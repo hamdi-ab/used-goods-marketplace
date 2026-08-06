@@ -6,7 +6,7 @@
 > **Owner:** Product Team
 > **Related Documents:**
 > - 00-winning-strategy.md
-> - 02-prd.md
+> - 02-prd/00-overview.md
 
 ---
 
@@ -14,7 +14,7 @@
 
 Our platform is a modern, AI-assisted, trust-first marketplace designed specifically for Ethiopia's growing second-hand economy.
 
-It enables individuals to easily list, discover, and purchase pre-owned goods through a structured, intuitive, and secure digital experience.
+It enables individuals to easily list, discover, and purchase second-hand goods through a structured, intuitive, and secure digital experience.
 
 Unlike existing informal marketplaces built around Telegram channels and social media posts, our platform provides powerful search, transparent seller trust indicators, intelligent listing assistance, and an optimized buying journey.
 
@@ -30,7 +30,7 @@ The result is a marketplace that feels fast, trustworthy, and effortless.
 
 # Mission Statement
 
-Empower Ethiopian communities to confidently exchange pre-owned goods through intelligent technology, transparent trust systems, and an exceptional user experience.
+Empower Ethiopian communities to confidently exchange second-hand goods through intelligent technology, transparent trust systems, and an exceptional user experience.
 
 ---
 
@@ -211,7 +211,7 @@ Examples include:
 
 ---
 
-## Intelligent Discovery
+## Intelligent Search
 
 Finding products should feel effortless.
 

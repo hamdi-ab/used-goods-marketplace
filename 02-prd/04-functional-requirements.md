@@ -110,7 +110,7 @@ Guest
 - Register
 - Login
 
-Authenticated User
+Authenticated users (Buyer / Seller / Admin)
 
 - Logout
 - Update Profile
@@ -280,8 +280,9 @@ Maximum
 ## Supported Image Types
 
 - JPG
+- JPEG
 - PNG
-- WEBP
+- WebP
 
 ---
 
@@ -537,7 +538,7 @@ Fraud
 
 Duplicate
 
-Incorrect Category
+Wrong Category
 
 Offensive Content
 

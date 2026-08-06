@@ -376,6 +376,7 @@ Represents buyer feedback.
 Belongs to
 
 - Buyer
+- Accepted Offer (the completed transaction)
 
 References
 
@@ -386,6 +387,8 @@ References
 ### Rules
 
 One review per completed transaction.
+
+Each review must reference an accepted offer.
 
 ---
 
@@ -564,7 +567,7 @@ Trust Score is derived from platform activity and cannot be manually edited.
 
 ## INV-008
 
-A review must reference a completed transaction.
+A review must reference a completed transaction (an accepted offer).
 
 ---
 

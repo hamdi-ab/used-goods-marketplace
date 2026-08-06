@@ -130,7 +130,7 @@ Authorization follows Role-Based Access Control (RBAC).
 Roles:
 
 - Guest
-- User
+- Buyer
 - Seller
 - Admin
 
@@ -140,7 +140,7 @@ Guest:
 
 - Browse listings
 
-User:
+Buyer:
 
 - Favorite listings
 - Submit offers

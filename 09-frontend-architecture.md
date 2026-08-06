@@ -4,6 +4,8 @@
 >
 > **Version:** 1.0
 >
+> **Status:** Draft
+>
 > **Framework:** Next.js 15
 >
 > **Language:** TypeScript
@@ -556,7 +558,7 @@ Dashboard
 Route guards:
 
 - Guest
-- Authenticated User
+- Buyer
 - Seller
 - Admin
 

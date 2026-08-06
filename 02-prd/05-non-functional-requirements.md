@@ -182,7 +182,8 @@ Role-based authorization shall protect restricted actions.
 Roles
 
 - Guest
-- User
+- Buyer
+- Seller
 - Admin
 
 ---
@@ -206,8 +207,9 @@ Uploaded images shall be validated.
 Allowed
 
 - JPG
+- JPEG
 - PNG
-- WEBP
+- WebP
 
 Rejected
 

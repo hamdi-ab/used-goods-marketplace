@@ -547,7 +547,7 @@ Recent Activity
 
 # 14. Access Control Matrix
 
-| Page | Guest | User | Seller | Admin |
+| Page | Guest | Buyer | Seller | Admin |
 |------|:----:|:----:|:------:|:------:|
 | Homepage | ✅ | ✅ | ✅ | ✅ |
 | Search | ✅ | ✅ | ✅ | ✅ |

@@ -40,6 +40,8 @@ Base URL
 /api/v1
 ```
 
+All endpoint paths in this document are relative to the base URL unless stated otherwise (for example, `/listings` resolves to `/api/v1/listings`).
+
 ---
 
 # 3. Authentication
@@ -267,9 +269,9 @@ minPrice
 maxPrice
 
 sort
-
-search
 ```
+
+The dedicated search endpoint is `GET /search` (Section 17).
 
 ---
 
@@ -501,6 +503,18 @@ POST
 
 ```
 /reviews
+```
+
+Requires an accepted offer ID (one review per completed transaction).
+
+Body
+
+```json
+{
+  "offerId": "",
+  "rating": 5,
+  "comment": ""
+}
 ```
 
 ---

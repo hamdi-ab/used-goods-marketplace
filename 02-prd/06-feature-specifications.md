@@ -153,8 +153,8 @@ Track
 
 ## Future
 
-- Google Login
-- Apple Login
+- Google OAuth
+- Passkeys
 - Fayda Login
 
 ---
@@ -699,11 +699,11 @@ Spam
 
 Fraud
 
-Fake Product
-
 Duplicate
 
 Wrong Category
+
+Offensive Content
 
 Other
 

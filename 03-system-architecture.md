@@ -440,7 +440,7 @@ Browse Only
 
 ---
 
-Authenticated User
+Buyer
 
 ↓
 
@@ -581,6 +581,12 @@ Audit Logs
 ---
 
 # 13. Scalability Strategy
+
+Initial Design Targets
+
+- 10,000 users
+- 50,000 listings
+- 500 concurrent users
 
 Current Architecture Supports
 
@@ -735,6 +741,8 @@ Future
 
 # 20. Architecture Decisions (ADRs)
 
+The full rationale for each decision lives in `04-architecture-decision-records.md`. The numbers here match the canonical ADR document.
+
 ## ADR-001
 
 Use Serverless Architecture.
@@ -745,7 +753,7 @@ Zero infrastructure cost.
 
 ---
 
-## ADR-002
+## ADR-003
 
 Use Supabase instead of building a custom backend.
 
@@ -755,7 +763,7 @@ Faster development and built-in authentication.
 
 ---
 
-## ADR-003
+## ADR-009
 
 Use Gemini instead of OpenAI.
 
@@ -765,7 +773,7 @@ Generous free tier for hackathon development.
 
 ---
 
-## ADR-004
+## ADR-002
 
 Use Next.js App Router.
 
@@ -775,7 +783,7 @@ Performance, SEO, and Server Components.
 
 ---
 
-## ADR-005
+## ADR-011
 
 Store images in Supabase Storage.
 

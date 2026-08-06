@@ -38,7 +38,7 @@ Rather than replacing these platforms, our product organizes the buying and sell
 
 # Vision
 
-To become Ethiopia's most trusted digital marketplace for buying and selling pre-owned goods.
+To become Ethiopia's most trusted marketplace for buying and selling second-hand goods.
 
 ---
 
@@ -115,12 +115,60 @@ Pain Points
 
 ---
 
+### Families
+
+Needs
+
+- Furniture
+- Home appliances
+- Quality second-hand goods
+- Trustworthy sellers
+
+Pain Points
+
+- Unclear condition
+- Hidden damage
+- Unresponsive sellers
+
+---
+
+### Local Merchants
+
+Needs
+
+- Inventory discovery
+- Price comparison
+- Quick contact
+
+Pain Points
+
+- Slow discovery
+- Duplicate listings
+- Missing contact information
+
+---
+
+### Small Business Owners
+
+Needs
+
+- Furniture
+- Electronics
+- Home appliances
+- Reliable sellers
+
+Pain Points
+
+- Time-consuming search
+- Low confidence in sellers
+
+---
+
 ## Secondary Users
 
-- Families
-- Small business owners
-- Local merchants
 - Collectors
+- Small retailers
+- Community organizations
 
 ---
 
@@ -250,7 +298,7 @@ Transparent trust indicators for every seller.
 
 ## Hero Feature 03
 
-### Lightning Search
+### Intelligent Search
 
 Fast discovery through structured filters and intelligent search.
 
@@ -266,6 +314,7 @@ The product should achieve the following during demonstration:
 - Lighthouse Performance ≥ 95
 - Lighthouse Accessibility ≥ 95
 - Lighthouse Best Practices ≥ 95
+- Lighthouse SEO ≥ 95
 
 ---
 
@@ -296,15 +345,18 @@ The product should achieve the following during demonstration:
 
 The following are intentionally excluded from Version 1:
 
-- Live chat
+- Live chat / in-app messaging
 - Escrow payments
 - Delivery logistics
 - Wallet system
 - Auctions
-- Multi-vendor stores
+- Multi-vendor stores / business storefronts
 - Complex recommendation engine
 - Real Fayda API integration
 - Full payment gateway implementation
+- Mobile applications
+- Inventory management
+- Multi-language AI
 
 ---
 

@@ -1,7 +1,7 @@
 # Product Requirements Document (PRD)
 # 00 - Overview
 
-> **Project Name:** _(Working Name)_
+> **Project Name:** Used Goods Marketplace _(Working Name)_
 >
 > **Challenge:** VinTech Challenge 2026
 >
@@ -83,6 +83,8 @@ The product will be considered successful if it demonstrates:
 - Optimized image loading.
 - Lighthouse Performance ≥ 95.
 - Lighthouse Accessibility ≥ 95.
+- Lighthouse Best Practices ≥ 95.
+- Lighthouse SEO ≥ 95.
 
 ## Business
 
@@ -139,9 +141,9 @@ The product will be considered successful if it demonstrates:
 
 The following features are intentionally excluded from the MVP:
 
-- Live messaging
+- Live chat / in-app messaging
 - Escrow payments
-- Shipping logistics
+- Delivery logistics
 - Wallet functionality
 - Auction listings
 - Business storefronts
@@ -203,7 +205,7 @@ The platform primarily serves:
 
 Each user group shares a common goal:
 
-Buying or selling pre-owned goods with confidence.
+Buying or selling second-hand goods with confidence.
 
 ---
 
@@ -250,11 +252,22 @@ This philosophy guides all product, UX, and engineering decisions.
 
 - 00-winning-strategy.md
 - 01-product-vision.md
-- 03-information-architecture.md
-- 04-design-system.md
-- 05-database-design.md
-- 06-api-specification.md
-- 07-system-architecture.md
+- 02-user-personas.md
+- 03-user-stories.md
+- 04-functional-requirements.md
+- 05-non-functional-requirements.md
+- 06-feature-specifications.md
+- 07-user-flows.md
+- 08-information-architecture.md
+- 03-system-architecture.md
+- 04-architecture-decision-records.md
+- 05-domain-model.md
+- 06-database-design-specification.md
+- 07-api-specification.md
+- 08-backend-architecture.md
+- 09-frontend-architecture.md
+- 10-security-architecture.md
+- 11-design-system.md
 
 ---
 
@@ -264,12 +277,11 @@ This overview introduces the product at a high level.
 
 Subsequent PRD sections provide detailed specifications for:
 
-- Goals
-- Personas
-- User Stories
-- Functional Requirements
-- Non-functional Requirements
-- Business Rules
-- Edge Cases
-- Acceptance Criteria
-- Success Metrics
+- 01-goals.md — Strategic goals and measurable success criteria
+- 02-user-personas.md — Primary user groups
+- 03-user-stories.md — User stories with acceptance criteria
+- 04-functional-requirements.md — Functional modules and permissions
+- 05-non-functional-requirements.md — Performance, security, and scalability requirements
+- 06-feature-specifications.md — Detailed feature behavior
+- 07-user-flows.md — End-to-end user flows
+- 08-information-architecture.md — Site structure and navigation

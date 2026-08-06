@@ -276,12 +276,16 @@ Columns
 | Column | Type |
 |----------|------|
 | id | UUID |
+| offer_id | UUID |
 | seller_id | UUID |
 | buyer_id | UUID |
 | rating | SMALLINT |
 | comment | TEXT |
 
 Constraints
+
+- `offer_id` references `offers.id` (FK): a review must belong to an accepted offer, which is the completed transaction.
+- UNIQUE `(offer_id)` — one review per completed transaction (supports INV-008).
 
 Rating
 
@@ -378,6 +382,7 @@ This table enables analytics today and in-app messaging tomorrow.
 | listings | reports | 1:N |
 | profiles | reviews | 1:N |
 | profiles | favorites | 1:N |
+| offers | reviews | 1:1 |
 | profiles | notifications | 1:N |
 | profiles | verifications | 1:N |
 
@@ -396,6 +401,8 @@ This table enables analytics today and in-app messaging tomorrow.
 ## Reviews
 
 Rating between 1 and 5.
+
+One review per accepted offer (UNIQUE `offer_id`).
 
 ---
 
@@ -464,7 +471,7 @@ GIN index for PostgreSQL full-text search on listing title and description.
 ## Reviews
 
 - Public can read.
-- Buyer can create one review per completed transaction.
+- Buyer can create one review per completed transaction (one per accepted offer).
 - Author can edit within a short grace period (optional).
 
 ---
