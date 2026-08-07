@@ -231,14 +231,14 @@ This philosophy guides all product, UX, and engineering decisions.
 - ../02-architecture/05-backend-architecture.md
 - ../02-architecture/06-frontend-architecture.md
 - ../02-architecture/07-security-architecture.md
-- ../04-design/vds2-design-foundations.md (VDS Part 2)
-- ../04-design/vds3-component-standards.md (VDS Part 3)
-- ../04-design/vds4-advanced-patterns.md (VDS Part 4)
-- ../04-design/vds5-governance-and-qa.md (VDS Part 5)
-- ../04-design/vcl-component-library.md (VCL Part 1)
-- ../04-design/vcl2-advanced-components.md (VCL Part 2)
-- ../04-design/vcl3-engineering-standards.md (VCL Part 3)
-- ../04-design/vux-ux-guidelines.md
+- ../04-design/00-design-foundations.md
+- ../04-design/01-component-standards.md
+- ../04-design/02-advanced-patterns.md
+- ../04-design/03-governance-and-qa.md
+- ../04-design/04-component-library.md
+- ../04-design/05-advanced-components.md
+- ../04-design/06-engineering-standards.md
+- ../04-design/07-ux-guidelines.md
 
 # 12. Document Status
 
