@@ -267,7 +267,14 @@ This philosophy guides all product, UX, and engineering decisions.
 - 08-backend-architecture.md
 - 09-frontend-architecture.md
 - 10-security-architecture.md
-- 11-design-system.md
+- vds2-design-foundations.md (VDS Part 2)
+- vds3-component-standards.md (VDS Part 3)
+- vds4-advanced-patterns.md (VDS Part 4)
+- vds5-governance-and-qa.md (VDS Part 5)
+- vcl-component-library.md (VCL Part 1)
+- vcl2-advanced-components.md (VCL Part 2)
+- vcl3-engineering-standards.md (VCL Part 3)
+- vux-ux-guidelines.md
 
 ---
 
