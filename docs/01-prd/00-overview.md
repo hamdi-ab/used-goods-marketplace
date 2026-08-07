@@ -214,8 +214,8 @@ This philosophy guides all product, UX, and engineering decisions.
 
 # 11. Related Documents
 
-- 00-winning-strategy.md
-- 01-product-vision.md
+- ../00-strategy/00-winning-strategy.md
+- ../00-strategy/01-product-vision.md
 - 02-user-personas.md
 - 03-user-stories.md
 - 04-functional-requirements.md
@@ -223,22 +223,22 @@ This philosophy guides all product, UX, and engineering decisions.
 - 06-feature-specifications.md
 - 07-user-flows.md
 - 08-information-architecture.md
-- 03-system-architecture.md
-- 04-architecture-decision-records.md
-- 05-domain-model.md
-- 06-database-design-specification.md
-- 07-api-specification.md
-- 08-backend-architecture.md
-- 09-frontend-architecture.md
-- 10-security-architecture.md
-- vds2-design-foundations.md (VDS Part 2)
-- vds3-component-standards.md (VDS Part 3)
-- vds4-advanced-patterns.md (VDS Part 4)
-- vds5-governance-and-qa.md (VDS Part 5)
-- vcl-component-library.md (VCL Part 1)
-- vcl2-advanced-components.md (VCL Part 2)
-- vcl3-engineering-standards.md (VCL Part 3)
-- vux-ux-guidelines.md
+- ../02-architecture/03-system-architecture.md
+- ../02-architecture/04-architecture-decision-records.md
+- ../02-architecture/05-domain-model.md
+- ../02-architecture/06-database-design-specification.md
+- ../02-architecture/07-api-specification.md
+- ../02-architecture/08-backend-architecture.md
+- ../02-architecture/09-frontend-architecture.md
+- ../02-architecture/10-security-architecture.md
+- ../04-design/vds2-design-foundations.md (VDS Part 2)
+- ../04-design/vds3-component-standards.md (VDS Part 3)
+- ../04-design/vds4-advanced-patterns.md (VDS Part 4)
+- ../04-design/vds5-governance-and-qa.md (VDS Part 5)
+- ../04-design/vcl-component-library.md (VCL Part 1)
+- ../04-design/vcl2-advanced-components.md (VCL Part 2)
+- ../04-design/vcl3-engineering-standards.md (VCL Part 3)
+- ../04-design/vux-ux-guidelines.md
 
 # 12. Document Status
 

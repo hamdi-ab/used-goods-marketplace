@@ -6,7 +6,7 @@
 > **Owner:** Product Team
 > **Related Documents:**
 > - 00-winning-strategy.md
-> - 02-prd/00-overview.md
+> - ../01-prd/00-overview.md
 
 # Product Overview
 

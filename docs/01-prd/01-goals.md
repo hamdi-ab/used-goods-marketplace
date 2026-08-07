@@ -6,8 +6,8 @@
 > **Owner:** Product Team
 > **Related Documents:**
 > - 00-overview.md
-> - 00-winning-strategy.md
-> - 01-product-vision.md
+> - ../00-strategy/00-winning-strategy.md
+> - ../00-strategy/01-product-vision.md
 
 # 1. Purpose
 
