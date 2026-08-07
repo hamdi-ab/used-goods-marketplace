@@ -44,6 +44,21 @@ The platform follows these principles:
 - Lazy loading
 - Incremental optimization
 
+## NFR mapping to how it is met
+
+**NFR-SCALE-001**: 10,000 users, 50,000 listings, and 500 concurrent users are initial **design targets**, required "without architectural changes."
+
+Two distinct numbers, two distinct guarantees:
+
+- **10,000 users / 50,000 listings** is a *scale* (registration and dataset volume), not a load figure. Postgres handles these row counts trivially. Meeting it is a query-shape guarantee: every list is **paginated** (NFR-SCALE-002), every filter/search/order column is **indexed** (NFR-SCALE-003), and search runs through the single `security definer` RPC on a tsvector + GIN (pg_trgm) base. No proof-load is required for this half.
+- **500 concurrent users** is a *load* figure — the simultaneous-connection peak that drives server, Postgres, and image delivery. This half is met by architecture, and verified empirically by load test:
+  - Stateless Next.js frontend on Vercel auto-scales horizontally; the edge/CDN absorbs asset requests.
+  - Supabase Postgres serves indexed, paginated queries; the search path is one RPC round-trip, not N+1.
+  - Images serve from object storage behind the CDN (NFR-SCALE-004), off the app server path.
+  - API target < 300 ms and search < 500 ms keep connection-hold time short, so fewer long-lived sockets.
+
+Verification: a load test (see T19 — load & capacity verification) records a p95 baseline at a meaningful concurrency (initial target 100–200 concurrent, extrapolating the 500-design shape) and is the evidence cited for this half. Absent that test, the doc-party claim is *target-only* and deliberately stated as such.
+
 # 4. Rendering Strategy
 
 ## Server Components
