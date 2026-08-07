@@ -223,14 +223,14 @@ This philosophy guides all product, UX, and engineering decisions.
 - 06-feature-specifications.md
 - 07-user-flows.md
 - 08-information-architecture.md
-- ../02-architecture/03-system-architecture.md
-- ../02-architecture/04-architecture-decision-records.md
-- ../02-architecture/05-domain-model.md
-- ../02-architecture/06-database-design-specification.md
-- ../02-architecture/07-api-specification.md
-- ../02-architecture/08-backend-architecture.md
-- ../02-architecture/09-frontend-architecture.md
-- ../02-architecture/10-security-architecture.md
+- ../02-architecture/00-system-architecture.md
+- ../02-architecture/01-architecture-decision-records.md
+- ../02-architecture/02-domain-model.md
+- ../02-architecture/03-database-design-specification.md
+- ../02-architecture/04-api-specification.md
+- ../02-architecture/05-backend-architecture.md
+- ../02-architecture/06-frontend-architecture.md
+- ../02-architecture/07-security-architecture.md
 - ../04-design/vds2-design-foundations.md (VDS Part 2)
 - ../04-design/vds3-component-standards.md (VDS Part 3)
 - ../04-design/vds4-advanced-patterns.md (VDS Part 4)

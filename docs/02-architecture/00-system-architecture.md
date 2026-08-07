@@ -534,7 +534,7 @@ Each environment uses:
 
 # 20. Architecture Decisions (ADRs)
 
-The full rationale for each decision lives in `04-architecture-decision-records.md`. The numbers here match the canonical ADR document.
+The full rationale for each decision lives in `01-architecture-decision-records.md`. The numbers here match the canonical ADR document.
 
 ## ADR-001
 
