@@ -186,6 +186,39 @@ Every interaction should have a purpose.
 
 ---
 
+## Brand Personality
+
+The marketplace should feel like a helpful local community—not a corporate e-commerce giant.
+
+**Brand attributes:** Trustworthy · Friendly · Practical · Modern · Local · Honest · Efficient
+
+**It is NOT:** flashy, luxurious, aggressive, overly playful, overdesigned.
+
+**Voice:** warm, simple, professional, human.
+
+| Instead of | Use |
+|---|---|
+| "Authentication Failed" | "Incorrect email or password." |
+| "Error 500" | "Something went wrong. Please try again." |
+
+## Core Experience Pillars
+
+Every feature should strengthen at least one pillar:
+
+- **Discover** — finding the right item should be effortless.
+- **Trust** — users should feel safe buying from strangers.
+- **Connect** — buyer↔seller communication should require minimal effort.
+- **Decide** — users should have enough information to make confident purchasing decisions.
+- **Act** — every important action should be obvious (Contact Seller, Make Offer, Save Listing, Report Listing).
+
+## Visual Language
+
+Inspired by Airbnb (clarity), Apple (spacing), Notion (minimalism), Telegram (familiarity), and Facebook Marketplace (discoverability) — combined into an identity built for Ethiopian community commerce.
+
+## Design Constraints
+
+Mobile-first · Responsive web · Low-bandwidth friendly · Touch interaction · WCAG AA · Fast rendering.
+
 # 11. Brand Colors
 
 ## Primary — Trust Green
@@ -442,6 +475,6 @@ Not in MVP. When enabled, respect the same contrast rules using the neutral pale
 
 # 25. Summary
 
-This design system translates the Trust / Speed / Simplicity philosophy into reusable tokens and component standards.
+This design system translates the Trust / Speed / Simplicity philosophy, the brand personality, and the Discover / Trust / Connect / Decide / Act pillars into reusable tokens and component standards.
 
 It gives developers a consistent, accessible, mobile-first foundation and directly supports the Lighthouse Accessibility ≥ 95 goal while keeping the product listing as the hero of every screen.
