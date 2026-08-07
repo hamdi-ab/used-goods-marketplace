@@ -4,8 +4,6 @@
 
 > Version: 1.0
 
----
-
 # Table of Contents
 
 1. Color System
@@ -23,17 +21,11 @@
 13. Accessibility Tokens
 14. Design Tokens Summary
 
----
-
 # 1. Color System
 
 ## Philosophy
 
-Colors communicate hierarchy, trust, and feedback—not decoration.
-
-The palette is intentionally minimal to create a clean, modern marketplace experience where listings remain the focal point.
-
----
+Colors communicate hierarchy, trust, and feedback—not decoration. The palette is intentionally minimal to create a clean, modern marketplace experience where listings remain the focal point.
 
 ## Primary Palette
 
@@ -50,8 +42,6 @@ Purpose:
 - Links
 - Selected States
 
----
-
 ### Primary Scale
 
 | Token | Hex |
@@ -66,8 +56,6 @@ Purpose:
 | Primary 700 | #1E40AF |
 | Primary 800 | #1E3A8A |
 | Primary 900 | #172554 |
-
----
 
 # Neutral Palette
 
@@ -91,8 +79,6 @@ Used for:
 | Gray 800 | #1F2937 |
 | Gray 900 | #111827 |
 
----
-
 # Success
 
 ```text
@@ -105,8 +91,6 @@ Uses
 - Successful Upload
 - Payment Success
 - Positive Status
-
----
 
 # Warning
 
@@ -121,8 +105,6 @@ Uses
 - Fair Condition
 - Attention Required
 
----
-
 # Error
 
 ```text
@@ -136,8 +118,6 @@ Uses
 - Validation Errors
 - Reported Content
 
----
-
 # Information
 
 ```text
@@ -149,8 +129,6 @@ Uses
 - Tips
 - Notifications
 - Helpful Information
-
----
 
 # 2. Semantic Colors
 
@@ -169,8 +147,6 @@ Use
 ```text
 color.primary
 ```
-
----
 
 Available Tokens
 
@@ -200,8 +176,6 @@ color.disabled
 
 This allows future theming without changing component implementations.
 
----
-
 # 3. Typography
 
 ## Typeface
@@ -222,8 +196,6 @@ System UI
 sans-serif
 ```
 
----
-
 # Font Scale
 
 | Name | Size |
@@ -240,8 +212,6 @@ sans-serif
 | Body Small | 14px |
 | Caption | 12px |
 
----
-
 # Font Weight
 
 | Weight | Usage |
@@ -250,8 +220,6 @@ sans-serif
 | 500 | Labels |
 | 600 | Headings |
 | 700 | Hero Titles |
-
----
 
 # Line Height
 
@@ -262,8 +230,6 @@ sans-serif
 | Body | 150% |
 | Caption | 150% |
 
----
-
 # Text Rules
 
 Maximum paragraph width
@@ -273,8 +239,6 @@ Maximum paragraph width
 ```
 
 Avoid centered paragraphs except in hero sections.
-
----
 
 # 4. Spacing System
 
@@ -302,8 +266,6 @@ Scale
 
 Spacing should always use predefined tokens rather than arbitrary values.
 
----
-
 # 5. Grid System
 
 Desktop
@@ -323,8 +285,6 @@ Mobile
 ```text
 4 Columns
 ```
-
----
 
 # Gutters
 
@@ -346,8 +306,6 @@ Mobile
 16px
 ```
 
----
-
 # Max Width
 
 Content Container
@@ -355,8 +313,6 @@ Content Container
 ```text
 1280px
 ```
-
----
 
 # 6. Layout Containers
 
@@ -383,8 +339,6 @@ Extra Large
 ```text
 1280px
 ```
-
----
 
 # 7. Border Radius
 
@@ -423,8 +377,6 @@ Inputs
 12px
 ```
 
----
-
 # 8. Elevation & Shadows
 
 Elevation should indicate hierarchy.
@@ -432,8 +384,6 @@ Elevation should indicate hierarchy.
 Level 0
 
 No Shadow
-
----
 
 Level 1
 
@@ -443,8 +393,6 @@ Cards
 0 1px 2px rgba(0,0,0,.06)
 ```
 
----
-
 Level 2
 
 Dropdown
@@ -452,8 +400,6 @@ Dropdown
 ```css
 0 4px 12px rgba(0,0,0,.08)
 ```
-
----
 
 Level 3
 
@@ -463,11 +409,7 @@ Dialogs
 0 10px 30px rgba(0,0,0,.12)
 ```
 
----
-
 Never stack multiple shadows.
-
----
 
 # 9. Iconography
 
@@ -484,8 +426,6 @@ Reasons
 - Open Source
 - Modern
 
----
-
 Icon Sizes
 
 | Size | Usage |
@@ -495,8 +435,6 @@ Icon Sizes
 | 24 | Navigation |
 | 32 | Empty States |
 | 48 | Hero Graphics |
-
----
 
 # 10. Imagery
 
@@ -513,8 +451,6 @@ Fallback
 
 Placeholder image when no photo exists.
 
----
-
 Seller Avatar
 
 Preferred
@@ -523,27 +459,15 @@ Circular
 
 64×64
 
----
-
 # 11. Motion
 
 Animations should support understanding—not decoration.
 
-Duration
-
-Fast
-
-150ms
-
-Standard
-
-250ms
-
-Slow
-
-350ms
-
----
+| Duration | Value |
+|---|---|
+| Fast | 150ms |
+| Standard | 250ms |
+| Slow | 350ms |
 
 Easing
 
@@ -563,8 +487,6 @@ Avoid:
 - Flash
 - Excessive rotation
 
----
-
 # 12. Responsive Breakpoints
 
 | Device | Width |
@@ -577,8 +499,6 @@ Avoid:
 | Large Desktop | 1536px |
 
 Design mobile-first.
-
----
 
 # 13. Accessibility Tokens
 
@@ -602,8 +522,6 @@ Focus Ring
 
 Interactive elements must always display a visible focus state.
 
----
-
 # 14. Design Tokens Summary
 
 ## Colors
@@ -614,52 +532,36 @@ Interactive elements must always display a visible focus state.
 - Error
 - Neutral
 
----
-
 ## Typography
 
 - Geist
 - 12 text styles
 
----
-
 ## Spacing
 
 - 8-point grid
-
----
 
 ## Radius
 
 - 4–24px
 
----
-
 ## Shadows
 
 - 3 elevation levels
 
----
-
 ## Icons
 
 - Lucide React
-
----
 
 ## Motion
 
 - 150–350ms
 - ease-out
 
----
-
 ## Responsive
 
 - Mobile-first
 - 6 breakpoints
-
----
 
 # Summary
 

@@ -8,8 +8,6 @@
 >
 > **Owner:** Product & UX Team
 
----
-
 # 1. Purpose
 
 This document defines the structural organization of the marketplace.
@@ -27,8 +25,6 @@ It specifies:
 
 The goal is to create a navigation system that feels intuitive while remaining scalable as new features are added.
 
----
-
 # 2. Architecture Principles
 
 The information architecture is guided by six principles.
@@ -37,15 +33,11 @@ The information architecture is guided by six principles.
 
 Users should reach any important feature within three interactions.
 
----
-
 ## Principle 2 — Discoverability
 
 Products should always be easy to find.
 
 Search and browsing receive the highest navigation priority.
-
----
 
 ## Principle 3 — Trust
 
@@ -53,25 +45,17 @@ Seller information should always be accessible.
 
 Trust should never be hidden.
 
----
-
 ## Principle 4 — Mobile First
 
 Navigation should require minimal thumb movement.
-
----
 
 ## Principle 5 — Scalability
 
 Future features should fit naturally into the navigation without redesigning the application.
 
----
-
 ## Principle 6 — Consistency
 
 Navigation behavior should remain consistent across desktop and mobile devices.
-
----
 
 # 3. Site Map
 
@@ -120,8 +104,6 @@ Marketplace
     └── Statistics
 ```
 
----
-
 # 4. Primary Navigation
 
 The primary navigation appears on every page.
@@ -142,8 +124,6 @@ Dashboard
 Profile
 ```
 
----
-
 Mobile Navigation
 
 ```text
@@ -162,8 +142,6 @@ Sell
 
 The Dashboard is accessed from the Profile tab on mobile to keep the bottom navigation uncluttered.
 
----
-
 # 5. Footer Navigation
 
 Footer contains secondary pages.
@@ -174,8 +152,6 @@ Footer contains secondary pages.
 - Terms of Service
 - Privacy Policy
 - Contact
-
----
 
 # 6. Route Structure
 
@@ -242,8 +218,6 @@ Seller Profile
 /terms
 ```
 
----
-
 ## Authentication Routes
 
 ```text
@@ -253,8 +227,6 @@ Seller Profile
 
 /forgot-password
 ```
-
----
 
 ## Protected Routes
 
@@ -272,8 +244,6 @@ Seller Profile
 /dashboard/settings
 ```
 
----
-
 ## Seller Routes
 
 ```text
@@ -286,8 +256,6 @@ Seller Profile
 /sell/drafts
 ```
 
----
-
 ## Buyer Routes
 
 ```text
@@ -297,8 +265,6 @@ Seller Profile
 
 /profile
 ```
-
----
 
 ## Admin Routes
 
@@ -313,8 +279,6 @@ Seller Profile
 
 /admin/statistics
 ```
-
----
 
 # 7. Layout Architecture
 
@@ -332,8 +296,6 @@ Used by:
 - Categories
 - Product Pages
 
----
-
 ## Authentication Layout
 
 Minimal layout
@@ -344,8 +306,6 @@ Contains only
 - Form
 - Background illustration
 
----
-
 ## Dashboard Layout
 
 Contains
@@ -355,8 +315,6 @@ Contains
 - Breadcrumb
 - Main Content
 
----
-
 ## Admin Layout
 
 Contains
@@ -364,8 +322,6 @@ Contains
 - Admin Sidebar
 - Admin Header
 - Content Area
-
----
 
 # 8. Breadcrumb Structure
 
@@ -401,8 +357,6 @@ Listings
 Edit Listing
 ```
 
----
-
 # 9. Search Hierarchy
 
 Search prioritizes:
@@ -413,8 +367,6 @@ Search prioritizes:
 4. Description
 5. Keywords
 6. Seller Name
-
----
 
 # 10. Category Architecture
 
@@ -461,8 +413,6 @@ Baby & Kids
 Other
 ```
 
----
-
 # 11. Listing Information Hierarchy
 
 The product page should present information in the following order.
@@ -478,8 +428,6 @@ The product page should present information in the following order.
 9. Similar Listings
 
 This order reflects how buyers evaluate second-hand products.
-
----
 
 # 12. Seller Profile Hierarchy
 
@@ -517,8 +465,6 @@ Active Listings
 Reviews
 ```
 
----
-
 # 13. Dashboard Information Hierarchy
 
 Dashboard
@@ -543,8 +489,6 @@ Analytics
 Recent Activity
 ```
 
----
-
 # 14. Access Control Matrix
 
 | Page | Guest | Buyer | Seller | Admin |
@@ -557,8 +501,6 @@ Recent Activity
 | Dashboard | ❌ | ✅ | ✅ | ✅ |
 | Create Listing | ❌ | ❌ | ✅ | ✅ |
 | Admin | ❌ | ❌ | ❌ | ✅ |
-
----
 
 # 15. URL Design Guidelines
 
@@ -582,8 +524,6 @@ Bad
 ```text
 /listing?id=82738273
 ```
-
----
 
 # 16. Empty State Strategy
 
@@ -609,8 +549,6 @@ Offers
 
 Each empty state should include a clear call-to-action.
 
----
-
 # 17. Error Page Strategy
 
 Custom pages
@@ -624,8 +562,6 @@ Each page should provide:
 - Clear explanation
 - Navigation back to safety
 - Search option where appropriate
-
----
 
 # 18. SEO Architecture
 
@@ -644,8 +580,6 @@ Sitemap should include:
 - Public Listings
 - Seller Profiles
 
----
-
 # 19. Future Expansion
 
 The architecture is designed to support future modules without disrupting the existing navigation.
@@ -659,8 +593,6 @@ Planned additions include:
 - Push Notifications
 - Business Accounts
 - Mobile Applications
-
----
 
 # 20. Summary
 

@@ -4,8 +4,6 @@
 
 > Version: 1.0
 
----
-
 # Table of Contents
 
 1. Component Philosophy
@@ -37,8 +35,6 @@
 27. Forms
 28. Component Checklist
 
----
-
 # 1. Component Philosophy
 
 Every component should be:
@@ -51,73 +47,33 @@ Every component should be:
 
 A component should solve one problem only.
 
----
-
 # 2. Buttons
 
 ## Variants
 
 ### Primary
 
-Purpose:
-
-Primary action on every page.
-
-Examples:
-
-- Publish Listing
-- Login
-- Save Changes
+**Purpose:** Primary action on every page. **Examples:** Publish Listing, Login, Save Changes.
 
 Only one primary button should dominate a section.
 
----
-
 ### Secondary
 
-Purpose
-
-Supporting actions.
-
-Example
-
-- Cancel
-- Back
-- View More
-
----
+**Purpose:** Supporting actions. **Example:** Cancel, Back, View More.
 
 ### Outline
 
-Purpose
-
-Less emphasis while remaining interactive.
-
----
+**Purpose:** Less emphasis while remaining interactive.
 
 ### Ghost
 
-Purpose
-
-Toolbar actions.
-
-Examples
-
-- Favorite
-- Share
-- Bookmark
-
----
+**Purpose:** Toolbar actions. **Examples:** Favorite, Share, Bookmark.
 
 ### Destructive
 
-Purpose
-
-Delete actions.
+**Purpose:** Delete actions.
 
 Always require confirmation.
-
----
 
 ## Sizes
 
@@ -126,8 +82,6 @@ Always require confirmation.
 | Small | 36px |
 | Medium | 44px |
 | Large | 52px |
-
----
 
 ## States
 
@@ -142,8 +96,6 @@ Every button supports
 
 Loading replaces the label with a spinner.
 
----
-
 # 3. Inputs
 
 Supported Types
@@ -156,8 +108,6 @@ Supported Types
 - Search
 - Currency
 
----
-
 Each Input Includes
 
 - Label
@@ -165,15 +115,11 @@ Each Input Includes
 - Helper Text
 - Error Message
 
----
-
 Validation
 
 Errors appear only after interaction or submission.
 
 Never validate while typing unless necessary.
-
----
 
 # 4. Select & Dropdown
 
@@ -190,8 +136,6 @@ Support:
 - Search (large datasets)
 - Clear selection
 
----
-
 # 5. Search Bar
 
 Features
@@ -207,8 +151,6 @@ Future
 - Recent searches
 - Suggestions
 
----
-
 # 6. Cards
 
 Cards are the primary surface.
@@ -220,55 +162,15 @@ Types
 - Statistic Card
 - Dashboard Card
 
----
-
 Standard Layout
 
-Image
-
-↓
-
-Title
-
-↓
-
-Price
-
-↓
-
-Condition
-
-↓
-
-Location
-
-↓
-
-Seller
-
-↓
-
-Actions
-
----
+Image → Title → Price → Condition → Location → Seller → Actions
 
 # 7. Badges
 
-Purpose
-
-Display status.
-
-Examples
-
-- Verified
-- New
-- Sold
-- Featured
-- Pending
+**Purpose:** Display status. **Examples:** Verified, New, Sold, Featured, Pending.
 
 Badges never act as buttons.
-
----
 
 # 8. Chips
 
@@ -280,8 +182,6 @@ Used for:
 
 Must be removable.
 
----
-
 # 9. Tags
 
 Display metadata.
@@ -292,8 +192,6 @@ Examples
 - Electronics
 - Addis Ababa
 - Used
-
----
 
 # 10. Avatars
 
@@ -307,19 +205,9 @@ Initials.
 
 Sizes
 
-32
-
-48
-
-64
-
-96
-
----
+32, 48, 64, 96
 
 Verification badge overlays bottom-right.
-
----
 
 # 11. Images
 
@@ -330,23 +218,15 @@ Every image supports
 - Lazy loading
 - Zoom (gallery)
 
----
-
 Aspect Ratio
 
-Listing
-
-4:3
-
----
+Listing: 4:3
 
 # 12. Navigation
 
 Desktop
 
 Top Navigation
-
----
 
 Mobile
 
@@ -355,8 +235,6 @@ Bottom Navigation
 Maximum
 
 5 primary destinations.
-
----
 
 # 13. Breadcrumbs
 
@@ -368,8 +246,6 @@ Used on
 
 Avoid breadcrumbs on mobile where space is limited.
 
----
-
 # 14. Tabs
 
 Maximum
@@ -380,8 +256,6 @@ Swipeable on mobile.
 
 Never hide content behind multiple nested tabs.
 
----
-
 # 15. Accordions
 
 Used for
@@ -391,8 +265,6 @@ Used for
 - Seller Information
 
 Only one expanded by default.
-
----
 
 # 16. Tables
 
@@ -406,8 +278,6 @@ Avoid tables on mobile.
 
 Prefer cards.
 
----
-
 # 17. Lists
 
 Spacing
@@ -420,15 +290,11 @@ Support
 - Hover
 - Selection
 
----
-
 # 18. Pagination
 
 Desktop
 
 Numbered Pagination
-
----
 
 Mobile
 
@@ -437,8 +303,6 @@ Load More
 or
 
 Infinite Scroll
-
----
 
 # 19. Modals
 
@@ -450,8 +314,6 @@ Should never exceed 80% viewport height.
 
 Critical actions require confirmation.
 
----
-
 # 20. Drawers
 
 Used on mobile for
@@ -461,8 +323,6 @@ Used on mobile for
 - Settings
 
 Should slide from the bottom or right depending on context.
-
----
 
 # 21. Toasts
 
@@ -481,23 +341,17 @@ Maximum
 
 3 visible simultaneously.
 
----
-
 # 22. Tooltips
 
 Use only when labels cannot be displayed.
 
 Do not hide essential information inside tooltips.
 
----
-
 # 23. Skeletons
 
 Replace loading spinners whenever possible.
 
 Skeletons should match the final layout.
-
----
 
 # 24. Empty States
 
@@ -516,8 +370,6 @@ Example
 
 Browse Listings
 
----
-
 # 25. Error States
 
 Every error includes
@@ -527,8 +379,6 @@ Every error includes
 - Retry action
 
 Avoid technical jargon.
-
----
 
 # 26. Loading States
 
@@ -543,8 +393,6 @@ Examples
 
 Never leave the user guessing.
 
----
-
 # 27. Forms
 
 Rules
@@ -555,25 +403,9 @@ Rules
 - Keyboard accessible
 - Mobile friendly
 
----
-
 Form Layout
 
-Label
-
-↓
-
-Input
-
-↓
-
-Helper Text
-
-↓
-
-Error
-
----
+Label → Input → Helper Text → Error
 
 # 28. Component Checklist
 
@@ -589,8 +421,6 @@ Every component must support
 - Dark mode compatibility (future)
 - Theme tokens
 - RTL readiness (future)
-
----
 
 # 29. Implementation Mapping (shadcn/ui)
 
@@ -613,8 +443,6 @@ The component library is built on **shadcn/ui** (ADR-007), customized with the t
 | Toasts / alerts | Sonner / Alert |
 
 Tokens are consumed as CSS design tokens (e.g. `--primary`, `--success`) mapped into Tailwind theme variables — never hardcoded in components.
-
----
 
 # Summary
 

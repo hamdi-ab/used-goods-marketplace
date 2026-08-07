@@ -6,8 +6,6 @@
 > **Priority:** Critical
 > **Owner:** Product Team
 
----
-
 # Introduction
 
 This document defines the detailed behavior of every major feature in the marketplace.
@@ -27,32 +25,22 @@ Each feature specification includes:
 - Edge Cases
 - Future Enhancements
 
----
-
 # Feature FS-001
 # User Registration
-
----
 
 ## Purpose
 
 Allow new users to securely create an account.
-
----
 
 ## Primary Users
 
 - Buyer
 - Seller
 
----
-
 ## Entry Points
 
 - Landing Page
 - Login Page
-
----
 
 ## UI Components
 
@@ -62,51 +50,32 @@ Allow new users to securely create an account.
 - Sign Up Button
 - Login Link
 
----
-
 ## Workflow
 
 Open Registration
-
 ↓
-
 Fill Form
-
 ↓
-
 Validate Inputs
-
 ↓
-
 Create Account
-
 ↓
-
 Create Profile
-
 ↓
-
 Redirect to Onboarding
-
----
 
 ## Validation
 
-Email
-
+**Email:**
 - Required
 - Valid Email
 - Unique
 
-Password
-
+**Password:**
 - Minimum 8 Characters
 
-Confirm Password
-
+**Confirm Password:**
 - Must Match Password
-
----
 
 ## Success State
 
@@ -115,41 +84,28 @@ Confirm Password
 - Success Toast
 - Redirect
 
----
-
 ## Error States
 
 - Email Exists
 - Weak Password
 - Network Error
 
----
-
 ## API
 
 POST
-
 /auth/register
-
----
 
 ## Database
 
-Tables
-
+**Tables:**
 - auth.users
 - profiles
 
----
-
 ## Analytics
 
-Track
-
+**Track:**
 - registration_started
 - registration_completed
-
----
 
 ## Future
 
@@ -157,18 +113,12 @@ Track
 - Passkeys
 - Fayda Login
 
----
-
 # Feature FS-002
 # User Profile
-
----
 
 ## Purpose
 
 Allow users to build credibility.
-
----
 
 ## Editable Fields
 
@@ -180,65 +130,39 @@ Allow users to build credibility.
 - Sub-city
 - Bio
 
----
-
 ## Trust Signals
 
-Display
-
+**Display:**
 - Email Verified
 - Phone Verified
 - Telegram Linked
 - Trust Score
 
----
-
 ## Business Rules
 
-Phone Number
-
-Required for Sellers
-
-Telegram
-
-Optional
-
----
+**Phone Number:** Required for Sellers
+**Telegram:** Optional
 
 ## Empty State
 
 "No profile information yet."
 
----
-
 ## Success
 
 Profile Completion recalculated.
 
----
-
 # Feature FS-003
 # Seller Verification
-
----
 
 ## Purpose
 
 Increase marketplace trust.
 
----
-
 ## Verification Types
-
-✓ Email
-
-✓ Phone
-
-✓ Telegram
-
-✓ Future Fayda
-
----
+- ✓ Email
+- ✓ Phone
+- ✓ Telegram
+- ✓ Future Fayda
 
 ## Trust Score Formula
 
@@ -250,34 +174,21 @@ Score calculated using:
 - Verification
 - Reports
 
----
-
 ## Display
-
-Green Badge
-
-Trust Score
-
-Verified Indicators
-
----
+- Green Badge
+- Trust Score
+- Verified Indicators
 
 # Feature FS-004
 # Create Listing
-
----
 
 ## Purpose
 
 Allow sellers to publish products.
 
----
-
 ## Primary Goal
 
 Listing creation under 60 seconds.
-
----
 
 ## UI Components
 
@@ -293,51 +204,24 @@ Listing creation under 60 seconds.
 - AI Assistant
 - Publish Button
 
----
-
 ## Workflow
 
 Upload Images
-
 ↓
-
 AI Generates Suggestions
-
 ↓
-
 User Reviews
-
 ↓
-
 User Edits
-
 ↓
-
 Publish
-
----
 
 ## Validation
 
-Images
-
-1–10
-
-Title
-
-5–120 Characters
-
-Description
-
-20–2000 Characters
-
-Price
-
-Required
-
-Positive Number
-
----
+**Images:** 1–10
+**Title:** 5–120 Characters
+**Description:** 20–2000 Characters
+**Price:** Required, Positive Number
 
 ## Business Rules
 
@@ -347,90 +231,53 @@ Drafts allowed.
 
 Images compressed before upload.
 
----
-
 ## Loading States
-
-Uploading Images
-
-Generating AI
-
-Publishing
-
----
+- Uploading Images
+- Generating AI
+- Publishing
 
 ## Success
-
-Listing Published
-
-Redirect Dashboard
-
----
+- Listing Published
+- Redirect Dashboard
 
 ## Error States
-
-Image Upload Failed
-
-Network Error
-
-Validation Error
-
-AI Timeout
-
----
+- Image Upload Failed
+- Network Error
+- Validation Error
+- AI Timeout
 
 ## Database
 
-Tables
-
+**Tables:**
 - listings
 - listing_images
 
----
-
 ## Analytics
 
-Track
-
+**Track:**
 - listing_started
 - listing_saved_draft
 - listing_published
 
----
-
 ## Future
-
-Video Upload
-
-360 Images
-
----
+- Video Upload
+- 360 Images
 
 # Feature FS-005
 # AI Listing Assistant
-
----
 
 ## Purpose
 
 Reduce seller effort.
 
----
-
 ## Inputs
-
-Photos
-
-Optional Title
-
-Optional Description
-
----
+- Photos
+- Optional Title
+- Optional Description
 
 ## Outputs
 
-Generated
-
+**Generated:**
 - Title
 - Description
 - Category
@@ -438,19 +285,11 @@ Generated
 - Condition
 - Listing Quality Score
 
----
-
 ## User Controls
-
-Accept
-
-Edit
-
-Regenerate
-
-Ignore
-
----
+- Accept
+- Edit
+- Regenerate
+- Ignore
 
 ## Business Rules
 
@@ -458,46 +297,29 @@ AI never publishes automatically.
 
 Every field remains editable.
 
----
-
 ## Failure
 
 Allow manual listing creation.
 
----
-
 ## Analytics
 
-Track
-
+**Track:**
 - ai_used
 - ai_regenerated
 - ai_accepted
 
----
-
 # Feature FS-006
 # Search
-
----
 
 ## Purpose
 
 Fast product discovery.
 
----
-
 ## Search Fields
-
-Title
-
-Description
-
-Category
-
-Location
-
----
+- Title
+- Description
+- Category
+- Location
 
 ## Filters
 
@@ -508,319 +330,175 @@ Location
 - Verified Seller
 - Negotiable
 
----
-
 ## Sorting
-
-Newest
-
-Oldest
-
-Lowest Price
-
-Highest Price
-
-Most Viewed
-
----
+- Newest
+- Oldest
+- Lowest Price
+- Highest Price
+- Most Viewed
 
 ## Empty State
 
 "No products found."
 
-Show
-
-Suggestions
-
----
+**Show:** Suggestions
 
 ## Loading
 
 Skeleton Cards
 
----
-
 ## Performance Target
 
 <500 ms
 
----
-
 # Feature FS-007
 # Product Details
 
----
-
 ## Components
-
-Gallery
-
-Price
-
-Description
-
-Condition
-
-Seller
-
-Trust Panel
-
-Location
-
-Offers
-
-Favorites
-
-Report
-
-Contact
-
-Similar Products
-
----
+- Gallery
+- Price
+- Description
+- Condition
+- Seller
+- Trust Panel
+- Location
+- Offers
+- Favorites
+- Report
+- Contact
+- Similar Products
 
 ## CTA Buttons
-
-Favorite
-
-Offer
-
-Telegram
-
-Call
-
-Share
-
----
+- Favorite
+- Offer
+- Telegram
+- Call
+- Share
 
 ## Business Rules
 
-Sold listings
-
+**Sold listings:**
 Cannot receive offers.
-
----
 
 # Feature FS-008
 # Favorites
 
----
-
 ## Actions
-
-Add
-
-Remove
-
-View List
-
----
+- Add
+- Remove
+- View List
 
 ## Empty State
 
 "You haven't saved anything yet."
 
----
-
 # Feature FS-009
 # Offers
-
----
 
 ## Buyer
 
 Create Offer
-
 ↓
-
 Seller Reviews
-
 ↓
-
 Accept / Reject
-
 ↓
-
 Buyer Notified
 
----
-
 ## Status
-
-Pending
-
-Accepted
-
-Rejected
-
-Expired
-
----
+- Pending
+- Accepted
+- Rejected
+- Expired
 
 ## Future
 
 Counter Offer
 
----
-
 # Feature FS-010
 # Reviews
-
----
 
 ## Rating
 
 1–5 Stars
 
----
-
 ## Comment
 
 Optional
 
----
-
 ## Rules
-
-One Review
-
-Per Transaction
-
----
+- One Review
+- Per Transaction
 
 # Feature FS-011
 # Reports
 
----
-
 ## Reasons
-
-Spam
-
-Fraud
-
-Duplicate
-
-Wrong Category
-
-Offensive Content
-
-Other
-
----
+- Spam
+- Fraud
+- Duplicate
+- Wrong Category
+- Offensive Content
+- Other
 
 ## Workflow
 
 Report
-
 ↓
-
 Admin Queue
-
 ↓
-
 Review
-
 ↓
-
 Resolved
-
----
 
 # Feature FS-012
 # Seller Dashboard
 
----
-
 ## Widgets
-
-Trust Score
-
-Views
-
-Offers
-
-Favorites
-
-Listings
-
-Analytics
-
-Recent Activity
-
----
+- Trust Score
+- Views
+- Offers
+- Favorites
+- Listings
+- Analytics
+- Recent Activity
 
 ## Quick Actions
-
-Create Listing
-
-Edit Listing
-
-Archive
-
-Mark Sold
-
----
+- Create Listing
+- Edit Listing
+- Archive
+- Mark Sold
 
 # Feature FS-013
 # Notifications
 
----
-
 ## Types
-
-Offer Received
-
-Offer Accepted
-
-Listing Published
-
-Listing Sold
-
-Listing Reported
-
----
+- Offer Received
+- Offer Accepted
+- Listing Published
+- Listing Sold
+- Listing Reported
 
 ## Channels
-
-In-App
-
-Email (Future)
-
-Push (Future)
-
----
+- In-App
+- Email (Future)
+- Push (Future)
 
 # Feature FS-014
 # Administration
 
----
-
 ## Modules
-
-User Management
-
-Listing Moderation
-
-Reports
-
-Marketplace Analytics
-
-Verification Review
-
----
+- User Management
+- Listing Moderation
+- Reports
+- Marketplace Analytics
+- Verification Review
 
 ## Admin Actions
-
-Suspend User
-
-Delete Listing
-
-Resolve Report
-
-Approve Verification
-
----
+- Suspend User
+- Delete Listing
+- Resolve Report
+- Approve Verification
 
 # Feature Dependency Matrix
 
@@ -838,8 +516,6 @@ Approve Verification
 | Dashboard | Listings |
 | Reports | Listings |
 
----
-
 # MVP Feature Priority
 
 ## Phase 1 (Core)
@@ -851,8 +527,6 @@ Approve Verification
 - Product Page
 - Contact Seller
 
----
-
 ## Phase 2 (Enhanced MVP)
 
 - AI Listing Assistant
@@ -862,8 +536,6 @@ Approve Verification
 - Dashboard
 - Trust Score
 
----
-
 ## Phase 3 (Future)
 
 - Fayda Verification
@@ -872,8 +544,6 @@ Approve Verification
 - Saved Searches
 - AI Pricing
 - Recommendation Engine
-
----
 
 # Summary
 

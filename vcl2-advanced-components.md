@@ -4,8 +4,6 @@
 
 > Version: 1.0
 
----
-
 # Table of Contents
 
 1. Trust Components
@@ -19,469 +17,167 @@
 9. AI Components
 10. Future Components
 
----
-
 # 1. Trust Components
 
 ## VerificationBadge ⭐
 
-Purpose
-
-Display seller verification status.
-
-Variants
-
-- Verified
-- Phone Verified
-- Fayda Verified (Future)
-- Community Trusted
-- Unverified
-
-Properties
-
-- Tooltip support
-- Clickable for explanation
-- Small / Medium / Large
-
----
+**Purpose:** Display seller verification status. **Variants:** Verified, Phone Verified, Fayda Verified (Future), Community Trusted, Unverified. **Properties:** Tooltip support, Clickable for explanation, Small / Medium / Large.
 
 ## Rating
 
-Displays
-
-★★★★★
-
-Supports
-
-- Read only
-- Interactive
-- Half Stars
-
----
+**Displays:** ★★★★★. **Supports:** Read only, Interactive, Half Stars.
 
 ## ReviewSummary
 
-Displays
-
-Overall Rating
-
-↓
-
-Review Count
-
-↓
-
-Distribution
-
-5★
-
-4★
-
-3★
-
-2★
-
-1★
-
----
+**Displays:** Overall Rating → Review Count → Distribution (5★, 4★, 3★, 2★, 1★).
 
 ## TrustScore
 
-Future Component
-
-Displays
-
-92 / 100
-
-Factors
-
-- Verification
-- Rating
-- Reports
-- Account Age
-- Successful Listings
-
----
+Future Component. **Displays:** 92 / 100. **Factors:** Verification, Rating, Reports, Account Age, Successful Listings.
 
 ## SellerStats
 
-Displays
-
-Listings
-
-Rating
-
-Joined
-
-Verification
-
----
+**Displays:** Listings, Rating, Joined, Verification.
 
 # 2. Dashboard Components
 
 ## DashboardHeader
 
-Displays
-
-Page Title
-
-Actions
-
-Breadcrumbs
-
----
+**Displays:** Page Title, Actions, Breadcrumbs.
 
 ## StatisticsCard
 
-Displays
-
-Title
-
-Icon
-
-Value
-
-Trend
-
----
+**Displays:** Title, Icon, Value, Trend.
 
 ## ActivityTimeline
 
-Displays
-
-Recent
-
-- Listings
-- Offers
-- Reviews
-
----
+**Displays:** Recent (Listings, Offers, Reviews).
 
 ## QuickActions
 
-Buttons
-
-Create Listing
-
-View Favorites
-
-Manage Offers
-
----
+**Buttons:** Create Listing, View Favorites, Manage Offers.
 
 ## RecentListings
 
-Compact list.
-
-Supports
-
-- Edit
-- Delete
-- Promote (Future)
-
----
+Compact list. **Supports:** Edit, Delete, Promote (Future).
 
 ## SellerAnalytics
 
-Charts
-
-Future
-
-Views
-
-Favorites
-
-Offers
-
-Sales
-
----
+Charts (Future): Views, Favorites, Offers, Sales.
 
 # 3. Admin Components
 
 ## ModerationQueue
 
-Displays
-
-Reported listings.
-
-Actions
-
-Approve
-
-Remove
-
-Suspend Seller
-
----
+**Displays:** Reported listings. **Actions:** Approve, Remove, Suspend Seller.
 
 ## ReportCard
 
-Shows
-
-Reason
-
-Reporter
-
-Evidence
-
-Time
-
----
+**Shows:** Reason, Reporter, Evidence, Time.
 
 ## UserManagementTable
 
-Displays
-
-Users
-
-Verification
-
-Reports
-
-Status
-
----
+**Displays:** Users, Verification, Reports, Status.
 
 ## VerificationRequests
 
-Future
-
-Review Fayda requests.
-
-Approve
-
-Reject
-
----
+Future. Review Fayda requests. Approve. Reject.
 
 # 4. Analytics Components
 
 ## MetricCard
 
-Displays
-
-Title
-
-Number
-
-Trend
-
----
+**Displays:** Title, Number, Trend.
 
 ## LineChart
 
-Future
-
-Traffic
-
-Views
-
----
+Future. Traffic, Views.
 
 ## BarChart
 
-Future
-
-Categories
-
-Sales
-
----
+Future. Categories, Sales.
 
 ## DonutChart
 
-Future
-
-Listing Distribution
-
----
+Future. Listing Distribution.
 
 ## HeatMap
 
-Future
-
-Popular Cities
-
----
+Future. Popular Cities.
 
 # 5. Feedback Components
 
 ## Toast
 
-Variants
-
-Success
-
-Info
-
-Warning
-
-Error
-
----
+**Variants:** Success, Info, Warning, Error.
 
 ## AlertBanner
 
-Displays
-
-Persistent notifications.
-
----
+**Displays:** Persistent notifications.
 
 ## ConfirmationDialog
 
-Actions
-
-Delete
-
-Logout
-
-Cancel Offer
-
----
+**Actions:** Delete, Logout, Cancel Offer.
 
 ## SuccessDialog
 
-Examples
-
-Listing Published
-
-Offer Sent
-
-Profile Updated
-
----
+**Examples:** Listing Published, Offer Sent, Profile Updated.
 
 ## ErrorDialog
 
-Friendly explanation.
-
-Retry button.
-
----
+Friendly explanation. Retry button.
 
 # 6. Utility Components
 
 ## Avatar
 
-Supports
-
-Image
-
-Fallback Initials
-
-Verification Badge
-
----
+**Supports:** Image, Fallback Initials, Verification Badge.
 
 ## Badge
 
-Variants
-
-Success
-
-Warning
-
-Error
-
-Info
-
-Neutral
-
----
+**Variants:** Success, Warning, Error, Info, Neutral.
 
 ## Chip
 
-Used for
-
-Filters
-
----
+**Used for:** Filters.
 
 ## Divider
 
-Horizontal
-
-Vertical
-
----
+Horizontal, Vertical.
 
 ## Tooltip
 
-Accessible.
-
-Keyboard friendly.
-
----
+Accessible. Keyboard friendly.
 
 ## CopyButton
 
-Copies
-
-Phone Number
-
-Telegram Username
-
-Listing Link
-
----
+**Copies:** Phone Number, Telegram Username, Listing Link.
 
 ## ShareButton
 
-Future
-
-Telegram
-
-WhatsApp
-
-Facebook
-
-Copy Link
-
----
+Future. Telegram, WhatsApp, Facebook, Copy Link.
 
 # 7. Empty States
 
 ## EmptyListings
 
-CTA
-
-Create Listing
-
----
+**CTA:** Create Listing.
 
 ## EmptyFavorites
 
-CTA
-
-Browse Marketplace
-
----
+**CTA:** Browse Marketplace.
 
 ## EmptySearch
 
-CTA
-
-Clear Filters
-
----
+**CTA:** Clear Filters.
 
 ## EmptyOffers
 
-CTA
-
-Browse Listings
-
----
+**CTA:** Browse Listing.
 
 ## EmptyReviews
 
-CTA
-
-Be the first reviewer.
-
----
+**CTA:** Be the first reviewer.
 
 # 8. Skeleton Components
 
@@ -497,57 +193,23 @@ Skeleton versions exist for:
 
 Never show blank pages during loading.
 
----
-
 # 9. AI Components
 
 ## AISuggestionCard
 
-Displays
-
-✨ AI Suggested
-
-Accept
-
-Edit
-
-Regenerate
-
----
+**Displays:** ✨ AI Suggested. Accept, Edit, Regenerate.
 
 ## AIConfidenceBadge
 
-Displays
-
-Confidence
-
-High
-
-Medium
-
-Low
-
----
+**Displays:** Confidence (High, Medium, Low).
 
 ## AILoadingCard
 
 Animated placeholder.
 
----
-
 ## AIExplanation
 
-Future
-
-Explain why AI suggested
-
-Category
-
-Condition
-
-Price
-
----
+Future. Explain why AI suggested (Category, Condition, Price).
 
 # 10. Future Components
 
@@ -559,8 +221,6 @@ Price
 - Live Offer Counter
 - Recently Viewed Carousel
 - Recommended Listings Carousel
-
----
 
 # Summary
 

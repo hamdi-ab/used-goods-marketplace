@@ -8,14 +8,11 @@
 >
 > **Owner:** Engineering Team
 
----
-
 # 1. Purpose
 
 This document defines the testing strategy for the Used Goods Marketplace.
 
 The goal is to ensure the platform is:
-
 - Reliable
 - Secure
 - Stable
@@ -23,12 +20,9 @@ The goal is to ensure the platform is:
 
 while enabling rapid feature development.
 
----
-
 # 2. Testing Philosophy
 
 We follow the **Testing Pyramid**.
-
 ```text
                 E2E Tests
              ----------------
@@ -38,25 +32,19 @@ We follow the **Testing Pyramid**.
 ```
 
 The majority of tests should be unit tests because they are:
-
 - Fast
 - Cheap
 - Reliable
 
 End-to-end tests should focus only on critical user journeys.
 
----
-
 # 3. Testing Levels
 
 ## Unit Testing
 
-Purpose:
-
-Verify individual functions, utilities, and business logic.
+Purpose: Verify individual functions, utilities, and business logic.
 
 Examples:
-
 - Price formatting
 - Trust score calculation
 - Validation helpers
@@ -64,39 +52,27 @@ Examples:
 - AI response parser
 
 Tools:
-
 - Vitest
 - React Testing Library
 
----
-
 ## Integration Testing
 
-Purpose:
-
-Verify interaction between multiple components or services.
+Purpose: Verify interaction between multiple components or services.
 
 Examples:
-
 - Create Listing → Database
 - Login → Profile Loading
 - Offer Submission → Notification
 - Image Upload → Storage
 
----
-
 ## End-to-End Testing
 
-Purpose:
-
-Simulate complete user journeys.
+Purpose: Simulate complete user journeys.
 
 Tool:
-
 - Playwright
 
 Critical flows:
-
 - User registration
 - Login
 - Create listing
@@ -104,8 +80,6 @@ Critical flows:
 - Favorite listing
 - Submit offer
 - Report listing
-
----
 
 # 4. Test Coverage Goals
 
@@ -119,14 +93,11 @@ Critical flows:
 
 Coverage is a guide—not a substitute for meaningful tests.
 
----
-
 # 5. Functional Testing
 
 Validate that all user-facing features work as expected.
 
 Examples:
-
 - Register account
 - Log in
 - Edit profile
@@ -139,55 +110,42 @@ Examples:
 - Leave review
 - Report listing
 
----
-
 # 6. Validation Testing
 
 Verify input rules.
 
 Examples:
-
 Listing:
-
 - Empty title
 - Invalid price
 - Too many images
 - Missing category
 
 Registration:
-
 - Invalid email
 - Weak password
 - Duplicate email
 
 Offer:
-
 - Negative amount
 - Offer on own listing
-
----
 
 # 7. Authorization Testing
 
 Ensure permissions are enforced.
 
 Scenarios:
-
 - Seller edits own listing ✅
 - Seller edits another user's listing ❌
 - Buyer views own offers ✅
 - Buyer views another buyer's offers ❌
 - Admin moderates reports ✅
 
----
-
 # 8. Row Level Security Testing
 
 Every RLS policy should have tests.
 
-Examples:
-
-Profiles
+Examples: Profiles
 
 - Read public profile
 - Update own profile
@@ -205,12 +163,9 @@ Offers
 - Seller reads offers for owned listings
 - Unauthorized access denied
 
----
-
 # 9. API Testing
 
 Verify:
-
 - HTTP status codes
 - Request validation
 - Response format
@@ -219,23 +174,17 @@ Verify:
 - Rate limiting
 
 Example:
-
 ```http
 POST /api/v1/listings
 ```
-
 Expected:
-
 - `201 Created`
 - Valid JSON response
 - Listing persisted
 
----
-
 # 10. UI Testing
 
 Verify:
-
 - Responsive layouts
 - Navigation
 - Forms
@@ -244,28 +193,20 @@ Verify:
 - Empty states
 - Dark mode (future)
 
----
-
 # 11. Accessibility Testing
 
-Minimum standard:
-
-WCAG AA
+Minimum standard: WCAG AA
 
 Verify:
-
 - Keyboard navigation
 - Focus order
 - Screen reader labels
 - Color contrast
 - Touch target size
 
----
-
 # 12. Performance Testing
 
 Measure:
-
 - Page load time
 - API response time
 - Search latency
@@ -273,12 +214,9 @@ Measure:
 
 Targets follow the **Performance & Scalability Strategy**.
 
----
-
 # 13. Security Testing
 
 Verify:
-
 - Authentication
 - Authorization
 - RLS policies
@@ -288,12 +226,9 @@ Verify:
 - SQL injection protection
 - Rate limiting
 
----
-
 # 14. AI Feature Testing
 
 Test the AI Listing Assistant with:
-
 - Single image
 - Multiple images
 - Poor-quality image
@@ -301,7 +236,6 @@ Test the AI Listing Assistant with:
 - Long description
 
 Verify:
-
 - Generated title
 - Suggested category
 - Condition estimate
@@ -309,28 +243,21 @@ Verify:
 
 AI outputs should be reviewed for reasonableness, not exact wording.
 
----
-
 # 15. Browser Testing
 
 Supported browsers:
-
 - Chrome
 - Edge
 - Firefox
 - Safari (latest versions)
 
 Mobile browsers:
-
 - Chrome (Android)
 - Safari (iOS)
-
----
 
 # 16. Device Testing
 
 Minimum breakpoints:
-
 | Device | Width |
 |---------|------:|
 | Mobile | 360px |
@@ -338,32 +265,25 @@ Minimum breakpoints:
 | Laptop | 1024px |
 | Desktop | 1440px |
 
----
-
 # 17. Regression Testing
 
 Run regression tests before:
-
 - New release
 - Major refactor
 - Database migration
 
 Critical regression suite:
-
 - Authentication
 - Listings
 - Search
 - Offers
 - Reviews
 
----
-
 # 18. Test Data Strategy
 
 Use seeded development data.
 
 Include:
-
 - Multiple sellers
 - Multiple categories
 - Listings with different conditions
@@ -372,24 +292,18 @@ Include:
 
 Avoid using real user data.
 
----
-
 # 19. Continuous Testing
 
 Tests should run automatically:
-
 - On every pull request
 - Before merging to `main`
 - Before deployment
 
 A failing test blocks the merge until resolved.
 
----
-
 # 20. Defect Management
 
 Bug severity:
-
 | Level | Description |
 |--------|-------------|
 | Critical | Data loss, security, system unavailable |
@@ -397,12 +311,9 @@ Bug severity:
 | Medium | Feature works with limitations |
 | Low | Cosmetic or minor usability issue |
 
----
-
 # 21. Exit Criteria
 
 A feature is considered test-ready when:
-
 - Unit tests pass
 - Integration tests pass
 - Critical E2E flow passes
@@ -410,19 +321,14 @@ A feature is considered test-ready when:
 - Accessibility checks pass
 - Security review completed
 
----
-
 # 22. Future Enhancements
 
 Future additions:
-
 - Visual regression testing
 - Load testing
 - Chaos testing
 - AI-assisted test generation
 - Contract testing for APIs
-
----
 
 # 23. Summary
 

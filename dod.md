@@ -2,13 +2,9 @@
 
 > Project: VinTech Challenge 2026
 
----
-
 # Purpose
 
 The Definition of Done establishes the minimum quality standard required before work is considered complete.
-
----
 
 # Development
 
@@ -17,15 +13,11 @@ The Definition of Done establishes the minimum quality standard required before 
 - [ ] No debug code
 - [ ] No console logs
 
----
-
 # Quality
 
 - [ ] Unit tests pass
 - [ ] Integration tests pass
 - [ ] No critical bugs
-
----
 
 # UI
 
@@ -35,15 +27,11 @@ The Definition of Done establishes the minimum quality standard required before 
 - [ ] Error state implemented
 - [ ] Empty state implemented
 
----
-
 # Security
 
 - [ ] Input validation
 - [ ] Authorization verified
 - [ ] RLS reviewed
-
----
 
 # Documentation
 
@@ -51,15 +39,11 @@ The Definition of Done establishes the minimum quality standard required before 
 - [ ] API documentation updated
 - [ ] Architecture updated if impacted
 
----
-
 # Deployment
 
 - [ ] CI passes
 - [ ] Build passes
 - [ ] Preview deployment verified
-
----
 
 # Summary
 

@@ -8,8 +8,6 @@
 >
 > **Owner:** CTO / Engineering Team
 
----
-
 # 1. Purpose
 
 This document defines the core business domain of the marketplace.
@@ -24,8 +22,6 @@ The domain model serves as the foundation for:
 - Authorization Rules
 - AI Features
 - Future Scalability
-
----
 
 # 2. Domain Overview
 
@@ -48,8 +44,6 @@ The primary business entities are:
 - Report
 - Notification
 - Verification
-
----
 
 # 3. Core Domain Diagram
 
@@ -80,8 +74,6 @@ Notification ◄────── System
 Verification ───────► Seller Profile
 ```
 
----
-
 # 4. Aggregate Roots
 
 Following Domain-Driven Design (DDD), not every entity is independent.
@@ -90,57 +82,29 @@ Some entities belong to an aggregate.
 
 ## Aggregate: User
 
-Root Entity
+**Root Entity:** User
 
-- User
-
-Children
-
-- Profile
-- Favorites
-- Notifications
-
----
+**Children:** Profile, Favorites, Notifications
 
 ## Aggregate: Listing
 
-Root Entity
+**Root Entity:** Listing
 
-- Listing
-
-Children
-
-- Images
-- Offers
-- Reports
-
----
+**Children:** Images, Offers, Reports
 
 ## Aggregate: Seller
 
-Root Entity
+**Root Entity:** Seller Profile
 
-- Seller Profile
-
-Children
-
-- Reviews
-- Verification
-- Trust Score
-
----
+**Children:** Reviews, Verification, Trust Score
 
 # 5. Entity Definitions
-
----
 
 # User
 
 ## Purpose
 
 Represents every authenticated person.
-
----
 
 ### Attributes
 
@@ -150,34 +114,21 @@ Represents every authenticated person.
 - Created At
 - Last Login
 
----
-
 ### Responsibilities
 
 - Authentication
 - Ownership
 - Authorization
 
----
-
 ### Relationships
 
-Owns
-
-- Profile
-- Listings
-- Favorites
-- Offers
-
----
+**Owns:** Profile, Listings, Favorites, Offers
 
 # Seller Profile
 
 ## Purpose
 
 Represents the public identity of a seller.
-
----
 
 ### Attributes
 
@@ -189,29 +140,17 @@ Represents the public identity of a seller.
 - Bio
 - Trust Score
 
----
-
 ### Relationships
 
-Belongs to
+**Belongs to:** User
 
-- User
-
-Has many
-
-- Listings
-- Reviews
-- Verification Records
-
----
+**Has many:** Listings, Reviews, Verification Records
 
 # Listing
 
 ## Purpose
 
 Represents a second-hand product offered for sale.
-
----
 
 ### Attributes
 
@@ -222,25 +161,13 @@ Represents a second-hand product offered for sale.
 - Status
 - Published Date
 
----
-
 ### Relationships
 
-Belongs to
+**Belongs to:** Seller
 
-- Seller
+**Has many:** Images, Offers, Reports
 
-Has many
-
-- Images
-- Offers
-- Reports
-
-Belongs to
-
-- Category
-
----
+**Belongs to:** Category
 
 # Listing Image
 
@@ -248,33 +175,23 @@ Belongs to
 
 Stores product images.
 
----
-
 ### Attributes
 
 - URL
 - Order
 - Alt Text
 
----
-
 ### Rules
 
 Every listing must contain at least one image.
 
-Maximum
-
-10 images.
-
----
+**Maximum:** 10 images.
 
 # Category
 
 ## Purpose
 
 Organizes listings.
-
----
 
 ### Examples
 
@@ -283,21 +200,15 @@ Organizes listings.
 - Vehicles
 - Fashion
 
----
-
 ### Rules
 
 Each listing belongs to exactly one category.
-
----
 
 # Offer
 
 ## Purpose
 
 Represents a buyer's price proposal.
-
----
 
 ### Attributes
 
@@ -306,28 +217,15 @@ Represents a buyer's price proposal.
 - Message
 - Created At
 
----
-
 ### Status
 
-Pending
+**Pending:** Accepted
 
-Accepted
-
-Rejected
-
-Expired
-
----
+**Rejected:** Expired
 
 ### Relationships
 
-Belongs to
-
-- Buyer
-- Listing
-
----
+**Belongs to:** Buyer, Listing
 
 # Favorite
 
@@ -335,25 +233,15 @@ Belongs to
 
 Stores saved listings.
 
----
-
 ### Relationships
 
-Belongs to
+**Belongs to:** User
 
-- User
-
-References
-
-- Listing
-
----
+**References:** Listing
 
 ### Rules
 
 Duplicate favorites are not allowed.
-
----
 
 # Review
 
@@ -361,28 +249,17 @@ Duplicate favorites are not allowed.
 
 Represents buyer feedback.
 
----
-
 ### Attributes
 
 - Rating
 - Comment
 - Date
 
----
-
 ### Relationships
 
-Belongs to
+**Belongs to:** Buyer, Accepted Offer (the completed transaction)
 
-- Buyer
-- Accepted Offer (the completed transaction)
-
-References
-
-- Seller
-
----
+**References:** Seller
 
 ### Rules
 
@@ -390,43 +267,25 @@ One review per completed transaction.
 
 Each review must reference an accepted offer.
 
----
-
 # Report
 
 ## Purpose
 
 Community moderation.
 
----
-
 ### Reasons
 
-Spam
+**Spam:** Fraud
 
-Fraud
+**Duplicate:** Wrong Category
 
-Duplicate
-
-Wrong Category
-
-Offensive Content
-
-Other
-
----
+**Offensive Content:** Other
 
 ### Relationships
 
-Belongs to
+**Belongs to:** Listing
 
-- Listing
-
-Submitted by
-
-- User
-
----
+**Submitted by:** User
 
 # Notification
 
@@ -434,25 +293,17 @@ Submitted by
 
 Inform users about marketplace events.
 
----
-
 ### Examples
 
 - Offer received
 - Listing sold
 - Listing reported
 
----
-
 ### Status
 
-Unread
-
-Read
+**Unread:** Read
 
 Archived
-
----
 
 # Verification
 
@@ -460,29 +311,17 @@ Archived
 
 Represents trust signals.
 
----
-
 ### Types
 
-Email
+**Email:** Phone
 
-Phone
-
-Telegram
-
-Future Fayda
-
----
+**Telegram:** Future Fayda
 
 ### Status
 
-Pending
-
-Verified
+**Pending:** Verified
 
 Rejected
-
----
 
 # 6. Ownership Rules
 
@@ -498,8 +337,6 @@ Rejected
 | Report | User |
 | Notification | System |
 | Verification | Seller |
-
----
 
 # 7. Relationship Cardinality
 
@@ -517,8 +354,6 @@ Rejected
 | Seller → Reviews | 1 : N |
 | Seller → Verification Records | 1 : N |
 
----
-
 # 8. Business Invariants
 
 These rules must always be true.
@@ -527,55 +362,37 @@ These rules must always be true.
 
 Every listing has exactly one owner.
 
----
-
 ## INV-002
 
 Every listing belongs to one category.
-
----
 
 ## INV-003
 
 Every published listing has at least one image.
 
----
-
 ## INV-004
 
 Only the listing owner can edit or archive a listing.
-
----
 
 ## INV-005
 
 A user cannot submit an offer on their own listing.
 
----
-
 ## INV-006
 
 A buyer may only favorite a listing once.
-
----
 
 ## INV-007
 
 Trust Score is derived from platform activity and cannot be manually edited.
 
----
-
 ## INV-008
 
 A review must reference a completed transaction (an accepted offer).
 
----
-
 ## INV-009
 
 Verification records are immutable after approval.
-
----
 
 # 9. Domain Events
 
@@ -589,47 +406,33 @@ Examples:
 - Update seller statistics
 - Index listing
 
----
-
 ### OfferSubmitted
 
 - Notify seller
 - Update dashboard
-
----
 
 ### OfferAccepted
 
 - Notify buyer
 - Allow review after transaction
 
----
-
 ### ListingMarkedSold
 
 - Prevent new offers
 - Update seller metrics
 
----
-
 ### ReviewSubmitted
 
 - Recalculate Trust Score
-
----
 
 ### ListingReported
 
 - Add moderation task
 
----
-
 ### VerificationApproved
 
 - Update verification badge
 - Increase Trust Score
-
----
 
 # 10. Domain Services
 
@@ -647,8 +450,6 @@ Inputs:
 - Verification
 - Sales
 
----
-
 ## AI Listing Service
 
 Generates:
@@ -659,8 +460,6 @@ Generates:
 - Keywords
 - Quality Score
 
----
-
 ## Search Service
 
 Handles:
@@ -670,13 +469,9 @@ Handles:
 - Ranking
 - Pagination
 
----
-
 ## Notification Service
 
 Creates platform notifications.
-
----
 
 # 11. Value Objects
 
@@ -689,20 +484,14 @@ Examples:
 - Amount
 - Currency (ETB)
 
----
-
 ## Address
 
 - City
 - Sub-city
 
----
-
 ## Phone Number
 
 Validated Ethiopian phone number.
-
----
 
 ## Listing Condition
 
@@ -714,8 +503,6 @@ Allowed values:
 - Fair Condition
 - For Parts
 
----
-
 ## Trust Score
 
 Range:
@@ -723,8 +510,6 @@ Range:
 0–100
 
 Read-only.
-
----
 
 # 12. Bounded Contexts
 
@@ -736,8 +521,6 @@ To keep the system modular, the domain is divided into contexts.
 - Authentication
 - Verification
 
----
-
 ### Marketplace Context
 
 - Listings
@@ -745,28 +528,20 @@ To keep the system modular, the domain is divided into contexts.
 - Search
 - Favorites
 
----
-
 ### Transaction Context
 
 - Offers
 - Reviews
-
----
 
 ### Moderation Context
 
 - Reports
 - Trust Score
 
----
-
 ### AI Context
 
 - AI Listing Assistant
 - Listing Quality Score
-
----
 
 # 13. Domain Summary
 
@@ -778,8 +553,6 @@ To keep the system modular, the domain is divided into contexts.
 | Transactions | Offer |
 | Moderation | Report |
 | AI | AI Listing Service |
-
----
 
 # 14. Summary
 

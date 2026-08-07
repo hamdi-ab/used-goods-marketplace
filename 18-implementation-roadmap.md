@@ -8,8 +8,6 @@
 >
 > **Status:** Approved
 
----
-
 # 1. Purpose
 
 This roadmap defines the implementation strategy for the Used Goods Marketplace.
@@ -17,26 +15,20 @@ This roadmap defines the implementation strategy for the Used Goods Marketplace.
 It breaks development into manageable phases, aligns engineering efforts with the competition evaluation criteria, and ensures that the MVP is completed before optional enhancements.
 
 Objectives:
-
 - Deliver a complete MVP
 - Prioritize high-impact features
 - Reduce implementation risk
 - Prevent scope creep
 - Maximize judging score
 
----
-
 # 2. Development Principles
 
 The team follows these principles:
-
 - Build the smallest valuable feature first
 - Finish before expanding
 - Ship working software continuously
 - Prioritize user value over technical complexity
 - Postpone nice-to-have features until the MVP is complete
-
----
 
 # 3. Project Milestones
 
@@ -48,8 +40,6 @@ The team follows these principles:
 | M4 | AI Assistant Complete |
 | M5 | Polish & Optimization |
 | M6 | Competition Submission |
-
----
 
 # 4. Phase 0 — Project Setup
 
@@ -77,8 +67,6 @@ Prepare the development environment.
 - CI passes
 - Preview deployment works
 
----
-
 # 5. Phase 1 — Core Foundation
 
 Duration: 2–3 Days
@@ -93,8 +81,6 @@ Deliverables
 - Password Reset
 - Protected Routes
 
----
-
 ## Epic 2: User Profiles
 
 Deliverables
@@ -104,8 +90,6 @@ Deliverables
 - Contact Information
 - City Selection
 - Telegram Username
-
----
 
 ## Epic 3: Layout
 
@@ -117,13 +101,9 @@ Deliverables
 - Mobile Navigation
 - Responsive Layout
 
----
-
 ## Exit Criteria
 
 Users can register, log in, and access a responsive application.
-
----
 
 # 6. Phase 2 — Marketplace Core
 
@@ -141,8 +121,6 @@ Deliverables
 - Condition Badge
 - Category Selection
 
----
-
 ## Epic 5: Browsing
 
 Deliverables
@@ -152,8 +130,6 @@ Deliverables
 - Listing Cards
 - Seller Card
 - Pagination
-
----
 
 ## Epic 6: Search
 
@@ -166,13 +142,9 @@ Deliverables
 - City Filter
 - Sort Options
 
----
-
 ## Exit Criteria
 
 Users can successfully browse and discover listings.
-
----
 
 # 7. Phase 3 — Marketplace Interaction
 
@@ -186,8 +158,6 @@ Deliverables
 - Remove Favorite
 - Favorites Page
 
----
-
 ## Epic 8: Offers
 
 Deliverables
@@ -195,8 +165,6 @@ Deliverables
 - Submit Offer
 - Offer Dashboard
 - Offer Status
-
----
 
 ## Epic 9: Seller Dashboard
 
@@ -206,13 +174,9 @@ Deliverables
 - Statistics
 - Edit Listings
 
----
-
 ## Exit Criteria
 
 Users can interact with sellers and manage their marketplace activity.
-
----
 
 # 8. Phase 4 — Trust & Safety
 
@@ -226,8 +190,6 @@ Deliverables
 - Review Submission
 - Rating Display
 
----
-
 ## Epic 11: Reports
 
 Deliverables
@@ -235,8 +197,6 @@ Deliverables
 - Report Listing
 - Report Seller
 - Admin Review Queue
-
----
 
 ## Epic 12: Verification
 
@@ -247,13 +207,9 @@ Deliverables
 - Fayda Placeholder Integration
 - Trust Indicators
 
----
-
 ## Exit Criteria
 
 Trust mechanisms are visible throughout the marketplace.
-
----
 
 # 9. Phase 5 — AI Features
 
@@ -269,8 +225,6 @@ Deliverables
 - Suggested Category
 - Condition Estimation
 
----
-
 ## Epic 14: AI Search (Stretch Goal)
 
 Deliverables
@@ -278,16 +232,11 @@ Deliverables
 - Natural Language Search
 
 Example:
-
 > "Used Samsung phones under 20,000 ETB in Addis"
-
----
 
 ## Exit Criteria
 
 AI improves listing creation without becoming a dependency for core functionality.
-
----
 
 # 10. Phase 6 — Polish
 
@@ -301,16 +250,12 @@ Duration: 2 Days
 - Error States
 - Responsive Improvements
 
----
-
 ## Performance
 
 - Image Compression
 - Lazy Loading
 - Code Splitting
 - Lighthouse Optimization
-
----
 
 ## Accessibility
 
@@ -319,21 +264,15 @@ Duration: 2 Days
 - Color Contrast
 - Focus States
 
----
-
 ## Security
 
 - Final RLS Review
 - Rate Limit Validation
 - Input Validation Audit
 
----
-
 ## Exit Criteria
 
 Application is production-ready for submission.
-
----
 
 # 11. Documentation Phase
 
@@ -346,8 +285,6 @@ Deliverables
 - Deployment Guide
 - Environment Setup
 
----
-
 # 12. Demo Preparation
 
 Deliverables
@@ -358,11 +295,7 @@ Deliverables
 - Screen Recording
 - Presentation Slides
 
-Video Length:
-
-3–5 minutes
-
----
+Video Length: 3–5 minutes
 
 # 13. Submission Checklist
 
@@ -372,15 +305,11 @@ Video Length:
 - Clean Commit History
 - README Complete
 
----
-
 ## Application
 
 - Responsive
 - Stable
 - No Blocking Bugs
-
----
 
 ## Documentation
 
@@ -388,22 +317,17 @@ Video Length:
 - Accurate
 - Up-to-date
 
----
-
 ## Video
 
 - Core Features Demonstrated
 - Architecture Explained
 - Deployment Shown
 
----
-
 # 14. Stretch Goals
 
 Implement only if all MVP work is complete.
 
 Possible additions:
-
 - Telebirr Integration
 - Chapa Integration
 - Fayda Verification
@@ -413,12 +337,9 @@ Possible additions:
 - PWA Support
 - Push Notifications
 
----
-
 # 15. Definition of MVP
 
 The MVP is complete when users can:
-
 - Register and log in
 - Create listings
 - Upload images
@@ -432,12 +353,9 @@ The MVP is complete when users can:
 
 All required competition functionality should be operational.
 
----
-
 # 16. Risks
 
 Potential risks include:
-
 - Scope creep
 - AI integration delays
 - Image upload issues
@@ -445,24 +363,18 @@ Potential risks include:
 - Time constraints
 
 Mitigation:
-
 - Prioritize MVP features
 - Defer stretch goals
 - Conduct frequent integration testing
 
----
-
 # 17. Success Criteria
 
 The project is successful if it:
-
 - Meets all challenge requirements
 - Demonstrates a polished user experience
 - Performs reliably
 - Scores well across judging categories
 - Is deployable with minimal manual steps
-
----
 
 # 18. Summary
 

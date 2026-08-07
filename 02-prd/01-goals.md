@@ -9,8 +9,6 @@
 > - 00-winning-strategy.md
 > - 01-product-vision.md
 
----
-
 # 1. Purpose
 
 This document defines the strategic goals and measurable success criteria for the marketplace.
@@ -19,15 +17,11 @@ Every product decision, engineering task, and design choice must contribute to o
 
 If a feature does not support these goals, it should not be included in the MVP.
 
----
-
 # 2. Product Goal
 
 Build a modern, trustworthy, and intuitive marketplace that enables Ethiopian communities to confidently buy and sell second-hand goods.
 
 The platform should significantly improve the current experience provided by informal channels such as Telegram and Facebook without requiring users to change their existing communication habits.
-
----
 
 # 3. Business Goals
 
@@ -35,52 +29,42 @@ The platform should significantly improve the current experience provided by inf
 
 Replace fragmented social media listings with a structured marketplace that is easy to browse and search.
 
-Success Indicators
+**Success Indicators:**
 
 - Structured product listings
 - Organized categories
 - Powerful search
 - Responsive interface
 
----
-
 ## BG-02 Increase Marketplace Trust
 
 Reduce uncertainty between buyers and sellers by introducing transparent trust indicators.
 
-Success Indicators
+**Success Indicators:**
 
 - Seller Trust Score
 - Ratings & Reviews
 - Listing Reports
 - Verification Indicators
 
----
-
 ## BG-03 Reduce Selling Friction
 
 Enable sellers to create high-quality listings quickly with minimal effort.
 
-Success Indicators
+**Success Indicators:**
 
 - AI Listing Assistant
 - Simple listing wizard
 - Multiple image upload
 - Intelligent defaults
 
-Target
-
-Average listing creation time:
-
-**Less than 60 seconds**
-
----
+**Target:** Average listing creation time: **Less than 60 seconds**
 
 ## BG-04 Improve Product Discovery
 
 Help buyers find relevant products within seconds.
 
-Success Indicators
+**Success Indicators:**
 
 - Search
 - Filters
@@ -88,27 +72,19 @@ Success Indicators
 - Similar Listings
 - Trending Listings
 
-Target
-
-Average product discovery time:
-
-**Less than 30 seconds**
-
----
+**Target:** Average product discovery time: **Less than 30 seconds**
 
 ## BG-05 Build a Scalable Foundation
 
 Design the application so future capabilities can be added without major architectural changes.
 
-Examples
+**Examples:**
 
 - Payments
 - Delivery
 - Fayda verification
 - Mobile applications
 - Business accounts
-
----
 
 # 4. User Goals
 
@@ -123,8 +99,6 @@ Buyers want to:
 - Save interesting products.
 - Make informed purchasing decisions.
 
----
-
 ## Seller Goals
 
 Sellers want to:
@@ -136,8 +110,6 @@ Sellers want to:
 - Understand listing performance.
 - Sell items faster.
 
----
-
 ## Administrator Goals
 
 Administrators want to:
@@ -147,8 +119,6 @@ Administrators want to:
 - Review reports.
 - Moderate users.
 - Monitor marketplace health.
-
----
 
 # 5. User Experience Goals
 
@@ -165,8 +135,6 @@ Users should never feel overwhelmed.
 
 Every screen should have a single primary action.
 
----
-
 # 6. Technical Goals
 
 The engineering team should prioritize:
@@ -175,14 +143,11 @@ The engineering team should prioritize:
 
 Pages should load quickly.
 
-Target
-
+**Target:**
 - Initial page load < 2 seconds
 - Search results < 500ms
 - Lazy-loaded images
 - Optimized assets
-
----
 
 ## TG-02 Scalability
 
@@ -192,8 +157,6 @@ Architecture should support:
 - Thousands of users
 - Additional product categories
 - Future mobile applications
-
----
 
 ## TG-03 Maintainability
 
@@ -205,13 +168,11 @@ Code should be:
 - Easy to extend
 - Consistently structured
 
----
-
 ## TG-04 Security
 
 Protect both users and platform data.
 
-Requirements
+**Requirements:**
 
 - Secure authentication
 - Role-based authorization
@@ -221,13 +182,11 @@ Requirements
 - Secure database policies
 - HTTPS-only deployment
 
----
-
 ## TG-05 Accessibility
 
 The application should be usable by everyone.
 
-Requirements
+**Requirements:**
 
 - Keyboard navigation
 - Semantic HTML
@@ -236,17 +195,13 @@ Requirements
 - Screen-reader support
 - Focus indicators
 
-Target
-
-Lighthouse Accessibility Score ≥ 95
-
----
+**Target:** Lighthouse Accessibility Score ≥ 95
 
 # 7. Design Goals
 
 The interface should communicate trust immediately.
 
-Design principles
+**Design principles:**
 
 - Minimal
 - Spacious
@@ -255,15 +210,13 @@ Design principles
 - Modern
 - Professional
 
-Visual priorities
+**Visual priorities:**
 
 1. Product Images
 2. Price
 3. Trust
 4. Seller
 5. Call to Action
-
----
 
 # 8. Innovation Goals
 
@@ -277,8 +230,6 @@ The platform should introduce meaningful improvements through:
 - Intelligent Search
 - Marketplace Health Indicators
 
----
-
 # 9. Success Metrics (KPIs)
 
 ## Product KPIs
@@ -291,8 +242,6 @@ The platform should introduce meaningful improvements through:
 | Responsive support | 100% |
 | Successful listing creation | >95% |
 
----
-
 ## User Experience KPIs
 
 | KPI | Target |
@@ -301,8 +250,6 @@ The platform should introduce meaningful improvements through:
 | Navigation clarity | Excellent |
 | Loading experience | Excellent |
 | Accessibility | ≥95 |
-
----
 
 ## Technical KPIs
 
@@ -313,8 +260,6 @@ The platform should introduce meaningful improvements through:
 | Lighthouse Best Practices | ≥95 |
 | Lighthouse SEO | ≥95 |
 
----
-
 ## Engineering KPIs
 
 | KPI | Target |
@@ -324,13 +269,11 @@ The platform should introduce meaningful improvements through:
 | Zero Critical Bugs During Demo | Yes |
 | Production Build Success | 100% |
 
----
-
 # 10. MVP Goals
 
 The MVP should allow a complete buyer and seller journey.
 
-Seller Journey
+**Seller Journey:**
 
 - Register
 - Create profile
@@ -339,7 +282,7 @@ Seller Journey
 - Receive offer
 - Manage listing
 
-Buyer Journey
+**Buyer Journey:**
 
 - Browse homepage
 - Search products
@@ -349,8 +292,6 @@ Buyer Journey
 - Contact seller
 - Save favorite
 - Submit offer
-
----
 
 # 11. Non-Goals
 
@@ -370,8 +311,6 @@ The following features are excluded:
 
 These may be considered for future releases.
 
----
-
 # 12. Goal Prioritization
 
 ## Must Have
@@ -389,8 +328,6 @@ These may be considered for future releases.
 - AI Listing Assistant
 - Responsive Design
 
----
-
 ## Should Have
 
 - Listing Analytics
@@ -399,16 +336,12 @@ These may be considered for future releases.
 - Listing Quality Score
 - Rich Condition Details
 
----
-
 ## Could Have
 
 - Saved Searches
 - Recently Viewed
 - Smart Recommendations
 - AI Price Suggestions
-
----
 
 ## Won't Have (MVP)
 
@@ -418,8 +351,6 @@ These may be considered for future releases.
 - Auctions
 - Wallet
 - Mobile Apps
-
----
 
 # 13. Decision Framework
 
@@ -433,8 +364,6 @@ Before implementing any feature, ask the following questions:
 6. Can it be completed within the competition timeline?
 
 If the answer to most of these questions is **No**, the feature should not be included in the MVP.
-
----
 
 # 14. Goal Summary
 

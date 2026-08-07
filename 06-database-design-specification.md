@@ -10,8 +10,6 @@
 >
 > **Owner:** Backend Team
 
----
-
 # 1. Purpose
 
 This document defines the complete database design for the Used Goods Marketplace.
@@ -28,8 +26,6 @@ It includes:
 - Soft Delete Strategy
 - Audit Strategy
 
----
-
 # 2. Design Principles
 
 The database follows these principles:
@@ -41,8 +37,6 @@ The database follows these principles:
 - Design for scalability
 - Minimize duplicated data
 - Keep derived values out of the database where possible
-
----
 
 # 3. High-Level ER Diagram
 
@@ -74,15 +68,11 @@ profiles ─────── verifications
 profiles ─────── notifications
 ```
 
----
-
 # 4. Naming Conventions
 
 ## Tables
 
-Plural
-
-Examples
+**Plural:** Examples
 
 ```
 profiles
@@ -91,15 +81,11 @@ offers
 favorites
 ```
 
----
-
 ## Primary Keys
 
 ```
 id UUID PRIMARY KEY
 ```
-
----
 
 ## Foreign Keys
 
@@ -111,8 +97,6 @@ listing_id
 category_id
 ```
 
----
-
 ## Timestamps
 
 ```
@@ -122,8 +106,6 @@ updated_at
 
 deleted_at
 ```
-
----
 
 # 5. Common Audit Columns
 
@@ -136,13 +118,9 @@ Every business table includes:
 | updated_at | TIMESTAMPTZ |
 | deleted_at | TIMESTAMPTZ NULL |
 
----
-
 # 6. Table: profiles
 
-Purpose
-
-Stores public user information.
+**Purpose:** Stores public user information.
 
 | Column | Type | Notes |
 |----------|------|------|
@@ -158,12 +136,7 @@ Stores public user information.
 | profile_completion | SMALLINT | 0–100 |
 | role | TEXT | buyer / seller / admin |
 
-Indexes
-
-- phone
-- city
-
----
+**Indexes:** phone, city
 
 # 7. Table: categories
 
@@ -175,12 +148,7 @@ Indexes
 | parent_id | UUID NULL |
 | icon | TEXT NULL |
 
-Rules
-
-- Slug unique
-- Parent optional
-
----
+**Rules:** Slug unique, Parent optional
 
 # 8. Table: listings
 
@@ -201,20 +169,9 @@ Rules
 | favorite_count | INTEGER DEFAULT 0 |
 | published_at | TIMESTAMPTZ |
 
-Indexes
+**Indexes:** seller_id, category_id, city, status, price, published_at
 
-- seller_id
-- category_id
-- city
-- status
-- price
-- published_at
-
-Future
-
-Full-text index
-
----
+**Future:** Full-text index
 
 # 9. Table: listing_images
 
@@ -226,13 +183,9 @@ Full-text index
 | display_order | SMALLINT |
 | alt_text | TEXT |
 
-Rules
-
-Maximum
+**Rules:** Maximum
 
 10 images
-
----
 
 # 10. Table: offers
 
@@ -245,13 +198,7 @@ Maximum
 | message | TEXT |
 | status | TEXT |
 
-Indexes
-
-- buyer_id
-- listing_id
-- status
-
----
+**Indexes:** buyer_id, listing_id, status
 
 # 11. Table: favorites
 
@@ -269,8 +216,6 @@ Columns
 | user_id | UUID |
 | listing_id | UUID |
 
----
-
 # 12. Table: reviews
 
 | Column | Type |
@@ -282,16 +227,9 @@ Columns
 | rating | SMALLINT |
 | comment | TEXT |
 
-Constraints
+**Constraints:** `offer_id` references `offers.id` (FK): a review must belong to an accepted offer, which is the completed transaction., UNIQUE `(offer_id)` — one review per completed transaction (supports INV-008).
 
-- `offer_id` references `offers.id` (FK): a review must belong to an accepted offer, which is the completed transaction.
-- UNIQUE `(offer_id)` — one review per completed transaction (supports INV-008).
-
-Rating
-
-1–5
-
----
+**Rating:** 1–5
 
 # 13. Table: reports
 
@@ -304,14 +242,7 @@ Rating
 | description | TEXT |
 | status | TEXT |
 
-Statuses
-
-- Pending
-- Reviewing
-- Resolved
-- Rejected
-
----
+**Statuses:** Pending, Reviewing, Resolved, Rejected
 
 # 14. Table: notifications
 
@@ -325,8 +256,6 @@ Statuses
 | is_read | BOOLEAN |
 | metadata | JSONB |
 
----
-
 # 15. Table: verifications
 
 | Column | Type |
@@ -337,20 +266,11 @@ Statuses
 | status | TEXT |
 | verified_at | TIMESTAMPTZ |
 
-Types
-
-- Email
-- Phone
-- Telegram
-- Fayda
-
----
+**Types:** Email, Phone, Telegram, Fayda
 
 # 16. Table: conversations (Future-Ready)
 
-Purpose
-
-Track buyer-seller contact attempts.
+**Purpose:** Track buyer-seller contact attempts.
 
 | Column | Type |
 |----------|------|
@@ -362,14 +282,9 @@ Track buyer-seller contact attempts.
 | status | TEXT |
 | initiated_at | TIMESTAMPTZ |
 
-Supported methods
-
-- Telegram
-- Phone
+**Supported methods:** Telegram, Phone
 
 This table enables analytics today and in-app messaging tomorrow.
-
----
 
 # 17. Relationships
 
@@ -386,8 +301,6 @@ This table enables analytics today and in-app messaging tomorrow.
 | profiles | notifications | 1:N |
 | profiles | verifications | 1:N |
 
----
-
 # 18. Constraints
 
 ## Listings
@@ -396,27 +309,19 @@ This table enables analytics today and in-app messaging tomorrow.
 - Title length: 5–120
 - Description length: 20–2000
 
----
-
 ## Reviews
 
 Rating between 1 and 5.
 
 One review per accepted offer (UNIQUE `offer_id`).
 
----
-
 ## Favorites
 
 Unique (user_id, listing_id)
 
----
-
 ## Images
 
 Maximum 10 per listing (enforced in application logic).
-
----
 
 # 19. Index Strategy
 
@@ -435,8 +340,6 @@ Future:
 
 GIN index for PostgreSQL full-text search on listing title and description.
 
----
-
 # 20. Row Level Security (RLS)
 
 ## Profiles
@@ -444,15 +347,11 @@ GIN index for PostgreSQL full-text search on listing title and description.
 - Users can read public profiles.
 - Users can update only their own profile.
 
----
-
 ## Listings
 
 - Public can read published listings.
 - Sellers can create listings.
 - Sellers can update/delete only their own listings.
-
----
 
 ## Offers
 
@@ -460,13 +359,9 @@ GIN index for PostgreSQL full-text search on listing title and description.
 - Seller can read offers on their listings.
 - Admin has full access.
 
----
-
 ## Favorites
 
 - Users can only access their own favorites.
-
----
 
 ## Reviews
 
@@ -474,28 +369,20 @@ GIN index for PostgreSQL full-text search on listing title and description.
 - Buyer can create one review per completed transaction (one per accepted offer).
 - Author can edit within a short grace period (optional).
 
----
-
 ## Reports
 
 - Reporter can create.
 - Admin can read/update.
 - Public cannot view reports.
 
----
-
 ## Notifications
 
 - Users can only read their own notifications.
-
----
 
 ## Verifications
 
 - Users can view their own verification records.
 - Only admins/system services can update verification status.
-
----
 
 # 21. Soft Delete Strategy
 
@@ -514,8 +401,6 @@ Benefits:
 
 Queries should exclude deleted rows by default.
 
----
-
 # 22. Migration Strategy
 
 Version database changes using timestamped SQL migrations.
@@ -527,8 +412,6 @@ Example:
 20260806_create_categories.sql
 20260807_create_listings.sql
 ```
-
----
 
 # 23. Seed Data
 
@@ -546,8 +429,6 @@ Initial categories:
 
 Create one admin account for moderation.
 
----
-
 # 24. Future Extensions
 
 The schema is designed to support:
@@ -562,8 +443,6 @@ The schema is designed to support:
 - Seller Subscriptions
 
 without breaking existing tables.
-
----
 
 # 25. Summary
 

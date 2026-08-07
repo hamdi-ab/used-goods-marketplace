@@ -6,8 +6,6 @@
 > **Owner:** Product & Engineering Team
 > **Last Updated:** August 2026
 
----
-
 # Executive Summary
 
 This document serves as the single source of truth for the project. Every product, design, and engineering decision should align with the strategy defined here.
@@ -15,8 +13,6 @@ This document serves as the single source of truth for the project. Every produc
 Our goal is not simply to build another online marketplace.
 
 Our goal is to build **the fastest and most trustworthy way to buy and sell second-hand goods in Ethiopia.**
-
----
 
 # Challenge Overview
 
@@ -34,19 +30,13 @@ This creates several problems:
 
 Rather than replacing these platforms, our product organizes the buying and selling experience into a structured, trustworthy, and modern marketplace.
 
----
-
 # Vision
 
 To become Ethiopia's most trusted marketplace for buying and selling second-hand goods.
 
----
-
 # Mission
 
 Empower individuals to confidently buy and sell second-hand products through a fast, secure, and intuitive marketplace experience.
-
----
 
 # Product Positioning
 
@@ -58,8 +48,6 @@ Unlike traditional classified websites or Telegram channels, our platform focuse
 
 Every feature should strengthen at least one of these pillars.
 
----
-
 # Problem Statement
 
 ## Current Situation
@@ -70,13 +58,9 @@ Sellers repeatedly answer the same questions, struggle to price their items, and
 
 The result is a fragmented marketplace with low efficiency and low trust.
 
----
-
 # Solution Statement
 
 Our platform provides a structured marketplace where sellers can quickly create high-quality listings and buyers can discover trusted products through intelligent search, filtering, and seller reputation systems.
-
----
 
 # Target Users
 
@@ -84,85 +68,33 @@ Our platform provides a structured marketplace where sellers can quickly create 
 
 ### University Students
 
-Needs
+**Needs:** Phones, Laptops, Furniture, Affordable prices
 
-- Phones
-- Laptops
-- Furniture
-- Affordable prices
-
-Pain Points
-
-- Limited budget
-- Hard to compare listings
-- Trust concerns
-
----
+**Pain Points:** Limited budget, Hard to compare listings, Trust concerns
 
 ### Young Professionals
 
-Needs
+**Needs:** Furniture, Electronics, Home appliances, Reliable sellers
 
-- Furniture
-- Electronics
-- Home appliances
-- Reliable sellers
-
-Pain Points
-
-- Time-consuming search
-- Low confidence in sellers
-
----
+**Pain Points:** Time-consuming search, Low confidence in sellers
 
 ### Families
 
-Needs
+**Needs:** Furniture, Home appliances, Quality second-hand goods, Trustworthy sellers
 
-- Furniture
-- Home appliances
-- Quality second-hand goods
-- Trustworthy sellers
-
-Pain Points
-
-- Unclear condition
-- Hidden damage
-- Unresponsive sellers
-
----
+**Pain Points:** Unclear condition, Hidden damage, Unresponsive sellers
 
 ### Local Merchants
 
-Needs
+**Needs:** Inventory discovery, Price comparison, Quick contact
 
-- Inventory discovery
-- Price comparison
-- Quick contact
-
-Pain Points
-
-- Slow discovery
-- Duplicate listings
-- Missing contact information
-
----
+**Pain Points:** Slow discovery, Duplicate listings, Missing contact information
 
 ### Small Business Owners
 
-Needs
+**Needs:** Furniture, Electronics, Home appliances, Reliable sellers
 
-- Furniture
-- Electronics
-- Home appliances
-- Reliable sellers
-
-Pain Points
-
-- Time-consuming search
-- Low confidence in sellers
-
----
+**Pain Points:** Time-consuming search, Low confidence in sellers
 
 ## Secondary Users
 
@@ -170,48 +102,25 @@ Pain Points
 - Small retailers
 - Community organizations
 
----
-
 # Core Product Principles
 
 ## 1. Trust First
 
 Every interaction should increase buyer confidence.
 
-Examples
-
-- Seller trust score
-- Verification badges
-- Ratings
-- Reporting system
-
----
+**Examples:** Seller trust score, Verification badges, Ratings, Reporting system
 
 ## 2. Fast Discovery
 
 Users should find relevant products in less than 30 seconds.
 
-Examples
-
-- Powerful search
-- Smart filters
-- Similar listings
-- Clean categories
-
----
+**Examples:** Powerful search, Smart filters, Similar listings, Clean categories
 
 ## 3. Effortless Selling
 
 Creating a listing should take less than one minute.
 
-Examples
-
-- AI Listing Assistant
-- Image upload
-- Suggested pricing
-- Smart descriptions
-
----
+**Examples:** AI Listing Assistant, Image upload, Suggested pricing, Smart descriptions
 
 # Value Proposition
 
@@ -222,8 +131,6 @@ Examples
 - Easily compare listings
 - Better search experience
 
----
-
 ## Sellers
 
 - Create listings quickly
@@ -231,52 +138,23 @@ Examples
 - Receive qualified buyers
 - Gain listing insights
 
----
-
 # Competitive Advantage
 
 Our platform differentiates itself through:
 
 ## AI Listing Assistant
 
-Automatically generates
-
-- Title
-- Description
-- Suggested category
-- Suggested condition
-- Suggested keywords
-- Listing quality score
-
----
+**Automatically generates:** Title, Description, Suggested category, Suggested condition, Suggested keywords, Listing quality score
 
 ## Seller Trust Framework
 
 Instead of a simple verification badge, sellers receive a transparent trust score based on multiple trust signals.
 
-Examples include
-
-- Email verification
-- Telegram account connected
-- Profile completion
-- Ratings
-- Successful sales
-- Community reports
-- Future Fayda integration
-
----
+**Examples include:** Email verification, Telegram account connected, Profile completion, Ratings, Successful sales, Community reports, Future Fayda integration
 
 ## Intelligent Marketplace
 
-Features include
-
-- Similar listings
-- Smart search
-- Trending products
-- Recently viewed
-- Personalized discovery (future)
-
----
+**Features include:** Similar listings, Smart search, Trending products, Recently viewed, Personalized discovery (future)
 
 # Hero Features
 
@@ -286,23 +164,17 @@ Features include
 
 Create high-quality listings in seconds.
 
----
-
 ## Hero Feature 02
 
 ### Seller Trust Score
 
 Transparent trust indicators for every seller.
 
----
-
 ## Hero Feature 03
 
 ### Intelligent Search
 
 Fast discovery through structured filters and intelligent search.
-
----
 
 # Success Metrics
 
@@ -315,8 +187,6 @@ The product should achieve the following during demonstration:
 - Lighthouse Accessibility ≥ 95
 - Lighthouse Best Practices ≥ 95
 - Lighthouse SEO ≥ 95
-
----
 
 # MVP Scope
 
@@ -339,8 +209,6 @@ The product should achieve the following during demonstration:
 - AI Listing Assistant
 - Responsive design
 
----
-
 ## Out of Scope
 
 The following are intentionally excluded from Version 1:
@@ -358,26 +226,11 @@ The following are intentionally excluded from Version 1:
 - Inventory management
 - Multi-language AI
 
----
-
 # Future Roadmap
 
-Version 1.1
+**Version 1.1:** Saved searches, Recently viewed, Marketplace analytics, Smart recommendations
 
-- Saved searches
-- Recently viewed
-- Marketplace analytics
-- Smart recommendations
-
-Version 2.0
-
-- Telebirr integration
-- Chapa integration
-- Fayda verification
-- Delivery partners
-- AI pricing engine
-
----
+**Version 2.0:** Telebirr integration, Chapa integration, Fayda verification, Delivery partners, AI pricing engine
 
 # Guiding Principles
 
@@ -391,8 +244,6 @@ Before implementing any feature, ask the following questions:
 
 If the answer is **No**, the feature should not be included in the MVP.
 
----
-
 # Project Goals
 
 ## Business Goals
@@ -401,8 +252,6 @@ If the answer is **No**, the feature should not be included in the MVP.
 - Increase trust between buyers and sellers.
 - Reduce listing friction.
 - Encourage structured digital commerce.
-
----
 
 ## Technical Goals
 
@@ -413,8 +262,6 @@ If the answer is **No**, the feature should not be included in the MVP.
 - Scalable database
 - Clean API design
 - Production-ready codebase
-
----
 
 # Demo Story
 
@@ -429,8 +276,6 @@ Our demonstration tells a simple story.
 7. The seller receives an offer.
 
 This demonstrates the complete marketplace lifecycle in under five minutes.
-
----
 
 # Winning Statement
 

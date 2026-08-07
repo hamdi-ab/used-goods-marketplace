@@ -8,8 +8,6 @@
 > - 00-overview.md
 > - 01-goals.md
 
----
-
 # 1. Introduction
 
 This document defines the primary user groups for the marketplace.
@@ -17,8 +15,6 @@ This document defines the primary user groups for the marketplace.
 Rather than describing generic demographics, these personas focus on user goals, behaviors, frustrations, and motivations.
 
 Every feature in the product should solve a real problem experienced by one or more of these personas.
-
----
 
 # 2. Primary Persona A — Student Buyer
 
@@ -28,27 +24,15 @@ University students represent one of the largest markets for second-hand goods i
 
 They frequently buy affordable electronics, furniture, books, and household items due to limited budgets.
 
----
-
 ## Profile
 
-**Age**
+**Age:** 18–26
 
-18–26
+**Occupation:** University Student
 
-**Occupation**
+**Technical Experience:** High
 
-University Student
-
-**Technical Experience**
-
-High
-
-**Shopping Frequency**
-
-Frequent
-
----
+**Shopping Frequency:** Frequent
 
 ## Goals
 
@@ -57,8 +41,6 @@ Frequent
 - Buy from trustworthy sellers.
 - Contact sellers quickly.
 - Save money.
-
----
 
 ## Common Purchases
 
@@ -69,8 +51,6 @@ Frequent
 - Books
 - Small appliances
 
----
-
 ## Pain Points
 
 - Endless Telegram scrolling.
@@ -80,8 +60,6 @@ Frequent
 - Sellers who never reply.
 - No easy comparison.
 
----
-
 ## Product Needs
 
 - Fast search.
@@ -90,13 +68,9 @@ Frequent
 - Favorites.
 - Similar products.
 
----
-
 ## Success Criteria
 
 "I found exactly what I wanted in a few minutes."
-
----
 
 # 3. Primary Persona B — Young Professional Seller
 
@@ -106,23 +80,13 @@ Young professionals regularly upgrade devices and household items.
 
 They want a fast and professional way to sell.
 
----
-
 ## Profile
 
-**Age**
+**Age:** 24–35
 
-24–35
+**Occupation:** Professional
 
-**Occupation**
-
-Professional
-
-**Technical Experience**
-
-Medium to High
-
----
+**Technical Experience:** Medium to High
 
 ## Goals
 
@@ -132,8 +96,6 @@ Medium to High
 - Avoid repetitive conversations.
 - Receive fair offers.
 
----
-
 ## Common Listings
 
 - Phones
@@ -141,8 +103,6 @@ Medium to High
 - Furniture
 - Home appliances
 - Office equipment
-
----
 
 ## Pain Points
 
@@ -152,8 +112,6 @@ Medium to High
 - Repeated questions.
 - No reputation.
 
----
-
 ## Product Needs
 
 - AI Listing Assistant.
@@ -162,13 +120,9 @@ Medium to High
 - Offer management.
 - Multiple images.
 
----
-
 ## Success Criteria
 
 "My item was listed in under one minute."
-
----
 
 # 4. Primary Persona C — Family Buyer
 
@@ -178,16 +132,12 @@ Families often search for affordable furniture, appliances, and household goods.
 
 Their purchases are less frequent but involve higher value.
 
----
-
 ## Goals
 
 - Save money.
 - Buy quality items.
 - Purchase from trustworthy sellers.
 - Inspect detailed product information.
-
----
 
 ## Common Purchases
 
@@ -197,16 +147,12 @@ Their purchases are less frequent but involve higher value.
 - Dining tables
 - Beds
 
----
-
 ## Pain Points
 
 - Unclear condition.
 - Missing descriptions.
 - Hidden damage.
 - Unresponsive sellers.
-
----
 
 ## Product Needs
 
@@ -216,13 +162,9 @@ Their purchases are less frequent but involve higher value.
 - Trust Score.
 - Rich descriptions.
 
----
-
 ## Success Criteria
 
 "I felt confident before contacting the seller."
-
----
 
 # 5. Primary Persona D — Local Merchant
 
@@ -232,8 +174,6 @@ Some small merchants regularly buy and resell used goods.
 
 They care about speed and inventory availability.
 
----
-
 ## Goals
 
 - Find inventory quickly.
@@ -241,15 +181,11 @@ They care about speed and inventory availability.
 - Contact sellers immediately.
 - Monitor new listings.
 
----
-
 ## Pain Points
 
 - Slow discovery.
 - Duplicate listings.
 - Missing contact information.
-
----
 
 ## Product Needs
 
@@ -259,13 +195,9 @@ They care about speed and inventory availability.
 - Recent listings.
 - Quick contact.
 
----
-
 ## Success Criteria
 
 "I can discover inventory before everyone else."
-
----
 
 # 6. Administrator Persona
 
@@ -275,8 +207,6 @@ Administrators protect marketplace quality.
 
 They ensure trust and remove abuse.
 
----
-
 ## Responsibilities
 
 - Review reports.
@@ -285,15 +215,11 @@ They ensure trust and remove abuse.
 - Review verification requests.
 - Monitor marketplace activity.
 
----
-
 ## Goals
 
 - Keep listings legitimate.
 - Prevent fraud.
 - Improve marketplace quality.
-
----
 
 ## Product Needs
 
@@ -301,8 +227,6 @@ They ensure trust and remove abuse.
 - Reporting dashboard.
 - Listing review queue.
 - User management.
-
----
 
 # 7. Shared User Pain Points
 
@@ -319,8 +243,6 @@ Across all personas, the same problems repeatedly appear.
 
 These problems define the core product opportunity.
 
----
-
 # 8. Shared User Motivations
 
 Users want:
@@ -333,8 +255,6 @@ Users want:
 - Reliable communication.
 
 Every major feature should support at least one of these motivations.
-
----
 
 # 9. Persona Feature Mapping
 
@@ -353,38 +273,34 @@ Every major feature should support at least one of these motivations.
 | Analytics | | ✓ | | ✓ | |
 | Similar Listings | ✓ | | ✓ | ✓ | |
 
----
-
 # 10. Design Implications
 
 These personas directly influence product design.
 
-Examples:
+**Examples:**
 
-Student Buyers need:
+**Student Buyers need:**
 
 - Fast navigation.
 - Mobile-first experience.
 - Clear pricing.
 
-Family Buyers need:
+**Family Buyers need:**
 
 - Larger images.
 - Detailed condition information.
 - Strong trust indicators.
 
-Sellers need:
+**Sellers need:**
 
 - Minimal listing effort.
 - AI assistance.
 - Analytics.
 
-Administrators need:
+**Administrators need:**
 
 - Efficient moderation tools.
 - Clear reporting workflows.
-
----
 
 # 11. Persona Prioritization
 
@@ -397,8 +313,6 @@ The MVP prioritizes the following order:
 Marketplace success depends primarily on creating excellent buyer and seller experiences.
 
 Administrative capabilities should remain lightweight but effective.
-
----
 
 # 12. Key Insight
 

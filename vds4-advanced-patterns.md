@@ -4,8 +4,6 @@
 
 > Version: 1.0
 
----
-
 # Table of Contents
 
 1. User Feedback Patterns
@@ -21,8 +19,6 @@
 11. Accessibility Patterns
 12. Microinteractions
 
----
-
 # 1. User Feedback Patterns
 
 Every user action must produce immediate feedback.
@@ -36,17 +32,12 @@ Categories:
 
 Examples
 
-✓ Listing Published
-
-✓ Favorite Added
-
-✓ Offer Sent
-
-✓ Image Uploaded
+- ✓ Listing Published
+- ✓ Favorite Added
+- ✓ Offer Sent
+- ✓ Image Uploaded
 
 The user should never wonder if an action succeeded.
-
----
 
 # 2. Loading Experience
 
@@ -60,15 +51,11 @@ Preferred loading order
 2. Progressive Loading
 3. Spinner (last resort)
 
----
-
 ## Skeleton Rules
 
 Skeleton dimensions must closely match the final content.
 
 Avoid generic gray rectangles.
-
----
 
 ## Progressive Loading
 
@@ -76,25 +63,7 @@ Load content in priority order.
 
 Example
 
-Navigation
-
-↓
-
-Hero
-
-↓
-
-Filters
-
-↓
-
-Listings
-
-↓
-
-Recommendations
-
----
+Navigation → Hero → Filters → Listings → Recommendations
 
 # 3. Empty States
 
@@ -104,8 +73,6 @@ Every empty state must include
 - Title
 - Explanation
 - Primary CTA
-
----
 
 ### Example
 
@@ -117,8 +84,6 @@ Button
 
 Clear Filters
 
----
-
 ### Favorites
 
 "You haven't saved anything yet."
@@ -126,8 +91,6 @@ Clear Filters
 ↓
 
 Browse Marketplace
-
----
 
 ### Seller Dashboard
 
@@ -137,8 +100,6 @@ Browse Marketplace
 
 Create Listing
 
----
-
 # 4. Error Recovery
 
 Errors should always answer
@@ -146,13 +107,9 @@ Errors should always answer
 - What happened?
 - What can the user do next?
 
----
-
 Bad
 
 500 Internal Server Error
-
----
 
 Good
 
@@ -162,15 +119,11 @@ Good
 
 Retry
 
----
-
 Critical errors include
 
 - Retry
 - Support link (future)
 - Error ID
-
----
 
 # 5. Notifications
 
@@ -184,23 +137,11 @@ Information
 
 Error
 
----
-
 Priority
 
-Toast
-
-↓
-
-Banner
-
-↓
-
-Modal
+Toast → Banner → Modal
 
 Use the least disruptive pattern possible.
-
----
 
 # 6. Trust Patterns
 
@@ -208,119 +149,36 @@ Trust is the primary UX objective.
 
 Display prominently
 
-✓ Seller Rating
-
-✓ Verification Badge
-
-✓ Joined Date
-
-✓ Response Time (Future)
-
-✓ Number of Listings
-
-✓ Report Button
-
-✓ Condition Badge
-
-✓ Location
-
----
+- ✓ Seller Rating
+- ✓ Verification Badge
+- ✓ Joined Date
+- ✓ Response Time (Future)
+- ✓ Number of Listings
+- ✓ Report Button
+- ✓ Condition Badge
+- ✓ Location
 
 Trust indicators should always appear before the Contact Seller action.
-
----
 
 # 7. Marketplace UX Patterns
 
 Listing Detail Priority
 
-Images
-
-↓
-
-Price
-
-↓
-
-Condition
-
-↓
-
-Title
-
-↓
-
-Seller
-
-↓
-
-Description
-
-↓
-
-Location
-
-↓
-
-Related Listings
-
----
+Images → Price → Condition → Title → Seller → Description → Location → Related Listings
 
 Search Priority
 
-Keyword
-
-↓
-
-Category
-
-↓
-
-Price
-
-↓
-
-Condition
-
-↓
-
-City
-
-↓
-
-Sort
-
----
+Keyword → Category → Price → Condition → City → Sort
 
 Seller Profile Priority
 
-Avatar
-
-↓
-
-Verification
-
-↓
-
-Rating
-
-↓
-
-Listings
-
-↓
-
-Contact
-
----
+Avatar → Verification → Rating → Listings → Contact
 
 # 8. AI Interaction Patterns
 
 AI suggestions should always be editable.
 
 Never lock generated content.
-
----
 
 AI Generated Fields
 
@@ -335,15 +193,7 @@ Each generated field should show
 
 Users may
 
-Accept
-
-Edit
-
-Replace
-
-Regenerate
-
----
+Accept, Edit, Replace, Regenerate
 
 # 9. Ethiopian Localization
 
@@ -351,13 +201,9 @@ Currency
 
 ETB
 
----
-
 Numbers
 
 1,250 ETB
-
----
 
 Language Strategy
 
@@ -371,33 +217,17 @@ Future
 - Afaan Oromo
 - Tigrinya
 
----
-
 Phone Numbers
 
 Support Ethiopian formatting.
-
----
 
 Location
 
 Use:
 
-City
-
-↓
-
-Sub City
-
-↓
-
-Neighborhood (Optional)
-
----
+City → Sub City → Neighborhood (Optional)
 
 Maps should not be required for the MVP.
-
----
 
 # 10. Dark Mode Strategy
 
@@ -410,15 +240,11 @@ Future Principles
 - Preserve accessibility
 - No pure black
 
----
-
 # 11. Accessibility Patterns
 
 Keyboard
 
 Every interactive component is keyboard accessible.
-
----
 
 Focus
 
@@ -426,34 +252,19 @@ Always visible.
 
 Never remove browser focus without replacement.
 
----
-
 Screen Readers
 
-Every
-
-- Button
-- Image
-- Input
-- Dialog
-
-must have accessible labels.
-
----
+Every Button, Image, Input, Dialog must have accessible labels.
 
 Contrast
 
 Minimum WCAG AA.
-
----
 
 Animations
 
 Respect
 
 prefers-reduced-motion
-
----
 
 # 12. Microinteractions
 
@@ -472,8 +283,6 @@ Examples
 ✔ Listing published confirmation
 
 Microinteractions should be subtle and complete within 300ms.
-
----
 
 # Summary
 

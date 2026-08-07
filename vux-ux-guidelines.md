@@ -10,8 +10,6 @@
 >
 > **Last Updated:** August 2026
 
----
-
 # Table of Contents
 
 1. Purpose
@@ -35,8 +33,6 @@
 19. UX Metrics
 20. UX Review Checklist
 
----
-
 # 1. Purpose
 
 The VinTech UX Guidelines define how users interact with the marketplace.
@@ -52,23 +48,17 @@ The goal is to create experiences that are:
 
 These guidelines ensure every interaction supports users in successfully buying and selling second-hand goods.
 
----
-
 # 2. UX Vision
 
 Our marketplace should feel like a trusted local community where buying and selling is simple, transparent, and safe.
 
 Every interaction should reduce uncertainty and build confidence.
 
----
-
 # 3. Core UX Principles
 
 ## Clarity Over Cleverness
 
 Interfaces should be immediately understandable. Avoid hidden actions or unconventional patterns.
-
----
 
 ## Trust First
 
@@ -80,8 +70,6 @@ Every screen should answer:
 - Where is it located?
 - Why should I trust this seller?
 
----
-
 ## Fewer Steps
 
 Minimize the number of actions required to complete a task.
@@ -92,8 +80,6 @@ Examples:
 - Contact seller in one tap
 - Save favorite instantly
 
----
-
 ## Progressive Disclosure
 
 Show advanced options only when needed.
@@ -103,13 +89,9 @@ Examples:
 - Advanced filters hidden behind "More Filters"
 - Optional fields collapsed by default
 
----
-
 ## Mobile-First
 
 Design for thumb-friendly interaction and limited screen space.
-
----
 
 # 4. User Personas
 
@@ -127,8 +109,6 @@ Pain Points
 - Difficult search
 - Slow responses
 
----
-
 ## Seller
 
 Goals
@@ -143,77 +123,15 @@ Pain Points
 - Low visibility
 - Spam messages
 
----
-
 # 5. Primary User Journeys
 
 ## Buyer Journey
 
-Landing Page
-
-↓
-
-Search / Browse
-
-↓
-
-Apply Filters
-
-↓
-
-View Listing
-
-↓
-
-Review Seller
-
-↓
-
-Contact Seller
-
-↓
-
-Make Offer
-
-↓
-
-Complete Purchase (Offline or Future Payment)
-
----
+Landing Page → Search / Browse → Apply Filters → View Listing → Review Seller → Contact Seller → Make Offer → Complete Purchase (Offline or Future Payment)
 
 ## Seller Journey
 
-Register
-
-↓
-
-Complete Profile
-
-↓
-
-Create Listing
-
-↓
-
-Upload Images
-
-↓
-
-Publish
-
-↓
-
-Receive Offers
-
-↓
-
-Manage Listing
-
-↓
-
-Mark as Sold
-
----
+Register → Complete Profile → Create Listing → Upload Images → Publish → Receive Offers → Manage Listing → Mark as Sold
 
 # 6. Navigation Guidelines
 
@@ -236,8 +154,6 @@ Maximum 5 items
 
 Overflow actions belong in a menu.
 
----
-
 # 7. Search & Discovery
 
 Search should support:
@@ -257,8 +173,6 @@ Future
 
 Results should update quickly and clearly indicate active filters.
 
----
-
 # 8. Listing Creation Experience
 
 Goal: Publish a listing in under three minutes.
@@ -277,8 +191,6 @@ Recommended flow:
 
 AI suggestions should accelerate—not replace—user input.
 
----
-
 # 9. Trust & Safety UX
 
 Trust indicators should appear before contact actions.
@@ -295,8 +207,6 @@ Display:
 
 Report flows should be simple and require minimal effort.
 
----
-
 # 10. Buyer Experience
 
 Priorities
@@ -308,8 +218,6 @@ Priorities
 
 Avoid unnecessary interruptions before the user reaches the listing.
 
----
-
 # 11. Seller Experience
 
 Provide:
@@ -320,8 +228,6 @@ Provide:
 - Clear edit actions
 
 Allow sellers to save drafts and continue later.
-
----
 
 # 12. Forms & Validation
 
@@ -337,8 +243,6 @@ Example
 ❌ "Validation Error"
 
 ✅ "Please enter a price greater than 0 ETB."
-
----
 
 # 13. Feedback & System States
 
@@ -361,8 +265,6 @@ Failure
 - Friendly explanation
 - Retry action
 
----
-
 # 14. Mobile UX
 
 Touch Targets
@@ -383,8 +285,6 @@ Support:
 
 Avoid horizontal scrolling for core content.
 
----
-
 # 15. Accessibility
 
 Requirements
@@ -396,8 +296,6 @@ Requirements
 - Respect reduced-motion preferences
 
 Content should never rely on color alone to convey meaning.
-
----
 
 # 16. AI Interaction Guidelines
 
@@ -419,8 +317,6 @@ Example
 [Edit]
 
 [Regenerate]
-
----
 
 # 17. Ethiopian Localization
 
@@ -454,8 +350,6 @@ Future
 
 Design layouts should accommodate longer translated text.
 
----
-
 # 18. Content & Microcopy
 
 Tone
@@ -466,21 +360,9 @@ Tone
 
 Examples
 
-Instead of:
+Instead of: "Authentication Failed" → Use: "Incorrect email or password."
 
-"Authentication Failed"
-
-Use:
-
-"Incorrect email or password."
-
-Instead of:
-
-"No Results"
-
-Use:
-
-"We couldn't find any items matching your search."
+Instead of: "No Results" → Use: "We couldn't find any items matching your search."
 
 Button labels should describe actions clearly.
 
@@ -490,8 +372,6 @@ Examples
 - Contact Seller
 - Save Listing
 - Make Offer
-
----
 
 # 19. UX Metrics
 
@@ -508,8 +388,6 @@ Measure experience using:
 
 Track these metrics to guide future improvements.
 
----
-
 # 20. UX Review Checklist
 
 ## Navigation
@@ -517,14 +395,10 @@ Track these metrics to guide future improvements.
 - [ ] Users always know where they are
 - [ ] Primary actions are easy to find
 
----
-
 ## Content
 
 - [ ] Important information appears first
 - [ ] Trust indicators are visible
-
----
 
 ## Forms
 
@@ -532,15 +406,11 @@ Track these metrics to guide future improvements.
 - [ ] Clear validation messages
 - [ ] Accessible controls
 
----
-
 ## Feedback
 
 - [ ] Loading states implemented
 - [ ] Success feedback provided
 - [ ] Errors are actionable
-
----
 
 ## Mobile
 
@@ -548,23 +418,17 @@ Track these metrics to guide future improvements.
 - [ ] Thumb-friendly controls
 - [ ] No horizontal scrolling
 
----
-
 ## Accessibility
 
 - [ ] WCAG AA contrast
 - [ ] Keyboard support
 - [ ] Screen reader labels
 
----
-
 ## Performance
 
 - [ ] Fast initial load
 - [ ] Lazy-loaded images
 - [ ] Minimal layout shifts
-
----
 
 # Closing Statement
 

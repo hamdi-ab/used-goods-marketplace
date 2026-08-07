@@ -6,8 +6,6 @@
 > **Priority:** Critical
 > **Owner:** Product & UX Team
 
----
-
 # 1. Introduction
 
 This document defines the end-to-end journeys users take while interacting with the marketplace.
@@ -23,8 +21,6 @@ Each flow describes:
 
 These flows guide UX design, frontend implementation, backend APIs, and testing.
 
----
-
 # 2. User Flow Overview
 
 The marketplace supports six primary user journeys:
@@ -35,8 +31,6 @@ The marketplace supports six primary user journeys:
 4. Buyer Purchase Journey
 5. Offer & Negotiation
 6. Trust & Reporting
-
----
 
 # Flow 1 — User Registration
 
@@ -88,8 +82,6 @@ Marketplace Home
 - Email already exists
 - Weak password
 - Network failure
-
----
 
 # Flow 2 — Seller Creates a Listing
 
@@ -155,8 +147,6 @@ Users can:
 - AI timeout
 - Missing required fields
 
----
-
 # Flow 3 — Buyer Discovers a Product
 
 ## Goal
@@ -210,8 +200,6 @@ Suggest:
 - Browse categories
 - View recent listings
 
----
-
 # Flow 4 — Product Evaluation
 
 ## Goal
@@ -246,8 +234,6 @@ Choose Action
 - Submit Offer
 - Report Listing
 - Share Listing
-
----
 
 # Flow 5 — Offer Submission
 
@@ -296,8 +282,6 @@ Offer status updated.
 
 Buyer notified.
 
----
-
 # Flow 6 — Contact Seller
 
 ## Goal
@@ -321,8 +305,6 @@ External App Opens
 The marketplace does not manage conversations.
 
 Communication continues through familiar channels.
-
----
 
 # Flow 7 — Save Favorites
 
@@ -351,8 +333,6 @@ Users may:
 - Open listings
 - Contact seller
 
----
-
 # Flow 8 — Seller Dashboard
 
 ## Goal
@@ -380,8 +360,6 @@ Dashboard
 - Mark Sold
 - Delete
 
----
-
 # Flow 9 — Leave a Review
 
 ## Goal
@@ -407,8 +385,6 @@ Submit Review
 
 - One review per transaction
 - Ratings update seller trust score
-
----
 
 # Flow 10 — Report Listing
 
@@ -446,8 +422,6 @@ Admin Queue
 - Offensive Content
 - Other
 
----
-
 # Flow 11 — Administrator Moderation
 
 ## Goal
@@ -478,8 +452,6 @@ Approve Remove Suspend
 - User notified (future)
 - Marketplace updated
 
----
-
 # Global Navigation Flow
 
 ```text
@@ -493,8 +465,6 @@ Home
  ├── Notifications
  └── Profile
 ```
-
----
 
 # Error Flow Principles
 
@@ -517,8 +487,6 @@ Show Error
 Retry Upload
 ```
 
----
-
 # Loading State Principles
 
 Long-running operations should display progress.
@@ -530,8 +498,6 @@ Examples:
 - AI generation spinner with status
 - Button loading indicators during form submission
 
----
-
 # Success State Principles
 
 Every successful action should provide immediate feedback.
@@ -542,8 +508,6 @@ Examples:
 - Success banners
 - Updated UI without full page refresh
 - Automatic navigation where appropriate
-
----
 
 # Flow Summary
 

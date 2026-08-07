@@ -8,8 +8,6 @@
 > - 00-winning-strategy.md
 > - 02-prd/00-overview.md
 
----
-
 # Product Overview
 
 Our platform is a modern, AI-assisted, trust-first marketplace designed specifically for Ethiopia's growing second-hand economy.
@@ -20,19 +18,13 @@ Unlike existing informal marketplaces built around Telegram channels and social 
 
 The result is a marketplace that feels fast, trustworthy, and effortless.
 
----
-
 # Vision Statement
 
 > To become Ethiopia's most trusted marketplace for buying and selling second-hand goods.
 
----
-
 # Mission Statement
 
 Empower Ethiopian communities to confidently exchange second-hand goods through intelligent technology, transparent trust systems, and an exceptional user experience.
-
----
 
 # Product Purpose
 
@@ -43,8 +35,6 @@ Instead of scrolling through hundreds of Telegram messages, users should be able
 Instead of wondering whether a seller is trustworthy, buyers should have access to clear reputation signals before making contact.
 
 Instead of spending time writing listings, sellers should receive intelligent assistance that helps them publish professional listings in less than one minute.
-
----
 
 # The Problem
 
@@ -70,8 +60,6 @@ Common problems include:
 
 These problems create friction for both buyers and sellers.
 
----
-
 # Our Solution
 
 We provide a purpose-built marketplace where:
@@ -85,8 +73,6 @@ We provide a purpose-built marketplace where:
 Our goal is not to replace existing communication channels.
 
 Our goal is to organize the marketplace around them.
-
----
 
 # Product Philosophy
 
@@ -111,8 +97,6 @@ Trust is achieved through:
 - Reporting tools
 - Community moderation
 
----
-
 ## 2. Speed
 
 Buying and selling should require as little effort as possible.
@@ -126,8 +110,6 @@ Examples include:
 - Quick contact actions
 
 Users should spend their time making decisions—not navigating the platform.
-
----
 
 ## 3. Simplicity
 
@@ -152,8 +134,6 @@ Create Listing:
 Dashboard:
 "How am I performing?"
 
----
-
 # Core Value Proposition
 
 ## For Buyers
@@ -166,8 +146,6 @@ Buyers can:
 - Save time using structured search
 - Feel more confident before contacting sellers
 
----
-
 ## For Sellers
 
 Sellers can:
@@ -177,8 +155,6 @@ Sellers can:
 - Reach more interested buyers
 - Build long-term reputation
 - Track listing performance
-
----
 
 # Product Differentiators
 
@@ -194,8 +170,6 @@ Helps sellers create professional listings by automatically generating:
 - Estimated price range
 - Listing quality score
 
----
-
 ## Seller Trust Framework
 
 Rather than relying on a single verification badge, trust is built from multiple signals.
@@ -208,8 +182,6 @@ Examples include:
 - Successful sales
 - Community ratings
 - Future Fayda verification support
-
----
 
 ## Intelligent Search
 
@@ -224,8 +196,6 @@ Features include:
 - Recently viewed
 - Personalized recommendations (future)
 
----
-
 # Target Audience
 
 ## Primary Users
@@ -235,16 +205,12 @@ Features include:
 - Families
 - Small business owners
 
----
-
 ## Secondary Users
 
 - Local merchants
 - Collectors
 - Small retailers
 - Community organizations
-
----
 
 # Product Goals
 
@@ -256,8 +222,6 @@ The platform should:
 - Encourage structured digital commerce.
 - Provide a delightful user experience.
 
----
-
 # Success Metrics
 
 The product will be considered successful if it can demonstrate:
@@ -268,8 +232,6 @@ The product will be considered successful if it can demonstrate:
 - Product discovery in under 30 seconds.
 - Responsive experience across all devices.
 
----
-
 ## Technical
 
 - Lighthouse Performance Score ≥ 95
@@ -277,16 +239,12 @@ The product will be considered successful if it can demonstrate:
 - SEO Score ≥ 95
 - Best Practices Score ≥ 95
 
----
-
 ## Product
 
 - High-quality listings
 - Fast search response
 - Minimal navigation friction
 - Strong trust perception
-
----
 
 # Long-Term Vision
 
@@ -304,8 +262,6 @@ Potential future capabilities include:
 - Mobile applications
 - Business seller accounts
 
----
-
 # Product Principles
 
 Every feature added to the platform should satisfy at least one of the following:
@@ -318,8 +274,6 @@ Every feature added to the platform should satisfy at least one of the following
 - Deliver measurable value.
 
 If a feature satisfies none of these principles, it should not be included in the MVP.
-
----
 
 # Product Vision Summary
 

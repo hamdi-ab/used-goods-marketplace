@@ -8,8 +8,6 @@
 >
 > **Owner:** Security & Backend Team
 
----
-
 # 1. Purpose
 
 This document defines the security architecture for the Used Goods Marketplace.
@@ -28,8 +26,6 @@ It covers:
 
 The objective is to build a secure marketplace while maintaining a smooth user experience.
 
----
-
 # 2. Security Principles
 
 The platform follows these core principles:
@@ -40,8 +36,6 @@ The platform follows these core principles:
 - Zero Trust
 - Privacy by Design
 - Fail Securely
-
----
 
 # 3. Threat Model
 
@@ -56,8 +50,6 @@ The platform follows these core principles:
 - Personal information
 - Authentication tokens
 
----
-
 ## Potential Threats
 
 - Account takeover
@@ -71,8 +63,6 @@ The platform follows these core principles:
 - API abuse
 - Brute force attacks
 - Data leakage
-
----
 
 # 4. Authentication
 
@@ -90,8 +80,6 @@ Future:
 - Fayda Identity
 - Passkeys
 
----
-
 ## Password Policy
 
 Minimum:
@@ -107,8 +95,6 @@ Recommended:
 
 Passwords are never stored by the application.
 
----
-
 # 5. Session Management
 
 Sessions use JWT tokens.
@@ -120,8 +106,6 @@ Rules:
 - Secure refresh flow
 - Automatic expiration
 - Logout invalidates local session
-
----
 
 # 6. Authorization
 
@@ -155,8 +139,6 @@ Admin:
 - Moderate reports
 - Suspend users
 
----
-
 # 7. Ownership Validation
 
 Before modifying resources, ownership must be verified.
@@ -176,33 +158,21 @@ Ownership checks exist in:
 - Server logic
 - Supabase RLS
 
----
-
 # 8. Row Level Security (RLS)
 
 Every table enforces RLS.
 
 Examples:
 
-Profiles
+**Profiles:** Users may edit only their own profile.
 
-Users may edit only their own profile.
+**Listings:** Only owners may update listings.
 
-Listings
-
-Only owners may update listings.
-
-Offers
-
-Buyers see their offers.
+**Offers:** Buyers see their offers.
 
 Sellers see offers on their listings.
 
-Notifications
-
-Users access only their own notifications.
-
----
+**Notifications:** Users access only their own notifications.
 
 # 9. API Security
 
@@ -216,8 +186,6 @@ All APIs require:
 - Consistent error handling
 
 Sensitive endpoints require authentication.
-
----
 
 # 10. Input Validation
 
@@ -234,8 +202,6 @@ Server-side:
 - Business rule validation
 
 Never trust client validation alone.
-
----
 
 # 11. File Upload Security
 
@@ -262,8 +228,6 @@ Validation:
 - Reject executable content
 
 Store files outside the public source code.
-
----
 
 # 12. Image Processing
 
@@ -298,8 +262,6 @@ Future:
 - AI-based inappropriate content detection
 - Duplicate image detection
 
----
-
 # 13. XSS Protection
 
 Prevent Cross-Site Scripting by:
@@ -308,8 +270,6 @@ Prevent Cross-Site Scripting by:
 - Sanitizing HTML (if supported)
 - Never rendering raw HTML without sanitization
 - Using React's default escaping
-
----
 
 # 14. CSRF Protection
 
@@ -320,8 +280,6 @@ Mitigations:
 - JWT Authorization headers
 - Origin validation
 
----
-
 # 15. SQL Injection Protection
 
 Protection:
@@ -329,8 +287,6 @@ Protection:
 - Parameterized queries
 - Supabase client libraries
 - No string concatenation in SQL
-
----
 
 # 16. Rate Limiting
 
@@ -350,8 +306,6 @@ Report endpoint:
 
 - Prevent repeated submissions within a short time window
 
----
-
 # 17. Abuse Prevention
 
 Detect:
@@ -366,8 +320,6 @@ Future:
 
 - CAPTCHA after repeated abuse
 - Automated moderation
-
----
 
 # 18. Privacy
 
@@ -386,8 +338,6 @@ Optional:
 
 Sensitive information must not be exposed publicly without user consent.
 
----
-
 # 19. Personal Data Protection
 
 Public profile:
@@ -402,8 +352,6 @@ Private profile:
 - Email
 - Internal identifiers
 - Verification records (unless surfaced as badges)
-
----
 
 # 20. Secrets Management
 
@@ -424,8 +372,6 @@ Rules:
 - Never commit secrets to Git
 - Never expose service role keys to the client
 
----
-
 # 21. Security Headers
 
 Configure:
@@ -436,8 +382,6 @@ Configure:
 - Referrer-Policy
 - Permissions-Policy
 - Strict-Transport-Security (HSTS)
-
----
 
 # 22. Audit Logging
 
@@ -457,8 +401,6 @@ Do not log:
 - JWT tokens
 - Sensitive personal data
 
----
-
 # 23. Monitoring
 
 Track:
@@ -475,8 +417,6 @@ Future:
 - PostHog
 - Security alerts
 
----
-
 # 24. Backup & Recovery
 
 Database:
@@ -492,8 +432,6 @@ Recovery objectives:
 - Restore critical data quickly
 - Preserve audit history
 
----
-
 # 25. Security Testing
 
 Perform:
@@ -505,8 +443,6 @@ Perform:
 - Input validation tests
 - Rate limiting tests
 - Penetration testing (basic)
-
----
 
 # 26. Incident Response
 
@@ -521,8 +457,6 @@ In case of a security incident:
 
 Maintain a record of significant incidents for future learning.
 
----
-
 # 27. Future Enhancements
 
 Planned improvements:
@@ -534,8 +468,6 @@ Planned improvements:
 - Automated spam detection
 - Image moderation
 - Security dashboard
-
----
 
 # 28. Summary
 

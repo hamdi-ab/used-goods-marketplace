@@ -8,8 +8,6 @@
 >
 > **Owner:** Backend Team
 
----
-
 # 1. Purpose
 
 This document defines the backend architecture for the marketplace.
@@ -23,8 +21,6 @@ Objectives:
 - Easy testing
 - Scalable business logic
 - Vendor independence
-
----
 
 # 2. High-Level Architecture
 
@@ -56,18 +52,11 @@ Objectives:
          Supabase (Database + Storage)
 ```
 
----
-
 # 3. Backend Layers
 
 ## Presentation Layer
 
-Responsibilities
-
-- Accept requests
-- Authenticate users
-- Parse input
-- Return responses
+**Responsibilities:** Accept requests, Authenticate users, Parse input, Return responses
 
 Examples
 
@@ -79,28 +68,17 @@ GET /api/v1/search
 
 No business logic exists here.
 
----
-
 ## Validation Layer
 
-Responsibilities
+**Responsibilities:** Validate request body, Validate query parameters, File validation, Authorization checks
 
-- Validate request body
-- Validate query parameters
-- File validation
-- Authorization checks
-
-Technology
-
-- Zod
+**Technology:** Zod
 
 Example
 
 ```ts
 ListingSchema.parse(request.body)
 ```
-
----
 
 ## Application Layer
 
@@ -118,17 +96,11 @@ AcceptOffer
 GenerateAIListing
 ```
 
-Responsibilities
-
-- Execute workflows
-- Call repositories
-- Publish events
+**Responsibilities:** Execute workflows, Call repositories, Publish events
 
 No SQL.
 
 No UI logic.
-
----
 
 ## Domain Layer
 
@@ -148,11 +120,7 @@ Trust Score
 Verification
 ```
 
-Responsibilities
-
-- Business invariants
-- Domain rules
-- Calculations
+**Responsibilities:** Business invariants, Domain rules, Calculations
 
 Example
 
@@ -160,13 +128,9 @@ Example
 A seller cannot make an offer on their own listing.
 ```
 
----
-
 ## Repository Layer
 
-Purpose
-
-Abstract database access.
+**Purpose:** Abstract database access.
 
 Example
 
@@ -178,31 +142,17 @@ OfferRepository
 ProfileRepository
 ```
 
-Responsibilities
-
-- CRUD operations
-- Queries
-- Transactions
+**Responsibilities:** CRUD operations, Queries, Transactions
 
 Only this layer knows Supabase.
-
----
 
 ## Infrastructure Layer
 
 Contains integrations.
 
-Examples
-
-- Supabase
-- Gemini API
-- Storage
-- Future Telebirr
-- Future Fayda
+**Examples:** Supabase, Gemini API, Storage, Future Telebirr, Future Fayda
 
 Changing providers should only affect this layer.
-
----
 
 # 4. Project Structure
 
@@ -230,13 +180,9 @@ backend/
 └── utils/
 ```
 
----
-
 # 5. Request Lifecycle
 
-Example
-
-Create Listing
+**Example:** Create Listing
 
 ```text
 HTTP Request
@@ -270,8 +216,6 @@ Database
 Response
 ```
 
----
-
 # 6. Application Services
 
 Each service represents one use case.
@@ -302,8 +246,6 @@ CalculateTrustScoreService
 
 Each service performs one responsibility.
 
----
-
 # 7. Repository Pattern
 
 Repositories isolate persistence.
@@ -333,8 +275,6 @@ markSold()
 ```
 
 Future migrations require changing only repository implementations.
-
----
 
 # 8. Domain Events
 
@@ -370,8 +310,6 @@ Future Email
 Future Push Notifications
 ```
 
----
-
 # 9. AI Integration
 
 The AI service is isolated.
@@ -397,8 +335,6 @@ Frontend
 ```
 
 The frontend never communicates directly with Gemini.
-
----
 
 # 10. Storage Flow
 
@@ -426,15 +362,11 @@ Public URL
 Listing Saved
 ```
 
----
-
 # 11. Transactions
 
 Critical operations execute atomically.
 
-Examples
-
-Offer Accepted
+**Examples:** Offer Accepted
 
 ```
 Update Offer
@@ -454,8 +386,6 @@ Commit
 
 Rollback on failure.
 
----
-
 # 12. Authorization
 
 Implemented in multiple layers.
@@ -470,8 +400,6 @@ Example
 ```
 Only listing owner may edit listing.
 ```
-
----
 
 # 13. Error Handling
 
@@ -501,37 +429,15 @@ AI Timeout
 
 Responses are standardized.
 
----
-
 # 14. Logging
 
-Log
+**Log:** Requests, Errors, AI calls, Listing creation, Moderation actions
 
-- Requests
-- Errors
-- AI calls
-- Listing creation
-- Moderation actions
-
-Never log
-
-- Passwords
-- JWTs
-- Sensitive user data
-
----
+**Never log:** Passwords, JWTs, Sensitive user data
 
 # 15. Background Jobs (Future)
 
-Future asynchronous tasks
-
-- AI processing
-- Email delivery
-- Search indexing
-- Analytics aggregation
-- Image optimization
-
----
+**Future asynchronous tasks:** AI processing, Email delivery, Search indexing, Analytics aggregation, Image optimization
 
 # 16. Configuration
 
@@ -551,39 +457,17 @@ APP_URL
 
 Never hardcode secrets.
 
----
-
 # 17. Backend Security
 
-Layers
-
-- HTTPS
-- JWT
-- Input Validation
-- Output Sanitization
-- RLS
-- Rate Limiting
-- Audit Logging
-
----
+**Layers:** HTTPS, JWT, Input Validation, Output Sanitization, RLS, Rate Limiting, Audit Logging
 
 # 18. Testing Strategy
 
-Unit Tests
+**Unit Tests:** Domain, Services
 
-- Domain
-- Services
+**Integration Tests:** Repositories, API Endpoints
 
-Integration Tests
-
-- Repositories
-- API Endpoints
-
-End-to-End Tests
-
-- Complete user flows
-
----
+**End-to-End Tests:** Complete user flows
 
 # 19. Future Evolution
 
@@ -595,8 +479,6 @@ The architecture supports future migration to:
 - FastAPI
 
 because business logic remains independent from Supabase.
-
----
 
 # 20. Summary
 

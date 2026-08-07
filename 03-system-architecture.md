@@ -8,8 +8,6 @@
 >
 > **Owner:** CTO / Engineering Team
 
----
-
 # 1. Overview
 
 ## Purpose
@@ -26,8 +24,6 @@ This architecture is designed around the following principles:
 - Security
 - Maintainability
 - Cost = $0 for MVP
-
----
 
 # 2. High-Level Architecture
 
@@ -64,8 +60,6 @@ Notifications             Future Integrations
                            Fayda
 ```
 
----
-
 # 3. Architecture Style
 
 The application follows a modern serverless architecture.
@@ -77,13 +71,9 @@ The application follows a modern serverless architecture.
 - Client Components where necessary
 - App Router
 
----
-
 ## Backend
 
-Backend-as-a-Service
-
-Supabase provides:
+**Backend-as-a-Service:** Supabase provides:
 
 - Authentication
 - PostgreSQL
@@ -92,20 +82,14 @@ Supabase provides:
 - Edge Functions
 - Row Level Security
 
----
-
 ## AI Layer
 
-Google Gemini API
-
-Responsibilities
+**Google Gemini API:** Responsibilities
 
 - Listing Generation
 - Description Improvement
 - Category Prediction
 - Condition Suggestion
-
----
 
 # 4. Logical Architecture
 
@@ -129,172 +113,80 @@ Data Access Layer
 Database
 ```
 
----
-
 ## Presentation Layer
 
-Responsibilities
+**Responsibilities:** UI, Forms, Validation, Navigation
 
-- UI
-- Forms
-- Validation
-- Navigation
-
-Technology
-
-- Next.js
-- React
-- TailwindCSS
-- shadcn/ui
-
----
+**Technology:** Next.js, React, TailwindCSS, shadcn/ui
 
 ## Application Layer
 
-Responsibilities
+**Responsibilities:** API Requests, State Management, Authentication, Routing
 
-- API Requests
-- State Management
-- Authentication
-- Routing
-
-Technology
-
-- TanStack Query
-- React Context
-- Server Actions
-
----
+**Technology:** TanStack Query, React Context, Server Actions
 
 ## Business Layer
 
-Responsibilities
+**Responsibilities:** Listing Rules, Offer Rules, Trust Score, Review Logic
 
-- Listing Rules
-- Offer Rules
-- Trust Score
-- Review Logic
-
-Implemented using
-
-- Edge Functions
-- Shared TypeScript Utilities
-
----
+**Implemented using:** Edge Functions, Shared TypeScript Utilities
 
 ## Data Layer
 
-Responsibilities
+**Responsibilities:** PostgreSQL, Storage, Authentication
 
-- PostgreSQL
-- Storage
-- Authentication
-
-Managed by
-
-Supabase
-
----
+**Managed by:** Supabase
 
 # 5. Major Services
 
 ## Authentication Service
 
-Responsibilities
+**Responsibilities:** Registration, Login, Session, JWT, Authorization
 
-- Registration
-- Login
-- Session
-- JWT
-- Authorization
-
-Provider
-
-Supabase Auth
-
----
+**Provider:** Supabase Auth
 
 ## Listing Service
 
-Responsibilities
-
-- CRUD Listings
-- Upload Images
-- Archive
-- Sold Status
-
----
+**Responsibilities:** CRUD Listings, Upload Images, Archive, Sold Status
 
 ## Search Service
 
-Responsibilities
+**Responsibilities:** Keyword Search, Filtering, Sorting, Pagination
 
-- Keyword Search
-- Filtering
-- Sorting
-- Pagination
-
-Future
-
-Full-text search
-
----
+**Future:** Full-text search
 
 ## Trust Service
 
-Responsibilities
-
-Calculate
+**Responsibilities:** Calculate
 
 - Seller Score
 - Profile Completion
 - Verification
 - Reviews
 
----
-
 ## Offer Service
 
-Responsibilities
-
-- Create Offer
-- Accept
-- Reject
-
----
+**Responsibilities:** Create Offer, Accept, Reject
 
 ## Notification Service
 
-Responsibilities
+**Responsibilities:** Offer Notifications, Listing Updates
 
-- Offer Notifications
-- Listing Updates
+**MVP:** Realtime
 
-MVP
-
-Realtime
-
-Future
-
-Email
+**Future:** Email
 
 Push Notifications
 
----
-
 ## AI Service
 
-Responsibilities
-
-Generate
+**Responsibilities:** Generate
 
 - Title
 - Description
 - Category
 - Keywords
 - Quality Score
-
----
 
 # 6. Data Flow
 
@@ -319,8 +211,6 @@ Profile Created
 
 Dashboard
 ```
-
----
 
 ## Listing Creation
 
@@ -348,8 +238,6 @@ Database
 Search Index
 ```
 
----
-
 ## Product Search
 
 ```text
@@ -372,13 +260,9 @@ Filtered Results
 Frontend
 ```
 
----
-
 # 7. Request Lifecycle
 
-Example
-
-View Listing
+**Example:** View Listing
 
 ```text
 Browser
@@ -404,8 +288,6 @@ Response
 React UI
 ```
 
----
-
 # 8. Authentication Flow
 
 ```text
@@ -428,8 +310,6 @@ Protected Routes
 RLS Validation
 ```
 
----
-
 # 9. Authorization Model
 
 Guest
@@ -437,8 +317,6 @@ Guest
 ↓
 
 Browse Only
-
----
 
 Buyer
 
@@ -448,8 +326,6 @@ Favorites
 
 Offers
 
----
-
 Seller
 
 ↓
@@ -457,8 +333,6 @@ Seller
 Listings
 
 Dashboard
-
----
 
 Administrator
 
@@ -470,13 +344,9 @@ Reports
 
 Analytics
 
----
-
 # 10. File Storage
 
-Storage Provider
-
-Supabase Storage
+**Storage Provider:** Supabase Storage
 
 Buckets
 
@@ -489,8 +359,6 @@ documents/
 
 future-verification/
 ```
-
----
 
 Image Pipeline
 
@@ -514,33 +382,17 @@ Storage
 Public URL
 ```
 
----
-
 # 11. Caching Strategy
 
-Cache
+**Cache:** Homepage
 
-Homepage
+**Categories:** Popular Listings
 
-Categories
+**Seller Profiles:** Search Results
 
-Popular Listings
+**Dynamic:** Offers
 
-Seller Profiles
-
-Search Results
-
----
-
-Dynamic
-
-Offers
-
-Dashboard
-
-Notifications
-
----
+**Dashboard:** Notifications
 
 # 12. Security Layers
 
@@ -578,37 +430,17 @@ Layer 6
 
 Audit Logs
 
----
-
 # 13. Scalability Strategy
 
-Initial Design Targets
+**Initial Design Targets:** 10,000 users, 50,000 listings, 500 concurrent users
 
-- 10,000 users
-- 50,000 listings
-- 500 concurrent users
+**Current Architecture Supports:** Thousands of users, Thousands of listings, Image CDN, Stateless frontend
 
-Current Architecture Supports
-
-- Thousands of users
-- Thousands of listings
-- Image CDN
-- Stateless frontend
-
-Future Scaling
-
-- Redis Cache
-- Search Engine
-- Background Workers
-- Queue Processing
-
----
+**Future Scaling:** Redis Cache, Search Engine, Background Workers, Queue Processing
 
 # 14. Error Handling
 
-Client Errors
-
-400
+**Client Errors:** 400
 
 401
 
@@ -618,44 +450,21 @@ Client Errors
 
 Validation
 
----
-
-Server Errors
-
-500
+**Server Errors:** 500
 
 503
 
----
+**Recovery:** Retry
 
-Recovery
-
-Retry
-
-Graceful Fallback
-
-Toast Notification
-
----
+**Graceful Fallback:** Toast Notification
 
 # 15. Monitoring
 
-Metrics
+**Metrics:** Login Success, Listing Creation, AI Usage, Search Time, API Latency, Upload Success
 
-- Login Success
-- Listing Creation
-- AI Usage
-- Search Time
-- API Latency
-- Upload Success
-
-Future
-
-Sentry
+**Future:** Sentry
 
 PostHog
-
----
 
 # 16. Deployment Architecture
 
@@ -683,8 +492,6 @@ Production
 Supabase
 ```
 
----
-
 # 17. Environment Separation
 
 Development
@@ -703,23 +510,11 @@ Each environment uses:
 - Separate storage
 - Separate environment variables
 
----
-
 # 18. External Integrations
 
-Current
+**Current:** Gemini API
 
-- Gemini API
-
-Future
-
-- Fayda Verification
-- Telebirr
-- Chapa
-- SMS Gateway
-- Email Provider
-
----
+**Future:** Fayda Verification, Telebirr, Chapa, SMS Gateway, Email Provider
 
 # 19. Technology Responsibilities
 
@@ -737,8 +532,6 @@ Future
 | Deployment | Vercel |
 | Version Control | GitHub |
 
----
-
 # 20. Architecture Decisions (ADRs)
 
 The full rationale for each decision lives in `04-architecture-decision-records.md`. The numbers here match the canonical ADR document.
@@ -751,8 +544,6 @@ Reason:
 
 Zero infrastructure cost.
 
----
-
 ## ADR-003
 
 Use Supabase instead of building a custom backend.
@@ -760,8 +551,6 @@ Use Supabase instead of building a custom backend.
 Reason:
 
 Faster development and built-in authentication.
-
----
 
 ## ADR-009
 
@@ -771,8 +560,6 @@ Reason:
 
 Generous free tier for hackathon development.
 
----
-
 ## ADR-002
 
 Use Next.js App Router.
@@ -781,8 +568,6 @@ Reason:
 
 Performance, SEO, and Server Components.
 
----
-
 ## ADR-011
 
 Store images in Supabase Storage.
@@ -790,8 +575,6 @@ Store images in Supabase Storage.
 Reason:
 
 Integrated security, CDN support, and signed URLs.
-
----
 
 # 21. Risks & Mitigations
 
@@ -802,8 +585,6 @@ Integrated security, CDN support, and signed URLs.
 | Spam listings | Reports, Trust Score, moderation |
 | High search latency | Indexed queries and pagination |
 | Unauthorized access | Supabase RLS + JWT validation |
-
----
 
 # 22. Future Evolution
 
@@ -819,8 +600,6 @@ The architecture is designed to support:
 - Business storefronts
 
 without major architectural changes.
-
----
 
 # 23. Summary
 

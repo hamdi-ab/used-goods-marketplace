@@ -12,8 +12,6 @@
 >
 > **Status:** Draft
 
----
-
 # 1. Overview
 
 This document defines the REST API contract for the marketplace.
@@ -21,8 +19,6 @@ This document defines the REST API contract for the marketplace.
 All endpoints return JSON.
 
 Authentication uses Bearer JWT tokens issued by Supabase Authentication.
-
----
 
 # 2. API Principles
 
@@ -42,8 +38,6 @@ Base URL
 
 All endpoint paths in this document are relative to the base URL unless stated otherwise (for example, `/listings` resolves to `/api/v1/listings`).
 
----
-
 # 3. Authentication
 
 Protected endpoints require
@@ -51,8 +45,6 @@ Protected endpoints require
 ```
 Authorization: Bearer <JWT_TOKEN>
 ```
-
----
 
 Success
 
@@ -72,8 +64,6 @@ Forbidden
 403 Forbidden
 ```
 
----
-
 # 4. Standard Response Format
 
 ## Success
@@ -86,8 +76,6 @@ Forbidden
 }
 ```
 
----
-
 ## Error
 
 ```json
@@ -99,8 +87,6 @@ Forbidden
   }
 }
 ```
-
----
 
 # 5. Authentication Endpoints
 
@@ -127,8 +113,6 @@ Response
 201 Created
 ```
 
----
-
 ## Login
 
 POST
@@ -143,12 +127,7 @@ Response
 200 OK
 ```
 
-Returns
-
-- JWT
-- User Profile
-
----
+**Returns:** JWT, User Profile
 
 ## Logout
 
@@ -158,8 +137,6 @@ POST
 /auth/logout
 ```
 
----
-
 ## Refresh Token
 
 POST
@@ -167,8 +144,6 @@ POST
 ```
 /auth/refresh
 ```
-
----
 
 # 6. Profile Endpoints
 
@@ -180,8 +155,6 @@ GET
 /profile
 ```
 
----
-
 ## Update Profile
 
 PATCH
@@ -190,17 +163,7 @@ PATCH
 /profile
 ```
 
-Editable
-
-- Name
-- Phone
-- Telegram
-- Avatar
-- Bio
-- City
-- Sub-city
-
----
+**Editable:** Name, Phone, Telegram, Avatar, Bio, City, Sub-city
 
 ## Public Seller Profile
 
@@ -210,14 +173,7 @@ GET
 /seller/{sellerId}
 ```
 
-Returns
-
-- Seller Info
-- Rating
-- Trust Score
-- Active Listings
-
----
+**Returns:** Seller Info, Rating, Trust Score, Active Listings
 
 # 7. Category Endpoints
 
@@ -229,8 +185,6 @@ GET
 /categories
 ```
 
----
-
 ## Category Details
 
 GET
@@ -238,8 +192,6 @@ GET
 ```
 /categories/{slug}
 ```
-
----
 
 # 8. Listing Endpoints
 
@@ -273,8 +225,6 @@ sort
 
 The dedicated search endpoint is `GET /search` (Section 17).
 
----
-
 ## Get Listing
 
 GET
@@ -282,8 +232,6 @@ GET
 ```
 /listings/{id}
 ```
-
----
 
 ## Create Listing
 
@@ -293,11 +241,7 @@ POST
 /listings
 ```
 
-Authentication
-
-Required
-
----
+**Authentication:** Required
 
 Body
 
@@ -318,8 +262,6 @@ Returns
 201 Created
 ```
 
----
-
 ## Update Listing
 
 PATCH
@@ -329,8 +271,6 @@ PATCH
 ```
 
 Only owner.
-
----
 
 ## Delete Listing
 
@@ -342,8 +282,6 @@ DELETE
 
 Soft delete.
 
----
-
 ## Mark Sold
 
 PATCH
@@ -351,8 +289,6 @@ PATCH
 ```
 /listings/{id}/sold
 ```
-
----
 
 ## Upload Images
 
@@ -362,13 +298,9 @@ POST
 /listings/{id}/images
 ```
 
-Multipart Form Data
-
-Maximum
+**Multipart Form Data:** Maximum
 
 10 images
-
----
 
 # 9. AI Endpoints
 
@@ -380,11 +312,7 @@ POST
 /ai/listing
 ```
 
-Input
-
-- Images
-- Optional Title
-- Optional Description
+**Input:** Images, Optional Title, Optional Description
 
 Returns
 
@@ -399,8 +327,6 @@ Returns
 }
 ```
 
----
-
 # 10. Favorite Endpoints
 
 ## Add Favorite
@@ -411,8 +337,6 @@ POST
 /favorites
 ```
 
----
-
 ## Remove Favorite
 
 DELETE
@@ -421,8 +345,6 @@ DELETE
 /favorites/{listingId}
 ```
 
----
-
 ## My Favorites
 
 GET
@@ -430,8 +352,6 @@ GET
 ```
 /favorites
 ```
-
----
 
 # 11. Offer Endpoints
 
@@ -453,8 +373,6 @@ Body
 }
 ```
 
----
-
 ## Seller Offers
 
 GET
@@ -462,8 +380,6 @@ GET
 ```
 /offers/seller
 ```
-
----
 
 ## Buyer Offers
 
@@ -473,8 +389,6 @@ GET
 /offers/buyer
 ```
 
----
-
 ## Accept Offer
 
 PATCH
@@ -483,8 +397,6 @@ PATCH
 /offers/{id}/accept
 ```
 
----
-
 ## Reject Offer
 
 PATCH
@@ -492,8 +404,6 @@ PATCH
 ```
 /offers/{id}/reject
 ```
-
----
 
 # 12. Review Endpoints
 
@@ -517,8 +427,6 @@ Body
 }
 ```
 
----
-
 ## Seller Reviews
 
 GET
@@ -526,8 +434,6 @@ GET
 ```
 /seller/{sellerId}/reviews
 ```
-
----
 
 # 13. Report Endpoints
 
@@ -549,8 +455,6 @@ Body
 }
 ```
 
----
-
 # 14. Notification Endpoints
 
 ## My Notifications
@@ -561,8 +465,6 @@ GET
 /notifications
 ```
 
----
-
 ## Mark Read
 
 PATCH
@@ -570,8 +472,6 @@ PATCH
 ```
 /notifications/{id}
 ```
-
----
 
 # 15. Verification Endpoints
 
@@ -583,8 +483,6 @@ POST
 /verification
 ```
 
----
-
 ## Verification Status
 
 GET
@@ -592,8 +490,6 @@ GET
 ```
 /verification
 ```
-
----
 
 # 16. Dashboard Endpoints
 
@@ -605,15 +501,7 @@ GET
 /dashboard
 ```
 
-Returns
-
-- Active Listings
-- Drafts
-- Sold
-- Offers
-- Analytics
-
----
+**Returns:** Active Listings, Drafts, Sold, Offers, Analytics
 
 # 17. Search
 
@@ -641,8 +529,6 @@ maxPrice
 sort
 ```
 
----
-
 # 18. Pagination
 
 Request
@@ -665,8 +551,6 @@ Response
 }
 ```
 
----
-
 # 19. Sorting
 
 Supported
@@ -682,8 +566,6 @@ price_desc
 
 most_viewed
 ```
-
----
 
 # 20. HTTP Status Codes
 
@@ -701,39 +583,23 @@ most_viewed
 |429|Rate Limited|
 |500|Internal Error|
 
----
-
 # 21. Validation Rules
 
-Listing
-
-Title
+**Listing:** Title
 
 5–120 characters
 
-Description
+**Description:** 20–2000 characters
 
-20–2000 characters
+**Price:** Greater than zero
 
-Price
+**Images:** Maximum 10
 
-Greater than zero
+**Offers:** Cannot exceed decimal precision
 
-Images
-
-Maximum 10
-
-Offers
-
-Cannot exceed decimal precision
-
-Reviews
-
-Rating
+**Reviews:** Rating
 
 1–5
-
----
 
 # 22. Rate Limiting
 
@@ -755,25 +621,15 @@ AI
 20 generations/day/user
 ```
 
----
-
 # 23. Security
 
-JWT Authentication
+**JWT Authentication:** HTTPS
 
-HTTPS
+**Input Validation:** Output Encoding
 
-Input Validation
-
-Output Encoding
-
-Rate Limiting
-
-Row Level Security
+**Rate Limiting:** Row Level Security
 
 Audit Logging
-
----
 
 # 24. Versioning
 
@@ -791,8 +647,6 @@ Future
 
 Older versions remain supported during migration windows.
 
----
-
 # 25. Future APIs
 
 - Payments
@@ -802,8 +656,6 @@ Older versions remain supported during migration windows.
 - Chat
 - Push Notifications
 - Business Accounts
-
----
 
 # 26. Summary
 

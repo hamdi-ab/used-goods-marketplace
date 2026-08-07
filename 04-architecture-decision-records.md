@@ -8,8 +8,6 @@
 >
 > **Owner:** CTO
 
----
-
 # Introduction
 
 This document records the significant architectural decisions made during the design of the marketplace.
@@ -25,8 +23,6 @@ Each ADR explains:
 
 This ensures future contributors understand *why* technologies and patterns were selected.
 
----
-
 # ADR-001
 ## Architecture Style
 
@@ -34,13 +30,9 @@ This ensures future contributors understand *why* technologies and patterns were
 
 Accepted
 
----
-
 ### Problem
 
 The platform requires rapid development, zero infrastructure cost, strong scalability, and minimal DevOps overhead.
-
----
 
 ### Options
 
@@ -48,13 +40,9 @@ The platform requires rapid development, zero infrastructure cost, strong scalab
 - Serverless Architecture
 - Microservices
 
----
-
 ### Decision
 
 Adopt a **Serverless Architecture**.
-
----
 
 ### Rationale
 
@@ -62,24 +50,11 @@ Serverless eliminates server management, reduces operational complexity, and ali
 
 Supabase and Vercel provide managed infrastructure that scales automatically.
 
----
-
 ### Trade-offs
 
-Pros
+**Pros:** Zero server maintenance, Automatic scaling, Fast development, Low operational cost
 
-- Zero server maintenance
-- Automatic scaling
-- Fast development
-- Low operational cost
-
-Cons
-
-- Vendor dependence
-- Execution time limits for serverless functions
-- Less control over infrastructure
-
----
+**Cons:** Vendor dependence, Execution time limits for serverless functions, Less control over infrastructure
 
 # ADR-002
 ## Frontend Framework
@@ -88,13 +63,9 @@ Cons
 
 Accepted
 
----
-
 ### Problem
 
 The frontend must provide excellent SEO, responsiveness, and developer productivity.
-
----
 
 ### Options
 
@@ -103,13 +74,9 @@ The frontend must provide excellent SEO, responsiveness, and developer productiv
 - Nuxt
 - Angular
 
----
-
 ### Decision
 
 Use **Next.js App Router**.
-
----
 
 ### Rationale
 
@@ -124,24 +91,11 @@ Next.js provides:
 
 These capabilities directly benefit a marketplace application.
 
----
-
 ### Trade-offs
 
-Pros
+**Pros:** SEO, Performance, Routing, Server Actions, Built-in optimization
 
-- SEO
-- Performance
-- Routing
-- Server Actions
-- Built-in optimization
-
-Cons
-
-- Steeper learning curve
-- More conventions
-
----
+**Cons:** Steeper learning curve, More conventions
 
 # ADR-003
 ## Backend Platform
@@ -150,13 +104,9 @@ Cons
 
 Accepted
 
----
-
 ### Problem
 
 The application requires authentication, database, storage, and APIs without building a custom backend.
-
----
 
 ### Options
 
@@ -165,13 +115,9 @@ The application requires authentication, database, storage, and APIs without bui
 - PocketBase
 - Custom Express API
 
----
-
 ### Decision
 
 Use **Supabase**.
-
----
 
 ### Rationale
 
@@ -186,23 +132,11 @@ Supabase offers:
 
 This reduces implementation effort while maintaining flexibility.
 
----
-
 ### Trade-offs
 
-Pros
+**Pros:** SQL database, Open-source ecosystem, Powerful security, Excellent developer experience
 
-- SQL database
-- Open-source ecosystem
-- Powerful security
-- Excellent developer experience
-
-Cons
-
-- Vendor dependence
-- Fewer managed services than some cloud providers
-
----
+**Cons:** Vendor dependence, Fewer managed services than some cloud providers
 
 # ADR-004
 ## Database Selection
@@ -211,13 +145,9 @@ Cons
 
 Accepted
 
----
-
 ### Problem
 
 Marketplace data contains relationships between users, listings, images, offers, reviews, favorites, and reports.
-
----
 
 ### Options
 
@@ -225,13 +155,9 @@ Marketplace data contains relationships between users, listings, images, offers,
 - MongoDB
 - Firestore
 
----
-
 ### Decision
 
 Use **PostgreSQL**.
-
----
 
 ### Rationale
 
@@ -246,22 +172,11 @@ PostgreSQL provides:
 - Full-text search
 - Mature tooling
 
----
-
 ### Trade-offs
 
-Pros
+**Pros:** Strong consistency, Excellent relational support, Powerful querying
 
-- Strong consistency
-- Excellent relational support
-- Powerful querying
-
-Cons
-
-- More structured schema design
-- Slightly higher learning curve than NoSQL
-
----
+**Cons:** More structured schema design, Slightly higher learning curve than NoSQL
 
 # ADR-005
 ## Authentication
@@ -270,13 +185,9 @@ Cons
 
 Accepted
 
----
-
 ### Decision
 
 Use **Supabase Authentication**.
-
----
 
 ### Rationale
 
@@ -290,8 +201,6 @@ Provides:
 
 without custom implementation.
 
----
-
 # ADR-006
 ## Authorization
 
@@ -299,13 +208,9 @@ without custom implementation.
 
 Accepted
 
----
-
 ### Decision
 
 Use **Row Level Security (RLS)** as the primary authorization mechanism.
-
----
 
 ### Rationale
 
@@ -315,21 +220,11 @@ Example:
 
 Users can only update their own listings.
 
----
-
 ### Trade-offs
 
-Pros
+**Pros:** Centralized security, Reduced application logic, Lower risk of accidental data exposure
 
-- Centralized security
-- Reduced application logic
-- Lower risk of accidental data exposure
-
-Cons
-
-- More complex SQL policies
-
----
+**Cons:** More complex SQL policies
 
 # ADR-007
 ## UI Component Library
@@ -338,8 +233,6 @@ Cons
 
 Accepted
 
----
-
 ### Options
 
 - Material UI
@@ -347,13 +240,9 @@ Accepted
 - Ant Design
 - shadcn/ui
 
----
-
 ### Decision
 
 Use **shadcn/ui**.
-
----
 
 ### Rationale
 
@@ -361,21 +250,11 @@ Provides accessible, customizable components without imposing a visual style.
 
 Allows the product to establish its own brand identity.
 
----
-
 ### Trade-offs
 
-Pros
+**Pros:** Full customization, Accessibility, Modern design
 
-- Full customization
-- Accessibility
-- Modern design
-
-Cons
-
-- More implementation effort than opinionated libraries
-
----
+**Cons:** More implementation effort than opinionated libraries
 
 # ADR-008
 ## Styling Framework
@@ -384,34 +263,19 @@ Cons
 
 Accepted
 
----
-
 ### Decision
 
 Use **Tailwind CSS**.
-
----
 
 ### Rationale
 
 Supports rapid UI development while maintaining design consistency.
 
----
-
 ### Trade-offs
 
-Pros
+**Pros:** Utility-first workflow, Small production bundle, Responsive design
 
-- Utility-first workflow
-- Small production bundle
-- Responsive design
-
-Cons
-
-- Long class names
-- Requires discipline for consistency
-
----
+**Cons:** Long class names, Requires discipline for consistency
 
 # ADR-009
 ## AI Provider
@@ -420,42 +284,25 @@ Cons
 
 Accepted
 
----
-
 ### Options
 
 - Gemini
 - OpenAI
 - Claude
 
----
-
 ### Decision
 
 Use **Google Gemini**.
-
----
 
 ### Rationale
 
 The free tier is suitable for MVP development and supports text generation tasks required by the AI Listing Assistant.
 
----
-
 ### Trade-offs
 
-Pros
+**Pros:** Cost-effective, Strong text generation, Easy API integration
 
-- Cost-effective
-- Strong text generation
-- Easy API integration
-
-Cons
-
-- Dependency on external service
-- Response latency varies
-
----
+**Cons:** Dependency on external service, Response latency varies
 
 # ADR-010
 ## State Management
@@ -463,8 +310,6 @@ Cons
 ### Status
 
 Accepted
-
----
 
 ### Decision
 
@@ -474,13 +319,9 @@ Use:
 - TanStack Query for client-side server state
 - React Context for lightweight global UI state
 
----
-
 ### Rationale
 
 Avoid introducing a large state management library unless complexity demands it.
-
----
 
 # ADR-011
 ## Image Storage
@@ -489,13 +330,9 @@ Avoid introducing a large state management library unless complexity demands it.
 
 Accepted
 
----
-
 ### Decision
 
 Store images in **Supabase Storage**.
-
----
 
 ### Rationale
 
@@ -506,8 +343,6 @@ Benefits include:
 - Signed URLs
 - Simplified permissions
 
----
-
 # ADR-012
 ## Search Strategy
 
@@ -515,13 +350,9 @@ Benefits include:
 
 Accepted
 
----
-
 ### Decision
 
 Use PostgreSQL search capabilities for the MVP.
-
----
 
 ### Rationale
 
@@ -529,16 +360,12 @@ Expected data volume does not justify introducing Elasticsearch or Meilisearch.
 
 Future migration remains possible if search requirements grow.
 
----
-
 # ADR-013
 ## Communication Strategy
 
 ### Status
 
 Accepted
-
----
 
 ### Decision
 
@@ -549,27 +376,15 @@ Supported channels:
 - Telegram
 - Phone call
 
----
-
 ### Rationale
 
 This aligns with existing user behavior in Ethiopia and significantly reduces development effort.
 
----
-
 ### Trade-offs
 
-Pros
+**Pros:** Faster MVP, Familiar user experience, No chat moderation
 
-- Faster MVP
-- Familiar user experience
-- No chat moderation
-
-Cons
-
-- Conversations occur outside the platform
-
----
+**Cons:** Conversations occur outside the platform
 
 # ADR-014
 ## Payments
@@ -578,13 +393,9 @@ Cons
 
 Deferred
 
----
-
 ### Decision
 
 Exclude payment processing from the MVP.
-
----
 
 ### Rationale
 
@@ -592,16 +403,12 @@ The challenge lists Telebirr and Chapa as optional enhancements.
 
 Excluding payments reduces scope while preserving a clear integration path.
 
----
-
 # ADR-015
 ## Identity Verification
 
 ### Status
 
 Deferred
-
----
 
 ### Decision
 
@@ -617,13 +424,9 @@ Future integration:
 
 - Fayda digital identity verification
 
----
-
 ### Rationale
 
 Keeps the MVP simple while enabling stronger trust features later.
-
----
 
 # ADR-016
 ## Analytics
@@ -631,8 +434,6 @@ Keeps the MVP simple while enabling stronger trust features later.
 ### Status
 
 Accepted
-
----
 
 ### Decision
 
@@ -646,13 +447,9 @@ Examples:
 - Offer submitted
 - Favorite added
 
----
-
 ### Rationale
 
 Analytics support future product improvements and provide insights into user behavior.
-
----
 
 # ADR-017
 ## Deployment
@@ -660,8 +457,6 @@ Analytics support future product improvements and provide insights into user beh
 ### Status
 
 Accepted
-
----
 
 ### Decision
 
@@ -672,13 +467,9 @@ Deploy using:
 - Vercel
 - Supabase
 
----
-
 ### Rationale
 
 This stack provides continuous deployment with minimal operational overhead.
-
----
 
 # ADR-018
 ## API Design
@@ -686,8 +477,6 @@ This stack provides continuous deployment with minimal operational overhead.
 ### Status
 
 Accepted
-
----
 
 ### Decision
 
@@ -701,13 +490,9 @@ Example:
 /api/v1/users
 ```
 
----
-
 ### Rationale
 
 Predictable APIs simplify frontend integration and future maintenance.
-
----
 
 # ADR Summary
 
@@ -731,8 +516,6 @@ Predictable APIs simplify frontend integration and future maintenance.
 | ADR-016 | Product Analytics |
 | ADR-017 | Vercel Deployment |
 | ADR-018 | RESTful API Design |
-
----
 
 # Conclusion
 

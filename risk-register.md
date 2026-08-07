@@ -2,8 +2,6 @@
 
 > Project: VinTech Challenge 2026
 
----
-
 | ID | Risk | Probability | Impact | Mitigation |
 |----|------|------------|--------|------------|
 | R-01 | Scope creep | High | High | Freeze MVP scope after Phase 2 |
@@ -17,8 +15,6 @@
 | R-09 | Browser incompatibility | Low | Medium | Cross-browser testing |
 | R-10 | Time constraints | High | High | Prioritize P0 features |
 
----
-
 # Top 5 Critical Risks
 
 1. Scope Creep
@@ -27,12 +23,9 @@
 4. Search Performance
 5. Image Upload Reliability
 
----
-
 # Review Schedule
 
 Review risks:
-
 - At sprint planning
 - Before each milestone
 - Before final submission

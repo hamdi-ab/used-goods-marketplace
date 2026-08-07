@@ -4,8 +4,6 @@
 
 > Version: 1.0
 
----
-
 # Table of Contents
 
 1. Component API Standards
@@ -17,8 +15,6 @@
 7. Versioning
 8. Deprecation Policy
 9. Component Checklist
-
----
 
 # 1. Component API Standards
 
@@ -54,8 +50,6 @@ variant="featured"
 size="lg"
 ```
 
----
-
 # 2. Props Guidelines
 
 Props should be:
@@ -78,8 +72,6 @@ Avoid
 deleteItem()
 ```
 
----
-
 # 3. Accessibility Contract
 
 Every component must support:
@@ -96,8 +88,6 @@ Buttons require accessible labels.
 
 Dialogs must trap focus until closed.
 
----
-
 # 4. Performance Standards
 
 Components should:
@@ -113,8 +103,6 @@ Images:
 - Optimized
 - Responsive
 - Cached
-
----
 
 # 5. Testing Requirements
 
@@ -139,31 +127,20 @@ Every reusable component should include:
 - Tablet
 - Desktop
 
----
-
 # 6. Storybook Organization
 
 Each component should have stories for:
 
-Default
-
-Hover
-
-Focus
-
-Disabled
-
-Loading
-
-Error
-
-Empty (if applicable)
-
-Dark Mode (future)
+- Default
+- Hover
+- Focus
+- Disabled
+- Loading
+- Error
+- Empty (if applicable)
+- Dark Mode (future)
 
 Stories should document expected behavior and serve as living examples.
-
----
 
 # 7. Versioning
 
@@ -171,28 +148,16 @@ Version components using Semantic Versioning.
 
 Example
 
-Button v1.0
-
-↓
-
-v1.1
-
-↓
-
-v2.0 (breaking)
-
----
+Button v1.0 → v1.1 → v2.0 (breaking)
 
 # 8. Deprecation Policy
 
 When replacing a component:
 
-1. Mark as Deprecated.
+1. Mark as deprecated.
 2. Document the replacement.
 3. Maintain compatibility until removal.
 4. Remove in the next major version.
-
----
 
 # 9. Component Checklist
 
@@ -204,15 +169,11 @@ Every production-ready component should satisfy:
 - [ ] Responsive
 - [ ] Supports all defined states
 
----
-
 ## Accessibility
 
 - [ ] Keyboard accessible
 - [ ] Screen reader friendly
 - [ ] WCAG AA compliant
-
----
 
 ## Engineering
 
@@ -221,8 +182,6 @@ Every production-ready component should satisfy:
 - [ ] No unnecessary re-renders
 - [ ] Public API documented
 
----
-
 ## UX
 
 - [ ] Clear feedback
@@ -230,15 +189,11 @@ Every production-ready component should satisfy:
 - [ ] Loading state
 - [ ] Empty state (where relevant)
 
----
-
 ## Documentation
 
 - [ ] Storybook story
 - [ ] Props documented
 - [ ] Usage example provided
-
----
 
 # Closing Statement
 

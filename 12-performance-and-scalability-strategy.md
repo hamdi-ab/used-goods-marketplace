@@ -8,14 +8,11 @@
 >
 > **Owner:** Engineering Team
 
----
-
 # 1. Purpose
 
 This document defines how the marketplace maintains fast response times, efficient resource usage, and sustainable growth as the number of users and listings increases.
 
 It covers:
-
 - Performance optimization
 - Scalability
 - Caching
@@ -24,12 +21,9 @@ It covers:
 - Search performance
 - Future scaling strategy
 
----
-
 # 2. Performance Goals
 
 The MVP targets the following metrics:
-
 | Metric | Target |
 |---------|---------|
 | First Contentful Paint | < 1.8 s |
@@ -40,12 +34,9 @@ The MVP targets the following metrics:
 | Image Upload | < 5 s |
 | Lighthouse Performance | ≥ 95 |
 
----
-
 # 3. Scalability Principles
 
 The platform follows these principles:
-
 - Horizontal scalability
 - Stateless services
 - CDN-first asset delivery
@@ -53,46 +44,36 @@ The platform follows these principles:
 - Lazy loading
 - Incremental optimization
 
----
-
 # 4. Rendering Strategy
 
 ## Server Components
 
 Use for:
-
 - Home page
 - Listings
 - Categories
 - Seller pages
 
 Benefits:
-
 - Better SEO
 - Reduced JavaScript
 - Faster first load
-
----
 
 ## Client Components
 
 Only where interaction is required.
 
 Examples:
-
 - Forms
 - Favorites
 - Filters
 - Offer modal
-
----
 
 # 5. Image Optimization
 
 Images are the largest assets in the application.
 
 Strategy:
-
 - Store originals in Supabase Storage
 - Compress before upload
 - Serve responsive sizes
@@ -100,16 +81,12 @@ Strategy:
 - Use WebP where supported
 
 Future:
-
 - Automatic thumbnail generation
 - Blur placeholders
-
----
 
 # 6. Database Optimization
 
 Use indexes on:
-
 - category_id
 - seller_id
 - city
@@ -123,23 +100,17 @@ Select only required columns.
 
 Paginate all large datasets.
 
----
-
 # 7. Search Optimization
 
 MVP:
-
 - PostgreSQL full-text search
 - Indexed filters
 - Server-side pagination
 
 Future:
-
 - Meilisearch
 - Elasticsearch
 - AI semantic search
-
----
 
 # 8. Caching Strategy
 
@@ -149,38 +120,26 @@ Future:
 - Icons
 - Fonts
 
----
-
 ## CDN Cache
 
 Static assets served through Vercel CDN.
 
----
-
 ## Server Cache
 
 Cache:
-
 - Categories
 - Homepage metadata
 - Popular listings
-
----
 
 # 9. Pagination
 
 Never load all listings.
 
-Default:
-
-20 items/page.
+Default: 20 items/page.
 
 Support:
-
 - Infinite scroll
 - Traditional pagination
-
----
 
 # 10. Network Optimization
 
@@ -190,12 +149,9 @@ Support:
 - Code splitting
 - Dynamic imports
 
----
-
 # 11. Bundle Optimization
 
 Lazy-load:
-
 - Dashboard
 - AI assistant
 - Admin area
@@ -203,37 +159,28 @@ Lazy-load:
 
 Keep the initial bundle as small as possible.
 
----
-
 # 12. Realtime Strategy
 
 Use Supabase Realtime only for:
-
 - Notifications
 - Offer updates
 
 Avoid unnecessary live subscriptions.
-
----
 
 # 13. AI Performance
 
 AI requests are asynchronous.
 
 Users receive:
-
 - Loading indicator
 - Timeout handling
 - Retry option
 
 Responses should never block the core marketplace.
 
----
-
 # 14. Future Scaling
 
 The architecture supports:
-
 - Read replicas
 - Redis caching
 - Dedicated search engine
@@ -241,12 +188,9 @@ The architecture supports:
 - Queue workers
 - Microservices (only when justified)
 
----
-
 # 15. Performance Monitoring
 
 Track:
-
 - Page load times
 - API latency
 - Database query duration
@@ -254,26 +198,17 @@ Track:
 - AI response time
 
 Tools (future):
-
 - PostHog
 - Sentry
 - Vercel Analytics
 
----
-
 # 16. Performance Budget
 
-Initial JavaScript:
+Initial JavaScript: < 250 KB (compressed)
 
-< 250 KB (compressed)
-
-Initial images:
-
-Optimized and lazy-loaded.
+Initial images: Optimized and lazy-loaded.
 
 Avoid unnecessary third-party libraries.
-
----
 
 # 17. Summary
 

@@ -2,16 +2,10 @@
 # 00 - Overview
 
 > **Project Name:** Used Goods Marketplace _(Working Name)_
->
 > **Challenge:** VinTech Challenge 2026
->
 > **Version:** 1.0
->
 > **Status:** Draft
->
 > **Owner:** Product & Engineering Team
-
----
 
 # 1. Introduction
 
@@ -20,8 +14,6 @@ This Product Requirements Document (PRD) defines the complete functional and non
 It serves as the primary reference for designers, developers, testers, and stakeholders throughout the product lifecycle.
 
 This document describes **what** the product should accomplish, **why** each feature exists, and **how** success will be measured. It intentionally avoids low-level implementation details, which are covered in the engineering documentation.
-
----
 
 # 2. Background
 
@@ -41,15 +33,11 @@ These platforms were not designed to function as marketplaces and therefore intr
 
 The challenge is to build a modern web platform that addresses these problems while remaining familiar to Ethiopian users.
 
----
-
 # 3. Product Vision
 
 Create the most trusted and user-friendly marketplace for buying and selling second-hand goods in Ethiopia.
 
 The platform should simplify listing creation, improve product discovery, increase buyer confidence, and establish a scalable foundation for future marketplace services.
-
----
 
 # 4. Product Objectives
 
@@ -61,8 +49,6 @@ The primary objectives are:
 - Improve listing quality using AI-assisted workflows.
 - Deliver a responsive, fast, and intuitive web experience.
 - Build a scalable architecture suitable for future expansion.
-
----
 
 # 5. Success Criteria
 
@@ -92,8 +78,6 @@ The product will be considered successful if it demonstrates:
 - Strong seller trust perception.
 - Fast buyer-to-seller communication.
 - Reduced marketplace friction.
-
----
 
 # 6. Scope
 
@@ -135,8 +119,6 @@ The product will be considered successful if it demonstrates:
 - Reports
 - Verification indicators
 
----
-
 ## Out of Scope
 
 The following features are intentionally excluded from the MVP:
@@ -153,8 +135,6 @@ The following features are intentionally excluded from the MVP:
 
 These features are reserved for future releases.
 
----
-
 # 7. Product Principles
 
 Every product decision must reinforce one or more of the following principles.
@@ -170,11 +150,9 @@ Examples include:
 - Seller ratings
 - Listing reputation
 
----
-
 ## Speed
 
-Users should accomplish common tasks quickly.
+Users should complete common tasks quickly.
 
 Examples include:
 
@@ -183,15 +161,11 @@ Examples include:
 - Smart filters
 - Quick contact options
 
----
-
 ## Simplicity
 
 The interface should require minimal learning.
 
 The platform should feel familiar to first-time users while remaining powerful for experienced users.
-
----
 
 # 8. Primary User Groups
 
@@ -207,8 +181,6 @@ Each user group shares a common goal:
 
 Buying or selling second-hand goods with confidence.
 
----
-
 # 9. Hero Features
 
 The product focuses on three core experiences.
@@ -217,19 +189,13 @@ The product focuses on three core experiences.
 
 Helps sellers publish professional listings in less than one minute.
 
----
-
 ## 2. Seller Trust Score
 
 Provides transparent trust signals before buyers initiate contact.
 
----
-
 ## 3. Intelligent Search
 
 Allows buyers to quickly discover relevant listings using structured search and advanced filters.
-
----
 
 # 10. Design Philosophy
 
@@ -245,8 +211,6 @@ Every screen should answer a single user question.
 | Create Listing | How fast can I sell? |
 
 This philosophy guides all product, UX, and engineering decisions.
-
----
 
 # 11. Related Documents
 
@@ -275,8 +239,6 @@ This philosophy guides all product, UX, and engineering decisions.
 - vcl2-advanced-components.md (VCL Part 2)
 - vcl3-engineering-standards.md (VCL Part 3)
 - vux-ux-guidelines.md
-
----
 
 # 12. Document Status
 

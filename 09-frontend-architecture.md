@@ -14,8 +14,6 @@
 >
 > **Owner:** Frontend Team
 
----
-
 # 1. Purpose
 
 This document defines the frontend architecture of the marketplace.
@@ -34,8 +32,6 @@ It describes:
 
 The objective is to build a frontend that is scalable, maintainable, and optimized for both users and developers.
 
----
-
 # 2. Frontend Principles
 
 The frontend follows these principles:
@@ -47,8 +43,6 @@ The frontend follows these principles:
 - Strong typing
 - Accessibility by default
 - Mobile-first responsive design
-
----
 
 # 3. High-Level Architecture
 
@@ -76,8 +70,6 @@ The frontend follows these principles:
                Supabase Backend
 ```
 
----
-
 # 4. Project Structure
 
 ```text
@@ -103,8 +95,6 @@ src/
 │
 └── config/
 ```
-
----
 
 # 5. App Router Structure
 
@@ -144,8 +134,6 @@ Every route owns:
 - Metadata
 - Loading UI
 - Error UI
-
----
 
 # 6. Feature Organization
 
@@ -193,8 +181,6 @@ Benefits:
 - Better code ownership
 - Reduced coupling
 
----
-
 # 7. Shared Folder
 
 Shared code is reused across multiple features.
@@ -218,8 +204,6 @@ types/
 ```
 
 Only reusable code belongs here.
-
----
 
 # 8. Component Hierarchy
 
@@ -257,8 +241,6 @@ ImageGallery
 Button
 ```
 
----
-
 # 9. Server Components
 
 Default choice.
@@ -277,8 +259,6 @@ Benefits:
 - Smaller JavaScript bundle
 - Faster initial load
 
----
-
 # 10. Client Components
 
 Only used when interactivity is required.
@@ -291,8 +271,6 @@ Examples:
 - Offer modal
 - Image carousel
 - Theme switcher
-
----
 
 # 11. State Management
 
@@ -307,8 +285,6 @@ Examples:
 - Tabs
 - Dropdowns
 
----
-
 ## Server State
 
 Use TanStack Query.
@@ -319,8 +295,6 @@ Examples:
 - Offers
 - Reviews
 - Notifications
-
----
 
 ## Global UI State
 
@@ -335,8 +309,6 @@ Examples:
 
 Avoid using Context for frequently changing server data.
 
----
-
 # 12. Data Fetching Strategy
 
 ### Server Components
@@ -347,8 +319,6 @@ Used for:
 - SEO content
 - Public listings
 
----
-
 ### Client Components
 
 Used for:
@@ -357,16 +327,12 @@ Used for:
 - Real-time updates
 - User interactions
 
----
-
 ### Mutations
 
 Performed through:
 
 - Server Actions
 - API Routes (when appropriate)
-
----
 
 # 13. Forms
 
@@ -397,29 +363,17 @@ Server Validation
 Database
 ```
 
----
-
 # 14. Styling Strategy
 
-Framework
+**Framework:** Tailwind CSS
 
-Tailwind CSS
+**Component Library:** shadcn/ui
 
-Component Library
+**Icons:** Lucide React
 
-shadcn/ui
-
-Icons
-
-Lucide React
-
-Animations
-
-Framer Motion (only where meaningful)
+**Animations:** Framer Motion (only where meaningful)
 
 Avoid excessive animations.
-
----
 
 # 15. Design Tokens
 
@@ -434,8 +388,6 @@ Centralize:
 
 Never hardcode design values in components.
 
----
-
 # 16. Performance Strategy
 
 ### Images
@@ -445,8 +397,6 @@ Never hardcode design values in components.
 - Responsive sizes
 - Compression
 
----
-
 ### Code Splitting
 
 Lazy-load:
@@ -455,17 +405,11 @@ Lazy-load:
 - AI components
 - Admin pages
 
----
-
 ### Rendering
 
 Prefer:
 
-Server Components
-
-Avoid unnecessary hydration.
-
----
+**Server Components:** Avoid unnecessary hydration.
 
 ### Bundle Optimization
 
@@ -473,15 +417,11 @@ Avoid unnecessary hydration.
 - Dynamic imports
 - Minimal client JavaScript
 
----
-
 # 17. Accessibility
 
 Minimum standard:
 
-WCAG AA
-
-Requirements:
+**WCAG AA:** Requirements:
 
 - Keyboard navigation
 - Focus indicators
@@ -489,8 +429,6 @@ Requirements:
 - Semantic HTML
 - Screen reader support
 - Color contrast compliance
-
----
 
 # 18. SEO Strategy
 
@@ -504,8 +442,6 @@ Every public page includes:
 - Structured Data (JSON-LD)
 
 Listings should expose product metadata for search engines.
-
----
 
 # 19. Error Handling
 
@@ -521,8 +457,6 @@ not-found.tsx
 
 Users receive clear recovery actions.
 
----
-
 # 20. Loading Experience
 
 Use skeleton loaders instead of generic spinners where possible.
@@ -534,8 +468,6 @@ Examples:
 - Dashboard widgets
 
 Progressive loading improves perceived performance.
-
----
 
 # 21. Authentication Flow
 
@@ -562,8 +494,6 @@ Route guards:
 - Seller
 - Admin
 
----
-
 # 22. Realtime Features
 
 Supabase Realtime powers:
@@ -574,28 +504,13 @@ Supabase Realtime powers:
 
 Realtime should enhance—not block—the user experience.
 
----
-
 # 23. Testing
 
-Unit Tests
+**Unit Tests:** Components, Hooks, Utilities
 
-- Components
-- Hooks
-- Utilities
+**Integration Tests:** Feature workflows
 
-Integration Tests
-
-- Feature workflows
-
-End-to-End Tests
-
-- Registration
-- Listing creation
-- Offer flow
-- Search journey
-
----
+**End-to-End Tests:** Registration, Listing creation, Offer flow, Search journey
 
 # 24. Coding Standards
 
@@ -606,8 +521,6 @@ End-to-End Tests
 - No `any` unless justified
 - Small, focused components
 - One responsibility per hook
-
----
 
 # 25. Future Evolution
 
@@ -622,8 +535,6 @@ The architecture supports:
 - Advanced analytics
 
 without major restructuring.
-
----
 
 # 26. Summary
 
