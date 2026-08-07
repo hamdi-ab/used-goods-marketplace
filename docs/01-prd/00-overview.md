@@ -239,6 +239,7 @@ This philosophy guides all product, UX, and engineering decisions.
 - ../04-design/05-advanced-components.md
 - ../04-design/06-engineering-standards.md
 - ../04-design/07-ux-guidelines.md
+- ../04-design/08-image-asset-strategy.md
 
 # 12. Document Status
 
