@@ -13,9 +13,10 @@
 5. Developer Handoff
 6. Versioning
 7. Contribution Guidelines
-8. Design QA Checklist
-9. Future Evolution
-10. Final Principles
+8. External Design Skills — How to Combine
+9. Design QA Checklist
+10. Future Evolution
+11. Final Principles
 
 # 1. Governance
 
@@ -109,7 +110,33 @@ Before adding a new component ask:
 
 If not, propose a new component with documentation.
 
-# 8. Design QA Checklist
+# 8. External Design Skills — How to Combine
+
+Three sources inform UI work. This is the agreed division of labor; it prevents the skills from colliding with the design system.
+
+## Roles
+
+| Source | Role | When to use |
+|---|---|---|
+| **This design system (VDS/VCL/VUX)** | **Source of truth** | Always. Tokens, components, UX principles, and market specifics (ETB, Addis Ababa, Amharic roadmap, trust-first flows) are binding. Nothing ships that contradicts it. |
+| **ui-ux-pro-max** | **Reference shelf** | Choosing styles, palettes, fonts, or patterns; broad UX rules; platform/stack guidance (`--stack nextjs`, `--stack shadcn`). Look it up, then check against VDS. |
+| **impeccable** | **Polish & audit gate** | Making a finished screen feel non-AI / production-grade. `critique`, `audit`, `polish`, and its anti-slop bans. Runs best on a live app (needs PRODUCT.md / browser). |
+
+## Verified behavior of the tools against our product
+
+The tool engines were actually run against "used goods marketplace, Ethiopia, trust" and compared to this system (August 2026):
+
+- **ui-ux-pro-max `--design-system`** recommends a **Vibrant & Block-based** style with **purple primary (`#7C3AED`) + green accent**, even with "trust"/"clean/practical" keywords. Its typography flip-flops between hand-drawn (Kalam/Patrick Hand) and e-commerce (Rubik/Nunito Sans). **Verdict:** its default color/font output conflicts with our trust-first identity (`#2563EB` primary, Geist). Use it for its *process* (search → reasoning → checklist), not its literal palette/type recommendations. Treat any tool-generated palette as a starting sketch to be reconciled to VDS tokens, not adopted.
+- Its **pattern guidance is sound** and matches our UX doc: hero = search-focused CTA, categories, featured listings, trust/safety section, and a "list your item" CTA.
+- Its **stack guidance is correct for us**: `next/link` for internal nav, `scroll={false}` for tabs/pagination, `@next/bundle-analyzer`; shadcn `asChild` composition, install via CLI, rely on built-in ARIA.
+- Its **UX domain** aligns with our search product: autocomplete + "no results" with suggestions.
+- **impeccable** refuses to run without product context (`PRODUCT.md`); it is a polish/craft workflow for a built app, not a doc-time validator. Its **anti-slop bans** (gradient text, side-stripe borders, cream/sand bodies, hero-metric blocks, identical card grids, uppercase eyebrow kickers, numbered section markers) are worth adopting as a manual review gate during implementation.
+
+## Working rule
+
+Build to VDS tokens. When unsure what a screen should look like, consult ui-ux-pro-max as reference, then reconcile to VDS. Before shipping a screen, run an impeccable-style anti-slop + heuristic pass (Nielsen heuristics, cognitive load, personas). A tool's palette, font, or layout is a suggestion; VDS tokens and market specifics are the law.
+
+# 9. Design QA Checklist
 
 ## Foundations
 
@@ -157,7 +184,7 @@ If not, propose a new component with documentation.
 - [ ] Minimal layout shift
 - [ ] Efficient rendering
 
-# 9. Future Evolution
+# 10. Future Evolution
 
 Future additions may include:
 
@@ -169,7 +196,7 @@ Future additions may include:
 - Full dark mode
 - RTL support
 
-# 10. Final Principles
+# 11. Final Principles
 
 Every screen should answer:
 
