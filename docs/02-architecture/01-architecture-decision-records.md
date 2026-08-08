@@ -292,17 +292,24 @@ Accepted
 
 ### Decision
 
-Use **Google Gemini**.
+Use **Google Gemini**, specifically a **flash-class multimodal model** (vision + text) in the current Gemini flash generation (`gemini-2.5-flash` / `gemini-3-flash`; pin at T14). The AI Listing Assistant is a **vision task**: it consumes the seller's photos, so the model must accept image input, not just text.
 
 ### Rationale
 
-The free tier is suitable for MVP development and supports text generation tasks required by the AI Listing Assistant.
+The free tier is suitable for MVP development and supports the vision tasks required by the AI Listing Assistant (ADR-019 covers image token/cost math). Gemini 2.5 Flash and 3 Flash are the current free-tier flash models; Gemini 2.0 Flash was deprecated and shut down in 2026 and must not be pinned. Response is a **structured JSON** (title, description, category, keywords, condition, quality score), constrained by a JSON schema so the provider returns typed enums we can render directly.
 
 ### Trade-offs
 
-**Pros:** Cost-effective, Strong text generation, Easy API integration
+**Pros:** Cost-effective (free tier covers image input), Strong text + vision generation, Easy API integration
 
-**Cons:** Dependency on external service, Response latency varies
+**Cons:** Dependency on external service, Response latency varies, Rate limits (RPM/RPD/TPM) on the free tier bound high-volume listing creation
+
+### Cost & limits
+
+- MVP target: **free tier, $0**. Gemini 2.5 Flash and 3 Flash count image input inside the same per-token limits and are free on the free tier.
+- **Image allowance:** up to **3,600 image files per request**; each image ≈ **258 tokens** at ≤384 px, tiled larger images in 768 px tiles also ~258 tokens/tile (a 960×540 image ≈ 6 tiles ≈ 1,548 input tokens).
+- **Free-tier rate limits** (Google AI Studio free key, project-level): ~20–250 RPD, ~5–10 RPM, ~250K–1M TPM depending on model — fine for a demo and a few hundred seed listings, tight for heavy batch generation.
+- **Paid fallback** (only if the quota is ever hit mid-demo): Gemini 2.5 Flash ≈ $0.15–$0.30 / 1M input tokens and $3.50 / 1M thinking-output tokens. A single AI listing call (1 photo + prompt) is a few thousand input tokens, i.e. fraction-of-a-cent; even 1,000 AI-assisted listings on the paid tier is well under $1 — see ADR-019.
 
 # ADR-010
 ## State Management
@@ -494,6 +501,50 @@ Example:
 
 Predictable APIs simplify frontend integration and future maintenance.
 
+# ADR-019
+## Gemini Vision: Image Input Budget & Cost
+
+### Status
+
+Accepted
+
+### Dependencies
+
+- ADR-009 (AI provider = Google Gemini, flash-class multimodal)
+
+### Why this ADR exists
+
+The AI Listing Assistant's input is *photos*. This ADR pins how much image we send, how it is tokenized/costed, and keeps the MVP inside the free tier, so T14 doesn't re-derive it.
+
+### Decision
+
+1. **Model:** use a **flash-class multimodal model** (`gemini-2.5-flash` or the newer `gemini-3-flash`, whichever is the current stable flash in the pack). A model stream is verified at T14. Never pin `gemini-2.0-flash` (deprecated & shut down 2026).
+2. **Image budget per listing:** send **1–4 photos** for listing analysis (the first 1–2 are the core content; 3–4 only add context). This matches the roadmap's "1–2 photos" seller demo and keeps token spend tiny.
+3. **Resize before send:** downscale photos server-side to ≤1024 px before calling Gemini (aligns with the storage/compression flow in backend-architecture §10). Smaller images are tiled cheaper:
+   - ≤384 px → **258 tokens/image**.
+   - Larger → 768 px tiles, each ≈258 tokens; a 960×540 photo ≈ 6 tiles ≈ 1,548 input tokens.
+   - Practical per-call image cost ≈ **0.3k–1.6k input tokens** for 1–4 resized photos.
+4. **Structured output:** request JSON-object response via a strict schema (title, description, category enum, keywords, condition enum, quality score). Enums map 1:1 to our domain (category/condition values in the handbook section 10 / DB spec). No freeform prose.
+5. **Free tier, $0:** the MVP lives on the Gemini free tier. Hitting the free quota (RPM/RPD) mid-demo is handled by graceful degradation to manual listing (feature "AI never publishes; manual listing always available" per FS-005).
+
+### Cost math (single listing call)
+
+Assumptions: 1 photo ≈ 0.3k–1.6k input tokens (post-resize), prompt + schema overhead ≈ 0.5–1k tokens, output ≈ 0.2–0.5k tokens.
+
+| Scenario | Input tokens | Output tokens | Free tier cost | Paid fallback cost (1M/≈$0.15–0.30 in) |
+|---|---|---|---|---|
+| 1 photo | ~0.5k–2.6k | ~0.2–0.5k | $0 | ~$0.0001–0.0004 |
+| 4 photos | ~1.3k–7.4k | ~0.2–0.5k | $0 | ~$0.0002–0.0011 |
+| 1,000 listings (batch) | ~1M–7M | ~0.2–0.5M | $0 (within quota if ~70–280 RPD for days) | ≈ $0.15–2.10 |
+
+**Bottom line:** the MVP's AI listing generation is free on the free tier; even a 1,000-listing paid run is ~$0.15–$2.10. The real constraint is **free-tier RPM/RPD**, not money — hence the 1–4 photo budget and server-side resize.
+
+### Trade-offs
+
+**Pros:** $0 MVP, image input inside the flash tier, tiny cost if paid is ever needed
+
+**Cons:** Free-tier rate limits cap concurrent listing generation; auto-tiling is provider-controlled, so actual token counts vary slightly and must be checked with `countTokens` at T14
+
 # ADR Summary
 
 | ADR | Decision |
@@ -516,6 +567,7 @@ Predictable APIs simplify frontend integration and future maintenance.
 | ADR-016 | Product Analytics |
 | ADR-017 | Vercel Deployment |
 | ADR-018 | RESTful API Design |
+| ADR-019 | Gemini Vision: Image Input Budget & Cost |
 
 # Conclusion
 
