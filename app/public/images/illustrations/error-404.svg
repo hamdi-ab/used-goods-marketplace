@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" font-family="Inter, Geist, 'Segoe UI', system-ui, sans-serif">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#EFF6FF"/><stop offset="1" stop-color="#DBEAFE"/>
+  </linearGradient>
+  <linearGradient id="skyDeep" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#DBEAFE"/><stop offset="1" stop-color="#BFDBFE"/>
+  </linearGradient>
+  <linearGradient id="primary" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#60A5FA"/><stop offset="1" stop-color="#2563EB"/>
+  </linearGradient>
+  <linearGradient id="primaryDeep" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#2563EB"/><stop offset="1" stop-color="#1D4ED8"/>
+  </linearGradient>
+  <linearGradient id="navy" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#1E40AF"/><stop offset="1" stop-color="#172554"/>
+  </linearGradient>
+  <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EFF6FF"/>
+  </linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#FBBF24"/><stop offset="1" stop-color="#F59E0B"/>
+  </linearGradient>
+  <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FDE68A"/><stop offset="1" stop-color="#F59E0B"/>
+  </linearGradient>
+  <linearGradient id="warm" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FFFBEB"/><stop offset="1" stop-color="#FEF3C7"/>
+  </linearGradient>
+  <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#93C5FD" stop-opacity="0.55"/><stop offset="1" stop-color="#93C5FD" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="glowWarm" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#FDE68A" stop-opacity="0.5"/><stop offset="1" stop-color="#FDE68A" stop-opacity="0"/>
+  </radialGradient>
+  <filter id="s1" x="-40%" y="-40%" width="180%" height="180%">
+    <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#1E40AF" flood-opacity="0.10"/>
+  </filter>
+  <filter id="s2" x="-40%" y="-40%" width="180%" height="180%">
+    <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#1E40AF" flood-opacity="0.14"/>
+  </filter>
+  <filter id="s3" x="-60%" y="-60%" width="220%" height="220%">
+    <feDropShadow dx="0" dy="14" stdDeviation="20" flood-color="#1E3A8A" flood-opacity="0.18"/>
+  </filter>
+</defs><rect width="1024" height="1024" fill="url(#sky)"/><ellipse cx="512" cy="430.08" rx="348.16" ry="307.2" fill="url(#glow)"/><path d="M 200 278 C 209.24 287.24 222 300 C 209.24 312.76 200 322 C 187.24 312.76 178 300 C 187.24 287.24 200 278 Z" fill="#93C5FD"/><path d="M 850 320 C 858.4 328.4 870 340 C 858.4 351.6 850 360 C 838.4 351.6 830 340 C 838.4 328.4 850 320 Z" fill="#EF4444"/><path d="M 840 740 C 848.4 748.4 860 760 C 848.4 771.6 840 780 C 828.4 771.6 820 760 C 828.4 748.4 840 740 Z" fill="#60A5FA"/><ellipse cx="512" cy="940" rx="340" ry="52" fill="#DBEAFE" opacity="0.7"/><text x="512" y="330" text-anchor="middle" font-size="240" font-weight="800" fill="#DBEAFE" transform="translate(0 12)">404</text><text x="512" y="330" text-anchor="middle" font-size="240" font-weight="800" fill="url(#primary)">404</text><g filter="url(#s2)"><g transform="translate(512 525) rotate(0) translate(-250 -105)"><rect width="500" height="210" rx="16" fill="#FFFFFF"/><rect width="500" height="210" rx="16" fill="#DBEAFE" opacity="0.55"/><g>
+      <g transform="translate(120 60)">
+        <circle cx="0" cy="0" r="42" fill="#93C5FD"/>
+        <path d="M 0 42 L 0 84 M 0 84 Q 26 110 56 110 M 0 84 Q -26 110 -56 110" fill="none" stroke="#60A5FA" stroke-width="9" stroke-linecap="round"/>
+        <path d="M 0 -4 L 0 18 M -24 10 L -12 26 M 24 10 L 12 26" stroke="#1E40AF" stroke-width="8" stroke-linecap="round"/>
+      </g>
+      <text x="180" y="70" font-size="26" font-weight="700" fill="#1F2937">This page is off the map</text>
+      <rect x="180" y="90" width="230" height="14" rx="7" fill="#D1D5DB"/>
+      <rect x="180" y="114" width="180" height="14" rx="7" fill="#E5E7EB"/>
+      <g><rect x="180" y="148" width="170" height="40" rx="20" fill="#1D4ED8" filter="url(#s1)"/><text x="265" y="168" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="600" fill="#FFFFFF">Back to Home</text></g>
+    </g></g></g><g><rect x="690" y="380" width="90" height="36" rx="18" fill="#EF4444" filter="url(#s1)"/><text x="735" y="398" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="600" fill="#FFFFFF">Error</text></g></svg>

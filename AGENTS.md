@@ -36,8 +36,22 @@ docs/
 - Use the `gh` CLI for all GitHub operations. Conventions (map issue, child tickets, native blocking) live in `docs/agents/issue-tracker.md`.
 - Do not change the tracker's documented conventions without also updating `issue-tracker.md`.
 
+## App assets (T18+)
+
+- The only non-doc code in this repo is the image set under `app/public/images/` (T18). It is the app scaffold's `public/` directory; the app itself is built by later tickets.
+- Assets are token-locked SVG sources + 2x PNG rasters, one flat-vector style on `#2563EB` + navy `#172554`. The manifest at `app/public/images/README.md` is the authority on contents, usage, and style.
+- No image-generation API was usable on the project's Google key (free tier quota `limit: 0`), so the set is hand-crafted SVG emitted from `app/public/images/_tools/generate.js`; `render.sh` rasterizes via headless Chrome. Regenerate both after touching `generate.js`.
+- Do not introduce ad hoc scenes or off-palette colors; reuse the generator primitives.
+
 ## Rules of thumb
 
 - When editing a doc, keep prose dense, preserve every fact/code/token, and fix or update any relative cross-reference you affect.
 - Keep the metadata block and the numbering scheme intact.
 - Only create or remove docs that touch the tracker with a recorded reason; a change to a numbered file is a change the tracker may reference.
+
+## Maintaining this file
+
+Keep this file for knowledge useful to almost every future agent session in this project.
+Do not repeat what the codebase already shows; point to the authoritative file or command instead.
+Prefer rewriting or pruning existing entries over appending new ones.
+When updating this file, preserve this bar for all agents and keep entries concise.
