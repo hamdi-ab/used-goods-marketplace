@@ -59,6 +59,8 @@ Two distinct numbers, two distinct guarantees:
 
 Verification: a load test (see T19 — load & capacity verification) records a p95 baseline at a meaningful concurrency (initial target 100–200 concurrent, extrapolating the 500-design shape) and is the evidence cited for this half. Absent that test, the doc-party claim is *target-only* and deliberately stated as such.
 
+**T19 evidence:** the load-test scenario, runbook, and report template live in [11-load-verification.md](11-load-verification.md) (script: `load-test/load-test.js`). Status: *pending hosting* — the live run requires the hosted endpoint (T17); measured p95s and the first bottleneck are backfilled into that report when available. The verdict will cite the measured values above; until then the 500-concurrent claim remains *target-only*.
+
 # 4. Rendering Strategy
 
 ## Server Components
