@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1000" viewBox="0 0 1200 1000" font-family="Inter, Geist, 'Segoe UI', system-ui, sans-serif">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#EFF6FF"/><stop offset="1" stop-color="#DBEAFE"/>
+  </linearGradient>
+  <linearGradient id="skyDeep" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#DBEAFE"/><stop offset="1" stop-color="#BFDBFE"/>
+  </linearGradient>
+  <linearGradient id="primary" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#60A5FA"/><stop offset="1" stop-color="#2563EB"/>
+  </linearGradient>
+  <linearGradient id="primaryDeep" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#2563EB"/><stop offset="1" stop-color="#1D4ED8"/>
+  </linearGradient>
+  <linearGradient id="navy" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#1E40AF"/><stop offset="1" stop-color="#172554"/>
+  </linearGradient>
+  <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EFF6FF"/>
+  </linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#FBBF24"/><stop offset="1" stop-color="#F59E0B"/>
+  </linearGradient>
+  <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FDE68A"/><stop offset="1" stop-color="#F59E0B"/>
+  </linearGradient>
+  <linearGradient id="warm" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FFFBEB"/><stop offset="1" stop-color="#FEF3C7"/>
+  </linearGradient>
+  <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#93C5FD" stop-opacity="0.55"/><stop offset="1" stop-color="#93C5FD" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="glowWarm" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#FDE68A" stop-opacity="0.5"/><stop offset="1" stop-color="#FDE68A" stop-opacity="0"/>
+  </radialGradient>
+  <filter id="s1" x="-40%" y="-40%" width="180%" height="180%">
+    <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#1E40AF" flood-opacity="0.10"/>
+  </filter>
+  <filter id="s2" x="-40%" y="-40%" width="180%" height="180%">
+    <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#1E40AF" flood-opacity="0.14"/>
+  </filter>
+  <filter id="s3" x="-60%" y="-60%" width="220%" height="220%">
+    <feDropShadow dx="0" dy="14" stdDeviation="20" flood-color="#1E3A8A" flood-opacity="0.18"/>
+  </filter>
+</defs><rect width="1200" height="1000" fill="url(#sky)"/><ellipse cx="600" cy="420" rx="408.00000000000006" ry="300" fill="url(#glow)"/><ellipse cx="600" cy="960" rx="432" ry="22" fill="#BFDBFE" opacity="0.45"/><path d="M 230 208 C 239.24 217.24 252 230 C 239.24 242.76 230 252 C 217.24 242.76 208 230 C 217.24 217.24 230 208 Z" fill="#60A5FA"/><path d="M 1020 200 C 1028.4 208.4 1040 220 C 1028.4 231.6 1020 240 C 1008.4 231.6 1000 220 C 1008.4 208.4 1020 200 Z" fill="#F59E0B"/><g transform="translate(250 780) scale(0.9)"><g>
+    <rect x="-20" y="-2" width="16" height="54" rx="8" fill="#1F2937"/>
+    <rect x="4" y="-2" width="16" height="54" rx="8" fill="#1F2937"/>
+    <rect x="-26" y="46" width="21" height="12" rx="6" fill="#1F2937"/>
+    <rect x="2" y="46" width="21" height="12" rx="6" fill="#1F2937"/>
+  </g><g>
+      <rect x="-48" y="-62" width="15" height="58" rx="7.5" fill="#1D4ED8"/>
+      <circle cx="-40.5" cy="-6" r="8" fill="#A96E3F"/>
+      <rect x="33" y="-62" width="15" height="58" rx="7.5" fill="#1D4ED8"/>
+      <circle cx="40.5" cy="-6" r="8" fill="#A96E3F"/>
+    </g><rect x="-28" y="-62" width="56" height="64" rx="24" fill="#1E40AF"/><g>
+    <circle cx="0" cy="-86" r="30" fill="#A96E3F"/>
+    <path d="M -30,-84 A 30,30 0 0,1 30,-84 Q 24,-103 0,-105 Q -24,-103 -30,-84 Z" fill="#374151"/>
+    <path d="M -16,-88 Q -11,-92 -6,-88" fill="none" stroke="#374151" stroke-width="3" stroke-linecap="round"/>
+    <path d="M 6,-88 Q 11,-92 16,-88" fill="none" stroke="#374151" stroke-width="3" stroke-linecap="round"/>
+    <path d="M -9,-75 Q 0,-68 9,-75" fill="none" stroke="#B45309" stroke-width="3" stroke-linecap="round"/>
+  </g></g><g transform="translate(400 560)"><g><path d="M 0 -132 C 39.6 -121.44000000000001 55 -66 55 -7.92 L 55 42.24 C 55 71.28 24.2 81.84 0 89.76 C -24.2 81.84 -55 71.28 -55 42.24 L -55 -7.92 C -55 -66 -39.6 -121.44000000000001 0 -132 Z" fill="#2563EB"/><path d="M 0 -106 C 30.959999999999997 -97.52000000000001 43 -53 43 -6.359999999999999 L 43 33.92 C 43 57.24 18.92 65.72 0 72.08 C -18.92 65.72 -43 57.24 -43 33.92 L -43 -6.359999999999999 C -43 -53 -30.959999999999997 -97.52000000000001 0 -106 Z" fill="#60A5FA"/></g><circle cx="0" cy="26" r="34" fill="#DBEAFE"/><circle cx="0" cy="26" r="25" fill="#A96E3F"/><path d="M -25 26 A 25 25 0 0 1 25 26 Q 20 15 0 13 Q -20 15 -25 26 Z" fill="#374151"/></g><circle cx="455" cy="540" r="26" fill="#22C55E" stroke="#FFFFFF" stroke-width="4"/><path d="M 449.54 540 L 453.96 544.42 L 460.98 535.58" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/><g filter="url(#s2)"><g transform="translate(810 570) rotate(-3) translate(-210 -150)"><rect width="420" height="300" rx="16" fill="#FFFFFF"/><rect width="420" height="300" rx="16" fill="#DBEAFE" opacity="0.55"/><g>
+      <rect x="30" y="34" width="120" height="120" rx="16" fill="#93C5FD"/>
+      <circle cx="90" cy="94" r="30" fill="#C98A5F"/>
+      <rect x="60" y="120" width="60" height="18" rx="9" fill="#172554"/>
+      <rect x="180" y="50" width="140" height="20" rx="10" fill="#1F2937"/>
+      <rect x="180" y="86" width="100" height="16" rx="8" fill="#9CA3AF"/>
+      <rect x="180" y="114" width="70" height="16" rx="8" fill="#D1D5DB"/>
+      <g><rect x="180" y="152" width="150" height="40" rx="20" fill="#22C55E" filter="url(#s1)"/><text x="255" y="172" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="600" fill="#FFFFFF">Verified Seller</text></g>
+      <path d="M 370 24 C 376.72 30.72 386 40 C 376.72 49.28 370 56 C 360.72 49.28 354 40 C 360.72 30.72 370 24 Z" fill="#F59E0B"/>
+    </g></g></g><g><circle cx="600" cy="400" r="34" fill="#2563EB" stroke="#FFFFFF" stroke-width="4"/><path d="M 592.86 400 L 598.64 405.78 L 607.82 394.22" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></g><g><rect x="680" y="230" width="240" height="40" rx="20" fill="#1E40AF" filter="url(#s1)"/><text x="800" y="250" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="600" fill="#FFFFFF">Fayda verified identity</text></g><path d="M 980 676 C 990.08 686.08 1004 700 C 990.08 713.92 980 724 C 966.08 713.92 956 700 C 966.08 686.08 980 676 Z" fill="#93C5FD"/><path d="M 150 402 C 157.56 409.56 168 420 C 157.56 430.44 150 438 C 139.56 430.44 132 420 C 139.56 409.56 150 402 Z" fill="#F59E0B"/></svg>
