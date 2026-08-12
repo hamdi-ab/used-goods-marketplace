@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Node tooling that regenerates the image assets (T18); not app code.
+    "public/images/_tools/**",
   ]),
 ]);
 
