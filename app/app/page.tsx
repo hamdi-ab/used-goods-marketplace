@@ -2,15 +2,9 @@ import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import { fetchCategories, fetchListings, PAGE_SIZE } from "@/lib/listings"
+import { buildBrowseUrl, nextOffset, parseBrowseParams } from "@/lib/browse"
 import { CategoryCard } from "@/components/categories/category-card"
 import { ListingCard } from "@/components/listings/listing-card"
-
-function buildHref(categorySlug: string | undefined, offset: number) {
-  const params = new URLSearchParams()
-  if (categorySlug) params.set("category", categorySlug)
-  if (offset) params.set("offset", String(offset))
-  return `/?${params.toString()}`
-}
 
 function NoResultsIcon({ className }: { className?: string }) {
   return (
@@ -46,11 +40,7 @@ export default async function HomePage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const sp = await searchParams
-  const categorySlug =
-    typeof sp.category === "string" ? sp.category : undefined
-  const rawOffset = typeof sp.offset === "string" ? Number(sp.offset) : 0
-  const offset =
-    Number.isFinite(rawOffset) && rawOffset > 0 ? rawOffset : 0
+  const { categorySlug, offset } = parseBrowseParams(sp)
 
   const categoriesPromise = fetchCategories()
   const { listings, hasMore, error } = await fetchListings({
@@ -94,7 +84,7 @@ export default async function HomePage({
         </div>
         {categorySlug ? (
           <Link
-            href={buildHref(undefined, 0)}
+            href={buildBrowseUrl(undefined, 0)}
             className="mt-3 inline-block text-sm underline"
           >
             All categories
@@ -110,7 +100,7 @@ export default async function HomePage({
               We could not load listings.
             </p>
             <Link
-              href={buildHref(categorySlug, offset)}
+              href={buildBrowseUrl(categorySlug, offset)}
               className="mt-2 inline-block text-sm font-medium text-primary underline"
             >
               Retry
@@ -132,7 +122,7 @@ export default async function HomePage({
             <div className="mt-4 flex flex-col justify-center gap-3 sm:flex-row">
               {categorySlug ? (
                 <Button asChild size="sm">
-                  <Link href={buildHref(undefined, 0)}>All categories</Link>
+                  <Link href={buildBrowseUrl(undefined, 0)}>All categories</Link>
                 </Button>
               ) : (
                 <Button asChild size="sm">
@@ -140,7 +130,7 @@ export default async function HomePage({
                 </Button>
               )}
               <Link
-                href={buildHref(undefined, 0)}
+                href={buildBrowseUrl(undefined, 0)}
                 className="text-sm underline"
               >
                 Refresh
@@ -158,10 +148,10 @@ export default async function HomePage({
             </ul>
             {hasMore ? (
               <div className="mt-10 flex justify-center">
-                <Link
-                  href={buildHref(categorySlug, offset + PAGE_SIZE)}
-                  className="text-sm font-medium underline"
-                >
+                 <Link
+                   href={buildBrowseUrl(categorySlug, nextOffset(offset))}
+                   className="text-sm font-medium underline"
+                 >
                   Load more
                 </Link>
               </div>

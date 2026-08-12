@@ -300,14 +300,10 @@ export async function fetchListings(opts: {
 }> {
   const supabase = await createClient()
   const limit = Math.min(opts.limit ?? PAGE_SIZE, BROWSE_LIMIT_MAX)
-  // Clamp + guard the pagination window: finite, non-negative, and never past
-  // the 1000-row ceiling so "Load more" always terminates. (§15: validate
-  // external input — offset comes from the URL.)
-  const requestedOffset = opts.offset ?? 0
-  const offset =
-    Number.isFinite(requestedOffset) && requestedOffset > 0
-      ? Math.min(requestedOffset, BROWSE_LIMIT_MAX - 1)
-      : 0
+  // offset is an untrusted cursor from the URL; parseBrowseParams
+  // (lib/browse) is the single source of truth that validates + clamps it
+  // to the 1000-row paging window so "Load more" always terminates.
+  const offset = opts.offset ?? 0
 
   let categoryId: string | null = null
   if (opts.categorySlug) {
