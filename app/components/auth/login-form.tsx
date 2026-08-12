@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 
 import { createClient } from "@/lib/supabase/client"
+import { isInternalPath } from "@/lib/utils"
 import { AuthCard } from "@/components/auth/auth-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -44,7 +45,7 @@ export function LoginForm({ next }: { next?: string }) {
     }
 
     router.refresh()
-    router.push(next ?? "/")
+    router.push(isInternalPath(next) ? next : "/")
   }
 
   return (

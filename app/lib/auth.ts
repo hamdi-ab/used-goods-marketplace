@@ -15,14 +15,10 @@ export type SessionUser = {
   profileCompleted: boolean
 }
 
-const ROLE_RANK: Record<UserRole, number> = {
-  buyer: 1,
-  seller: 2,
-  admin: 3,
-}
-
-export function roleAtLeast(role: UserRole, min: UserRole) {
-  return ROLE_RANK[role] >= ROLE_RANK[min]
+export const ROLE_LABELS: Record<UserRole, string> = {
+  buyer: "Buyer",
+  seller: "Seller",
+  admin: "Admin",
 }
 
 export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
@@ -38,7 +34,7 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
     .from("profiles")
     .select("full_name, role, profile_completion")
     .eq("id", authUser.id)
-    .single()
+    .maybeSingle()
 
   const role: UserRole = profile?.role === "admin" || profile?.role === "seller"
     ? profile.role
@@ -56,11 +52,5 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
 export async function requireUser(): Promise<SessionUser> {
   const user = await getCurrentUser()
   if (!user) redirect("/login")
-  return user
-}
-
-export async function requireRole(min: UserRole): Promise<SessionUser> {
-  const user = await requireUser()
-  if (!roleAtLeast(user.role, min)) redirect("/")
   return user
 }

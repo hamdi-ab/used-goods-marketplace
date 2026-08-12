@@ -11,6 +11,7 @@ import {
 
 import { useAuth } from "@/components/auth/auth-provider"
 import { signOut } from "@/app/actions/auth"
+import { initials } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
@@ -21,17 +22,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-
-function initials(name: string | null | undefined) {
-  return (
-    (name ?? "?")
-      .split(" ")
-      .map((part) => part.charAt(0))
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "?"
-  )
-}
 
 export function UserMenu() {
   const { user, loading } = useAuth()

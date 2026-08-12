@@ -3,8 +3,9 @@ import Link from "next/link"
 import { redirect } from "next/navigation"
 import { MailIcon, MapPinIcon, PhoneIcon, SendIcon } from "lucide-react"
 
-import { getCurrentUser } from "@/lib/auth"
+import { getCurrentUser, ROLE_LABELS } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
+import { initials } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -13,12 +14,6 @@ import { Badge } from "@/components/ui/badge"
 export const metadata: Metadata = {
   title: "Your profile",
   description: "Your VinTech Marketplace profile.",
-}
-
-const ROLE_LABELS: Record<string, string> = {
-  buyer: "Buyer",
-  seller: "Seller",
-  admin: "Admin",
 }
 
 type ProfileRow = {
@@ -33,17 +28,6 @@ type ProfileRow = {
   role: "buyer" | "seller" | "admin" | null
 }
 
-function initials(name: string | null | undefined) {
-  return (
-    (name ?? "?")
-      .split(" ")
-      .map((part) => part.charAt(0))
-      .slice(0, 2)
-      .join("")
-      .toUpperCase() || "?"
-  )
-}
-
 export default async function ProfilePage() {
   const user = await getCurrentUser()
   if (!user) redirect("/login")
@@ -55,7 +39,7 @@ export default async function ProfilePage() {
       "full_name, phone, telegram_username, city, sub_city, bio, trust_score, profile_completion, role"
     )
     .eq("id", user.id)
-    .single()
+    .maybeSingle()
 
   const p = (profile ?? {}) as ProfileRow
   const roleLabel = ROLE_LABELS[p.role ?? user.role] ?? "Buyer"

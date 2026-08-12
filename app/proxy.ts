@@ -29,7 +29,7 @@ export async function proxy(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Run on everything except static assets, images, favicon and API routes.
+     * Run on everything except static assets and images.
      */
     "/((?!_next/static|_next/image|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico|avif)$).*)",
   ],

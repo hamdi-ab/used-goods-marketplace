@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import Link from "next/link"
 import { HeartIcon, LayoutDashboardIcon, PlusIcon, UserRoundIcon } from "lucide-react"
 
-import { requireUser } from "@/lib/auth"
+import { requireUser, ROLE_LABELS } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -10,12 +10,6 @@ import { Badge } from "@/components/ui/badge"
 export const metadata: Metadata = {
   title: "Dashboard",
   description: "Your VinTech Marketplace dashboard.",
-}
-
-const ROLE_LABELS: Record<string, string> = {
-  buyer: "Buyer",
-  seller: "Seller",
-  admin: "Admin",
 }
 
 export default async function DashboardPage() {
