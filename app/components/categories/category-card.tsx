@@ -18,6 +18,7 @@ export function CategoryCard({
   return (
     <Link
       href={`?category=${category.slug}`}
+      aria-current={active ? "page" : undefined}
       className={`${base} hover:border-primary`}
     >
       <span

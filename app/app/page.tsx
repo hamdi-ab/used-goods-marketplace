@@ -12,6 +12,34 @@ function buildHref(categorySlug: string | undefined, offset: number) {
   return `/?${params.toString()}`
 }
 
+function NoResultsIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      className={className}
+      aria-hidden="true"
+    >
+      <path
+        d="M21 21l-4.35-4.35M9.5 18a8.5 8.5 0 110-17 8.5 8.5 0 010 17z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <circle
+        cx="7.5"
+        cy="7.5"
+        r="1.25"
+        stroke="currentColor"
+        strokeWidth="1.25"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+}
+
 export default async function HomePage({
   searchParams,
 }: {
@@ -20,12 +48,12 @@ export default async function HomePage({
   const sp = await searchParams
   const categorySlug =
     typeof sp.category === "string" ? sp.category : undefined
-  const offset = Number(
-    typeof sp.offset === "string" && sp.offset ? sp.offset : 0
-  )
+  const rawOffset = typeof sp.offset === "string" ? Number(sp.offset) : 0
+  const offset =
+    Number.isFinite(rawOffset) && rawOffset > 0 ? rawOffset : 0
 
   const categoriesPromise = fetchCategories()
-  const { listings, hasMore } = await fetchListings({
+  const { listings, hasMore, error } = await fetchListings({
     limit: PAGE_SIZE,
     offset,
     categorySlug,
@@ -76,21 +104,48 @@ export default async function HomePage({
 
       <section id="listings" aria-label="Listings">
         <h2 className="sr-only">Listings</h2>
-        {listings.length === 0 ? (
+        {error ? (
           <div className="py-16 text-center">
-            <p className="text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
+              We could not load listings.
+            </p>
+            <Link
+              href={buildHref(categorySlug, offset)}
+              className="mt-2 inline-block text-sm font-medium text-primary underline"
+            >
+              Retry
+            </Link>
+          </div>
+        ) : listings.length === 0 ? (
+          <div className="flex flex-col items-center py-16 text-center">
+            <NoResultsIcon className="mb-3 h-10 w-10 text-muted-foreground/60" />
+            <h3 className="font-heading text-lg font-semibold">
               {categorySlug
                 ? "No listings in this category yet."
                 : "No listings found."}
+            </h3>
+            <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+              {categorySlug
+                ? "Try another category or clear your filter."
+                : "Be the first to list — sellers are adding listings all the time."}
             </p>
-            {categorySlug ? (
+            <div className="mt-4 flex flex-col justify-center gap-3 sm:flex-row">
+              {categorySlug ? (
+                <Button asChild size="sm">
+                  <Link href={buildHref(undefined, 0)}>All categories</Link>
+                </Button>
+              ) : (
+                <Button asChild size="sm">
+                  <Link href="/sell">Start selling</Link>
+                </Button>
+              )}
               <Link
                 href={buildHref(undefined, 0)}
-                className="mt-2 inline-block text-sm underline"
+                className="text-sm underline"
               >
-                Clear filters
+                Refresh
               </Link>
-            ) : null}
+            </div>
           </div>
         ) : (
           <>

@@ -237,10 +237,10 @@ export async function fetchSellerListings(sellerId: string): Promise<Listing[]> 
 }
 
 export const PAGE_SIZE = 12
-// PostgREST (Supabase) caps an unpaginated select at 1000 rows; every browse
-// query is bounded to PAGE_SIZE so we stay well under that ceiling even with
-// deep paging via offset. (T05 browse)
-const BROWSE_LIMIT_MAX = 1000
+// Supabase/PostgREST caps a single select result set at 1000 rows. Browse is
+// windowed: each request fetches PAGE_SIZE rows and we never page past the
+// 1000-row ceiling (T05, NFR-COMP-003).
+export const BROWSE_LIMIT_MAX = 1000
 
 export interface BrowseSeller {
   id: string
@@ -250,27 +250,16 @@ export interface BrowseSeller {
   trust_score: number | null
 }
 
-export interface BrowseCategory {
-  id: string
-  name: string
-  slug: string
-}
-
 export interface BrowseListing {
   id: string
   title: string
   price: number
   condition: Condition
-  negotiable: boolean
   city: string | null
-  sub_city: string | null
-  view_count: number
-  favorite_count: number
   published_at: string
   image_url: string | null
   image_count: number
   seller: BrowseSeller | null
-  category: BrowseCategory | null
 }
 
 interface RawListingRow {
@@ -278,14 +267,9 @@ interface RawListingRow {
   title: string
   price: number
   condition: Condition
-  negotiable: boolean
   city: string | null
-  sub_city: string | null
-  view_count: number
-  favorite_count: number
   published_at: string
   seller: BrowseSeller[] | null
-  category: BrowseCategory[] | null
   images: ListingImage[] | null
 }
 
@@ -313,10 +297,18 @@ export async function fetchListings(opts: {
   listings: BrowseListing[]
   count: number | null
   hasMore: boolean
+  error: string | null
 }> {
   const supabase = await createClient()
   const limit = Math.min(opts.limit ?? PAGE_SIZE, BROWSE_LIMIT_MAX)
-  const offset = opts.offset ?? 0
+  // Clamp + guard the pagination window: finite, non-negative, and never past
+  // the 1000-row ceiling so "Load more" always terminates. (§15: validate
+  // external input — offset comes from the URL.)
+  const requestedOffset = opts.offset ?? 0
+  const offset =
+    Number.isFinite(requestedOffset) && requestedOffset > 0
+      ? Math.min(requestedOffset, BROWSE_LIMIT_MAX - 1)
+      : 0
 
   let categoryId: string | null = null
   if (opts.categorySlug) {
@@ -326,15 +318,14 @@ export async function fetchListings(opts: {
       .eq("slug", opts.categorySlug)
       .maybeSingle()
     categoryId = cat?.id ?? null
-    if (!categoryId) return { listings: [], count: 0, hasMore: false }
+    if (!categoryId) return { listings: [], count: 0, hasMore: false, error: null }
   }
 
   let query = supabase
     .from("listings")
     .select(
-      `id, title, price, condition, negotiable, city, sub_city, view_count, favorite_count, published_at,
+      `id, title, price, condition, city, published_at,
        seller:profiles(id, full_name, avatar_url, role, trust_score),
-       category:categories(id, name, slug),
        images:listing_images(id, image_url, display_order)`,
       { count: "exact" }
     )
@@ -347,7 +338,7 @@ export async function fetchListings(opts: {
 
   if (error) {
     console.error("fetchListings:", error.message)
-    return { listings: [], count, hasMore: false }
+    return { listings: [], count, hasMore: false, error: error.message }
   }
 
   const listings: BrowseListing[] = (data as RawListingRow[] | null ?? []).map(
@@ -358,17 +349,12 @@ export async function fetchListings(opts: {
           .sort((a, b) => a.display_order - b.display_order)[0]?.image_url ??
         null
       const seller = l.seller?.[0] ?? null
-      const category = l.category?.[0] ?? null
       return {
         id: l.id,
         title: l.title,
         price: l.price,
         condition: l.condition,
-        negotiable: l.negotiable,
         city: l.city,
-        sub_city: l.sub_city,
-        view_count: l.view_count,
-        favorite_count: l.favorite_count,
         published_at: l.published_at,
         image_url: cover,
         image_count: images.length,
@@ -381,15 +367,12 @@ export async function fetchListings(opts: {
               trust_score: seller.trust_score,
             }
           : null,
-        category: category
-          ? { id: category.id, name: category.name, slug: category.slug }
-          : null,
       }
     }
   )
 
   const hasMore = typeof count === "number" ? offset + listings.length < count : false
-  return { listings, count, hasMore }
+  return { listings, count, hasMore, error: null }
 }
 
 // ---- Writes (called by server actions; DB access centralized here, §17) ----
