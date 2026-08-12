@@ -6,6 +6,12 @@ import { revalidatePath } from "next/cache"
 
 import { getCurrentUser } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
+import {
+  ALLOWED_IMAGE_MIME,
+  MAX_IMAGE_BYTES,
+  detectImageMime,
+  uploadObjects,
+} from "@/lib/media"
 
 const onboardingSchema = z.object({
   fullName: z.string().min(2, "Enter your full name"),
@@ -126,9 +132,6 @@ export async function updateProfile(
   return { ok: true }
 }
 
-const ALLOWED_AVATAR_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"]
-const MAX_AVATAR_BYTES = 5 * 1024 * 1024
-
 export async function uploadAvatar(
   uid: string,
   _prevState: { url: string | null; error: string | null },
@@ -143,39 +146,44 @@ export async function uploadAvatar(
   if (!file || !file.size) {
     return { url: null, error: "Choose an image to upload" }
   }
-  if (!ALLOWED_AVATAR_TYPES.includes(file.type)) {
-    return { url: null, error: "Upload a JPG, PNG or WebP image" }
-  }
-  if (file.size > MAX_AVATAR_BYTES) {
-    return { url: null, error: "Avatar must be 5 MB or smaller" }
-  }
 
   const supabase = await createClient()
-  const ext = (file.name.split(".").pop() || "png").toLowerCase()
-  const path = `avatars/${uid}/${Date.now()}.${ext}`
+  // The avatar adapter: second adapter behind the shared Media upload seam.
+  // Validation now uses magic bytes (not the client MIME type) — matching the
+  // listing-image path so both adapters share one security surface.
+  const result = await uploadObjects(
+    [{ file, index: 0 }],
+    {
+      bucket: "profiles",
+      upsert: true,
+      validate: async (file) => {
+        const mime = await detectImageMime(file)
+        if (!mime || !ALLOWED_IMAGE_MIME.includes(mime)) {
+          return "Upload a JPG, PNG or WebP image"
+        }
+        if (file.size > MAX_IMAGE_BYTES) {
+          return "Avatar must be 5 MB or smaller"
+        }
+        return null
+      },
+      path: () => {
+        const ext = (file.name.split(".").pop() || "png").toLowerCase()
+        return `avatars/${uid}/${Date.now()}.${ext}`
+      },
+      reconcile: async (publicUrl) => {
+        const { error } = await supabase
+          .from("profiles")
+          .update({ avatar_url: publicUrl })
+          .eq("id", uid)
+        return error ? error.message : null
+      },
+    },
+    supabase
+  )
 
-  const { error: uploadError } = await supabase.storage
-    .from("profiles")
-    .upload(path, file, { upsert: true })
-
-  if (uploadError) {
-    return { url: null, error: uploadError.message }
-  }
-
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from("profiles").getPublicUrl(path)
-
-  const { error: updateError } = await supabase
-    .from("profiles")
-    .update({ avatar_url: publicUrl })
-    .eq("id", uid)
-
-  if (updateError) {
-    return { url: publicUrl, error: updateError.message }
-  }
+  if (!result.ok) return { url: null, error: result.error }
 
   revalidatePath("/profile")
   revalidatePath(`/users/${user.id}`)
-  return { url: publicUrl, error: null }
+  return { url: result.publicUrls[0], error: null }
 }

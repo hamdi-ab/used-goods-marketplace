@@ -1,13 +1,18 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
+import {
+  detectImageMime,
+  EXT_BY_MIME,
+  MAX_IMAGE_BYTES,
+  ALLOWED_IMAGE_MIME,
+  uploadObjects,
+} from "@/lib/media"
 
 // ---- Shared value sets (also drive the client form via literals) ----
 export const CONDITIONS = ["Brand New", "Lightly Used", "Fair"] as const
 export const STATUSES = ["draft", "published", "sold"] as const // "archived" is delete-only
 export const MAX_IMAGES = 10
-export const MAX_IMAGE_BYTES = 5 * 1024 * 1024
-export const ALLOWED_IMAGE_MIME = ["image/jpeg", "image/png", "image/webp"]
 
 export type Condition = (typeof CONDITIONS)[number]
 export type ListingStatus = (typeof STATUSES)[number] | "archived"
@@ -99,34 +104,9 @@ export function isValidUuid(id: string): boolean {
   return UUID_RE.test(id)
 }
 
-/** Returns the image MIME derived from magic bytes, or null if it's not a real image (rejects executables). */
-async function detectImageMime(file: File): Promise<string | null> {
-  const slice = file.slice(0, 12)
-  const buf = await slice.arrayBuffer()
-  const b = new Uint8Array(buf)
-  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return "image/jpeg"
-  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return "image/png"
-  // RIFF....WEBP
-  if (
-    b[0] === 0x52 &&
-    b[1] === 0x49 &&
-    b[2] === 0x46 &&
-    b[3] === 0x46 &&
-    b[8] === 0x57 &&
-    b[9] === 0x45 &&
-    b[10] === 0x42 &&
-    b[11] === 0x50
-  ) {
-    return "image/webp"
-  }
-  return null
-}
-
-const EXT_BY_MIME: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-}
+// Image validation primitives (detectImageMime, ALLOWED_IMAGE_MIME,
+// MAX_IMAGE_BYTES, EXT_BY_MIME) live in the Media object module (lib/media),
+// imported at the top of this file.
 
 // ---- Reads ----
 
@@ -487,61 +467,40 @@ export async function uploadListingPhotos(
     return `Up to ${MAX_IMAGES} photos allowed`
   }
 
-  // Track objects successfully uploaded so they can be cleaned up if a later
-  // step fails — otherwise a partial batch would orphan storage objects.
-  const uploadedPaths: string[] = []
-  const cleanupUploaded = async () => {
-    if (uploadedPaths.length) {
-      await supabase.storage.from("listing-images").remove(uploadedPaths).catch(() => {})
-    }
-  }
+  // The listing-image adapter: one of two adapters behind the shared Media
+  // upload seam (see lib/media). Bucket + path + reconciliation vary; the
+  // validate/upload/publicUrl/cleanup skeleton does not.
+  const result = await uploadObjects(
+    files.map((file, i) => ({ file, index: i })),
+    {
+      bucket: "listing-images",
+      validate: async (file) => {
+        const detected = await detectImageMime(file)
+        if (!detected || !ALLOWED_IMAGE_MIME.includes(detected)) {
+          return `${file.name || "Photo"} is not a valid JPG, PNG or WebP image`
+        }
+        if (file.size > MAX_IMAGE_BYTES) {
+          return "Each photo must be 5 MB or smaller"
+        }
+        return null
+      },
+      path: async (file, i) => {
+        const ext = EXT_BY_MIME[(await detectImageMime(file)) ?? ""] ?? "jpg"
+        return `${listingId}/${crypto.randomUUID()}-${i}.${ext}`
+      },
+      upsert: false,
+      reconcile: async (publicUrl, _file, i) => {
+        const { error } = await supabase.from("listing_images").insert({
+          listing_id: listingId,
+          image_url: publicUrl,
+          display_order: i,
+          alt_text: null,
+        })
+        return error ? error.message : null
+      },
+    },
+    supabase
+  )
 
-  try {
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i]
-      const detected = await detectImageMime(file)
-      if (!detected || !ALLOWED_IMAGE_MIME.includes(detected)) {
-        await cleanupUploaded()
-        return `${file.name || "Photo"} is not a valid JPG, PNG or WebP image`
-      }
-      if (file.size > MAX_IMAGE_BYTES) {
-        await cleanupUploaded()
-        return "Each photo must be 5 MB or smaller"
-      }
-
-      const ext = EXT_BY_MIME[detected]
-      const path = `${listingId}/${crypto.randomUUID()}-${i}.${ext}`
-
-      const { error: uploadError } = await supabase.storage
-        .from("listing-images")
-        .upload(path, file, { upsert: false })
-
-      if (uploadError) {
-        await cleanupUploaded()
-        return uploadError.message
-      }
-      uploadedPaths.push(path)
-
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("listing-images").getPublicUrl(path)
-
-      const { error: imageError } = await supabase.from("listing_images").insert({
-        listing_id: listingId,
-        image_url: publicUrl,
-        display_order: i,
-        alt_text: null,
-      })
-
-      if (imageError) {
-        await cleanupUploaded()
-        return imageError.message
-      }
-    }
-
-    return null
-  } catch (error) {
-    await cleanupUploaded()
-    return error instanceof Error ? error.message : "Failed to upload photos"
-  }
+  return result.ok ? null : result.error
 }
