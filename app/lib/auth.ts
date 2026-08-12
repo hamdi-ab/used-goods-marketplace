@@ -4,22 +4,10 @@ import { cache } from "react"
 import { redirect } from "next/navigation"
 
 import { createClient } from "@/lib/supabase/server"
+import type { SessionUser, UserRole } from "./auth/types"
 
-export type UserRole = "buyer" | "seller" | "admin"
-
-export type SessionUser = {
-  id: string
-  email: string
-  role: UserRole
-  fullName: string | null
-  profileCompleted: boolean
-}
-
-export const ROLE_LABELS: Record<UserRole, string> = {
-  buyer: "Buyer",
-  seller: "Seller",
-  admin: "Admin",
-}
+export type { SessionUser, UserRole }
+export { ROLE_LABELS } from "./auth/types"
 
 export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
   const supabase = await createClient()
