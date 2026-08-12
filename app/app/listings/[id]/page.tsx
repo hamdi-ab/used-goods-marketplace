@@ -5,7 +5,7 @@ import { MapPinIcon, TagIcon } from "lucide-react"
 
 import { ROLE_LABELS } from "@/lib/auth"
 import type { UserRole } from "@/lib/auth/types"
-import { fetchListing } from "@/lib/listings"
+import { fetchListing, formatCondition, formatPrice } from "@/lib/listings"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -20,7 +20,7 @@ export async function generateMetadata({
   params: Promise<{ id: string }>
 }): Promise<Metadata> {
   const { id } = await params
-  const data = await fetchListing(id)
+  const data = await fetchListing(id, { includeSeller: false })
   if (!data) return { title: "Listing not found" }
   const l = data.listing
   return {
@@ -31,18 +31,6 @@ export async function generateMetadata({
       description: l.description ?? undefined,
       images: data.images.length ? [data.images[0]?.image_url] : undefined,
     },
-  }
-}
-
-function formatPrice(price: number | string) {
-  try {
-    return new Intl.NumberFormat("en-ET", {
-      style: "currency",
-      currency: "ETB",
-      maximumFractionDigits: 2,
-    }).format(typeof price === "number" ? price : Number(price))
-  } catch {
-    return `ETB ${price}`
   }
 }
 
@@ -102,7 +90,7 @@ export default async function ListingPage({
           </div>
 
           <p className="text-2xl font-semibold text-foreground">
-            {formatPrice(l.price)}
+            {formatPrice(l.price, { maxFractionDigits: 2 })}
             {l.negotiable ? " (or best offer)" : null}
           </p>
 
@@ -178,11 +166,3 @@ export default async function ListingPage({
   )
 }
 
-function formatCondition(c: string) {
-  const map: Record<string, string> = {
-    "Brand New": "Brand new",
-    "Lightly Used": "Lightly used",
-    Fair: "Fair",
-  }
-  return map[c] ?? c
-}

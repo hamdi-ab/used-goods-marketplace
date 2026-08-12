@@ -143,7 +143,18 @@ export async function fetchCategories(): Promise<Category[]> {
   return data as Category[]
 }
 
-export async function fetchListing(id: string): Promise<ListingWithRelations | null> {
+export interface FetchListingOptions {
+  /** Include the joined seller profile. The detail view renders the seller card,
+   * but the edit flow only authorizes via the page and never reads the profile
+   * row — so it can opt out of the extra profiles join. (RLS "readable by the
+   * owner" already lets an owner see their unpubished/draft rows.) */
+  includeSeller?: boolean
+}
+
+export async function fetchListing(
+  id: string,
+  opts: FetchListingOptions = {}
+): Promise<ListingWithRelations | null> {
   if (!isValidUuid(id)) return null
   const supabase = await createClient()
 
@@ -170,55 +181,23 @@ export async function fetchListing(id: string): Promise<ListingWithRelations | n
     category = (cat as Category | null) ?? null
   }
 
-  const { data: seller } = await supabase
-    .from("profiles")
-    .select("id, full_name, avatar_url, role, trust_score")
-    .eq("id", listing.seller_id)
-    .maybeSingle()
+  // The seller join is opt-out: one seam serves both read intents (detail wants
+  // seller, edit does not), instead of two near-copied functions.
+  let seller: ListingWithRelations["seller"] = null
+  if (opts.includeSeller !== false) {
+    const { data: s } = await supabase
+      .from("profiles")
+      .select("id, full_name, avatar_url, role, trust_score")
+      .eq("id", listing.seller_id)
+      .maybeSingle()
+    seller = s as ListingWithRelations["seller"]
+  }
 
   return {
     listing: listing as Listing,
     images: (images ?? []) as ListingImage[],
     category: category as Category | null,
-    seller: seller as ListingWithRelations["seller"],
-  }
-}
-
-// Reads the row for the owner even when not published (used by edit page).
-export async function fetchListingForEdit(
-  id: string,
-  sellerId: string
-): Promise<ListingWithRelations | null> {
-  if (!isValidUuid(id)) return null
-  const supabase = await createClient()
-
-  const { data: listing } = await supabase
-    .from("listings")
-    .select(LISTING_COLUMNS)
-    .eq("id", id)
-    .eq("seller_id", sellerId)
-    .maybeSingle()
-  if (!listing) return null
-
-  const { data: images } = await supabase
-    .from("listing_images")
-    .select("id, listing_id, image_url, display_order, alt_text")
-    .eq("listing_id", id)
-    .order("display_order", { ascending: true })
-
-  const { data: category } = listing.category_id
-    ? await supabase
-        .from("categories")
-        .select("id, name, slug, parent_id")
-        .eq("id", listing.category_id)
-        .maybeSingle()
-    : { data: null }
-
-  return {
-    listing: listing as Listing,
-    images: (images ?? []) as ListingImage[],
-    category: (category as Category | null) ?? null,
-    seller: null,
+    seller,
   }
 }
 
@@ -273,19 +252,43 @@ interface RawListingRow {
   images: ListingImage[] | null
 }
 
-export function formatPrice(price: number | string): string {
+export interface FormatPriceOptions {
+  maxFractionDigits?: number
+}
+
+export function formatPrice(
+  price: number | string,
+  opts: FormatPriceOptions = {}
+): string {
   const n = typeof price === "number" ? price : Number(price)
   if (Number.isNaN(n)) return "ETB —"
+  const maxFractionDigits = opts.maxFractionDigits ?? 0
   try {
     return new Intl.NumberFormat("en-ET", {
       style: "currency",
       currency: "ETB",
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+      maximumFractionDigits: maxFractionDigits,
     }).format(n)
   } catch {
     return `ETB ${Math.round(n)}`
   }
+}
+
+const CONDITION_LABELS: Record<Condition, string> = {
+  "Brand New": "Brand new",
+  "Lightly Used": "Lightly used",
+  Fair: "Fair",
+}
+
+export function formatCondition(condition: Condition): string {
+  return CONDITION_LABELS[condition] ?? condition
+}
+
+export const CONDITION_COLORS: Record<Condition, string> = {
+  "Brand New": "bg-green-100 text-green-800",
+  "Lightly Used": "bg-blue-100 text-blue-800",
+  Fair: "bg-amber-100 text-amber-800",
 }
 
 // Public, paginated browse of published listings (anon-readable via RLS).

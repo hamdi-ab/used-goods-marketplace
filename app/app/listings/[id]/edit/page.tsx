@@ -13,7 +13,7 @@ export default async function EditListingPage({
 }) {
   const user = await requireSeller()
   const { id } = await params
-  const data = await fetchListing(id)
+  const data = await fetchListing(id, { includeSeller: false })
   if (!data) notFound()
   // Only the owning seller (or an admin) may edit.
   if (data.listing.seller_id !== user.id && user.role !== "admin") notFound()
