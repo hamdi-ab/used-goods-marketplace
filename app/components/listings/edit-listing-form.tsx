@@ -34,7 +34,7 @@ export function EditListingForm({
 
   return (
     <>
-      <form action={formAction}>
+      <form action={formAction} id="edit-listing-form">
         <input type="hidden" name="id" value={listing.id} readOnly />
 
         <Card className="mb-6">
@@ -183,27 +183,38 @@ export function EditListingForm({
         {state.ok ? <p className="text-sm text-green-600">Listing updated.</p> : null}
 
         <div className="mt-4 flex gap-3">
-          <Button type="submit" disabled={pending}>
+          <Button type="submit" form="edit-listing-form" disabled={pending}>
             {pending ? "Saving…" : "Save changes"}
           </Button>
-
-          <form
-            action={deleteAction}
-            onSubmit={(e) => {
-              if (!confirm("Archive this listing? You can republish it later.")) e.preventDefault()
+          <Button
+            type="submit"
+            form="delete-listing-form"
+            variant="destructive"
+            disabled={deletePending}
+            onClick={() => {
+              if (
+                !confirm("Archive this listing? You can republish it later.")
+              )
+                return false
             }}
           >
-            <input type="hidden" name="id" value={listing.id} readOnly />
-            <Button
-              type="submit"
-              variant="destructive"
-              disabled={deletePending}
-            >
-              <XIcon className="mr-2 size-4" />
-              {deletePending ? "Archiving…" : "Archive listing"}
-            </Button>
-          </form>
+            <XIcon className="mr-2 size-4" />
+            {deletePending ? "Archiving…" : "Archive listing"}
+          </Button>
         </div>
+      </form>
+
+      <form
+        id="delete-listing-form"
+        action={deleteAction}
+        onSubmit={(e) => {
+          if (
+            !confirm("Archive this listing? You can republish it later.")
+          )
+            e.preventDefault()
+        }}
+      >
+        <input type="hidden" name="id" value={listing.id} readOnly />
       </form>
 
       {deleteState.message ? (

@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 }
 
 export default async function SellPage() {
-  const user = await requireSeller()
+  await requireSeller()
   const categories = await fetchCategories()
 
   return (
@@ -22,7 +22,7 @@ export default async function SellPage() {
         List your item once, reach buyers across Addis Ababa.
       </p>
 
-      <CreateListingForm categories={categories} sellerId={user.id} />
+      <CreateListingForm categories={categories} />
     </main>
   )
 }

@@ -19,15 +19,20 @@ function FieldError({ message }: { message: string | undefined }) {
 
 export function CreateListingForm({
   categories,
-  sellerId,
 }: {
   categories: Category[]
-  sellerId: string
 }) {
   const router = useRouter()
   const [state, formAction, pending] = useActionState(createListing, {})
   const [previews, setPreviews] = useState<string[]>([])
   const fileRef = useRef<HTMLInputElement>(null)
+  const urlRefs = useRef<string[]>([])
+
+  useEffect(() => {
+    return () => {
+      urlRefs.current.forEach((url) => URL.revokeObjectURL(url))
+    }
+  }, [])
 
   useEffect(() => {
     if (state.ok && state.listingId) {
@@ -38,15 +43,15 @@ export function CreateListingForm({
   function handlePhotos(e: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
     // revoke prior previews
-    previews.forEach((url) => URL.revokeObjectURL(url))
+    urlRefs.current.forEach((url) => URL.revokeObjectURL(url))
+    urlRefs.current = []
     const urls = files.map((f) => URL.createObjectURL(f))
+    urlRefs.current = urls
     setPreviews(urls)
   }
 
   return (
     <form action={formAction}>
-      <input type="hidden" name="sellerId" value={sellerId} readOnly />
-
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Photos *</CardTitle>

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { MapPinIcon, TagIcon } from "lucide-react"
 
 import { ROLE_LABELS } from "@/lib/auth"
+import type { UserRole } from "@/lib/auth/types"
 import { fetchListing } from "@/lib/listings"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -56,7 +57,8 @@ export default async function ListingPage({
 
   const { listing: l, images, category, seller } = data
   const cover = images[0]?.image_url
-  const roleLabel = ROLE_LABELS[(l.seller_id ? "seller" : "buyer")] ?? "Seller"
+  const roleLabel =
+    ROLE_LABELS[(seller?.role ?? "seller") as UserRole] ?? "Seller"
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">

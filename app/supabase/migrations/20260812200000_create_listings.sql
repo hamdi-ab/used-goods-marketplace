@@ -1,8 +1,8 @@
 -- T04 - Listings service (CRUD, photos, search index)
--- Categories + listings + listing_images, per docs/02-architecture/03-database-design-specification.md
--- §7 (categories), §8 (listings), §7 listing_images (named listing_images),
--- §17 (indexes), §19 (images: max 10 per listing), §20 (RLS), §22 (migration naming).
--- Adds the full-text search index resolved in #3 (tsvector + GIN + pg_trgm).
+-- categories + listings + listing_images, per docs/02-architecture/03-database-design-specification.md
+-- §7 (categories), §8 (listings), §7 listing_images, §17 (indexes), §19 (images: max 10),
+-- §20 (RLS), §22 (migration naming). Full-text search index per resolved #3 (tsvector + GIN + pg_trgm).
+-- File-storage layout: avatars/, listing-images/ (docs/02-architecture/00-system-architecture.md §10).
 
 create extension if not exists pg_trgm;
 
@@ -17,9 +17,8 @@ create table if not exists public.categories (
 );
 
 -- Listing condition + status constrained to the documented value sets.
--- (DB spec §8 lists free-text columns; T04 AC fixes the value sets.)
-create type public.listing_condition as enum ('Brand New', 'Lightly Used', 'Fair');
-create type public.listing_status as enum ('draft', 'published', 'sold', 'archived');
+create type if not exists public.listing_condition as enum ('Brand New', 'Lightly Used', 'Fair');
+create type if not exists public.listing_status as enum ('draft', 'published', 'sold', 'archived');
 
 create table if not exists public.listings (
   id uuid primary key default gen_random_uuid(),
@@ -46,12 +45,12 @@ create table if not exists public.listings (
   deleted_at timestamptz
 );
 
--- Constraint ranges from DB spec §18: title 5-120, description 20-2000.
+-- Constraint ranges from DB spec §18: title 5-120, description 20-2000 (null allowed).
 alter table public.listings
   add constraint listings_title_len check (char_length(title) between 5 and 120),
-  add constraint listings_description_len check (char_length(coalesce(description, '')) <= 2000);
+  add constraint listings_description_len check (description is null or char_length(description) between 20 and 2000);
 
--- Indexes (DB spec §17 + §19 full-text future, now resolved by #3).
+-- Indexes (DB spec §17 + §19 full-text, now resolved by #3).
 create index if not exists listings_seller_id_idx on public.listings (seller_id);
 create index if not exists listings_category_id_idx on public.listings (category_id);
 create index if not exists listings_city_idx on public.listings (city);
@@ -88,13 +87,11 @@ create trigger if not exists listings_set_updated_at
 alter table public.listings enable row level security;
 alter table public.listing_images enable row level security;
 
--- Public read: published, not deleted.
 create policy if not exists "Listings are readable when published"
   on public.listings for select
   to authenticated, anon
   using (status = 'published' and deleted_at is null);
 
--- A seller sees all of their own listings (incl. drafts).
 create policy if not exists "Listings are readable by the owner"
   on public.listings for select
   to authenticated
@@ -116,15 +113,12 @@ create policy if not exists "Listings are deletable by the owner"
   to authenticated
   using ((select auth.uid()) = seller_id);
 
--- Admin override (consistent with profiles).
 create policy if not exists "Listings are manageable by admins"
   on public.listings for all
   to authenticated
   using (public.is_admin())
   with check (public.is_admin());
 
--- Listing images: readable when the parent listing is readable; only the
--- listing owner (or admin) may write them.
 create policy if not exists "Listing images are readable with published listings"
   on public.listing_images for select
   to authenticated, anon
@@ -182,38 +176,35 @@ grant select, insert, update, delete on public.listings, public.listing_images, 
 grant select on public.listings, public.listing_images, public.categories to anon;
 
 ------------------------------------------------------------------------------
--- Storage: listing photos (DB spec §11: JPG/JPEG/PNG/WebP, 5 MB each, max 10).
--- Public read; only the listing owner may write to listings/{listing_id}/.
+-- Storage (design §10): listing photos in the `listing-images` bucket.
+-- Public read (bucket is public); only the listing owner may write to
+-- listing-images/{listing_id}/... (foldername()[0] is the listing id).
+-- 5 MB per image, JPG/JPEG/PNG/WebP; magic-byte + size validation happens in
+-- the upload service (app/lib/listings.ts) — Storage RLS is defense-in-depth.
 ------------------------------------------------------------------------------
 insert into storage.buckets (id, name, public, file_size_limit)
-values ('listings', 'listings', true, 5242880)
+values ('listing-images', 'listing-images', true, 5242880)
 on conflict (id) do update
   set public = excluded.public, file_size_limit = excluded.file_size_limit;
 
 create policy if not exists "Listing photos are publicly readable"
   on storage.objects for select
   to authenticated, anon
-  using (bucket_id = 'listings');
+  using (bucket_id = 'listing-images');
 
 create policy if not exists "Listing photos are writable by the listing owner"
   on storage.objects for all
   to authenticated
   with check (
-    bucket_id = 'listings'
-    and (storage.foldername(name))[0] = 'listings'
-    and exists (
-      select 1 from public.listings l
-      where l.id = (storage.foldername(name))[1]::uuid
-        and l.seller_id = (select auth.uid())
+    bucket_id = 'listing-images'
+    and (storage.foldername(name))[0]::uuid in (
+      select l.id from public.listings l where l.seller_id = (select auth.uid())
     )
   )
   using (
-    bucket_id = 'listings'
-    and (storage.foldername(name))[0] = 'listings'
-    and exists (
-      select 1 from public.listings l
-      where l.id = (storage.foldername(name))[1]::uuid
-        and l.seller_id = (select auth.uid())
+    bucket_id = 'listing-images'
+    and (storage.foldername(name))[0]::uuid in (
+      select l.id from public.listings l where l.seller_id = (select auth.uid())
     )
   );
 
