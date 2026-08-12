@@ -87,6 +87,36 @@ This environment's `supabase start` was not executed (Docker was
 unavailable during scaffold), so the runtime URLs above are the documented
 defaults from the CLI output.
 
+### Database migrations
+
+Schema changes live in `supabase/migrations/` (timestamped SQL). Apply them
+and load the seed on the local stack:
+
+```bash
+supabase db reset
+```
+
+`supabase db reset` also runs `supabase/seed.sql`, which creates one admin
+account for moderation: **admin@vintch.local / admin1234** (change the
+password before any shared hosting).
+
+## Authentication & roles
+
+Auth is Supabase Auth (email & password) wired through `@supabase/ssr`
+cookie sessions. See `docs/02-architecture/07-security-architecture.md` for
+the model.
+
+- **Routes:** `/login`, `/register`, `/forgot-password`, `/reset-password`;
+  protected areas (`/profile`, `/dashboard`, `/onboarding`, `/sell`,
+  `/favorites`) redirect to `/login` via `proxy.ts` (Next 16 middleware).
+- **Roles:** `buyer` (default), `seller`, `admin`. A trigger creates a
+  `profiles` row for every new user; onboarding (`/onboarding`) completes it.
+- **RLS:** users read/update only their own profile; admins via
+  `public.is_admin()`. Relaxing public-profile reads is a later ticket.
+- **Session state:** `AuthProvider` subscribes to Supabase auth changes so
+  the header user menu stays in sync; sessions persist across refresh via
+  cookies.
+
 ## Environment variables
 
 See `.env.example` for the full set. Secrets must never be committed.

@@ -9,6 +9,7 @@ import { primaryNav, siteName } from "@/lib/nav"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { MobileNav } from "@/components/mobile-nav"
+import { UserMenu } from "@/components/auth/user-menu"
 
 export function SiteHeader() {
   const pathname = usePathname()
@@ -51,6 +52,7 @@ export function SiteHeader() {
           <Button asChild variant="default" size="sm" className="hidden sm:inline-flex">
             <Link href="/sell">Sell</Link>
           </Button>
+          <UserMenu />
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="outline" size="icon" className="lg:hidden" aria-label="Open menu">

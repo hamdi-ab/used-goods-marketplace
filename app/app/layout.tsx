@@ -5,6 +5,7 @@ import "./globals.css";
 
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { AuthProvider } from "@/components/auth/auth-provider";
 import { siteName } from "@/lib/nav";
 
 const geistSans = Geist({
@@ -33,9 +34,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
-        <SiteHeader />
-        <div className="flex flex-1 flex-col">{children}</div>
-        <SiteFooter />
+        <AuthProvider>
+          <SiteHeader />
+          <div className="flex flex-1 flex-col">{children}</div>
+          <SiteFooter />
+        </AuthProvider>
       </body>
     </html>
   );
