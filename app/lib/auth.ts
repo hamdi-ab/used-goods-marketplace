@@ -42,3 +42,14 @@ export async function requireUser(): Promise<SessionUser> {
   if (!user) redirect("/login")
   return user
 }
+
+// T04: only sellers (and admins) may create or edit listings.
+export async function requireSeller(): Promise<SessionUser> {
+  const user = await requireUser()
+  if (user.role !== "seller" && user.role !== "admin") {
+    // Not a seller yet — surface the profile page where this gate can be
+    // surfaced as a future "become a seller" prompt.
+    redirect("/profile")
+  }
+  return user
+}

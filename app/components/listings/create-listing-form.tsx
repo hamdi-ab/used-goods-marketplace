@@ -1,0 +1,237 @@
+"use client"
+
+import { useActionState, useEffect, useRef, useState, type ChangeEvent } from "react"
+import { useRouter } from "next/navigation"
+import { XIcon, UploadIcon } from "lucide-react"
+
+import { createListing } from "@/app/actions/listings"
+import type { Category } from "@/lib/listings"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+
+const CONDITIONS = ["Brand New", "Lightly Used", "Fair"] as const
+
+function FieldError({ message }: { message: string | undefined }) {
+  return message ? <p className="text-sm text-destructive">{message}</p> : null
+}
+
+export function CreateListingForm({
+  categories,
+}: {
+  categories: Category[]
+}) {
+  const router = useRouter()
+  const [state, formAction, pending] = useActionState(createListing, {})
+  const [previews, setPreviews] = useState<string[]>([])
+  const fileRef = useRef<HTMLInputElement>(null)
+  const urlRefs = useRef<string[]>([])
+
+  useEffect(() => {
+    return () => {
+      urlRefs.current.forEach((url) => URL.revokeObjectURL(url))
+    }
+  }, [])
+
+  useEffect(() => {
+    if (state.ok && state.listingId) {
+      router.replace(`/listings/${state.listingId}`)
+    }
+  }, [state, router])
+
+  function handlePhotos(e: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? [])
+    // revoke prior previews
+    urlRefs.current.forEach((url) => URL.revokeObjectURL(url))
+    urlRefs.current = []
+    const urls = files.map((f) => URL.createObjectURL(f))
+    urlRefs.current = urls
+    setPreviews(urls)
+  }
+
+  return (
+    <form action={formAction}>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Photos *</CardTitle>
+          <CardDescription>
+            First photo is the cover. Up to 10 JPG/PNG/WebP images, 5 MB each.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div
+            className="flex min-h-[120px] cursor-pointer items-center justify-center rounded-lg border border-dashed border-border text-center text-sm text-muted-foreground transition hover:border-primary"
+            onClick={() => fileRef.current?.click()}
+          >
+            <input
+              ref={fileRef}
+              type="file"
+              name="photos"
+              accept="image/png,image/jpeg,image/webp"
+              multiple
+              className="hidden"
+              onChange={handlePhotos}
+              aria-label="upload photos"
+            />
+            <UploadIcon className="mb-2 size-6" />
+            <span>{previews.length ? "Change photos" : "Click to upload"}</span>
+          </div>
+          {state.errors?.photos ? (
+            <FieldError message={state.errors.photos[0]} />
+          ) : null}
+          {previews.length > 0 ? (
+            <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {previews.map((url, i) => (
+                <div key={url} className="relative aspect-video w-full overflow-hidden rounded-md border">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt={`photo ${i + 1}`} className="h-full w-full object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      URL.revokeObjectURL(url)
+                      setPreviews((p) => p.filter((u) => u !== url))
+                    }}
+                    className="absolute right-1 top-1 rounded bg-background/80 p-0.5"
+                  >
+                    <XIcon className="size-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </CardContent>
+      </Card>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>Details</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="title">Title *</Label>
+              <Input
+                id="title"
+                name="title"
+                placeholder="What are you selling?"
+                aria-invalid={!!state.errors?.title}
+              />
+            <FieldError message={state.errors?.title?.[0]} />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="description">Description</Label>
+            <textarea
+              id="description"
+              name="description"
+              rows={5}
+              className="resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-within:ring-2 focus-within:ring-ring/50"
+              placeholder="Include condition, brand, age, what's included..."
+            />
+            <FieldError message={state.errors?.description?.[0]} />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="price">Price (ETB) *</Label>
+              <Input
+                id="price"
+                name="price"
+                type="number"
+                inputMode="decimal"
+                min={0}
+                step="0.01"
+                placeholder="0.00"
+                aria-invalid={!!state.errors?.price}
+              />
+              <FieldError message={state.errors?.price?.[0]} />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Label>Condition *</Label>
+              <div className="flex flex-wrap gap-3 pt-1">
+                {CONDITIONS.map((c) => (
+                  <label key={c} className="flex items-center gap-2 text-sm">
+                    <input
+                      type="radio"
+                      name="condition"
+                      value={c}
+                      required
+                      className="accent-primary"
+                    />
+                    {c}
+                  </label>
+                ))}
+              </div>
+              <FieldError message={state.errors?.condition?.[0]} />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="categoryId">Category *</Label>
+            <select
+              id="categoryId"
+              name="categoryId"
+              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/50"
+              aria-invalid={!!state.errors?.categoryId}
+            >
+              <option value="">Pick a category</option>
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <FieldError message={state.errors?.categoryId?.[0]} />
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-8">
+        <CardHeader>
+          <CardTitle>Location</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="city">City *</Label>
+              <Input
+                id="city"
+                name="city"
+                placeholder="e.g. Addis Ababa"
+                aria-invalid={!!state.errors?.city}
+              />
+              <FieldError message={state.errors?.city?.[0]} />
+            </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="subCity">Sub-city / neighborhood</Label>
+              <Input
+                id="subCity"
+                name="subCity"
+                placeholder="e.g. Bole"
+              />
+            </div>
+          </div>
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="address">Address (optional)</Label>
+              <Input
+                id="address"
+                name="address"
+                placeholder="Street address or landmark"
+              />
+            </div>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" name="negotiable" className="accent-primary" />
+            Price is negotiable
+          </label>
+        </CardContent>
+      </Card>
+
+      {state.message ? <p className="text-sm text-destructive">{state.message}</p> : null}
+
+      <Button type="submit" size="lg" className="w-full" disabled={pending}>
+        {pending ? "Publishing…" : "Publish listing"}
+      </Button>
+    </form>
+  )
+}
