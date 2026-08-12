@@ -5,13 +5,12 @@ import { useRouter } from "next/navigation"
 import { XIcon, UploadIcon } from "lucide-react"
 
 import { createListing } from "@/app/actions/listings"
+import { CONDITIONS } from "@/lib/listings"
 import type { Category } from "@/lib/listings"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
-const CONDITIONS = ["Brand New", "Lightly Used", "Fair"] as const
 
 function FieldError({ message }: { message: string | undefined }) {
   return message ? <p className="text-sm text-destructive">{message}</p> : null

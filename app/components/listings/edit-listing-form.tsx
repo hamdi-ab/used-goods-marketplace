@@ -4,19 +4,12 @@ import { useActionState } from "react"
 import { XIcon } from "lucide-react"
 
 import { updateListing, deleteListing } from "@/app/actions/listings"
+import { CONDITIONS, STATUSES_FOR_DISPLAY } from "@/lib/listings"
 import type { Category, Listing } from "@/lib/listings"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-
-const CONDITIONS = ["Brand New", "Lightly Used", "Fair"] as const
-const STATUSES: { value: string; label: string; disabled?: boolean }[] = [
-  { value: "draft", label: "Draft" },
-  { value: "published", label: "Published" },
-  { value: "sold", label: "Sold" },
-  { value: "archived", label: "Archived", disabled: true },
-]
 
 function FieldError({ message }: { message: string | undefined }) {
   return message ? <p className="text-sm text-destructive">{message}</p> : null
@@ -170,7 +163,7 @@ export function EditListingForm({
               className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/50"
               defaultValue={listing.status}
             >
-              {STATUSES.map((s) => (
+              {STATUSES_FOR_DISPLAY.map((s) => (
                 <option key={s.value} value={s.value} disabled={s.disabled}>
                   {s.label}
                 </option>

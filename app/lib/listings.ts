@@ -17,6 +17,22 @@ export const MAX_IMAGES = 10
 export type Condition = (typeof CONDITIONS)[number]
 export type ListingStatus = (typeof STATUSES)[number] | "archived"
 
+export interface ListingStatusOption {
+  value: string
+  label: string
+  disabled?: boolean
+}
+
+// Canonical status options for the edit flow: the writable statuses plus the
+// terminal "archived" state surfaced as disabled (delete-only). Kept here so
+// the form never drifts from the ListingStatus value set.
+export const STATUSES_FOR_DISPLAY: ListingStatusOption[] = [
+  { value: "draft", label: "Draft" },
+  { value: "published", label: "Published" },
+  { value: "sold", label: "Sold" },
+  { value: "archived", label: "Archived", disabled: true },
+]
+
 export interface Category {
   id: string
   name: string
