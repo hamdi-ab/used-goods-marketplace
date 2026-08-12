@@ -236,6 +236,162 @@ export async function fetchSellerListings(sellerId: string): Promise<Listing[]> 
   return data as Listing[]
 }
 
+export const PAGE_SIZE = 12
+// PostgREST (Supabase) caps an unpaginated select at 1000 rows; every browse
+// query is bounded to PAGE_SIZE so we stay well under that ceiling even with
+// deep paging via offset. (T05 browse)
+const BROWSE_LIMIT_MAX = 1000
+
+export interface BrowseSeller {
+  id: string
+  full_name: string | null
+  avatar_url: string | null
+  role: string | null
+  trust_score: number | null
+}
+
+export interface BrowseCategory {
+  id: string
+  name: string
+  slug: string
+}
+
+export interface BrowseListing {
+  id: string
+  title: string
+  price: number
+  condition: Condition
+  negotiable: boolean
+  city: string | null
+  sub_city: string | null
+  view_count: number
+  favorite_count: number
+  published_at: string
+  image_url: string | null
+  image_count: number
+  seller: BrowseSeller | null
+  category: BrowseCategory | null
+}
+
+interface RawListingRow {
+  id: string
+  title: string
+  price: number
+  condition: Condition
+  negotiable: boolean
+  city: string | null
+  sub_city: string | null
+  view_count: number
+  favorite_count: number
+  published_at: string
+  seller: BrowseSeller[] | null
+  category: BrowseCategory[] | null
+  images: ListingImage[] | null
+}
+
+export function formatPrice(price: number | string): string {
+  const n = typeof price === "number" ? price : Number(price)
+  if (Number.isNaN(n)) return "ETB —"
+  try {
+    return new Intl.NumberFormat("en-ET", {
+      style: "currency",
+      currency: "ETB",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(n)
+  } catch {
+    return `ETB ${Math.round(n)}`
+  }
+}
+
+// Public, paginated browse of published listings (anon-readable via RLS).
+export async function fetchListings(opts: {
+  limit?: number
+  offset?: number
+  categorySlug?: string
+} = {}): Promise<{
+  listings: BrowseListing[]
+  count: number | null
+  hasMore: boolean
+}> {
+  const supabase = await createClient()
+  const limit = Math.min(opts.limit ?? PAGE_SIZE, BROWSE_LIMIT_MAX)
+  const offset = opts.offset ?? 0
+
+  let categoryId: string | null = null
+  if (opts.categorySlug) {
+    const { data: cat } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("slug", opts.categorySlug)
+      .maybeSingle()
+    categoryId = cat?.id ?? null
+    if (!categoryId) return { listings: [], count: 0, hasMore: false }
+  }
+
+  let query = supabase
+    .from("listings")
+    .select(
+      `id, title, price, condition, negotiable, city, sub_city, view_count, favorite_count, published_at,
+       seller:profiles(id, full_name, avatar_url, role, trust_score),
+       category:categories(id, name, slug),
+       images:listing_images(id, image_url, display_order)`,
+      { count: "exact" }
+    )
+    .eq("status", "published")
+  if (categoryId) query = query.eq("category_id", categoryId)
+
+  const { data, error, count } = await query
+    .order("published_at", { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  if (error) {
+    console.error("fetchListings:", error.message)
+    return { listings: [], count, hasMore: false }
+  }
+
+  const listings: BrowseListing[] = (data as RawListingRow[] | null ?? []).map(
+    (l) => {
+      const images = l.images ?? []
+      const cover =
+        [...images]
+          .sort((a, b) => a.display_order - b.display_order)[0]?.image_url ??
+        null
+      const seller = l.seller?.[0] ?? null
+      const category = l.category?.[0] ?? null
+      return {
+        id: l.id,
+        title: l.title,
+        price: l.price,
+        condition: l.condition,
+        negotiable: l.negotiable,
+        city: l.city,
+        sub_city: l.sub_city,
+        view_count: l.view_count,
+        favorite_count: l.favorite_count,
+        published_at: l.published_at,
+        image_url: cover,
+        image_count: images.length,
+        seller: seller
+          ? {
+              id: seller.id,
+              full_name: seller.full_name,
+              avatar_url: seller.avatar_url,
+              role: seller.role,
+              trust_score: seller.trust_score,
+            }
+          : null,
+        category: category
+          ? { id: category.id, name: category.name, slug: category.slug }
+          : null,
+      }
+    }
+  )
+
+  const hasMore = typeof count === "number" ? offset + listings.length < count : false
+  return { listings, count, hasMore }
+}
+
 // ---- Writes (called by server actions; DB access centralized here, §17) ----
 
 export async function createListing(
