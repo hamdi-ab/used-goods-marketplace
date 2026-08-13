@@ -24,6 +24,8 @@ export interface BuyerOfferRow {
   status: OfferStatus
   created_at: string
   listing: BrowseListing | null
+  // The review on this offer, if the buyer has already rated the seller (T10).
+  review: { id: string; rating: number } | null
 }
 
 export interface SellerOfferRow extends BuyerOfferRow {
@@ -60,6 +62,7 @@ function mapRawOfferRow(
   row: RawOfferRow & {
     listing: RawOfferListingRow | null
     buyer?: { id: string; full_name: string | null; avatar_url: string | null } | null
+    review?: { id: string; rating: number } | null
   },
   withBuyer: boolean
 ): SellerOfferRow {
@@ -71,6 +74,7 @@ function mapRawOfferRow(
     status: row.status,
     created_at: row.created_at,
     listing: mapOfferListing(row.listing),
+    review: row.review ?? null,
     buyer: withBuyer ? (row.buyer ?? null) : null,
   }
 }
@@ -87,7 +91,8 @@ export async function fetchBuyerOffers(userId: string): Promise<BuyerOfferRow[]>
     .select(
       `${OFFER_COLUMNS},
        listing:listings(id, title, price, condition, city, published_at,
-         images:listing_images(id, image_url, display_order))`
+         images:listing_images(id, image_url, display_order)),
+       review:reviews(id, rating)`
     )
     .eq("buyer_id", userId)
     .order("created_at", { ascending: false })
@@ -105,6 +110,7 @@ export async function fetchBuyerOffers(userId: string): Promise<BuyerOfferRow[]>
     status: OfferStatus
     created_at: string
     listing: RawOfferListingRow | null
+    review: { id: string; rating: number } | null
   }[]
 
   return rows.map((row) => mapRawOfferRow(row, false))
