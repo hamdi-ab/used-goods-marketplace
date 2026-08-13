@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { HeartIcon, LayoutDashboardIcon, PlusIcon, UserRoundIcon } from "lucide-react"
+import { HeartIcon, InboxIcon, HandshakeIcon, LayoutDashboardIcon, PlusIcon, UserRoundIcon } from "lucide-react"
 
 import { requireUser, ROLE_LABELS } from "@/lib/auth"
 import { Button } from "@/components/ui/button"
@@ -61,6 +61,40 @@ export default async function DashboardPage() {
           <CardContent>
             <Button asChild variant="outline">
               <Link href="/favorites">View favorites</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <HandshakeIcon className="size-5 text-primary" />
+              My offers
+            </CardTitle>
+            <CardDescription>
+              Track the offers you have made and any counter-offers.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild variant="outline">
+              <Link href="/offers">View my offers</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <InboxIcon className="size-5 text-primary" />
+              Incoming offers
+            </CardTitle>
+            <CardDescription>
+              Accept, decline, or counter offers on your listings.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild variant="outline">
+              <Link href="/offers/seller">Manage offers</Link>
             </Button>
           </CardContent>
         </Card>

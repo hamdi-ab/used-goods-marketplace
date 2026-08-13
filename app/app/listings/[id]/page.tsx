@@ -8,6 +8,7 @@ import type { UserRole } from "@/lib/auth/types"
 import { fetchListing, formatCondition, formatPrice } from "@/lib/listings"
 import { fetchFavoriteIds } from "@/lib/favorites"
 import { FavoriteButton } from "@/components/favorites/favorite-button"
+import { MakeOfferButton } from "@/components/offers/make-offer-button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -101,6 +102,14 @@ export default async function ListingPage({
             {formatPrice(l.price, { maxFractionDigits: 2 })}
             {l.negotiable ? " (or best offer)" : null}
           </p>
+
+          <MakeOfferButton
+            listingId={l.id}
+            listingPrice={l.price}
+            isOwner={Boolean(user && user.id === l.seller_id)}
+            available={l.status === "published"}
+            signedIn={Boolean(user)}
+          />
 
           {category ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
