@@ -5,11 +5,13 @@ import { MapPinIcon, PhoneIcon, SendIcon } from "lucide-react"
 
 import { ROLE_LABELS, type UserRole } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
-import { initials } from "@/lib/utils"
+import { initials, formatShortDate } from "@/lib/utils"
+import { fetchSellerReviews, summarizeRating } from "@/lib/reviews"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ReviewStars } from "@/components/reviews/review-stars"
 
 type PublicProfileRow = {
   full_name: string | null
@@ -83,6 +85,9 @@ export default async function UserProfilePage({
 
   const role = (profile.role ?? "buyer") as UserRole
   const roleLabel = ROLE_LABELS[role] ?? "Buyer"
+  const reviews = await fetchSellerReviews(id)
+  const rating = summarizeRating(reviews)
+
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-10 sm:px-6 lg:px-8">
@@ -166,24 +171,74 @@ export default async function UserProfilePage({
             <p className="text-sm text-muted-foreground">No bio added yet.</p>
           )}
 
-          <dl className="grid grid-cols-2 gap-4 border-t border-border pt-5">
-            <div>
-              <dt className="text-xs font-medium text-muted-foreground">
-                Trust score
-              </dt>
-              <dd className="mt-1 text-2xl font-semibold text-foreground">
-                {profile.trust_score ?? 50}
-              </dd>
+           <dl className="grid grid-cols-2 gap-4 border-t border-border pt-5">
+             <div>
+               <dt className="text-xs font-medium text-muted-foreground">
+                 Trust score
+               </dt>
+               <dd className="mt-1 text-2xl font-semibold text-foreground">
+                 {profile.trust_score ?? 50}
+               </dd>
+             </div>
+             <div>
+               <dt className="text-xs font-medium text-muted-foreground">Role</dt>
+               <dd className="mt-1 text-2xl font-semibold text-foreground">
+                 {roleLabel}
+               </dd>
+             </div>
+           </dl>
+         </CardContent>
+       </Card>
+
+      {reviews.length > 0 ? (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Reviews</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-baseline justify-between">
+              <div className="flex items-center gap-2">
+                <ReviewStars rating={rating.average ?? 0} size="md" />
+                <span className="text-sm text-muted-foreground">
+                  {rating.average?.toFixed(1) ?? "—"} out of 5 ({rating.count})
+                </span>
+              </div>
             </div>
-            <div>
-              <dt className="text-xs font-medium text-muted-foreground">Role</dt>
-              <dd className="mt-1 text-2xl font-semibold text-foreground">
-                {roleLabel}
-              </dd>
-            </div>
-          </dl>
-        </CardContent>
-      </Card>
+
+            <ul className="mt-4 flex flex-col gap-4">
+              {reviews.map((review) => (
+                <li key={review.id} className="flex items-start gap-3 text-sm">
+                  <Avatar className="size-8">
+                    {review.buyer?.avatar_url ? (
+                      <AvatarImage
+                        src={review.buyer.avatar_url}
+                        alt={review.buyer.full_name ?? "Reviewer"}
+                      />
+                    ) : null}
+                    <AvatarFallback className="text-xs">
+                      {initials(review.buyer?.full_name ?? "")}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <ReviewStars rating={review.rating} size="xs" />
+                      <span className="text-xs text-muted-foreground">
+                        {formatShortDate(review.created_at)}
+                      </span>
+                    </div>
+                    {review.comment ? (
+                      <p className="mt-1 text-sm text-foreground/80">
+                        {review.comment}
+                      </p>
+                    ) : null}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      ) : null}
+
 
       <div className="mt-6 text-center">
         <Button asChild variant="link">

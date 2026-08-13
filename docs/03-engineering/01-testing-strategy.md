@@ -66,7 +66,7 @@ Tools:
 | Imports | Use `@/lib/...` aliases in tests, not `../lib/...` — relative specifiers resolve incorrectly under the Node env on Windows |
 | Coverage | `npm run test:ci` emits `coverage/` (gitignored) via the v8 provider |
 
-Pure seam surfaces covered: `lib/listings/constants` (`isValidUuid`, `formatPrice`, `formatCondition`, `LISTING_STATUS_LABELS`/`LISTING_STATUS_COLORS`), `lib/media` (`detectImageMime`, `uploadObjects` validation gate), `lib/browse` (`parseBrowseParams` window clamp, `buildBrowseUrl`), `lib/search` (`parseSearchParams` filter validation, `buildSearchUrl`), `lib/pagination` (`parseOffset` window clamp, `nextOffset`), `lib/favorites/constants` (`toggleFavoriteState`, `buildLoginUrl`), `lib/offers/constants` (`OFFER_STATUSES` status machine, `OFFER_AMOUNT_MAX`/`OFFER_MESSAGE_MAX` bounds, `buildLoginUrl`).
+Pure seam surfaces covered: `lib/listings/constants` (`isValidUuid`, `formatPrice`, `formatCondition`, `LISTING_STATUS_LABELS`/`LISTING_STATUS_COLORS`), `lib/media` (`detectImageMime`, `uploadObjects` validation gate), `lib/browse` (`parseBrowseParams` window clamp, `buildBrowseUrl`), `lib/search` (`parseSearchParams` filter validation, `buildSearchUrl`), `lib/pagination` (`parseOffset` window clamp, `nextOffset`), `lib/favorites/constants` (`toggleFavoriteState`, `buildLoginUrl`), `lib/offers/constants` (`OFFER_STATUSES` status machine, `OFFER_AMOUNT_MAX`/`OFFER_MESSAGE_MAX` bounds, `buildLoginUrl`), `lib/reviews/constants` (`RATING_MIN`/`RATING_MAX`, `REVIEW_COMMENT_MAX`, `REVIEWABLE_OFFER_STATUS`, `ratingAverageToTrustScore`).
 
 ## Integration Testing
 
