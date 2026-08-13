@@ -1,4 +1,6 @@
-import { BROWSE_LIMIT_MAX, PAGE_SIZE } from "@/lib/listings"
+import { nextOffset, parseOffset } from "@/lib/pagination"
+
+export { nextOffset }
 
 export interface BrowseCursor {
   categorySlug: string | undefined
@@ -18,13 +20,8 @@ export function parseBrowseParams(params: {
 }): BrowseCursor {
   const categorySlug =
     typeof params.category === "string" ? params.category : undefined
-  const raw = typeof params.offset === "string" ? params.offset : ""
-  const parsed = Number(raw)
-  const offset =
-    Number.isFinite(parsed) && parsed > 0
-      ? Math.min(parsed, BROWSE_LIMIT_MAX - 1)
-      : 0
-  return { categorySlug, offset }
+  const raw = typeof params.offset === "string" ? params.offset : undefined
+  return { categorySlug, offset: parseOffset(raw) }
 }
 
 /** Build the paginated browse URL (replaces the inline helper in app/page.tsx). */
@@ -36,8 +33,4 @@ export function buildBrowseUrl(
   if (categorySlug) params.set("category", categorySlug)
   if (offset) params.set("offset", String(offset))
   return `/?${params.toString()}`
-}
-
-export function nextOffset(offset: number): number {
-  return offset + PAGE_SIZE
 }

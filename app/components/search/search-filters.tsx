@@ -8,9 +8,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { CONDITIONS, type Category, type Condition } from "@/lib/listings/constants"
-import { buildSearchUrl, SEARCH_SORTS, type SearchFilters as SearchFiltersState } from "@/lib/search"
+import { buildSearchUrl, SEARCH_SORTS, type SearchQuery } from "@/lib/search"
 
-const fieldClass =
+const FIELD_CLASS =
   "w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/50"
 
 const SELECT_SORT_LABELS: Record<(typeof SEARCH_SORTS)[number], string> = {
@@ -25,7 +25,7 @@ export function SearchFilters({
   filters,
 }: {
   categories: Category[]
-  filters: SearchFiltersState
+  filters: SearchQuery
 }) {
   const router = useRouter()
   const [q, setQ] = useState(filters.q)
@@ -76,7 +76,7 @@ export function SearchFilters({
               id="search-category"
               value={categorySlug}
               onChange={(e) => setCategorySlug(e.target.value)}
-              className={fieldClass}
+              className={FIELD_CLASS}
             >
               <option value="">All categories</option>
               {categories.map((c) => (
@@ -95,7 +95,7 @@ export function SearchFilters({
               onChange={(e) =>
                 setCondition(e.target.value as Condition | "")
               }
-              className={fieldClass}
+              className={FIELD_CLASS}
             >
               <option value="">Any condition</option>
               {CONDITIONS.map((c) => (
@@ -148,8 +148,8 @@ export function SearchFilters({
             <select
               id="search-sort"
               value={sort}
-              onChange={(e) => setSort(e.target.value as SearchFiltersState["sort"])}
-              className={fieldClass}
+              onChange={(e) => setSort(e.target.value as SearchQuery["sort"])}
+              className={FIELD_CLASS}
             >
               {SEARCH_SORTS.map((s) => (
                 <option key={s} value={s}>

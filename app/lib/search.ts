@@ -1,14 +1,12 @@
-import {
-  BROWSE_LIMIT_MAX,
-  CONDITIONS,
-  PAGE_SIZE,
-  type Condition,
-} from "@/lib/listings/constants"
+import { CONDITIONS, type Condition } from "@/lib/listings/constants"
+import { nextOffset, parseOffset } from "@/lib/pagination"
+
+export { nextOffset }
 
 export const SEARCH_SORTS = ["newest", "oldest", "price_asc", "price_desc"] as const
 export type SearchSort = (typeof SEARCH_SORTS)[number]
 
-export interface SearchFilters {
+export interface SearchQuery {
   q: string
   categorySlug: string | undefined
   minPrice: number | undefined
@@ -36,7 +34,7 @@ export function parseSearchParams(params: {
   city?: SearchParamValue
   sort?: SearchParamValue
   offset?: SearchParamValue
-}): SearchFilters {
+}): SearchQuery {
   const single = (v: SearchParamValue): string | undefined =>
     typeof v === "string" ? v : undefined
 
@@ -57,14 +55,16 @@ export function parseSearchParams(params: {
     ? (rawSort as SearchSort)
     : "newest"
 
-  const rawOffset = single(params.offset) ?? ""
-  const parsedOffset = Number(rawOffset)
-  const offset =
-    Number.isFinite(parsedOffset) && parsedOffset > 0
-      ? Math.min(parsedOffset, BROWSE_LIMIT_MAX - 1)
-      : 0
-
-  return { q, categorySlug, minPrice, maxPrice, condition, city, sort, offset }
+  return {
+    q,
+    categorySlug,
+    minPrice,
+    maxPrice,
+    condition,
+    city,
+    sort,
+    offset: parseOffset(single(params.offset)),
+  }
 }
 
 function parsePrice(v: string | undefined): number | undefined {
@@ -73,21 +73,17 @@ function parsePrice(v: string | undefined): number | undefined {
   return Number.isFinite(n) && n >= 0 ? n : undefined
 }
 
-/** Build the search URL from a filters object, omitting empty/zero params. */
-export function buildSearchUrl(filters: SearchFilters): string {
+/** Build the search URL from a query object, omitting empty/zero params. */
+export function buildSearchUrl(query: SearchQuery): string {
   const params = new URLSearchParams()
-  if (filters.q) params.set("q", filters.q)
-  if (filters.categorySlug) params.set("category", filters.categorySlug)
-  if (filters.minPrice !== undefined) params.set("min", String(filters.minPrice))
-  if (filters.maxPrice !== undefined) params.set("max", String(filters.maxPrice))
-  if (filters.condition) params.set("condition", filters.condition)
-  if (filters.city) params.set("city", filters.city)
-  if (filters.sort !== "newest") params.set("sort", filters.sort)
-  if (filters.offset) params.set("offset", String(filters.offset))
+  if (query.q) params.set("q", query.q)
+  if (query.categorySlug) params.set("category", query.categorySlug)
+  if (query.minPrice !== undefined) params.set("min", String(query.minPrice))
+  if (query.maxPrice !== undefined) params.set("max", String(query.maxPrice))
+  if (query.condition) params.set("condition", query.condition)
+  if (query.city) params.set("city", query.city)
+  if (query.sort !== "newest") params.set("sort", query.sort)
+  if (query.offset) params.set("offset", String(query.offset))
   const qs = params.toString()
   return qs ? `/search?${qs}` : "/search"
-}
-
-export function nextOffset(offset: number): number {
-  return offset + PAGE_SIZE
 }

@@ -10,12 +10,15 @@
 --                 on title for typo-tolerant matches
 --   * filters  -> category slug, price range, condition enum, city substring
 --   * sort     -> newest (default) | oldest | price_asc | price_desc
---   * paging   -> p_limit capped at 1000 (PostgREST ceiling), p_offset >= 0,
---                 exact count via count(*) over ()
+--   * paging   -> p_limit and p_offset both clamped to the 1000-row PostgREST
+--                 window (offset + limit <= 1000), exact count via count(*) over ()
 --   * security -> SECURITY DEFINER with a hardened search_path; the WHERE clause
 --                 mirrors the public-read RLS policy (status = 'published' AND
 --                 deleted_at IS NULL) so the definer never leaks draft/sold or
---                 soft-deleted rows; EXECUTE granted only to anon + authenticated.
+--                 soft-deleted rows. The joined profile/category/image fields
+--                 are all publicly readable under RLS too (profiles: T03 public
+--                 read policy), so the definer exposes nothing the anon browse
+--                 path already exposes. EXECUTE granted only to anon/authenticated.
 
 create or replace function public.search_listings(
   p_query text default null,
@@ -53,7 +56,16 @@ set search_path = public
 as $$
 declare
   v_tsq tsquery;
+  v_limit int;
+  v_offset int;
 begin
+  if p_sort not in ('newest', 'oldest', 'price_asc', 'price_desc') then
+    p_sort := 'newest';
+  end if;
+
+  v_limit := least(greatest(p_limit, 0), 1000);
+  v_offset := least(greatest(p_offset, 0), 1000 - v_limit);
+
   if p_query is not null and btrim(p_query) <> '' then
     v_tsq := websearch_to_tsquery('simple', btrim(p_query));
   else
@@ -110,8 +122,8 @@ begin
     case when p_sort = 'price_desc' then l.price end desc nulls last,
     case when p_sort = 'oldest' then l.published_at end asc nulls last,
     l.published_at desc
-  limit least(greatest(p_limit, 0), 1000)
-  offset greatest(p_offset, 0);
+  limit v_limit
+  offset v_offset;
 end;
 $$;
 

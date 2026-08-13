@@ -57,9 +57,15 @@ describe("search.parseSearchParams", () => {
     })
   })
 
-  it("clamps a huge offset to the 1000-row ceiling", () => {
+  it("clamps a huge offset to the top of the 1000-row window", () => {
     expect(parseSearchParams({ offset: "99999" }).offset).toBe(
-      BROWSE_LIMIT_MAX - 1
+      BROWSE_LIMIT_MAX - PAGE_SIZE
+    )
+  })
+
+  it("keeps an offset that already fills the window", () => {
+    expect(parseSearchParams({ offset: String(BROWSE_LIMIT_MAX - PAGE_SIZE) }).offset).toBe(
+      BROWSE_LIMIT_MAX - PAGE_SIZE
     )
   })
 

@@ -43,7 +43,7 @@ export default async function SearchPage({
   const filters = parseSearchParams(sp)
 
   const categoriesPromise = fetchCategories()
-  const { listings, totalCount, hasMore, error } = await searchListings({
+  const { listings, count, hasMore, error } = await searchListings({
     q: filters.q || undefined,
     categorySlug: filters.categorySlug,
     minPrice: filters.minPrice,
@@ -64,7 +64,7 @@ export default async function SearchPage({
         <p className="mt-2 text-muted-foreground">
           {error
             ? "We could not run your search."
-            : `${totalCount} ${totalCount === 1 ? "listing" : "listings"}`}
+            : `${count} ${count === 1 ? "listing" : "listings"}`}
         </p>
       </section>
 

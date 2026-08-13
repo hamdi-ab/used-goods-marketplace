@@ -29,6 +29,7 @@ import type {
   ListingWithRelations,
 } from "./listings/constants"
 import type { SearchSort } from "@/lib/search"
+import { MAX_PAGING_OFFSET } from "@/lib/pagination"
 
 // Re-export the pure value objects so imports from "@/lib/listings" keep
 // resolving. Definitions live in ./listings/constants (server-free).
@@ -213,7 +214,10 @@ export async function fetchListings(opts: {
     }
   )
 
-  const hasMore = typeof count === "number" ? offset + listings.length < count : false
+  const hasMore =
+    typeof count === "number"
+      ? offset + listings.length < count && offset + listings.length < BROWSE_LIMIT_MAX
+      : false
   return { listings, count, hasMore, error: null }
 }
 
@@ -230,7 +234,7 @@ export interface SearchOptions {
 
 export interface SearchResult {
   listings: BrowseListing[]
-  totalCount: number
+  count: number
   hasMore: boolean
   error: string | null
 }
@@ -261,7 +265,7 @@ export async function searchListings(
   opts: SearchOptions = {}
 ): Promise<SearchResult> {
   const supabase = await createClient()
-  const offset = Math.min(Math.max(opts.offset ?? 0, 0), BROWSE_LIMIT_MAX - 1)
+  const offset = Math.min(Math.max(opts.offset ?? 0, 0), MAX_PAGING_OFFSET)
 
   const { data, error } = await supabase.rpc("search_listings", {
     p_query: opts.q || null,
@@ -277,7 +281,7 @@ export async function searchListings(
 
   if (error) {
     console.error("searchListings:", error.message)
-    return { listings: [], totalCount: 0, hasMore: false, error: error.message }
+    return { listings: [], count: 0, hasMore: false, error: error.message }
   }
 
   const rows = (data ?? []) as SearchListingRow[]
@@ -301,11 +305,12 @@ export async function searchListings(
       : null,
   }))
 
-  const totalCount = rows.length > 0 ? rows[0].total_count : 0
+  const count = rows.length > 0 ? rows[0].total_count : 0
   return {
     listings,
-    totalCount,
-    hasMore: offset + listings.length < totalCount,
+    count,
+    hasMore:
+      offset + listings.length < count && offset + listings.length < BROWSE_LIMIT_MAX,
     error: null,
   }
 }
