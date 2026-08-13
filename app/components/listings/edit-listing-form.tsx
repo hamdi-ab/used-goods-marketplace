@@ -186,7 +186,7 @@ export function EditListingForm({
             disabled={deletePending}
             onClick={() => {
               if (
-                !confirm("Archive this listing? You can republish it later.")
+                !confirm("Archive this listing? It will no longer be visible.")
               )
                 return false
             }}
@@ -202,7 +202,7 @@ export function EditListingForm({
         action={deleteAction}
         onSubmit={(e) => {
           if (
-            !confirm("Archive this listing? You can republish it later.")
+            !confirm("Archive this listing? It will no longer be visible.")
           )
             e.preventDefault()
         }}

@@ -17,8 +17,12 @@ export const metadata: Metadata = {
 
 export default async function DashboardPage() {
   const user = await requireUser()
+  // The seller home only makes sense for users who can sell; buyers land on the
+  // profile gate instead of a dead-end /sell redirect (issue #13 AC5).
+  const canSell = user.role === "seller" || user.role === "admin"
+
   const [listings, openOfferCount] = await Promise.all([
-    fetchSellerListings(user.id),
+    canSell ? fetchSellerListings(user.id) : Promise.resolve([]),
     countIncomingOffers(user.id),
   ])
 
@@ -32,30 +36,47 @@ export default async function DashboardPage() {
           Welcome back, {firstName}
         </h1>
         <p className="mt-2 max-w-xl text-muted-foreground">
-          This is your selling home: manage your listings, watch their stats, and
-          keep on top of incoming offers.
+          Manage your marketplace activity from here — track offers and
+          favorites, and keep on top of your listings.
         </p>
       </div>
 
-      <section className="mb-10">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="font-heading text-xl font-semibold">Your listings</h2>
-            <p className="text-sm text-muted-foreground">
-              {listings.length === 0
-                ? "Nothing on sale yet."
-                : `${listings.length} listing${listings.length === 1 ? "" : "s"} — edit, archive, or track views and favorites.`}
-            </p>
+      {canSell ? (
+        <section className="mb-10">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="font-heading text-xl font-semibold">Your listings</h2>
+              <p className="text-sm text-muted-foreground">
+                Edit, archive, or track views and favorites on your listings.
+              </p>
+            </div>
+            <Button asChild size="sm">
+              <Link href="/sell">
+                <PlusIcon className="mr-1.5 size-4" />
+                Create a listing
+              </Link>
+            </Button>
           </div>
-          <Button asChild size="sm">
-            <Link href="/sell">
-              <PlusIcon className="mr-1.5 size-4" />
-              Create a listing
-            </Link>
-          </Button>
-        </div>
-        <ListingManager listings={listings} />
-      </section>
+          <ListingManager listings={listings} />
+        </section>
+      ) : (
+        <Card className="mb-10">
+          <CardContent className="flex flex-col items-start gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="font-heading text-lg font-semibold">
+                Sell on the marketplace
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                When you start selling, your listings, their stats, and incoming
+                offers will live here.
+              </p>
+            </div>
+            <Button asChild variant="outline">
+              <Link href="/profile">Get started</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Card>

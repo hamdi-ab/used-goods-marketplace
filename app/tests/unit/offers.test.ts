@@ -7,6 +7,7 @@ import {
   OFFER_STATUS_COLORS,
   OFFER_STATUSES,
   OFFER_STATUS_LABELS,
+  OPEN_OFFER_STATUSES,
   type OfferStatus,
 } from "@/lib/offers/constants"
 
@@ -33,6 +34,17 @@ describe("offers bounds mirror the DB constraints", () => {
   it("allows a positive amount ceiling and the 500-char message cap", () => {
     expect(OFFER_AMOUNT_MAX).toBeGreaterThan(0)
     expect(OFFER_MESSAGE_MAX).toBe(500)
+  })
+})
+
+describe("offers.open statuses", () => {
+  it("marks pending and countered as the only open statuses", () => {
+    expect(OPEN_OFFER_STATUSES.sort()).toEqual(["countered", "pending"])
+  })
+
+  it("every open status is a declared status", () => {
+    const declared = new Set<string>(OFFER_STATUSES)
+    expect(OPEN_OFFER_STATUSES.every((s) => declared.has(s))).toBe(true)
   })
 })
 

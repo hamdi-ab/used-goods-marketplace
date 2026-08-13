@@ -1,29 +1,33 @@
 "use client"
 
 import Link from "next/link"
-import { useActionState } from "react"
+import { useActionState, useState } from "react"
 import { EyeIcon, HeartIcon, PackageOpenIcon, PencilIcon, PlusIcon, XIcon } from "lucide-react"
 
 import { deleteListing } from "@/app/actions/listings"
-import { formatPrice, type SellerListingRow } from "@/lib/listings"
+import type { SellerListingRow } from "@/lib/listings"
+import { formatPrice } from "@/lib/listings/constants"
 import { ListingStatusBadge } from "@/components/dashboard/listing-status-badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
 function ListingRow({ listing }: { listing: SellerListingRow }) {
   const [state, action, pending] = useActionState(deleteListing, {})
+  const [imgError, setImgError] = useState(false)
 
   return (
     <li>
       <Card>
         <CardContent className="flex flex-wrap items-center gap-4 p-4">
           <div className="size-16 shrink-0 overflow-hidden rounded-md border bg-muted">
-            {listing.cover_image_url ? (
+            {listing.cover_image_url && !imgError ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={listing.cover_image_url}
                 alt=""
                 className="h-full w-full object-cover"
+                loading="lazy"
+                onError={() => setImgError(true)}
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
@@ -67,7 +71,7 @@ function ListingRow({ listing }: { listing: SellerListingRow }) {
             <form
               action={action}
               onSubmit={(e) => {
-                if (!confirm("Archive this listing? You can republish it later."))
+                if (!confirm("Archive this listing? It will no longer be visible."))
                   e.preventDefault()
               }}
             >

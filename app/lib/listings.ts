@@ -48,14 +48,21 @@ export interface RawListingRow {
   images: ListingImage[] | null
 }
 
+// Shared cover-pick: the lowest display_order image is the listing's cover.
+// One rule for every listing read shape that renders a thumbnail (browse feed,
+// favorites feed, seller dashboard) so "which image is the cover" never forks.
+function pickCoverImage(
+  images: { image_url: string; display_order: number }[] | null
+): string | null {
+  return (
+    [...(images ?? [])].sort((a, b) => a.display_order - b.display_order)[0]
+      ?.image_url ?? null
+  )
+}
+
 // Shared row mapper for browse-shaped listing selects. Used by the public
 // browse feed and the favorites feed so both render cards identically.
 export function mapBrowseListing(l: RawListingRow): BrowseListing {
-  const images = l.images ?? []
-  const cover =
-    [...images]
-      .sort((a, b) => a.display_order - b.display_order)[0]?.image_url ??
-    null
   const seller = l.seller?.[0] ?? null
   return {
     id: l.id,
@@ -64,8 +71,8 @@ export function mapBrowseListing(l: RawListingRow): BrowseListing {
     condition: l.condition,
     city: l.city,
     published_at: l.published_at,
-    image_url: cover,
-    image_count: images.length,
+    image_url: pickCoverImage(l.images),
+    image_count: (l.images ?? []).length,
     seller: seller
       ? {
           id: seller.id,
@@ -112,6 +119,7 @@ export async function fetchListing(
     .from("listings")
     .select(LISTING_COLUMNS)
     .eq("id", id)
+    .is("deleted_at", null)
     .maybeSingle()
   if (!listing) return null
 
@@ -158,6 +166,13 @@ export interface SellerListingRow extends Listing {
   cover_image_url: string | null
 }
 
+// PostgREST returns numeric as string; the row type is derived from Listing so
+// the mapper cannot drift from the contract (price is the only shape change).
+type RawSellerListingRow = Omit<Listing, "price"> & {
+  price: number | string
+  images: { image_url: string; display_order: number }[] | null
+}
+
 export async function fetchSellerListings(
   sellerId: string
 ): Promise<SellerListingRow[]> {
@@ -178,51 +193,13 @@ export async function fetchSellerListings(
   }
 
   return (data as unknown as RawSellerListingRow[] | null ?? []).map((row) => {
-    const cover =
-      [...(row.images ?? [])].sort((a, b) => a.display_order - b.display_order)[0]
-        ?.image_url ?? null
+    const { images, ...rest } = row
     return {
-      id: row.id,
-      seller_id: row.seller_id,
-      category_id: row.category_id,
-      title: row.title,
-      description: row.description,
-      price: Number(row.price),
-      condition: row.condition,
-      negotiable: row.negotiable,
-      city: row.city,
-      sub_city: row.sub_city,
-      address: row.address,
-      status: row.status,
-      view_count: row.view_count,
-      favorite_count: row.favorite_count,
-      published_at: row.published_at,
-      created_at: row.created_at,
-      updated_at: row.updated_at,
-      cover_image_url: cover,
+      ...rest,
+      price: Number(rest.price),
+      cover_image_url: pickCoverImage(images),
     }
   })
-}
-
-interface RawSellerListingRow {
-  id: string
-  seller_id: string
-  category_id: string | null
-  title: string
-  description: string | null
-  price: number | string
-  condition: Condition
-  negotiable: boolean
-  city: string | null
-  sub_city: string | null
-  address: string | null
-  status: ListingStatus
-  view_count: number
-  favorite_count: number
-  published_at: string
-  created_at: string
-  updated_at: string
-  images: { image_url: string; display_order: number }[] | null
 }
 
 // Public, paginated browse of published listings (anon-readable via RLS).

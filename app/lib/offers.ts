@@ -7,7 +7,10 @@ import {
   type BrowseListing,
   type RawListingRow,
 } from "@/lib/listings"
-import type { OfferStatus } from "@/lib/offers/constants"
+import {
+  OPEN_OFFER_STATUSES,
+  type OfferStatus,
+} from "@/lib/offers/constants"
 
 export * from "@/lib/offers/constants"
 
@@ -153,7 +156,7 @@ export async function countIncomingOffers(userId: string): Promise<number> {
     .from("offers")
     .select("id", { count: "exact", head: true })
     .eq("listing.seller_id", userId)
-    .in("status", ["pending", "countered"])
+    .in("status", OPEN_OFFER_STATUSES)
 
   if (error) {
     console.error("countIncomingOffers:", error.message)
