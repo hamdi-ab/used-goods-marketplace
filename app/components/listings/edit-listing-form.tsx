@@ -4,7 +4,7 @@ import { useActionState } from "react"
 import { XIcon } from "lucide-react"
 
 import { updateListing, deleteListing } from "@/app/actions/listings"
-import { CONDITIONS, STATUSES_FOR_DISPLAY } from "@/lib/listings"
+import { CONDITIONS, STATUSES_FOR_DISPLAY } from "@/lib/listings/constants"
 import type { Category, Listing } from "@/lib/listings"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"

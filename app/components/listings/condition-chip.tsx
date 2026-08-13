@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 
-import { CONDITION_COLORS } from "@/lib/listings"
+import { CONDITION_COLORS } from "@/lib/listings/constants"
 import type { Condition } from "@/lib/listings"
 
 export function ConditionChip({ condition }: { condition: Condition }) {
