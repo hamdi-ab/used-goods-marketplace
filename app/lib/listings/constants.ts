@@ -28,6 +28,22 @@ export const STATUSES_FOR_DISPLAY: ListingStatusOption[] = [
   { value: "archived", label: "Archived", disabled: true },
 ]
 
+export const LISTING_STATUS_LABELS: Record<ListingStatus, string> = {
+  draft: "Draft",
+  published: "Published",
+  sold: "Sold",
+  archived: "Archived",
+}
+
+// Mirrors the offer-badge palette: live/published is green, sold is blue,
+// archived (soft-deleted) is red, draft is neutral.
+export const LISTING_STATUS_COLORS: Record<ListingStatus, string> = {
+  draft: "bg-muted text-muted-foreground",
+  published: "bg-green-100 text-green-800",
+  sold: "bg-blue-100 text-blue-800",
+  archived: "bg-red-100 text-red-800",
+}
+
 export interface Category {
   id: string
   name: string

@@ -186,6 +186,9 @@ export async function deleteListing(
 
   const user = await getCurrentUser()
   if (!user) redirect("/login")
+  if (user.role !== "seller" && user.role !== "admin") {
+    redirect("/profile")
+  }
 
   try {
     const result = await softDeleteListing(id, user.id)

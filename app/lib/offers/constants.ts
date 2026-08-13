@@ -12,6 +12,10 @@ export const OFFER_STATUSES = ["pending", "countered", "accepted", "declined"] a
 
 export type OfferStatus = (typeof OFFER_STATUSES)[number]
 
+// Statuses that still need a reply from the seller. The dashboard's open-offers
+// count uses these; accepted/declined are terminal for the seller.
+export const OPEN_OFFER_STATUSES: OfferStatus[] = ["pending", "countered"]
+
 export const OFFER_STATUS_LABELS: Record<OfferStatus, string> = {
   pending: "Pending",
   countered: "Countered",
