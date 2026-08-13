@@ -4,22 +4,10 @@ import { cache } from "react"
 import { redirect } from "next/navigation"
 
 import { createClient } from "@/lib/supabase/server"
+import type { SessionUser, UserRole } from "./auth/types"
 
-export type UserRole = "buyer" | "seller" | "admin"
-
-export type SessionUser = {
-  id: string
-  email: string
-  role: UserRole
-  fullName: string | null
-  profileCompleted: boolean
-}
-
-export const ROLE_LABELS: Record<UserRole, string> = {
-  buyer: "Buyer",
-  seller: "Seller",
-  admin: "Admin",
-}
+export type { SessionUser, UserRole }
+export { ROLE_LABELS } from "./auth/types"
 
 export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
   const supabase = await createClient()
@@ -52,5 +40,16 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
 export async function requireUser(): Promise<SessionUser> {
   const user = await getCurrentUser()
   if (!user) redirect("/login")
+  return user
+}
+
+// T04: only sellers (and admins) may create or edit listings.
+export async function requireSeller(): Promise<SessionUser> {
+  const user = await requireUser()
+  if (user.role !== "seller" && user.role !== "admin") {
+    // Not a seller yet — surface the profile page where this gate can be
+    // surfaced as a future "become a seller" prompt.
+    redirect("/profile")
+  }
   return user
 }

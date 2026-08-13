@@ -6,6 +6,12 @@ import { revalidatePath } from "next/cache"
 
 import { getCurrentUser } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
+import {
+  ALLOWED_IMAGE_MIME,
+  MAX_IMAGE_BYTES,
+  detectImageMime,
+  uploadObjects,
+} from "@/lib/media"
 
 const onboardingSchema = z.object({
   fullName: z.string().min(2, "Enter your full name"),
@@ -63,4 +69,121 @@ export async function completeProfile(
 
   revalidatePath("/profile")
   redirect("/profile")
+}
+
+const editProfileSchema = z.object({
+  city: z.string().min(1, "Enter your city").max(100),
+  subCity: z.string().max(100).optional(),
+  phone: z.string().max(30, "Phone number is too long").optional(),
+  telegramUsername: z
+    .string()
+    .max(50, "Too long")
+    .transform((v) => (v ? v.replace(/^@/, "") : v))
+    .optional(),
+  bio: z.string().max(300, "Bio must be 300 characters or fewer").optional(),
+  phonePublic: z.boolean().optional(),
+})
+
+export type EditProfileState = {
+  errors?: Record<string, string[] | undefined>
+  message?: string
+  ok?: boolean
+}
+
+export async function updateProfile(
+  _prevState: EditProfileState,
+  formData: FormData
+): Promise<EditProfileState> {
+  const parsed = editProfileSchema.safeParse({
+    city: formData.get("city"),
+    subCity: formData.get("subCity") || undefined,
+    phone: formData.get("phone") || undefined,
+    telegramUsername: formData.get("telegramUsername") || undefined,
+    bio: formData.get("bio") || undefined,
+    phonePublic: formData.get("phonePublic") === "on",
+  })
+
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors }
+  }
+
+  const user = await getCurrentUser()
+  if (!user) redirect("/login")
+
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      city: parsed.data.city,
+      sub_city: parsed.data.subCity || null,
+      phone: parsed.data.phone || null,
+      telegram_username: parsed.data.telegramUsername || null,
+      bio: parsed.data.bio || null,
+      phone_public: parsed.data.phonePublic ?? false,
+    })
+    .eq("id", user.id)
+
+  if (error) {
+    return { message: error.message }
+  }
+
+  revalidatePath("/profile")
+  revalidatePath(`/users/${user.id}`)
+  return { ok: true }
+}
+
+export async function uploadAvatar(
+  uid: string,
+  _prevState: { url: string | null; error: string | null },
+  formData: FormData
+): Promise<{ url: string | null; error: string | null }> {
+  const user = await getCurrentUser()
+  if (!user || user.id !== uid) {
+    return { url: null, error: "Not authorized" }
+  }
+
+  const file = formData.get("avatar") as File | null
+  if (!file || !file.size) {
+    return { url: null, error: "Choose an image to upload" }
+  }
+
+  const supabase = await createClient()
+  // The avatar adapter: second adapter behind the shared Media upload seam.
+  // Validation now uses magic bytes (not the client MIME type) — matching the
+  // listing-image path so both adapters share one security surface.
+  const result = await uploadObjects(
+    [{ file, index: 0 }],
+    {
+      bucket: "profiles",
+      upsert: true,
+      validate: async (file) => {
+        const mime = await detectImageMime(file)
+        if (!mime || !ALLOWED_IMAGE_MIME.includes(mime)) {
+          return "Upload a JPG, PNG or WebP image"
+        }
+        if (file.size > MAX_IMAGE_BYTES) {
+          return "Avatar must be 5 MB or smaller"
+        }
+        return null
+      },
+      path: () => {
+        const ext = (file.name.split(".").pop() || "png").toLowerCase()
+        return `avatars/${uid}/${Date.now()}.${ext}`
+      },
+      reconcile: async (publicUrl) => {
+        const { error } = await supabase
+          .from("profiles")
+          .update({ avatar_url: publicUrl })
+          .eq("id", uid)
+        return error ? error.message : null
+      },
+    },
+    supabase
+  )
+
+  if (!result.ok) return { url: null, error: result.error }
+
+  revalidatePath("/profile")
+  revalidatePath(`/users/${user.id}`)
+  return { url: result.publicUrls[0], error: null }
 }

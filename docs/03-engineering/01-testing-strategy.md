@@ -54,6 +54,19 @@ Examples:
 Tools:
 - Vitest
 - React Testing Library
+- @vitest/coverage-v8
+
+### Unit Testing Setup (app/)
+
+| Concern | Convention |
+|---------|------------|
+| Runner | `vitest.config.mts`, `environment: node`, `globals: true` |
+| Scripts | `npm test` (run), `npm run test:watch`, `npm run test:ci` (run + coverage) |
+| Stubs | `vitest/stubs/server-only.ts`, `vitest/stubs/supabase-server.ts` — alias `server-only` and `@/lib/supabase/server` so pure seam modules load under Node without the Next server graph |
+| Imports | Use `@/lib/...` aliases in tests, not `../lib/...` — relative specifiers resolve incorrectly under the Node env on Windows |
+| Coverage | `npm run test:ci` emits `coverage/` (gitignored) via the v8 provider |
+
+Pure seam surfaces covered: `lib/listings` (`isValidUuid`, `formatPrice`, `formatCondition`), `lib/media` (`detectImageMime`, `uploadObjects` validation gate), `lib/browse` (`parseBrowseParams` paging-window clamp, `buildBrowseUrl`, `nextOffset`).
 
 ## Integration Testing
 
