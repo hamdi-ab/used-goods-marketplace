@@ -1,0 +1,115 @@
+import type { Metadata } from "next"
+import Link from "next/link"
+import { SendIcon } from "lucide-react"
+
+import { requireUser } from "@/lib/auth"
+import { fetchBuyerOffers } from "@/lib/offers"
+import { formatPrice } from "@/lib/listings"
+import { formatShortDate } from "@/lib/utils"
+import { OfferStatusBadge } from "@/components/offers/offer-status-badge"
+import { BuyerOfferActions } from "@/components/offers/buyer-offer-actions"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+
+export const dynamic = "force-dynamic"
+
+export const metadata: Metadata = {
+  title: "My offers",
+  description: "Offers you have made on the VinTech Marketplace.",
+}
+
+export default async function OffersPage() {
+  const user = await requireUser()
+  const offers = await fetchBuyerOffers(user.id)
+
+  return (
+    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+        <h1 className="font-heading text-2xl font-semibold text-foreground">
+          My offers
+        </h1>
+        <Button asChild variant="ghost" size="sm">
+          <Link href="/offers/seller">View incoming offers →</Link>
+        </Button>
+      </div>
+
+      {offers.length === 0 ? (
+        <div className="flex flex-col items-center py-16 text-center">
+          <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-muted">
+            <SendIcon className="size-6 text-muted-foreground" />
+          </div>
+          <h2 className="font-heading text-lg font-semibold">No offers yet</h2>
+          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+            When you make an offer on a listing it shows up here, where you can
+            see whether the seller accepted, declined, or countered it.
+          </p>
+          <Button asChild size="sm" className="mt-4">
+            <Link href="/">Browse listings</Link>
+          </Button>
+        </div>
+      ) : (
+        <ul className="flex flex-col gap-4">
+          {offers.map((offer) => (
+            <li key={offer.id}>
+              <Card>
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-4">
+                    <div className="size-20 shrink-0 overflow-hidden rounded-md border bg-muted">
+                      {offer.listing?.image_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={offer.listing.image_url}
+                          alt=""
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+                          No photo
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      {offer.listing ? (
+                        <Link
+                          href={`/listings/${offer.listing.id}`}
+                          className="line-clamp-1 font-medium hover:underline"
+                        >
+                          {offer.listing.title}
+                        </Link>
+                      ) : (
+                        <p className="font-medium text-muted-foreground">
+                          Listing no longer available
+                        </p>
+                      )}
+                      <p className="mt-1 text-sm font-semibold">
+                        Your offer:{" "}
+                        {formatPrice(offer.amount, { maxFractionDigits: 2 })}
+                      </p>
+                      {offer.message ? (
+                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                          {offer.message}
+                        </p>
+                      ) : null}
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Submitted {formatShortDate(offer.created_at)}
+                      </p>
+                    </div>
+
+                    <OfferStatusBadge status={offer.status} />
+                  </div>
+
+                  {offer.status === "countered" ? (
+                    <div className="mt-4 border-t pt-3">
+                      <BuyerOfferActions offer={offer} />
+                    </div>
+                  ) : null}
+                </CardContent>
+              </Card>
+            </li>
+          ))}
+        </ul>
+      )}
+    </main>
+  )
+}

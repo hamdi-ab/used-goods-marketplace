@@ -168,6 +168,7 @@ Every business table includes:
 | view_count | INTEGER DEFAULT 0 |
 | favorite_count | INTEGER DEFAULT 0 |
 | published_at | TIMESTAMPTZ |
+| sold_to_buyer_id | UUID NULL | T08: winner of an accepted offer, stamped by `accept_offer` so the sold listing stays readable to the buyer without an offers↔listings RLS cycle |
 
 **Indexes:** seller_id, category_id, city, status, price, published_at
 

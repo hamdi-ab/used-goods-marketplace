@@ -1,10 +1,13 @@
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
+import { getCurrentUser } from "@/lib/auth"
 import { fetchCategories, fetchListings, PAGE_SIZE } from "@/lib/listings"
+import { fetchFavoriteIds } from "@/lib/favorites"
 import { buildBrowseUrl, nextOffset, parseBrowseParams } from "@/lib/browse"
 import { CategoryCard } from "@/components/categories/category-card"
 import { ListingCard } from "@/components/listings/listing-card"
+import { FavoriteButton } from "@/components/favorites/favorite-button"
 
 function NoResultsIcon({ className }: { className?: string }) {
   return (
@@ -42,12 +45,19 @@ export default async function HomePage({
   const sp = await searchParams
   const { categorySlug, offset } = parseBrowseParams(sp)
 
+  // Favorites state is per-user: kick the (cached) session read off up front,
+  // then fetch favorite ids only for signed-in visitors. Anonymous browsing
+  // adds no favorites round-trip.
+  const userPromise = getCurrentUser()
   const categoriesPromise = fetchCategories()
-  const { listings, hasMore, error } = await fetchListings({
+  const browsePromise = fetchListings({
     limit: PAGE_SIZE,
     offset,
     categorySlug,
   })
+  const user = await userPromise
+  const favoriteIds = user ? new Set(await fetchFavoriteIds(user.id)) : null
+  const { listings, hasMore, error } = await browsePromise
   const categories = await categoriesPromise
 
   return (
@@ -61,7 +71,7 @@ export default async function HomePage({
         </p>
         <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
           <Button asChild size="lg">
-            <Link href="#listings">Browse listings</Link>
+            <Link href="/search">Browse listings</Link>
           </Button>
           <Button asChild variant="outline" size="lg">
             <Link href="/sell">Start selling</Link>
@@ -142,7 +152,15 @@ export default async function HomePage({
             <ul className="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {listings.map((l) => (
                 <li key={l.id}>
-                  <ListingCard listing={l} />
+                  <ListingCard
+                    listing={l}
+                    favoriteButton={
+                      <FavoriteButton
+                        listingId={l.id}
+                        initial={favoriteIds?.has(l.id) ?? null}
+                      />
+                    }
+                  />
                 </li>
               ))}
             </ul>

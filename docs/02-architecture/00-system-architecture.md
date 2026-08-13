@@ -153,7 +153,9 @@ Database
 
 **Responsibilities:** Keyword Search, Filtering, Sorting, Pagination
 
-**Future:** Full-text search
+**Implementations:** `search_listings` RPC (T06) — Postgres full-text over the generated `search_vector` (tsvector GIN) + pg_trgm typo tolerance, category/price/condition/city filters, sort, 1000-row-capped paging; called from `searchListings` in `app/lib/listings.ts`.
+
+**Future:** Relevance ranking (`ts_rank`)
 
 ## Trust Service
 

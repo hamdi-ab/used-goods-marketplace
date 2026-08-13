@@ -19,3 +19,11 @@ export function initials(name: string | null | undefined) {
 export function isInternalPath(path: string | null | undefined): path is string {
   return typeof path === "string" && path.startsWith("/") && !path.startsWith("//")
 }
+
+// Short, locale-aware date for list rows (offers, reviews): "Aug 13".
+export function formatShortDate(iso: string): string {
+  return new Date(iso).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+  })
+}

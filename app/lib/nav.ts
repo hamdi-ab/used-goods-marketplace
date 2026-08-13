@@ -3,7 +3,7 @@ import {
   SearchIcon,
   PlusIcon,
   HeartIcon,
-  UserIcon,
+  HandshakeIcon,
   type LucideIcon,
 } from "lucide-react"
 
@@ -15,21 +15,22 @@ export type NavItem = {
 
 export const siteName = "VinTech Marketplace"
 
+// Component standards §12 caps primary destinations at 5. Dashboard and
+// Profile live in the account menu (components/auth/user-menu.tsx) instead.
 export const primaryNav: NavItem[] = [
   { title: "Home", href: "/" },
   { title: "Browse", href: "/search" },
   { title: "Sell", href: "/sell" },
+  { title: "Offers", href: "/offers" },
   { title: "Favorites", href: "/favorites" },
-  { title: "Dashboard", href: "/dashboard" },
-  { title: "Profile", href: "/profile" },
 ]
 
 export const mobileNav: NavItem[] = [
   { title: "Home", href: "/", icon: HomeIcon },
   { title: "Search", href: "/search", icon: SearchIcon },
   { title: "Sell", href: "/sell", icon: PlusIcon },
+  { title: "Offers", href: "/offers", icon: HandshakeIcon },
   { title: "Favorites", href: "/favorites", icon: HeartIcon },
-  { title: "Profile", href: "/profile", icon: UserIcon },
 ]
 
 export const footerNav: NavItem[] = [
