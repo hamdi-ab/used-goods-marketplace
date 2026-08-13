@@ -66,7 +66,7 @@ Tools:
 | Imports | Use `@/lib/...` aliases in tests, not `../lib/...` — relative specifiers resolve incorrectly under the Node env on Windows |
 | Coverage | `npm run test:ci` emits `coverage/` (gitignored) via the v8 provider |
 
-Pure seam surfaces covered: `lib/listings` (`isValidUuid`, `formatPrice`, `formatCondition`), `lib/media` (`detectImageMime`, `uploadObjects` validation gate), `lib/browse` (`parseBrowseParams` paging-window clamp, `buildBrowseUrl`, `nextOffset`).
+Pure seam surfaces covered: `lib/listings/constants` (`isValidUuid`, `formatPrice`, `formatCondition`), `lib/media` (`detectImageMime`, `uploadObjects` validation gate), `lib/browse` (`parseBrowseParams` window clamp, `buildBrowseUrl`), `lib/search` (`parseSearchParams` filter validation, `buildSearchUrl`), `lib/pagination` (`parseOffset` window clamp, `nextOffset`).
 
 ## Integration Testing
 

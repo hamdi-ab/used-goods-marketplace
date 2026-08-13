@@ -8,8 +8,10 @@ describe("browse.parseBrowseParams", () => {
     expect(parseBrowseParams({})).toEqual({ categorySlug: undefined, offset: 0 })
   })
 
-  it("clamps a huge offset to the 1000-row ceiling", () => {
-    expect(parseBrowseParams({ offset: "99999" }).offset).toBe(BROWSE_LIMIT_MAX - 1)
+  it("clamps a huge offset to the top of the 1000-row window", () => {
+    expect(parseBrowseParams({ offset: "99999" }).offset).toBe(
+      BROWSE_LIMIT_MAX - PAGE_SIZE
+    )
   })
 
   it("rejects a negative offset", () => {
