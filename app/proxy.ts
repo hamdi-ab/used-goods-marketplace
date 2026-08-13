@@ -2,7 +2,14 @@ import { type NextRequest, NextResponse } from "next/server"
 
 import { updateSession } from "@/lib/supabase/middleware"
 
-const PROTECTED_PREFIXES = ["/profile", "/dashboard", "/favorites", "/sell", "/onboarding"]
+const PROTECTED_PREFIXES = [
+  "/profile",
+  "/dashboard",
+  "/favorites",
+  "/sell",
+  "/onboarding",
+  "/admin",
+]
 const AUTH_PREFIXES = ["/login", "/register", "/forgot-password", "/reset-password"]
 
 function matches(pathname: string, prefixes: string[]) {

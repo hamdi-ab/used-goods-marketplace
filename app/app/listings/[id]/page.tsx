@@ -9,6 +9,7 @@ import { fetchListing, formatCondition, formatPrice } from "@/lib/listings"
 import { fetchFavoriteIds } from "@/lib/favorites"
 import { FavoriteButton } from "@/components/favorites/favorite-button"
 import { MakeOfferButton } from "@/components/offers/make-offer-button"
+import { ReportButton } from "@/components/reports/report-button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -96,6 +97,10 @@ export default async function ListingPage({
             </h1>
             <Badge variant="secondary">{formatCondition(l.condition)}</Badge>
             <FavoriteButton listingId={l.id} initial={favorited} />
+            <ReportButton
+              target={{ type: "listing", listingId: l.id }}
+              signedIn={Boolean(user)}
+            />
           </div>
 
           <p className="text-2xl font-semibold text-foreground">
@@ -171,6 +176,11 @@ export default async function ListingPage({
               View seller profile
             </Link>
           </Button>
+
+          <ReportButton
+            target={{ type: "seller", sellerId: l.seller_id }}
+            signedIn={Boolean(user)}
+          />
         </div>
       </div>
 

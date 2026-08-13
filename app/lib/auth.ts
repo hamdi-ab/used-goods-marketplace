@@ -53,3 +53,12 @@ export async function requireSeller(): Promise<SessionUser> {
   }
   return user
 }
+
+// T11: only admins may access the moderation queue.
+export async function requireAdmin(): Promise<SessionUser> {
+  const user = await requireUser()
+  if (user.role !== "admin") {
+    redirect("/dashboard")
+  }
+  return user
+}
