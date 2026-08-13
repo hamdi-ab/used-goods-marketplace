@@ -37,7 +37,7 @@ export * from "./listings/constants"
 
 // ---- Internal row shape (server-only; not part of the public value object) ----
 
-interface RawListingRow {
+export interface RawListingRow {
   id: string
   title: string
   price: number
@@ -46,6 +46,36 @@ interface RawListingRow {
   published_at: string
   seller: BrowseSeller[] | null
   images: ListingImage[] | null
+}
+
+// Shared row mapper for browse-shaped listing selects. Used by the public
+// browse feed and the favorites feed so both render cards identically.
+export function mapBrowseListing(l: RawListingRow): BrowseListing {
+  const images = l.images ?? []
+  const cover =
+    [...images]
+      .sort((a, b) => a.display_order - b.display_order)[0]?.image_url ??
+    null
+  const seller = l.seller?.[0] ?? null
+  return {
+    id: l.id,
+    title: l.title,
+    price: l.price,
+    condition: l.condition,
+    city: l.city,
+    published_at: l.published_at,
+    image_url: cover,
+    image_count: images.length,
+    seller: seller
+      ? {
+          id: seller.id,
+          full_name: seller.full_name,
+          avatar_url: seller.avatar_url,
+          role: seller.role,
+          trust_score: seller.trust_score,
+        }
+      : null,
+  }
 }
 
 // ---- Reads ----
@@ -185,33 +215,7 @@ export async function fetchListings(opts: {
   }
 
   const listings: BrowseListing[] = (data as RawListingRow[] | null ?? []).map(
-    (l) => {
-      const images = l.images ?? []
-      const cover =
-        [...images]
-          .sort((a, b) => a.display_order - b.display_order)[0]?.image_url ??
-        null
-      const seller = l.seller?.[0] ?? null
-      return {
-        id: l.id,
-        title: l.title,
-        price: l.price,
-        condition: l.condition,
-        city: l.city,
-        published_at: l.published_at,
-        image_url: cover,
-        image_count: images.length,
-        seller: seller
-          ? {
-              id: seller.id,
-              full_name: seller.full_name,
-              avatar_url: seller.avatar_url,
-              role: seller.role,
-              trust_score: seller.trust_score,
-            }
-          : null,
-      }
-    }
+    mapBrowseListing
   )
 
   const hasMore =
