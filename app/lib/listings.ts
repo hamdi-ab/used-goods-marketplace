@@ -9,120 +9,43 @@ import {
   uploadObjects,
 } from "@/lib/media"
 
-// ---- Shared value sets (also drive the client form via literals) ----
-export const CONDITIONS = ["Brand New", "Lightly Used", "Fair"] as const
-export const STATUSES = ["draft", "published", "sold"] as const // "archived" is delete-only
-export const MAX_IMAGES = 10
+import {
+  BROWSE_LIMIT_MAX,
+  LISTING_COLUMNS,
+  MAX_IMAGES,
+  PAGE_SIZE,
+  isValidUuid,
+} from "./listings/constants"
+import type {
+  BrowseListing,
+  BrowseSeller,
+  Category,
+  Condition,
+  Listing,
+  ListingEditPayload,
+  ListingImage,
+  ListingPayload,
+  ListingStatus,
+  ListingWithRelations,
+} from "./listings/constants"
+import type { SearchSort } from "@/lib/search"
 
-export type Condition = (typeof CONDITIONS)[number]
-export type ListingStatus = (typeof STATUSES)[number] | "archived"
+// Re-export the pure value objects so imports from "@/lib/listings" keep
+// resolving. Definitions live in ./listings/constants (server-free).
+export * from "./listings/constants"
 
-export interface ListingStatusOption {
-  value: string
-  label: string
-  disabled?: boolean
-}
+// ---- Internal row shape (server-only; not part of the public value object) ----
 
-// Canonical status options for the edit flow: the writable statuses plus the
-// terminal "archived" state surfaced as disabled (delete-only). Kept here so
-// the form never drifts from the ListingStatus value set.
-export const STATUSES_FOR_DISPLAY: ListingStatusOption[] = [
-  { value: "draft", label: "Draft" },
-  { value: "published", label: "Published" },
-  { value: "sold", label: "Sold" },
-  { value: "archived", label: "Archived", disabled: true },
-]
-
-export interface Category {
+interface RawListingRow {
   id: string
-  name: string
-  slug: string
-  parent_id: string | null
-}
-
-export interface ListingImage {
-  id: string
-  listing_id: string
-  image_url: string
-  display_order: number
-  alt_text: string | null
-}
-
-export interface Listing {
-  id: string
-  seller_id: string
-  category_id: string | null
   title: string
-  description: string | null
   price: number
   condition: Condition
-  negotiable: boolean
   city: string | null
-  sub_city: string | null
-  address: string | null
-  status: ListingStatus
-  view_count: number
-  favorite_count: number
   published_at: string
-  created_at: string
-  updated_at: string
+  seller: BrowseSeller[] | null
+  images: ListingImage[] | null
 }
-
-export interface ListingWithRelations {
-  listing: Listing
-  images: ListingImage[]
-  category: Category | null
-  seller: {
-    id: string
-    full_name: string | null
-    avatar_url: string | null
-    role: string | null
-    trust_score: number | null
-  } | null
-}
-
-export interface ListingPayload {
-  title: string
-  description?: string
-  price: number
-  condition: Condition
-  categoryId?: string
-  city: string
-  subCity?: string
-  address?: string
-  negotiable: boolean
-  photos?: File[]
-}
-
-export interface ListingEditPayload {
-  id: string
-  title: string
-  description?: string
-  price: number
-  condition: Condition
-  categoryId?: string
-  city: string
-  subCity?: string
-  address?: string
-  negotiable: boolean
-  status?: ListingStatus
-}
-
-export const LISTING_COLUMNS =
-  "id, seller_id, category_id, title, description, price, condition, negotiable, city, sub_city, address, status, view_count, favorite_count, published_at, created_at, updated_at"
-
-// ---- Helpers ----
-
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-
-export function isValidUuid(id: string): boolean {
-  return UUID_RE.test(id)
-}
-
-// Image validation primitives (detectImageMime, ALLOWED_IMAGE_MIME,
-// MAX_IMAGE_BYTES, EXT_BY_MIME) live in the Media object module (lib/media),
-// imported at the top of this file.
 
 // ---- Reads ----
 
@@ -211,82 +134,6 @@ export async function fetchSellerListings(sellerId: string): Promise<Listing[]> 
   return data as Listing[]
 }
 
-export const PAGE_SIZE = 12
-// Supabase/PostgREST caps a single select result set at 1000 rows. Browse is
-// windowed: each request fetches PAGE_SIZE rows and we never page past the
-// 1000-row ceiling (T05, NFR-COMP-003).
-export const BROWSE_LIMIT_MAX = 1000
-
-export interface BrowseSeller {
-  id: string
-  full_name: string | null
-  avatar_url: string | null
-  role: string | null
-  trust_score: number | null
-}
-
-export interface BrowseListing {
-  id: string
-  title: string
-  price: number
-  condition: Condition
-  city: string | null
-  published_at: string
-  image_url: string | null
-  image_count: number
-  seller: BrowseSeller | null
-}
-
-interface RawListingRow {
-  id: string
-  title: string
-  price: number
-  condition: Condition
-  city: string | null
-  published_at: string
-  seller: BrowseSeller[] | null
-  images: ListingImage[] | null
-}
-
-export interface FormatPriceOptions {
-  maxFractionDigits?: number
-}
-
-export function formatPrice(
-  price: number | string,
-  opts: FormatPriceOptions = {}
-): string {
-  const n = typeof price === "number" ? price : Number(price)
-  if (Number.isNaN(n)) return "ETB —"
-  const maxFractionDigits = opts.maxFractionDigits ?? 0
-  try {
-    return new Intl.NumberFormat("en-ET", {
-      style: "currency",
-      currency: "ETB",
-      minimumFractionDigits: 0,
-      maximumFractionDigits: maxFractionDigits,
-    }).format(n)
-  } catch {
-    return `ETB ${Math.round(n)}`
-  }
-}
-
-const CONDITION_LABELS: Record<Condition, string> = {
-  "Brand New": "Brand new",
-  "Lightly Used": "Lightly used",
-  Fair: "Fair",
-}
-
-export function formatCondition(condition: Condition): string {
-  return CONDITION_LABELS[condition] ?? condition
-}
-
-export const CONDITION_COLORS: Record<Condition, string> = {
-  "Brand New": "bg-green-100 text-green-800",
-  "Lightly Used": "bg-blue-100 text-blue-800",
-  Fair: "bg-amber-100 text-amber-800",
-}
-
 // Public, paginated browse of published listings (anon-readable via RLS).
 export async function fetchListings(opts: {
   limit?: number
@@ -368,6 +215,99 @@ export async function fetchListings(opts: {
 
   const hasMore = typeof count === "number" ? offset + listings.length < count : false
   return { listings, count, hasMore, error: null }
+}
+
+export interface SearchOptions {
+  q?: string
+  categorySlug?: string
+  minPrice?: number
+  maxPrice?: number
+  condition?: Condition
+  city?: string
+  sort?: SearchSort
+  offset?: number
+}
+
+export interface SearchResult {
+  listings: BrowseListing[]
+  totalCount: number
+  hasMore: boolean
+  error: string | null
+}
+
+/** Row shape returned by the `search_listings` RPC (see migrations). */
+interface SearchListingRow {
+  id: string
+  title: string
+  price: number
+  condition: Condition
+  city: string | null
+  published_at: string
+  image_url: string | null
+  image_count: number
+  seller_id: string | null
+  seller_full_name: string | null
+  seller_avatar_url: string | null
+  seller_role: string | null
+  seller_trust_score: number | null
+  total_count: number
+}
+
+// Keyword + filters + sort + count in one round trip via the search_listings
+// RPC (T06, Search Service). Paging mirrors fetchListings: one PAGE_SIZE window
+// that never crosses the 1000-row ceiling, with `hasMore` derived from the
+// exact count the RPC returns alongside the slice.
+export async function searchListings(
+  opts: SearchOptions = {}
+): Promise<SearchResult> {
+  const supabase = await createClient()
+  const offset = Math.min(Math.max(opts.offset ?? 0, 0), BROWSE_LIMIT_MAX - 1)
+
+  const { data, error } = await supabase.rpc("search_listings", {
+    p_query: opts.q || null,
+    p_category_slug: opts.categorySlug || null,
+    p_min_price: opts.minPrice ?? null,
+    p_max_price: opts.maxPrice ?? null,
+    p_condition: opts.condition ?? null,
+    p_city: opts.city || null,
+    p_sort: opts.sort ?? "newest",
+    p_limit: PAGE_SIZE,
+    p_offset: offset,
+  })
+
+  if (error) {
+    console.error("searchListings:", error.message)
+    return { listings: [], totalCount: 0, hasMore: false, error: error.message }
+  }
+
+  const rows = (data ?? []) as SearchListingRow[]
+  const listings: BrowseListing[] = rows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    price: row.price,
+    condition: row.condition,
+    city: row.city,
+    published_at: row.published_at,
+    image_url: row.image_url,
+    image_count: row.image_count,
+    seller: row.seller_id
+      ? {
+          id: row.seller_id,
+          full_name: row.seller_full_name,
+          avatar_url: row.seller_avatar_url,
+          role: row.seller_role,
+          trust_score: row.seller_trust_score,
+        }
+      : null,
+  }))
+
+  const totalCount = rows.length > 0 ? rows[0].total_count : 0
+  return {
+    listings,
+    totalCount,
+    hasMore: offset + listings.length < totalCount,
+    error: null,
+  }
 }
 
 // ---- Writes (called by server actions; DB access centralized here, §17) ----

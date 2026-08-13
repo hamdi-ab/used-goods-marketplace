@@ -61,7 +61,7 @@ export default async function HomePage({
         </p>
         <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
           <Button asChild size="lg">
-            <Link href="#listings">Browse listings</Link>
+            <Link href="/search">Browse listings</Link>
           </Button>
           <Button asChild variant="outline" size="lg">
             <Link href="/sell">Start selling</Link>

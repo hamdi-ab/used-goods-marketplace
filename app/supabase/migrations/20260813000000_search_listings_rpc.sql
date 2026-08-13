@@ -1,0 +1,119 @@
+-- T06 - Intelligent search & filters
+-- Implements the Search Service (docs/02-architecture/00-system-architecture.md):
+-- keyword full-text + category/price/condition/city filters + sort + pagination,
+-- on top of the T04 generated `search_vector` column and its GIN + pg_trgm
+-- indexes.
+--
+-- Search contract (per DB spec §19 and #3):
+--   * keyword  -> websearch_to_tsquery('simple') over the generated search_vector
+--                 (quoted phrases + AND/OR), with a pg_trgm similarity fallback
+--                 on title for typo-tolerant matches
+--   * filters  -> category slug, price range, condition enum, city substring
+--   * sort     -> newest (default) | oldest | price_asc | price_desc
+--   * paging   -> p_limit capped at 1000 (PostgREST ceiling), p_offset >= 0,
+--                 exact count via count(*) over ()
+--   * security -> SECURITY DEFINER with a hardened search_path; the WHERE clause
+--                 mirrors the public-read RLS policy (status = 'published' AND
+--                 deleted_at IS NULL) so the definer never leaks draft/sold or
+--                 soft-deleted rows; EXECUTE granted only to anon + authenticated.
+
+create or replace function public.search_listings(
+  p_query text default null,
+  p_category_slug text default null,
+  p_min_price numeric default null,
+  p_max_price numeric default null,
+  p_condition public.listing_condition default null,
+  p_city text default null,
+  p_sort text default 'newest',
+  p_limit int default 12,
+  p_offset int default 0
+)
+returns table (
+  id uuid,
+  title text,
+  price numeric,
+  condition public.listing_condition,
+  city text,
+  published_at timestamptz,
+  image_url text,
+  image_count bigint,
+  category_name text,
+  category_slug text,
+  seller_id uuid,
+  seller_full_name text,
+  seller_avatar_url text,
+  seller_role text,
+  seller_trust_score int,
+  total_count bigint
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  v_tsq tsquery;
+begin
+  if p_query is not null and btrim(p_query) <> '' then
+    v_tsq := websearch_to_tsquery('simple', btrim(p_query));
+  else
+    v_tsq := null;
+  end if;
+
+  return query
+  select
+    l.id,
+    l.title,
+    l.price,
+    l.condition,
+    l.city,
+    l.published_at,
+    im.image_url,
+    coalesce(ic.image_count, 0)::bigint,
+    c.name,
+    c.slug,
+    u.id,
+    u.full_name,
+    u.avatar_url,
+    u.role,
+    u.trust_score::int,
+    count(*) over ()::bigint
+  from public.listings l
+  left join public.categories c on c.id = l.category_id
+  left join public.profiles u on u.id = l.seller_id
+  left join lateral (
+    select i.image_url
+    from public.listing_images i
+    where i.listing_id = l.id
+    order by i.display_order asc
+    limit 1
+  ) im on true
+  left join lateral (
+    select count(*) as image_count
+    from public.listing_images i
+    where i.listing_id = l.id
+  ) ic on true
+  where l.status = 'published'
+    and l.deleted_at is null
+    and (p_category_slug is null or c.slug = p_category_slug)
+    and (p_min_price is null or l.price >= p_min_price)
+    and (p_max_price is null or l.price <= p_max_price)
+    and (p_condition is null or l.condition = p_condition)
+    and (p_city is null or l.city ilike '%' || p_city || '%')
+    and (
+      v_tsq is null
+      or l.search_vector @@ v_tsq
+      or l.title % p_query
+    )
+  order by
+    case when p_sort = 'price_asc' then l.price end asc nulls last,
+    case when p_sort = 'price_desc' then l.price end desc nulls last,
+    case when p_sort = 'oldest' then l.published_at end asc nulls last,
+    l.published_at desc
+  limit least(greatest(p_limit, 0), 1000)
+  offset greatest(p_offset, 0);
+end;
+$$;
+
+revoke all on function public.search_listings(text, text, numeric, numeric, public.listing_condition, text, text, int, int) from public;
+grant execute on function public.search_listings(text, text, numeric, numeric, public.listing_condition, text, text, int, int) to anon, authenticated;
