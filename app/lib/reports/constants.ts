@@ -28,18 +28,6 @@ export const REPORT_REASON_LABELS: Record<ReportReason, string> = {
   other: "Other",
 }
 
-// A small icon hint per reason so the admin queue can badge each row without a
-// lookup table. Reuses lucide icon names (kept as strings to avoid a client
-// import in this server-safe module).
-export const REPORT_REASON_ICONS: Record<ReportReason, string> = {
-  spam: "Flag",
-  fraud: "ShieldAlert",
-  duplicate: "Copy",
-  wrong_category: "Tag",
-  offensive_content: "AlertCircle",
-  other: "HelpCircle",
-}
-
 export const REPORT_STATUSES = ["open", "resolved", "rejected"] as const
 
 export type ReportStatus = (typeof REPORT_STATUSES)[number]

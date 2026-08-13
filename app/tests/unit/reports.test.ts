@@ -3,7 +3,6 @@ import { describe, it, expect } from "vitest"
 import {
   REPORT_REASONS,
   REPORT_REASON_LABELS,
-  REPORT_REASON_ICONS,
   REPORT_STATUSES,
   REPORT_STATUS_LABELS,
   REPORT_STATUS_COLORS,
@@ -29,12 +28,6 @@ describe("reports reasons", () => {
   it("maps a label to every declared reason", () => {
     for (const reason of REPORT_REASONS) {
       expect(REPORT_REASON_LABELS[reason]).toBeTruthy()
-    }
-  })
-
-  it("maps an icon hint to every declared reason", () => {
-    for (const reason of REPORT_REASONS) {
-      expect(REPORT_REASON_ICONS[reason]).toBeTruthy()
     }
   })
 

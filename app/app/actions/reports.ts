@@ -54,10 +54,11 @@ export async function submitReport(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  const user = await requireUser()
+  // Gate on a signed-in session before reaching the RPC; the RPC itself
+  // resolves the reporter from auth.uid() and enforces rate limiting.
+  await requireUser()
 
   const result = await createReportRow({
-    reporterId: user.id,
     listingId: parsed.data.listingId ?? null,
     sellerId: parsed.data.sellerId ?? null,
     reason: parsed.data.reason,

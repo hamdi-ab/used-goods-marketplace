@@ -1,6 +1,7 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
+import { OPEN_REPORT_STATUSES } from "./reports/constants"
 import type { ReportReason, ReportStatus } from "./reports/constants"
 
 // Re-export the pure value objects so imports from "@/lib/reports" keep
@@ -118,7 +119,7 @@ export async function fetchAdminReports(): Promise<ReportWithRelations[]> {
   const { data, error } = await supabase
     .from("reports")
     .select(REPORT_JOINS)
-    .in("status", ["open"])
+    .in("status", OPEN_REPORT_STATUSES)
     .order("created_at", { ascending: true })
 
   if (error) {
@@ -141,9 +142,10 @@ export interface ReportResult {
 /**
  * Submit a report. Delegates to the submit_report RPC so the rate limit and
  * duplicate-open checks run in a single SECURITY DEFINER round-trip.
+ * The reporter is resolved from the session (auth.uid) inside the RPC, so
+ * the caller's own user id is not trusted.
  */
 export async function createReport(params: {
-  reporterId: string
   listingId?: string | null
   sellerId?: string | null
   reason: ReportReason
@@ -192,36 +194,6 @@ export async function resolveReport(
 
   const result = (data ?? {}) as { ok?: boolean; error?: string | null }
   return { ok: result.ok === true, error: result.error ?? null }
-}
-
-/**
- * Count of open reports on a target. Used by the listing detail page to show
- * a badge, and by the report dialog to warn the reporter.
- */
-export async function countReports(
-  target: { listingId?: string | null; sellerId?: string | null } = {}
-): Promise<number> {
-  const supabase = await createClient()
-
-  let query = supabase
-    .from("reports")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "open")
-
-  if (target.listingId) {
-    query = query.eq("reported_listing_id", target.listingId)
-  } else if (target.sellerId) {
-    query = query.eq("reported_seller_id", target.sellerId)
-  } else {
-    return 0
-  }
-
-  const { count, error } = await query
-  if (error) {
-    console.error("countReports:", error.message)
-    return 0
-  }
-  return count ?? 0
 }
 
 // ---- Normalisation helpers (convert raw join rows to typed shapes) ----

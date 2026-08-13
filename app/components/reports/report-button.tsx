@@ -21,6 +21,15 @@ export function ReportButton({
   signedIn: boolean
 }) {
   const [open, setOpen] = useState(false)
+  // Incrementing the key on each open forces ReportDialog to remount, which
+  // resets its useActionState — otherwise a successful submission's state
+  // persists and the "report received" view shows on every reopen.
+  const [openKey, setOpenKey] = useState(0)
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen)
+    if (nextOpen) setOpenKey((k) => k + 1)
+  }
 
   const label = target.type === "listing" ? "Report listing" : "Report seller"
   const href =
@@ -41,7 +50,7 @@ export function ReportButton({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <FlagIcon className="mr-1.5 size-4" />
@@ -50,6 +59,7 @@ export function ReportButton({
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <ReportDialog
+          key={openKey}
           listingId={target.type === "listing" ? target.listingId : null}
           sellerId={target.type === "seller" ? target.sellerId : null}
           onClose={() => setOpen(false)}

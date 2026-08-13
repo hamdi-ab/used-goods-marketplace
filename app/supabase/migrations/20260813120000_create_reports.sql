@@ -164,9 +164,9 @@ $$;
 -- resolve_report RPC (SECURITY DEFINER).
 -- Admin moderation action. p_action decides the verdict:
 --   'remove_listing'  -> soft-delete the reported listing, close the report.
---   'block_seller'    -> set the seller's role back to 'buyer' (revokes seller
---                        tools; RLS keeps their existing listings readable),
---                        close the report.
+--   'block_seller'    -> demote the seller's role to 'buyer' and soft-delete
+--                        their active listings (so blocked content disappears
+--                        from all reads under RLS), close the report.
 --   'reject'          -> just close the report with status 'rejected' (no
 --                        content change).
 ------------------------------------------------------------------------------
@@ -210,10 +210,16 @@ begin
       return jsonb_build_object('ok', false, 'error', 'report has no seller target');
     end if;
     -- Revoke seller privileges: demote to buyer. This strips the seller
-    -- role so the profile gate (requireSeller) blocks them.
+    -- role so the profile gate (requireSeller) blocks them. Any active
+    -- listings they have are soft-deleted so they disappear from all reads.
     update public.profiles
       set role = 'buyer'
       where id = v_report.reported_seller_id;
+    update public.listings
+      set deleted_at = now(), status = 'archived'
+      where seller_id = v_report.reported_seller_id
+        and deleted_at is null
+        and status in ('published', 'draft');
   elsif p_action = 'reject' then
     -- No content change; just close the report.
   else
@@ -227,7 +233,8 @@ begin
     end,
     note = case
       when p_admin_note is not null then
-        coalesce(note, '') || ' [admin: ' || p_admin_note || ']'
+        -- Truncate to honour the reports_note_length check (1000 chars).
+        left(coalesce(note, '') || ' [admin: ' || p_admin_note || ']', 1000)
       else note
     end
     where id = p_report_id;
