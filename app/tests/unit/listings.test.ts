@@ -5,6 +5,10 @@ import {
   formatPrice,
   formatCondition,
   CONDITION_COLORS,
+  LISTING_STATUS_COLORS,
+  LISTING_STATUS_LABELS,
+  STATUSES,
+  type ListingStatus,
 } from "@/lib/listings"
 
 describe("listings.isValidUuid", () => {
@@ -52,5 +56,21 @@ describe("listings.CONDITION_COLORS", () => {
     expect(Object.keys(CONDITION_COLORS).sort()).toEqual(
       ["Brand New", "Lightly Used", "Fair"].sort()
     )
+  })
+})
+
+describe("listings status presentation", () => {
+  it("labels and colors cover the writable statuses plus archived", () => {
+    const statuses: ListingStatus[] = ["draft", "published", "sold", "archived"]
+    for (const status of statuses) {
+      expect(LISTING_STATUS_LABELS[status]).toBeTruthy()
+      expect(LISTING_STATUS_COLORS[status]).toMatch(/^bg-.*text-/)
+    }
+  })
+
+  it("labels every declared STATUSES value", () => {
+    for (const status of STATUSES) {
+      expect(LISTING_STATUS_LABELS[status]).toBeTruthy()
+    }
   })
 })

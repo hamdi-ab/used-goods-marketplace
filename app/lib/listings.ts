@@ -151,18 +151,78 @@ export async function fetchListing(
   }
 }
 
-export async function fetchSellerListings(sellerId: string): Promise<Listing[]> {
+// A seller's own listing as shown on the dashboard manager: the full Listing
+// plus the cover image for the thumbnail. Soft-deleted rows are filtered out so
+// an archived listing disappears from the seller's manager once deleted.
+export interface SellerListingRow extends Listing {
+  cover_image_url: string | null
+}
+
+export async function fetchSellerListings(
+  sellerId: string
+): Promise<SellerListingRow[]> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from("listings")
-    .select(LISTING_COLUMNS)
+    .select(
+      `${LISTING_COLUMNS},
+       images:listing_images(image_url, display_order)`
+    )
     .eq("seller_id", sellerId)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
+
   if (error) {
     console.error("fetchSellerListings:", error.message)
     return []
   }
-  return data as Listing[]
+
+  return (data as unknown as RawSellerListingRow[] | null ?? []).map((row) => {
+    const cover =
+      [...(row.images ?? [])].sort((a, b) => a.display_order - b.display_order)[0]
+        ?.image_url ?? null
+    return {
+      id: row.id,
+      seller_id: row.seller_id,
+      category_id: row.category_id,
+      title: row.title,
+      description: row.description,
+      price: Number(row.price),
+      condition: row.condition,
+      negotiable: row.negotiable,
+      city: row.city,
+      sub_city: row.sub_city,
+      address: row.address,
+      status: row.status,
+      view_count: row.view_count,
+      favorite_count: row.favorite_count,
+      published_at: row.published_at,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+      cover_image_url: cover,
+    }
+  })
+}
+
+interface RawSellerListingRow {
+  id: string
+  seller_id: string
+  category_id: string | null
+  title: string
+  description: string | null
+  price: number | string
+  condition: Condition
+  negotiable: boolean
+  city: string | null
+  sub_city: string | null
+  address: string | null
+  status: ListingStatus
+  view_count: number
+  favorite_count: number
+  published_at: string
+  created_at: string
+  updated_at: string
+  images: { image_url: string; display_order: number }[] | null
 }
 
 // Public, paginated browse of published listings (anon-readable via RLS).

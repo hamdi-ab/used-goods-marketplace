@@ -3,6 +3,9 @@ import Link from "next/link"
 import { HeartIcon, InboxIcon, HandshakeIcon, LayoutDashboardIcon, PlusIcon, UserRoundIcon } from "lucide-react"
 
 import { requireUser, ROLE_LABELS } from "@/lib/auth"
+import { fetchSellerListings } from "@/lib/listings"
+import { countIncomingOffers } from "@/lib/offers"
+import { ListingManager } from "@/components/dashboard/listing-manager"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -14,6 +17,10 @@ export const metadata: Metadata = {
 
 export default async function DashboardPage() {
   const user = await requireUser()
+  const [listings, openOfferCount] = await Promise.all([
+    fetchSellerListings(user.id),
+    countIncomingOffers(user.id),
+  ])
 
   const firstName = user.fullName?.split(" ")[0] ?? "there"
 
@@ -25,42 +32,48 @@ export default async function DashboardPage() {
           Welcome back, {firstName}
         </h1>
         <p className="mt-2 max-w-xl text-muted-foreground">
-          Manage your marketplace activity from here. List management tools arrive as
-          the platform grows.
+          This is your selling home: manage your listings, watch their stats, and
+          keep on top of incoming offers.
         </p>
       </div>
+
+      <section className="mb-10">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 className="font-heading text-xl font-semibold">Your listings</h2>
+            <p className="text-sm text-muted-foreground">
+              {listings.length === 0
+                ? "Nothing on sale yet."
+                : `${listings.length} listing${listings.length === 1 ? "" : "s"} — edit, archive, or track views and favorites.`}
+            </p>
+          </div>
+          <Button asChild size="sm">
+            <Link href="/sell">
+              <PlusIcon className="mr-1.5 size-4" />
+              Create a listing
+            </Link>
+          </Button>
+        </div>
+        <ListingManager listings={listings} />
+      </section>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <PlusIcon className="size-5 text-primary" />
-              Sell an item
+              <InboxIcon className="size-5 text-primary" />
+              Incoming offers
+              {openOfferCount > 0 ? (
+                <Badge variant="secondary">{openOfferCount} open</Badge>
+              ) : null}
             </CardTitle>
             <CardDescription>
-              Create a listing and reach buyers across the marketplace.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href="/sell">Create a listing</Link>
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <HeartIcon className="size-5 text-primary" />
-              Favorites
-            </CardTitle>
-            <CardDescription>
-              Review the listings you have saved for later.
+              Accept, decline, or counter offers on your listings.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild variant="outline">
-              <Link href="/favorites">View favorites</Link>
+              <Link href="/offers/seller">Manage offers</Link>
             </Button>
           </CardContent>
         </Card>
@@ -85,16 +98,16 @@ export default async function DashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <InboxIcon className="size-5 text-primary" />
-              Incoming offers
+              <HeartIcon className="size-5 text-primary" />
+              Favorites
             </CardTitle>
             <CardDescription>
-              Accept, decline, or counter offers on your listings.
+              Review the listings you have saved for later.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Button asChild variant="outline">
-              <Link href="/offers/seller">Manage offers</Link>
+              <Link href="/favorites">View favorites</Link>
             </Button>
           </CardContent>
         </Card>

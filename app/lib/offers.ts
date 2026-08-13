@@ -144,6 +144,24 @@ export async function fetchSellerOffers(userId: string): Promise<SellerOfferRow[
   return rows.map((row) => mapRawOfferRow(row, true))
 }
 
+// Open offers (pending or countered) on the seller's listings, for the dashboard
+// summary. RLS scopes the count to the caller's own listings; the explicit
+// seller filter is the same PostgREST hint used by fetchSellerOffers.
+export async function countIncomingOffers(userId: string): Promise<number> {
+  const supabase = await createClient()
+  const { count, error } = await supabase
+    .from("offers")
+    .select("id", { count: "exact", head: true })
+    .eq("listing.seller_id", userId)
+    .in("status", ["pending", "countered"])
+
+  if (error) {
+    console.error("countIncomingOffers:", error.message)
+    return 0
+  }
+  return count ?? 0
+}
+
 // ---- Writes ----
 
 export interface OfferResult {
