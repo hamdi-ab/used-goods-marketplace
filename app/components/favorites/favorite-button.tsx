@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useOptimistic, useRef } from "react"
+import { useOptimistic } from "react"
 import { usePathname } from "next/navigation"
 import { Heart } from "lucide-react"
 
@@ -31,7 +31,6 @@ export function FavoriteButton({
 }) {
   const [favorite, setFavorite] = useOptimistic(initial === true)
   const pathname = usePathname()
-  const formRef = useRef<HTMLFormElement>(null)
 
   // Signed-out visitors get a heart that routes through login (with a ?next=
   // back to this listing) instead of a form that would just redirect.
@@ -47,18 +46,19 @@ export function FavoriteButton({
     )
   }
 
+  // Client wrapper around the server action: flip the heart on the current
+  // frame via the shared reducer, then run the action. Revalidation re-syncs
+  // this optimistic frame with DB truth when the transition settles.
+  const submitFavorite = async (formData: FormData) => {
+    setFavorite(toggleFavoriteState)
+    await toggleFavorite(formData)
+  }
+
   return (
-    <form ref={formRef} action={toggleFavorite}>
+    <form action={submitFavorite}>
       <input type="hidden" name="listingId" value={listingId} />
       <button
         type="submit"
-        onClick={() => {
-          // Flip the heart on the current frame via the shared reducer, then
-          // let the form submit run the server action (revalidatePath re-syncs
-          // this optimistic frame with DB truth when the transition settles).
-          setFavorite(toggleFavoriteState)
-          formRef.current?.requestSubmit()
-        }}
         aria-label={favorite ? "Remove from favorites" : "Save to favorites"}
         aria-pressed={favorite}
         className={heartClasses(favorite)}

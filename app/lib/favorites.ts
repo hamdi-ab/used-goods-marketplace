@@ -82,17 +82,6 @@ export async function toggleFavoriteRow(
   }
   const supabase = await createClient()
 
-  // Only published, non-deleted listings can be favorited (RLS would also
-  // return null for anything else, but the explicit check keeps the write
-  // from silently toggling against a stale favorite of an unreadable row).
-  const { data: listing } = await supabase
-    .from("listings")
-    .select("id")
-    .eq("id", listingId)
-    .eq("status", "published")
-    .maybeSingle()
-  if (!listing) return { ok: false, error: "listing not found" }
-
   const { data: existing } = await supabase
     .from("favorites")
     .select("id")
@@ -101,6 +90,22 @@ export async function toggleFavoriteRow(
     .maybeSingle()
   const shouldFavor = toggleFavoriteState(Boolean(existing))
 
+  if (shouldFavor) {
+    // A new favorite requires a published, non-deleted listing (RLS would also
+    // return null for anything else, but the explicit check keeps the write
+    // from inserting a row for an unreadable listing).
+    const { data: listing } = await supabase
+      .from("listings")
+      .select("id")
+      .eq("id", listingId)
+      .eq("status", "published")
+      .maybeSingle()
+    if (!listing) return { ok: false, error: "listing not found" }
+  }
+
+  // Deleting is always allowed: a favorite can outlive its listing's
+  // publish status (a listing sold or unpublished while saved), and the
+  // owner must still be able to clear that stale row.
   const result = shouldFavor
     ? await supabase.from("favorites").insert({
         user_id: userId,

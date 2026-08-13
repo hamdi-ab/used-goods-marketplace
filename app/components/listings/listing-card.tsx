@@ -39,10 +39,8 @@ export function ListingCard({
           <div className="absolute right-2 top-2">{favoriteButton}</div>
         ) : null}
       </div>
-      <div className="mt-2 space-y-1">
-        <Link href={href} className="block">
-          <p className="line-clamp-1 font-medium">{listing.title}</p>
-        </Link>
+      <Link href={href} className="mt-2 block space-y-1">
+        <p className="line-clamp-1 font-medium">{listing.title}</p>
         <p className="font-semibold">{formatPrice(listing.price)}</p>
         <div className="flex items-center gap-2">
           <ConditionChip condition={listing.condition} />
@@ -51,7 +49,7 @@ export function ListingCard({
           ) : null}
         </div>
         <SellerBadge listing={listing} />
-      </div>
+      </Link>
     </div>
   )
 }
