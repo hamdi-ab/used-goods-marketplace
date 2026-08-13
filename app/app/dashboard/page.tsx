@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { HeartIcon, InboxIcon, HandshakeIcon, LayoutDashboardIcon, PlusIcon, UserRoundIcon } from "lucide-react"
+import { HeartIcon, InboxIcon, HandshakeIcon, LayoutDashboardIcon, PlusIcon, ShieldIcon, UserRoundIcon } from "lucide-react"
 
 import { requireUser, ROLE_LABELS } from "@/lib/auth"
 import { fetchSellerListings } from "@/lib/listings"
@@ -149,6 +149,25 @@ export default async function DashboardPage() {
             </Button>
           </CardContent>
         </Card>
+
+        {user.role === "admin" ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShieldIcon className="size-5 text-primary" />
+                Moderation
+              </CardTitle>
+              <CardDescription>
+                Review reported listings and sellers in the moderation queue.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild variant="outline">
+                <Link href="/admin/reports">Open reports</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : null}
 
         <Card>
           <CardHeader>
