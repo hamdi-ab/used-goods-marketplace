@@ -1,7 +1,7 @@
 import Link from "next/link"
 
 import type { BrowseListing } from "@/lib/listings"
-import { formatPrice } from "@/lib/listings"
+import { formatPrice } from "@/lib/listings/constants"
 import { ConditionChip } from "@/components/listings/condition-chip"
 import { SellerBadge } from "@/components/listings/seller-badge"
 

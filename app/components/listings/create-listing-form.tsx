@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import { XIcon, UploadIcon } from "lucide-react"
 
 import { createListing } from "@/app/actions/listings"
-import { CONDITIONS } from "@/lib/listings"
+import { CONDITIONS } from "@/lib/listings/constants"
 import type { Category } from "@/lib/listings"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"

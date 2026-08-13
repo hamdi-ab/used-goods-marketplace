@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   validate:
-    name: Lint, Typecheck & Build
+    name: Lint, Typecheck, Tests & Build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -36,6 +36,9 @@ jobs:
 
       - name: Type check
         run: npm run typecheck
+
+      - name: Run unit tests
+        run: npm test
 
       - name: Build
         run: npm run build
