@@ -1,20 +1,22 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
-import {
-  isValidUuid,
-  mapBrowseListing,
-  type BrowseListing,
-  type RawListingRow,
-} from "@/lib/listings"
+import type { Supabase } from "@/lib/supabase/types"
+import { isValidUuid } from "@/lib/listings/constants"
+import type { BrowseListing } from "@/lib/listings/constants"
+import { mapNestedBrowseListing } from "@/lib/listings/browse-mapper"
+import type { NestedBrowseRow } from "@/lib/listings/browse-mapper"
 import { toggleFavoriteState } from "@/lib/favorites/constants"
 
 export * from "@/lib/favorites/constants"
 
 // ---- Reads ----
 
-export async function fetchFavoriteIds(userId: string): Promise<string[]> {
-  const supabase = await createClient()
+export async function fetchFavoriteIds(
+  userId: string,
+  client?: Supabase
+): Promise<string[]> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from("favorites")
     .select("listing_id")
@@ -30,9 +32,10 @@ export async function fetchFavoriteIds(userId: string): Promise<string[]> {
 // listings that are no longer readable (unpublished, deleted, sold). Only
 // still-available favorites are returned, most recently favorited first.
 export async function fetchFavoriteListings(
-  userId: string
+  userId: string,
+  client?: Supabase
 ): Promise<BrowseListing[]> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from("favorites")
     .select(
@@ -53,13 +56,13 @@ export async function fetchFavoriteListings(
   // but listing_id -> listings is a to-one join: PostgREST returns a single
   // row (or null when the listing is no longer readable under RLS).
   const rows = (data ?? []) as unknown as {
-    listing: RawListingRow | null
+    listing: NestedBrowseRow | null
   }[]
 
   return rows
     .map((row) => row.listing)
-    .filter((listing): listing is RawListingRow => listing !== null)
-    .map(mapBrowseListing)
+    .filter((listing): listing is NestedBrowseRow => listing !== null)
+    .map(mapNestedBrowseListing)
 }
 
 // ---- Writes (called by the toggle server action) ----

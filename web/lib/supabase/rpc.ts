@@ -28,10 +28,10 @@ export interface RpcOutcome {
   error?: string | null
 }
 
-/** One typed seam for every RPC call. Mirrors offers.ts::runOfferRpc: the name
- * is a typed union and PostgREST's error object is reduced to its message in a
- * single place. The client is injected so the seam stays testable without the
- * server graph (and so callers can pass a fake in unit tests). */
+/** One typed seam for every RPC call. The name is a typed union and
+ * PostgREST's error object is reduced to its message in a single place. The
+ * client is injected so the seam stays testable without the server graph (and
+ * so callers can pass a fake in unit tests). */
 export async function callRpc<T>(
   supabase: Supabase,
   name: RpcName,
@@ -42,17 +42,20 @@ export async function callRpc<T>(
 }
 
 /** Normalise a write-RPC's `{ ok, error }` envelope, collapsing the jsonb
- * payload and the transport error into one `{ ok, error }` result. */
-export async function callOutcomeRpc(
+ * payload and the transport error into one `{ ok, error }` result. Generic over
+ * the extra fields a particular RPC returns (e.g. submit_review → seller_id),
+ * so every write-RPC caller lands on this one interface. On a transport error
+ * the extra fields are absent; callers default them with `??`. */
+export async function callOutcomeRpc<T extends RpcOutcome = RpcOutcome>(
   supabase: Supabase,
   name: RpcName,
   args: RpcArgs,
   logLabel: string
-): Promise<RpcOutcome> {
-  const { data, error } = await callRpc<RpcOutcome>(supabase, name, args)
+): Promise<T> {
+  const { data, error } = await callRpc<T>(supabase, name, args)
   if (error) {
     console.error(`${logLabel}:`, error)
-    return { ok: false, error }
+    return { ok: false, error } as unknown as T
   }
-  return data ?? {}
+  return (data ?? {}) as T
 }

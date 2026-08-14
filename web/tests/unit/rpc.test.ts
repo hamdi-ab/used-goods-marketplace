@@ -54,4 +54,19 @@ describe("supabase.callOutcomeRpc", () => {
     const result = await callOutcomeRpc(supabase, "submit_offer", {}, "test")
     expect(result).toEqual({})
   })
+
+  it("carries RPC-specific fields through the generic envelope", async () => {
+    const supabase = {
+      rpc: async () => ({
+        data: { ok: true, error: null, seller_id: "seller-9" },
+        error: null,
+      }),
+    } as never
+    const result = await callOutcomeRpc<{
+      ok: boolean
+      error: string | null
+      seller_id: string | null
+    }>(supabase, "submit_review", {}, "test")
+    expect(result).toEqual({ ok: true, error: null, seller_id: "seller-9" })
+  })
 })

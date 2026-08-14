@@ -37,12 +37,6 @@ export const OFFER_STATUS_COLORS: Record<OfferStatus, string> = {
 export const OFFER_AMOUNT_MAX = 100_000_000
 export const OFFER_MESSAGE_MAX = 500
 
-/**
- * The login redirect target for the "Make an offer" CTA. Login honors a
- * `?next=` query param (see app/login/page.tsx), so a signed-out visitor who
- * taps the CTA lands back on the exact listing after signing in. Kept here so
- * the Client Component needs no URL-building logic.
- */
-export function buildLoginUrl(pathname: string): string {
-  return `/login?next=${encodeURIComponent(pathname)}`
-}
+// The login redirect target for the "Make an offer" CTA, shared across
+// signed-out CTAs (see lib/nav.ts for the single definition).
+export { buildLoginUrl } from "@/lib/nav"

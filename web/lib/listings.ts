@@ -26,23 +26,26 @@ import type {
 } from "./listings/constants"
 import type { SearchSort } from "@/lib/search"
 import { MAX_PAGING_OFFSET } from "@/lib/pagination"
-import { mapBrowseListing, pickCoverImage } from "./listings/browse-mapper"
-import type { NestedBrowseRow } from "./listings/browse-mapper"
+import {
+  mapFlatSearchListing,
+  mapNestedBrowseListing,
+  pickCoverImage,
+} from "./listings/browse-mapper"
+import type {
+  FlatSearchRow,
+  NestedBrowseRow,
+} from "./listings/browse-mapper"
 
 // Re-export the pure value objects so imports from "@/lib/listings" keep
 // resolving. Definitions live in ./listings/constants (server-free).
 export * from "./listings/constants"
 
-// Re-export the browse row mapper + nested row shape so the favorites feed and
-// the offers read path use the one cover/seller rule. Definitions live in
-// ./listings/browse-mapper (server-free).
-export { mapBrowseListing } from "./listings/browse-mapper"
-export type { NestedBrowseRow as RawListingRow } from "./listings/browse-mapper"
-
 // ---- Reads ----
 
-export async function fetchCategories(): Promise<Category[]> {
-  const supabase = await createClient()
+export async function fetchCategories(
+  client?: Supabase
+): Promise<Category[]> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from("categories")
     .select("id, name, slug, parent_id")
@@ -64,10 +67,11 @@ export interface FetchListingOptions {
 
 export async function fetchListing(
   id: string,
-  opts: FetchListingOptions = {}
+  opts: FetchListingOptions = {},
+  client?: Supabase
 ): Promise<ListingWithRelations | null> {
   if (!isValidUuid(id)) return null
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
 
   const { data: listing } = await supabase
     .from("listings")
@@ -128,9 +132,10 @@ type RawSellerListingRow = Omit<Listing, "price"> & {
 }
 
 export async function fetchSellerListings(
-  sellerId: string
+  sellerId: string,
+  client?: Supabase
 ): Promise<SellerListingRow[]> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from("listings")
     .select(
@@ -157,17 +162,20 @@ export async function fetchSellerListings(
 }
 
 // Public, paginated browse of published listings (anon-readable via RLS).
-export async function fetchListings(opts: {
-  limit?: number
-  offset?: number
-  categorySlug?: string
-} = {}): Promise<{
+export async function fetchListings(
+  opts: {
+    limit?: number
+    offset?: number
+    categorySlug?: string
+  } = {},
+  client?: Supabase
+): Promise<{
   listings: BrowseListing[]
   count: number | null
   hasMore: boolean
   error: string | null
 }> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const limit = Math.min(opts.limit ?? PAGE_SIZE, BROWSE_LIMIT_MAX)
   // offset is an untrusted cursor from the URL; parseBrowseParams
   // (lib/browse) is the single source of truth that validates + clamps it
@@ -206,7 +214,7 @@ export async function fetchListings(opts: {
   }
 
   const listings: BrowseListing[] = (data as NestedBrowseRow[] | null ?? []).map(
-    mapBrowseListing
+    mapNestedBrowseListing
   )
 
   const hasMore =
@@ -234,34 +242,20 @@ export interface SearchResult {
   error: string | null
 }
 
-/** Row shape returned by the `search_listings` RPC (see migrations). */
-interface SearchListingRow {
-  id: string
-  title: string
-  price: number
-  condition: Condition
-  city: string | null
-  published_at: string
-  image_url: string | null
-  image_count: number
-  seller_id: string | null
-  seller_full_name: string | null
-  seller_avatar_url: string | null
-  seller_role: string | null
-  seller_trust_score: number | null
-  seller_phone_verified: boolean | null
-  seller_fayda_verified: boolean | null
-  total_count: number
-}
+/** Row shape returned by the `search_listings` RPC (see migrations). It is the
+ * same flat browse row the mapper consumes (so the seller/image contract lives
+ * once), plus the exact-count column the RPC adds alongside the slice. */
+type SearchListingRow = FlatSearchRow & { total_count: number }
 
 // Keyword + filters + sort + count in one round trip via the search_listings
 // RPC (T06, Search Service). Paging mirrors fetchListings: one PAGE_SIZE window
 // that never crosses the 1000-row ceiling, with `hasMore` derived from the
 // exact count the RPC returns alongside the slice.
 export async function searchListings(
-  opts: SearchOptions = {}
+  opts: SearchOptions = {},
+  client?: Supabase
 ): Promise<SearchResult> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const offset = Math.min(Math.max(opts.offset ?? 0, 0), MAX_PAGING_OFFSET)
 
   const { data, error } = await callRpc<SearchListingRow[]>(
@@ -286,7 +280,7 @@ export async function searchListings(
   }
 
   const rows = (data ?? []) as SearchListingRow[]
-  const listings: BrowseListing[] = rows.map(mapBrowseListing)
+  const listings: BrowseListing[] = rows.map(mapFlatSearchListing)
 
   const count = rows.length > 0 ? rows[0].total_count : 0
   return {

@@ -58,12 +58,6 @@ export const REPORT_NOTE_MAX = 1000
 export const REPORT_RATE_LIMIT_COUNT = 5
 export const REPORT_RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000
 
-/**
- * The login redirect target for the Report button. Login honors a `?next=`
- * query param (see app/login/page.tsx), so a signed-out visitor who taps
- * Report lands back on the exact listing after signing in. Kept here so the
- * Client Component needs no URL-building logic.
- */
-export function buildLoginUrl(pathname: string): string {
-  return `/login?next=${encodeURIComponent(pathname)}`
-}
+// The login redirect target for the Report button, shared across signed-out
+// CTAs (see lib/nav.ts for the single definition).
+export { buildLoginUrl } from "@/lib/nav"

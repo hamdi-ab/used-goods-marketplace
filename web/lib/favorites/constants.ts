@@ -20,12 +20,6 @@ export function toggleFavoriteState(state: FavoriteState): FavoriteState {
   return !state
 }
 
-/**
- * The login redirect target for the heart button. Login honors a `?next=`
- * query param (see app/login/page.tsx), so a signed-out visitor who taps a
- * heart lands back on the exact listing after signing in. Kept here so the
- * Client Component needs no URL-building logic.
- */
-export function buildLoginUrl(pathname: string): string {
-  return `/login?next=${encodeURIComponent(pathname)}`
-}
+// The login redirect target for the heart button, shared across signed-out
+// CTAs (see lib/nav.ts for the single definition).
+export { buildLoginUrl } from "@/lib/nav"

@@ -43,13 +43,11 @@ export interface FlatSearchRow {
   seller_fayda_verified?: boolean | null
 }
 
-export type BrowseRow = NestedBrowseRow | FlatSearchRow
-
 /** Shared cover-pick: the lowest display_order image is the listing's cover.
  * One rule for every listing read shape that renders a thumbnail (browse feed,
- * favorites feed, seller dashboard) so it never forks. */
+ * favorites feed, seller dashboard, admin report queue) so it never forks. */
 export function pickCoverImage(
-  images: { image_url: string; display_order: number }[] | null
+  images: { image_url: string; display_order: number }[] | null | undefined
 ): string | null {
   return (
     [...(images ?? [])].sort((a, b) => a.display_order - b.display_order)[0]
@@ -81,35 +79,36 @@ export function buildSeller(fields: {
   }
 }
 
-/** Map a nested (browse/favorites) or flat (search RPC) row to the display
- * shape both feeds render. Nested rows always carry the `images` key (even
- * when null), which is how the two shapes are told apart. */
-export function mapBrowseListing(row: BrowseRow): BrowseListing {
-  if ("images" in row) {
-    const seller = row.seller?.[0] ?? null
-    return {
-      id: row.id,
-      title: row.title,
-      price: row.price,
-      condition: row.condition,
-      city: row.city,
-      published_at: row.published_at,
-      image_url: pickCoverImage(row.images),
-      image_count: (row.images ?? []).length,
-      seller: seller
-        ? buildSeller({
-            id: seller.id,
-            full_name: seller.full_name,
-            avatar_url: seller.avatar_url,
-            role: seller.role,
-            trust_score: seller.trust_score,
-            phone_verified: seller.phone_verified ?? null,
-            fayda_verified: seller.fayda_verified ?? null,
-          })
-        : null,
-    }
+/** Map a nested (browse/favorites) row to the display shape both feeds render.
+ * The call site knows its shape statically, so there is no runtime sniff: the
+ * nested and flat paths are two entry points over the same cover/seller rules. */
+export function mapNestedBrowseListing(row: NestedBrowseRow): BrowseListing {
+  const seller = row.seller?.[0] ?? null
+  return {
+    id: row.id,
+    title: row.title,
+    price: row.price,
+    condition: row.condition,
+    city: row.city,
+    published_at: row.published_at,
+    image_url: pickCoverImage(row.images),
+    image_count: (row.images ?? []).length,
+    seller: seller
+      ? buildSeller({
+          id: seller.id,
+          full_name: seller.full_name,
+          avatar_url: seller.avatar_url,
+          role: seller.role,
+          trust_score: seller.trust_score,
+          phone_verified: seller.phone_verified ?? null,
+          fayda_verified: seller.fayda_verified ?? null,
+        })
+      : null,
   }
+}
 
+/** Map a flat `search_listings` RPC row to the display shape. */
+export function mapFlatSearchListing(row: FlatSearchRow): BrowseListing {
   return {
     id: row.id,
     title: row.title,

@@ -1,7 +1,9 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
-import { callRpc } from "@/lib/supabase/rpc"
+import type { Supabase } from "@/lib/supabase/types"
+import { callOutcomeRpc } from "@/lib/supabase/rpc"
+import { pickCoverImage } from "@/lib/listings/browse-mapper"
 import { OPEN_REPORT_STATUSES } from "./reports/constants"
 import type { ReportReason, ReportStatus } from "./reports/constants"
 
@@ -90,9 +92,10 @@ const REPORT_JOINS = `${REPORT_COLUMNS},
  * without a second round-trip.
  */
 export async function fetchMyReports(
-  userId: string
+  userId: string,
+  client?: Supabase
 ): Promise<MyReportRow[]> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
 
   const { data, error } = await supabase
     .from("reports")
@@ -114,8 +117,10 @@ export async function fetchMyReports(
  * The admin moderation queue: all open reports with the reported item's
  * context (listing + seller profile, or just the seller profile).
  */
-export async function fetchAdminReports(): Promise<ReportWithRelations[]> {
-  const supabase = await createClient()
+export async function fetchAdminReports(
+  client?: Supabase
+): Promise<ReportWithRelations[]> {
+  const supabase = client ?? (await createClient())
 
   const { data, error } = await supabase
     .from("reports")
@@ -140,12 +145,6 @@ export interface ReportResult {
   error: string | null
 }
 
-/** Result shape the report RPCs return (jsonb { ok, error }). */
-interface ReportRpcData {
-  ok?: boolean
-  error?: string | null
-}
-
 /**
  * Submit a report. Delegates to the submit_report RPC so the rate limit and
  * duplicate-open checks run in a single SECURITY DEFINER round-trip.
@@ -160,19 +159,18 @@ export async function createReport(params: {
 }): Promise<ReportResult> {
   const supabase = await createClient()
 
-  const { data, error } = await callRpc<ReportRpcData>(supabase, "submit_report", {
-    p_listing_id: params.listingId ?? null,
-    p_seller_id: params.sellerId ?? null,
-    p_reason: params.reason,
-    p_note: params.note?.trim() || null,
-  })
+  const result = await callOutcomeRpc(
+    supabase,
+    "submit_report",
+    {
+      p_listing_id: params.listingId ?? null,
+      p_seller_id: params.sellerId ?? null,
+      p_reason: params.reason,
+      p_note: params.note?.trim() || null,
+    },
+    "createReport"
+  )
 
-  if (error) {
-    console.error("createReport:", error)
-    return { ok: false, error }
-  }
-
-  const result = data ?? {}
   return { ok: result.ok === true, error: result.error ?? null }
 }
 
@@ -188,18 +186,17 @@ export async function resolveReport(
 ): Promise<ReportResult> {
   const supabase = await createClient()
 
-  const { data, error } = await callRpc<ReportRpcData>(supabase, "resolve_report", {
-    p_report_id: reportId,
-    p_action: action,
-    p_admin_note: adminNote?.trim() || null,
-  })
+  const result = await callOutcomeRpc(
+    supabase,
+    "resolve_report",
+    {
+      p_report_id: reportId,
+      p_action: action,
+      p_admin_note: adminNote?.trim() || null,
+    },
+    "resolveReport"
+  )
 
-  if (error) {
-    console.error("resolveReport:", error)
-    return { ok: false, error }
-  }
-
-  const result = data ?? {}
   return { ok: result.ok === true, error: result.error ?? null }
 }
 
@@ -230,15 +227,6 @@ interface RawReportRow {
     trust_score: number | null
   } | null
   reporter: { id: string; full_name: string | null; avatar_url: string | null } | null
-}
-
-function pickCoverImage(
-  images: { image_url: string; display_order: number }[] | null | undefined
-): string | null {
-  return (
-    [...(images ?? [])].sort((a, b) => a.display_order - b.display_order)[0]
-      ?.image_url ?? null
-  )
 }
 
 function normalizeAdminReport(row: RawReportRow): ReportWithRelations {

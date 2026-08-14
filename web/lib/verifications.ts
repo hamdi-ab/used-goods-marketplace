@@ -1,7 +1,7 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
-import { callRpc } from "@/lib/supabase/rpc"
+import { callOutcomeRpc } from "@/lib/supabase/rpc"
 import type {
   VerificationStatus,
   VerificationType,
@@ -35,33 +35,27 @@ export async function recordVerification(params: {
 }): Promise<RecordVerificationResult> {
   const supabase = await createClient()
 
-  const { data, error } = await callRpc<{
+  const result = await callOutcomeRpc<{
     ok: boolean
     error: string | null
     user_id: string
     type: VerificationType
-  }>(supabase, "record_verification", {
-    p_user_id: params.userId,
-    p_type: params.type,
-    p_status: params.status,
-    p_notes: params.notes?.trim() || null,
-  })
+  }>(
+    supabase,
+    "record_verification",
+    {
+      p_user_id: params.userId,
+      p_type: params.type,
+      p_status: params.status,
+      p_notes: params.notes?.trim() || null,
+    },
+    "recordVerification"
+  )
 
-  if (error) {
-    console.error("recordVerification:", error)
-    return { ok: false, error }
-  }
-
-  const result = data ?? {
-    ok: false,
-    error: null,
-    user_id: params.userId,
-    type: params.type,
-  }
   return {
     ok: result.ok === true,
     error: result.error ?? null,
-    user_id: result.user_id,
-    type: result.type,
+    user_id: result.user_id ?? params.userId,
+    type: result.type ?? params.type,
   }
 }

@@ -1,13 +1,12 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
+import type { Supabase } from "@/lib/supabase/types"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
-import {
-  isValidUuid,
-  mapBrowseListing,
-  type BrowseListing,
-  type RawListingRow,
-} from "@/lib/listings"
+import { isValidUuid } from "@/lib/listings/constants"
+import type { BrowseListing } from "@/lib/listings/constants"
+import { mapNestedBrowseListing } from "@/lib/listings/browse-mapper"
+import type { NestedBrowseRow } from "@/lib/listings/browse-mapper"
 import {
   OPEN_OFFER_STATUSES,
   type OfferStatus,
@@ -38,10 +37,10 @@ export interface SellerOfferRow extends BuyerOfferRow {
 }
 
 // A join row from the raw PostgREST shape. The embedded `listing` may lack a
-// `seller` join (buyer dashboard never asks for it); mapBrowseListing treats a
-// missing seller as null, so the cast is safe.
-type RawOfferListingRow = Omit<RawListingRow, "seller"> & {
-  seller?: RawListingRow["seller"]
+// `seller` join (buyer dashboard never asks for it); mapNestedBrowseListing
+// treats a missing seller as null, so the cast is safe.
+type RawOfferListingRow = Omit<NestedBrowseRow, "seller"> & {
+  seller?: NestedBrowseRow["seller"]
 }
 
 interface RawOfferRow {
@@ -56,7 +55,7 @@ interface RawOfferRow {
 function mapOfferListing(
   listing: RawOfferListingRow | null
 ): BrowseListing | null {
-  return listing ? mapBrowseListing(listing as RawListingRow) : null
+  return listing ? mapNestedBrowseListing(listing as NestedBrowseRow) : null
 }
 
 function mapRawOfferRow(
@@ -85,8 +84,11 @@ const OFFER_COLUMNS = "id, listing_id, amount, message, status, created_at"
 // The buyer's offer history, newest first. RLS keeps this to the user's own
 // offers; the listing join drops rows for listings the buyer can no longer see
 // (deleted, unpublished, or sold without an accepted offer of theirs).
-export async function fetchBuyerOffers(userId: string): Promise<BuyerOfferRow[]> {
-  const supabase = await createClient()
+export async function fetchBuyerOffers(
+  userId: string,
+  client?: Supabase
+): Promise<BuyerOfferRow[]> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from("offers")
     .select(
@@ -121,8 +123,11 @@ export async function fetchBuyerOffers(userId: string): Promise<BuyerOfferRow[]>
 // the seller's own listings; the explicit seller filter is a query hint that
 // keeps PostgREST from scanning the whole table. The buyer profile join names
 // the person behind each offer.
-export async function fetchSellerOffers(userId: string): Promise<SellerOfferRow[]> {
-  const supabase = await createClient()
+export async function fetchSellerOffers(
+  userId: string,
+  client?: Supabase
+): Promise<SellerOfferRow[]> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from("offers")
     .select(
@@ -157,8 +162,11 @@ export async function fetchSellerOffers(userId: string): Promise<SellerOfferRow[
 // Open offers (pending or countered) on the seller's listings, for the dashboard
 // summary. RLS scopes the count to the caller's own listings; the explicit
 // seller filter is the same PostgREST hint used by fetchSellerOffers.
-export async function countIncomingOffers(userId: string): Promise<number> {
-  const supabase = await createClient()
+export async function countIncomingOffers(
+  userId: string,
+  client?: Supabase
+): Promise<number> {
+  const supabase = client ?? (await createClient())
   const { count, error } = await supabase
     .from("offers")
     .select("id", { count: "exact", head: true })
@@ -200,26 +208,38 @@ export async function submitOfferRow(input: {
   return { ok: result.ok === true, error: result.error ?? null }
 }
 
-async function runOfferRpc(
-  fn: "accept_offer" | "decline_offer" | "counter_offer",
-  args: Record<string, string | number>
-): Promise<OfferResult> {
+export async function acceptOfferRow(offerId: string): Promise<OfferResult> {
   const supabase = await createClient()
-  const result = await callOutcomeRpc(supabase, fn, args, fn)
+  const result = await callOutcomeRpc(
+    supabase,
+    "accept_offer",
+    { p_offer_id: offerId },
+    "acceptOfferRow"
+  )
   return { ok: result.ok === true, error: result.error ?? null }
 }
 
-export function acceptOfferRow(offerId: string): Promise<OfferResult> {
-  return runOfferRpc("accept_offer", { p_offer_id: offerId })
+export async function declineOfferRow(offerId: string): Promise<OfferResult> {
+  const supabase = await createClient()
+  const result = await callOutcomeRpc(
+    supabase,
+    "decline_offer",
+    { p_offer_id: offerId },
+    "declineOfferRow"
+  )
+  return { ok: result.ok === true, error: result.error ?? null }
 }
 
-export function declineOfferRow(offerId: string): Promise<OfferResult> {
-  return runOfferRpc("decline_offer", { p_offer_id: offerId })
-}
-
-export function counterOfferRow(
+export async function counterOfferRow(
   offerId: string,
   amount: number
 ): Promise<OfferResult> {
-  return runOfferRpc("counter_offer", { p_offer_id: offerId, p_amount: amount })
+  const supabase = await createClient()
+  const result = await callOutcomeRpc(
+    supabase,
+    "counter_offer",
+    { p_offer_id: offerId, p_amount: amount },
+    "counterOfferRow"
+  )
+  return { ok: result.ok === true, error: result.error ?? null }
 }
