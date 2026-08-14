@@ -7,8 +7,10 @@ import { ROLE_LABELS, getCurrentUser } from "@/lib/auth"
 import type { UserRole } from "@/lib/auth/types"
 import { fetchListing, formatCondition, formatPrice } from "@/lib/listings"
 import { fetchFavoriteIds } from "@/lib/favorites"
+import { fetchSellerContactInfo } from "@/lib/contact"
 import { FavoriteButton } from "@/components/favorites/favorite-button"
 import { MakeOfferButton } from "@/components/offers/make-offer-button"
+import { ContactButton } from "@/components/contact/contact-button"
 import { ReportButton } from "@/components/reports/report-button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -50,6 +52,13 @@ export default async function ListingPage({
   const user = await getCurrentUser()
   const favorited = user
     ? (await fetchFavoriteIds(user.id)).includes(id)
+    : null
+
+  // Fetch the seller's contact surface (telegram + phone opt-in) so the
+  // ContactSeller button can render the right options. Phone is only
+  // returned when the seller has opted in (Privacy, AC4).
+  const contactInfo = user
+    ? await fetchSellerContactInfo(data.listing.seller_id)
     : null
 
   const { listing: l, images, category, seller } = data
@@ -114,6 +123,13 @@ export default async function ListingPage({
             isOwner={Boolean(user && user.id === l.seller_id)}
             available={l.status === "published"}
             signedIn={Boolean(user)}
+          />
+
+          <ContactButton
+            listingId={l.id}
+            sellerId={l.seller_id}
+            signedIn={Boolean(user)}
+            contactInfo={contactInfo}
           />
 
           {category ? (

@@ -1,0 +1,89 @@
+"use server"
+
+import { z } from "zod"
+
+import { requireUser } from "@/lib/auth"
+import {
+  recordContactAttempt,
+  fetchSellerContactInfo,
+} from "@/lib/contact"
+import { CONTACT_METHODS } from "@/lib/contact/constants"
+import type { ContactMethod } from "@/lib/contact/constants"
+
+function formValue(formData: FormData, key: string): string | undefined {
+  const v = formData.get(key)
+  return typeof v === "string" && v.length > 0 ? v : undefined
+}
+
+const recordContactSchema = z.object({
+  listingId: z.string().uuid().optional(),
+  sellerId: z.string().uuid(),
+  contactMethod: z.enum(CONTACT_METHODS),
+})
+
+export type RecordContactState = {
+  errors?: Record<string, string[] | undefined>
+  message?: string
+  ok?: boolean
+  url?: string | null
+}
+
+export async function recordContact(
+  _prevState: RecordContactState,
+  formData: FormData
+): Promise<RecordContactState> {
+  const parsed = recordContactSchema.safeParse({
+    listingId: formValue(formData, "listingId"),
+    sellerId: formValue(formData, "sellerId"),
+    contactMethod: formValue(formData, "contactMethod"),
+  })
+
+  if (!parsed.success) {
+    return { errors: parsed.error.flatten().fieldErrors }
+  }
+
+  // Require a signed-in session before recording (Privacy, AC4). The RPC
+  // itself resolves the reporter from auth.uid().
+  await requireUser()
+
+  // Fetch the contact info so we can build the right URL and enforce the
+  // phone opt-in guard server-side (Privacy, AC4).
+  const info = await fetchSellerContactInfo(parsed.data.sellerId)
+  if (!info) {
+    return { message: "Seller not found" }
+  }
+
+  let url: string | null = null
+
+  if (parsed.data.contactMethod === "telegram") {
+    if (!info.telegram_username) {
+      return { message: "Seller has not connected Telegram" }
+    }
+    // Telegram deep-link: t.me/<username>
+    url = `https://t.me/${info.telegram_username}`
+  } else if (parsed.data.contactMethod === "phone") {
+    if (!info.phone || !info.phone_public) {
+      return { message: "Seller has not made their phone number available" }
+    }
+    url = `tel:${info.phone.replace(/\D/g, "")}`
+  }
+
+  if (!url) {
+    return { message: "No contact method available" }
+  }
+
+  // Record the contact attempt (AC3). Failures here are non-fatal: we still
+  // return the URL so the buyer can contact the seller even if the audit log
+  // write fails.
+  const result = await recordContactAttempt({
+    contactMethod: parsed.data.contactMethod as ContactMethod,
+    listingId: parsed.data.listingId,
+    sellerId: parsed.data.sellerId,
+  })
+
+  if (!result.ok) {
+    console.warn("recordContact: contact attempt not logged:", result.error)
+  }
+
+  return { ok: true, url }
+}
