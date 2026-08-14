@@ -7,6 +7,7 @@ import { ROLE_LABELS, type UserRole } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
 import { initials, formatShortDate } from "@/lib/utils"
 import { fetchSellerReviews, summarizeRating } from "@/lib/reviews"
+import { SellerTrustBadges } from "@/components/verification/seller-trust-badges"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -24,15 +25,18 @@ type PublicProfileRow = {
   trust_score: number | null
   role: "buyer" | "seller" | "admin" | null
   phone_public: boolean | null
+  phone_verified: boolean | null
+  fayda_verified: boolean | null
 }
 
 async function fetchPublicProfile(id: string): Promise<PublicProfileRow | null> {
   const supabase = await createClient()
 
   // Public surface only: phone is fetched separately and only when the owner
-  // has opted in (Security spec §19: phone is private by default).
+  // has opted in (Security spec §19: phone is private by default). Trust-badge
+  // flags (phone_verified, fayda_verified) are public by T12 RLS design.
   const baseColumns =
-    "full_name, avatar_url, city, sub_city, bio, telegram_username, trust_score, role, phone_public"
+    "full_name, avatar_url, city, sub_city, bio, telegram_username, trust_score, role, phone_public, phone_verified, fayda_verified"
 
   const { data: profile, error } = await supabase
     .from("profiles")
@@ -120,18 +124,17 @@ export default async function UserProfilePage({
         </CardHeader>
 
         <CardContent className="flex flex-col gap-6">
-          {/* Verification indicators (placeholder: T12 builds the real badge set) */}
-          <div className="flex flex-wrap gap-2">
-            <Badge variant="secondary">
-              <span className="flex items-center gap-1">
-                <span className="inline-block size-2 rounded-full bg-muted-foreground" />
-                Verification pending
-              </span>
-            </Badge>
-            {profile.telegram_username ? (
-              <Badge variant="secondary">Telegram connected</Badge>
-            ) : null}
+          {/* T12 trust badges (replaces the previous placeholder). Phone / Fayda
+              flags and role are the public verification surface per DB spec §15
+              and issue #16 AC; the empty state ("Not verified yet") renders for
+              profiles with no active badge. */}
+          <div className="flex items-center gap-3">
+            <SellerTrustBadges seller={profile} />
           </div>
+
+          {profile.telegram_username ? (
+            <Badge variant="secondary">Telegram connected</Badge>
+          ) : null}
 
           <div className="flex items-center gap-3 text-sm">
             <MapPinIcon className="size-4 shrink-0 text-muted-foreground" />
