@@ -89,6 +89,8 @@ export interface ListingWithRelations {
     avatar_url: string | null
     role: string | null
     trust_score: number | null
+    phone_verified: boolean | null
+    fayda_verified: boolean | null
   } | null
 }
 
@@ -134,6 +136,10 @@ export interface BrowseSeller {
   avatar_url: string | null
   role: string | null
   trust_score: number | null
+  /** T12 trust badges surfaced alongside the seller on cards/profile/detail.
+   * Optional so legacy/flat rows that omit them still type-check. */
+  phone_verified?: boolean | null
+  fayda_verified?: boolean | null
 }
 
 export interface BrowseListing {

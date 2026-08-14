@@ -37,9 +37,9 @@ export async function fetchFavoriteListings(
     .from("favorites")
     .select(
       `created_at,
-       listing:listings(id, title, price, condition, city, published_at,
-         seller:profiles(id, full_name, avatar_url, role, trust_score),
-         images:listing_images(id, image_url, display_order))`
+        listing:listings(id, title, price, condition, city, published_at,
+          seller:profiles(id, full_name, avatar_url, role, trust_score, phone_verified, fayda_verified),
+          images:listing_images(id, image_url, display_order))`
     )
     .eq("user_id", userId)
     .order("created_at", { ascending: false })

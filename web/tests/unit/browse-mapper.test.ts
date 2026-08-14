@@ -32,7 +32,15 @@ describe("browse-mapper.mapBrowseListing (nested browse rows)", () => {
     const listing = mapBrowseListing(nested)
     expect(listing.image_url).toBe("/b.jpg")
     expect(listing.image_count).toBe(2)
-    expect(listing.seller).toEqual(nested.seller[0])
+    expect(listing.seller).toEqual({
+      id: "s1",
+      full_name: "Ann",
+      avatar_url: null,
+      role: "user",
+      trust_score: 4,
+      phone_verified: null,
+      fayda_verified: null,
+    })
   })
 
   it("handles a row with no seller or images", () => {
@@ -80,6 +88,8 @@ describe("browse-mapper.mapBrowseListing (search RPC rows)", () => {
         avatar_url: null,
         role: "user",
         trust_score: 4,
+        phone_verified: null,
+        fayda_verified: null,
       },
     })
   })

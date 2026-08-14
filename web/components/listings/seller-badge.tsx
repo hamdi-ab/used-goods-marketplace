@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { SellerTrustBadges } from "@/components/verification/seller-trust-badges"
 
 import type { BrowseListing } from "@/lib/listings"
 
@@ -33,6 +34,7 @@ export function SellerBadge({ listing }: { listing: BrowseListing }) {
           Trust {Math.round(trust)}
         </span>
       )}
+      <SellerTrustBadges seller={seller} />
     </div>
   )
 }
