@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache"
 
 import { getCurrentUser } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
+import { completeOwnProfile, updateOwnProfile } from "@/lib/profiles"
 import { uploadObjects } from "@/lib/media"
 import { avatarAdapter } from "@/lib/media/avatar-adapter"
 
@@ -43,24 +44,17 @@ export async function completeProfile(
   const user = await getCurrentUser()
   if (!user) redirect("/login")
 
-  const supabase = await createClient()
-  const { error } = await supabase
-    .from("profiles")
-    .update({
-      full_name: parsed.data.fullName,
-      city: parsed.data.city,
-      sub_city: parsed.data.subCity || null,
-      phone: parsed.data.phone || null,
-      telegram_username: parsed.data.telegramUsername
-        ? parsed.data.telegramUsername.replace(/^@/, "")
-        : null,
-      bio: parsed.data.bio || null,
-      profile_completion: 100,
-    })
-    .eq("id", user.id)
+  const result = await completeOwnProfile(user.id, {
+    fullName: parsed.data.fullName,
+    city: parsed.data.city,
+    subCity: parsed.data.subCity,
+    phone: parsed.data.phone,
+    telegramUsername: parsed.data.telegramUsername,
+    bio: parsed.data.bio,
+  })
 
-  if (error) {
-    return { message: error.message }
+  if (!result.ok) {
+    return { message: result.error ?? "Could not save your profile" }
   }
 
   revalidatePath("/profile")
@@ -106,21 +100,17 @@ export async function updateProfile(
   const user = await getCurrentUser()
   if (!user) redirect("/login")
 
-  const supabase = await createClient()
-  const { error } = await supabase
-    .from("profiles")
-    .update({
-      city: parsed.data.city,
-      sub_city: parsed.data.subCity || null,
-      phone: parsed.data.phone || null,
-      telegram_username: parsed.data.telegramUsername || null,
-      bio: parsed.data.bio || null,
-      phone_public: parsed.data.phonePublic ?? false,
-    })
-    .eq("id", user.id)
+  const result = await updateOwnProfile(user.id, {
+    city: parsed.data.city,
+    subCity: parsed.data.subCity,
+    phone: parsed.data.phone,
+    telegramUsername: parsed.data.telegramUsername,
+    bio: parsed.data.bio,
+    phonePublic: parsed.data.phonePublic,
+  })
 
-  if (error) {
-    return { message: error.message }
+  if (!result.ok) {
+    return { message: result.error ?? "Could not update your profile" }
   }
 
   revalidatePath("/profile")

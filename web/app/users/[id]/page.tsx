@@ -4,7 +4,7 @@ import { notFound } from "next/navigation"
 import { MapPinIcon, PhoneIcon, SendIcon } from "lucide-react"
 
 import { ROLE_LABELS, type UserRole, getCurrentUser } from "@/lib/auth"
-import { createClient } from "@/lib/supabase/server"
+import { fetchPublicProfile } from "@/lib/profiles"
 import { initials, formatShortDate } from "@/lib/utils"
 import { fetchSellerReviews, summarizeRating } from "@/lib/reviews"
 import { fetchSellerContactInfo } from "@/lib/contact"
@@ -15,50 +15,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ContactButton } from "@/components/contact/contact-button"
 import { ReviewStars } from "@/components/reviews/review-stars"
-
-type PublicProfileRow = {
-  full_name: string | null
-  avatar_url: string | null
-  city: string | null
-  sub_city: string | null
-  bio: string | null
-  telegram_username: string | null
-  phone: string | null
-  trust_score: number | null
-  role: "buyer" | "seller" | "admin" | null
-  phone_public: boolean | null
-  phone_verified: boolean | null
-  fayda_verified: boolean | null
-}
-
-async function fetchPublicProfile(id: string): Promise<PublicProfileRow | null> {
-  const supabase = await createClient()
-
-  // Public surface only: phone is fetched separately and only when the owner
-  // has opted in (Security spec §19: phone is private by default). Trust-badge
-  // flags (phone_verified, fayda_verified) are public by T12 RLS design.
-  const baseColumns =
-    "full_name, avatar_url, city, sub_city, bio, telegram_username, trust_score, role, phone_public, phone_verified, fayda_verified"
-
-  const { data: profile, error } = await supabase
-    .from("profiles")
-    .select(baseColumns)
-    .eq("id", id)
-    .maybeSingle()
-
-  if (error || !profile) return null
-
-  if (profile.phone_public) {
-    const { data: withPhone } = await supabase
-      .from("profiles")
-      .select("phone")
-      .eq("id", id)
-      .maybeSingle()
-    ;(profile as PublicProfileRow).phone = withPhone?.phone ?? null
-  }
-
-  return profile as PublicProfileRow
-}
 
 export async function generateMetadata({
   params,
