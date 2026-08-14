@@ -12,7 +12,7 @@
 ## What is here
 
 ```
-app/public/images/
+web/public/images/
 ├── README.md                  this manifest
 ├── illustrations/             SVG source + 2x PNG for every illustration
 │   ├── signature-vintech-hero.*
@@ -100,7 +100,7 @@ per the strategy doc ("cut freely"); the set above meets the ~12 core-asset bar.
   and screenshots it with headless Chrome (`_tools/generate.js` writes the SVGs at
   design size; `render.sh` re-emits them at 2x). Re-run `bash _tools/render.sh` after
   editing `generate.js` to refresh PNGs.
-- **Regeneration:** `cd app/public/images/_tools && node generate.js && bash render.sh`
+- **Regeneration:** `cd web/public/images/_tools && node generate.js && bash render.sh`
 - All SVGs are self-contained (no external references), so they can be used directly.
 
 ## Guidelines when editing
