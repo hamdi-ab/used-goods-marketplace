@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import Link from "next/link"
 import { useActionState, useState } from "react"
 import { EyeIcon, HeartIcon, PackageOpenIcon, PencilIcon, PlusIcon, XIcon } from "lucide-react"
@@ -19,14 +20,14 @@ function ListingRow({ listing }: { listing: SellerListingRow }) {
     <li>
       <Card>
         <CardContent className="flex flex-wrap items-center gap-4 p-4">
-          <div className="size-16 shrink-0 overflow-hidden rounded-md border bg-muted">
+          <div className="relative size-16 shrink-0 overflow-hidden rounded-md border bg-muted">
             {listing.cover_image_url && !imgError ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={listing.cover_image_url}
                 alt=""
-                className="h-full w-full object-cover"
-                loading="lazy"
+                fill
+                sizes="64px"
+                className="object-cover"
                 onError={() => setImgError(true)}
               />
             ) : (

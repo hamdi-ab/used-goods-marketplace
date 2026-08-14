@@ -252,7 +252,18 @@ export default async function UserProfilePage({
             </ul>
           </CardContent>
         </Card>
-      ) : null}
+      ) : (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Reviews</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              No reviews yet. Reviews appear after a completed transaction.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
 
       <div className="mt-6 text-center">

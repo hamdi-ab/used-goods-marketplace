@@ -5,9 +5,14 @@ import { useState } from "react"
 import { usePathname } from "next/navigation"
 
 import { buildLoginUrl } from "@/lib/offers/constants"
+import { lazyDialog } from "@/lib/lazy-dialog"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { OfferModal } from "@/components/offers/offer-modal"
+
+// T15: load the offer form only when the dialog opens (code splitting).
+const OfferModal = lazyDialog(() =>
+  import("@/components/offers/offer-modal").then((m) => m.OfferModal)
+)
 
 export function MakeOfferButton({
   listingId,

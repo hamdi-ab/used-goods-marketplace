@@ -6,6 +6,7 @@ import { XIcon } from "lucide-react"
 import { updateListing, deleteListing } from "@/app/actions/listings"
 import { CONDITIONS, STATUSES_FOR_DISPLAY } from "@/lib/listings/constants"
 import type { Category, Listing } from "@/lib/listings"
+import { FIELD_CLASS, TEXTAREA_CLASS } from "@/lib/form-fields"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -53,7 +54,7 @@ export function EditListingForm({
                 name="description"
                 rows={5}
                 defaultValue={listing.description ?? ""}
-                className="resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-within:ring-2 focus-within:ring-ring/50"
+                className={TEXTAREA_CLASS}
               />
               <FieldError message={state.errors?.description?.[0]} />
             </div>
@@ -100,7 +101,7 @@ export function EditListingForm({
               <select
                 id="categoryId"
                 name="categoryId"
-                className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/50"
+                className={FIELD_CLASS}
                 defaultValue={listing.category_id ?? ""}
                 aria-invalid={!!state.errors?.categoryId}
               >
@@ -160,7 +161,7 @@ export function EditListingForm({
           <CardContent>
             <select
               name="status"
-              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/50"
+              className={FIELD_CLASS}
               defaultValue={listing.status}
             >
               {STATUSES_FOR_DISPLAY.map((s) => (

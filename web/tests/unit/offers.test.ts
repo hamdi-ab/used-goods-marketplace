@@ -1,5 +1,11 @@
-import { describe, it, expect } from "vitest"
+import { describe, it, expect, vi } from "vitest"
 
+vi.mock("@/lib/supabase/server", () => ({
+  createClient: vi.fn(),
+}))
+
+import { createClient } from "@/lib/supabase/server"
+import { submitOfferRow } from "@/lib/offers"
 import {
   buildLoginUrl,
   OFFER_AMOUNT_MAX,
@@ -10,6 +16,8 @@ import {
   OPEN_OFFER_STATUSES,
   type OfferStatus,
 } from "@/lib/offers/constants"
+
+const mockCreateClient = vi.mocked(createClient)
 
 describe("offers status machine", () => {
   it("declares the four AC statuses", () => {
@@ -59,5 +67,74 @@ describe("offers.buildLoginUrl", () => {
     expect(buildLoginUrl("/?category=books")).toContain(
       "next=%2F%3Fcategory%3Dbooks"
     )
+  })
+})
+
+describe("offers.submitOfferRow (rate-limited RPC)", () => {
+  it("delegates to the submit_offer RPC with the listing id and amount", async () => {
+    const rpc = vi.fn(async () => ({
+      data: { ok: true, error: null },
+      error: null,
+    }))
+    mockCreateClient.mockResolvedValue({ rpc } as never)
+
+    const result = await submitOfferRow({
+      listingId: "11111111-1111-4111-8111-111111111111",
+      amount: 500,
+      message: "  hi  ",
+    })
+
+    expect(rpc).toHaveBeenCalledWith("submit_offer", {
+      p_listing_id: "11111111-1111-4111-8111-111111111111",
+      p_amount: 500,
+      p_message: "hi",
+    })
+    expect(result).toEqual({ ok: true, error: null })
+  })
+
+  it("surfaces a rate-limit error from the RPC", async () => {
+    mockCreateClient.mockResolvedValue({
+      rpc: async () => ({
+        data: { ok: false, error: "rate limit exceeded, please wait before submitting another offer" },
+        error: null,
+      }),
+    } as never)
+
+    const result = await submitOfferRow({
+      listingId: "22222222-2222-4222-8222-222222222222",
+      amount: 50,
+      message: null,
+    })
+
+    expect(result.ok).toBe(false)
+    expect(result.error).toContain("rate limit exceeded")
+  })
+
+  it("rejects a malformed listing id before touching the RPC", async () => {
+    const rpc = vi.fn()
+    mockCreateClient.mockResolvedValue({ rpc } as never)
+
+    const result = await submitOfferRow({
+      listingId: "not-a-uuid",
+      amount: 50,
+      message: null,
+    })
+
+    expect(rpc).not.toHaveBeenCalled()
+    expect(result).toEqual({ ok: false, error: "invalid listing id" })
+  })
+
+  it("reduces a PostgREST error to its message", async () => {
+    mockCreateClient.mockResolvedValue({
+      rpc: async () => ({ data: null, error: { message: "boom" } }),
+    } as never)
+
+    const result = await submitOfferRow({
+      listingId: "33333333-3333-4333-8333-333333333333",
+      amount: 50,
+      message: null,
+    })
+
+    expect(result).toEqual({ ok: false, error: "boom" })
   })
 })

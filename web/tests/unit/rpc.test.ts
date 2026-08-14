@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 
-import { callRpc } from "@/lib/supabase/rpc"
+import { callOutcomeRpc, callRpc } from "@/lib/supabase/rpc"
 
 describe("supabase.callRpc", () => {
   it("returns the typed data with no error on success", async () => {
@@ -27,5 +27,31 @@ describe("supabase.callRpc", () => {
     } as never
     const result = await callRpc(supabase, "submit_review", {})
     expect(result).toEqual({ data: null, error: null })
+  })
+})
+
+describe("supabase.callOutcomeRpc", () => {
+  it("returns the { ok, error } envelope on success", async () => {
+    const supabase = {
+      rpc: async () => ({ data: { ok: true, error: null }, error: null }),
+    } as never
+    const result = await callOutcomeRpc(supabase, "submit_offer", {}, "test")
+    expect(result).toEqual({ ok: true, error: null })
+  })
+
+  it("collapses a transport error into the envelope", async () => {
+    const supabase = {
+      rpc: async () => ({ data: null, error: { message: "boom" } }),
+    } as never
+    const result = await callOutcomeRpc(supabase, "record_contact_attempt", {}, "test")
+    expect(result).toEqual({ ok: false, error: "boom" })
+  })
+
+  it("returns an empty envelope when the payload is missing", async () => {
+    const supabase = {
+      rpc: async () => ({ data: undefined, error: null }),
+    } as never
+    const result = await callOutcomeRpc(supabase, "submit_offer", {}, "test")
+    expect(result).toEqual({})
   })
 })

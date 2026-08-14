@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
@@ -8,6 +9,12 @@ import { buildBrowseUrl, nextOffset, parseBrowseParams } from "@/lib/browse"
 import { CategoryCard } from "@/components/categories/category-card"
 import { ListingCard } from "@/components/listings/listing-card"
 import { FavoriteButton } from "@/components/favorites/favorite-button"
+
+export const metadata: Metadata = {
+  title: "Marketplace for trusted second-hand goods",
+  description:
+    "Buy and sell used goods confidently across Addis Ababa with VinTech Marketplace.",
+}
 
 function NoResultsIcon({ className }: { className?: string }) {
   return (

@@ -5,6 +5,7 @@ import { StarIcon } from "lucide-react"
 
 import { submitReview, type ReviewState } from "@/app/actions/reviews"
 import { RATING_MAX, REVIEW_COMMENT_MAX } from "@/lib/reviews/constants"
+import { TEXTAREA_CLASS } from "@/lib/form-fields"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
@@ -79,7 +80,7 @@ export function ReviewForm({
           rows={4}
           maxLength={REVIEW_COMMENT_MAX}
           placeholder="What was the transaction like?"
-          className="resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-within:ring-2 focus-within:ring-ring/50"
+          className={TEXTAREA_CLASS}
         />
         <FieldError message={state.errors?.comment?.[0]} />
       </div>

@@ -1,3 +1,4 @@
+import Image from "next/image"
 import Link from "next/link"
 import type { ReactNode } from "react"
 
@@ -21,12 +22,12 @@ export function ListingCard({
         <Link href={href} aria-label={listing.title}>
           <div className="aspect-[4/3] w-full overflow-hidden rounded-lg border bg-muted">
             {listing.image_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <Image
                 src={listing.image_url}
                 alt=""
-                className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
-                loading="lazy"
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-cover transition-transform duration-200 group-hover:scale-105"
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">

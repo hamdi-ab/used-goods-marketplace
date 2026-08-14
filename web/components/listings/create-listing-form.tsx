@@ -7,6 +7,7 @@ import { XIcon, UploadIcon } from "lucide-react"
 import { createListing } from "@/app/actions/listings"
 import { CONDITIONS } from "@/lib/listings/constants"
 import type { Category } from "@/lib/listings"
+import { FIELD_CLASS, TEXTAREA_CLASS } from "@/lib/form-fields"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -91,6 +92,7 @@ export function CreateListingForm({
                       URL.revokeObjectURL(url)
                       setPreviews((p) => p.filter((u) => u !== url))
                     }}
+                    aria-label={`Remove photo ${i + 1}`}
                     className="absolute right-1 top-1 rounded bg-background/80 p-0.5"
                   >
                     <XIcon className="size-4" />
@@ -124,7 +126,7 @@ export function CreateListingForm({
               id="description"
               name="description"
               rows={5}
-              className="resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-within:ring-2 focus-within:ring-ring/50"
+              className={TEXTAREA_CLASS}
               placeholder="Include condition, brand, age, what's included..."
             />
             <FieldError message={state.errors?.description?.[0]} />
@@ -171,7 +173,7 @@ export function CreateListingForm({
             <select
               id="categoryId"
               name="categoryId"
-              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/50"
+              className={FIELD_CLASS}
               aria-invalid={!!state.errors?.categoryId}
             >
               <option value="">Pick a category</option>

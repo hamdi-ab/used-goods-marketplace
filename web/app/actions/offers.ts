@@ -51,9 +51,8 @@ export async function submitOffer(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  const user = await requireUser()
+  await requireUser()
   const result = await submitOfferRow({
-    userId: user.id,
     listingId: parsed.data.listingId,
     amount: parsed.data.amount,
     message: parsed.data.message ?? null,

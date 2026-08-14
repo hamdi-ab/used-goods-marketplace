@@ -7,11 +7,9 @@ import { SearchIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { FIELD_CLASS } from "@/lib/form-fields"
 import { CONDITIONS, type Category, type Condition } from "@/lib/listings/constants"
 import { buildSearchUrl, SEARCH_SORTS, type SearchQuery } from "@/lib/search"
-
-const FIELD_CLASS =
-  "w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/50"
 
 const SELECT_SORT_LABELS: Record<(typeof SEARCH_SORTS)[number], string> = {
   newest: "Newest first",
@@ -59,7 +57,11 @@ export function SearchFilters({
       <div className="flex flex-col gap-4 rounded-lg border bg-card p-4">
         <div className="relative">
           <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Label htmlFor="search-keyword" className="sr-only">
+            Search by keyword
+          </Label>
           <Input
+            id="search-keyword"
             type="search"
             name="q"
             value={q}

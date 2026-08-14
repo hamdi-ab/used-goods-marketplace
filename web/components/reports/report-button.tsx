@@ -5,9 +5,14 @@ import { useState } from "react"
 import { FlagIcon } from "lucide-react"
 
 import { buildLoginUrl } from "@/lib/reports/constants"
+import { lazyDialog } from "@/lib/lazy-dialog"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { ReportDialog } from "@/components/reports/report-dialog"
+
+// T15: load the report form only when the dialog opens (code splitting).
+const ReportDialog = lazyDialog(() =>
+  import("@/components/reports/report-dialog").then((m) => m.ReportDialog)
+)
 
 type Target =
   | { type: "listing"; listingId: string }
