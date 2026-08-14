@@ -3,15 +3,17 @@ import Link from "next/link"
 import { notFound } from "next/navigation"
 import { MapPinIcon, PhoneIcon, SendIcon } from "lucide-react"
 
-import { ROLE_LABELS, type UserRole } from "@/lib/auth"
+import { ROLE_LABELS, type UserRole, getCurrentUser } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
 import { initials, formatShortDate } from "@/lib/utils"
 import { fetchSellerReviews, summarizeRating } from "@/lib/reviews"
+import { fetchSellerContactInfo } from "@/lib/contact"
 import { SellerTrustBadges } from "@/components/verification/seller-trust-badges"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ContactButton } from "@/components/contact/contact-button"
 import { ReviewStars } from "@/components/reviews/review-stars"
 
 type PublicProfileRow = {
@@ -91,6 +93,8 @@ export default async function UserProfilePage({
   const roleLabel = ROLE_LABELS[role] ?? "Buyer"
   const reviews = await fetchSellerReviews(id)
   const rating = summarizeRating(reviews)
+  const user = await getCurrentUser()
+  const contactInfo = user ? await fetchSellerContactInfo(id) : null
 
 
   return (
@@ -190,7 +194,15 @@ export default async function UserProfilePage({
                </dd>
              </div>
            </dl>
-         </CardContent>
+
+          {user?.id !== id ? (
+            <ContactButton
+              sellerId={id}
+              signedIn={Boolean(user)}
+              contactInfo={contactInfo}
+            />
+          ) : null}
+        </CardContent>
        </Card>
 
       {reviews.length > 0 ? (
