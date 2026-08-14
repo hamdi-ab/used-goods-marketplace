@@ -1,6 +1,7 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
+import { callRpc } from "@/lib/supabase/rpc"
 import { OPEN_REPORT_STATUSES } from "./reports/constants"
 import type { ReportReason, ReportStatus } from "./reports/constants"
 
@@ -139,6 +140,12 @@ export interface ReportResult {
   error: string | null
 }
 
+/** Result shape the report RPCs return (jsonb { ok, error }). */
+interface ReportRpcData {
+  ok?: boolean
+  error?: string | null
+}
+
 /**
  * Submit a report. Delegates to the submit_report RPC so the rate limit and
  * duplicate-open checks run in a single SECURITY DEFINER round-trip.
@@ -153,7 +160,7 @@ export async function createReport(params: {
 }): Promise<ReportResult> {
   const supabase = await createClient()
 
-  const { data, error } = await supabase.rpc("submit_report", {
+  const { data, error } = await callRpc<ReportRpcData>(supabase, "submit_report", {
     p_listing_id: params.listingId ?? null,
     p_seller_id: params.sellerId ?? null,
     p_reason: params.reason,
@@ -161,11 +168,11 @@ export async function createReport(params: {
   })
 
   if (error) {
-    console.error("createReport:", error.message)
-    return { ok: false, error: error.message }
+    console.error("createReport:", error)
+    return { ok: false, error }
   }
 
-  const result = (data ?? {}) as { ok?: boolean; error?: string | null }
+  const result = data ?? {}
   return { ok: result.ok === true, error: result.error ?? null }
 }
 
@@ -181,18 +188,18 @@ export async function resolveReport(
 ): Promise<ReportResult> {
   const supabase = await createClient()
 
-  const { data, error } = await supabase.rpc("resolve_report", {
+  const { data, error } = await callRpc<ReportRpcData>(supabase, "resolve_report", {
     p_report_id: reportId,
     p_action: action,
     p_admin_note: adminNote?.trim() || null,
   })
 
   if (error) {
-    console.error("resolveReport:", error.message)
-    return { ok: false, error: error.message }
+    console.error("resolveReport:", error)
+    return { ok: false, error }
   }
 
-  const result = (data ?? {}) as { ok?: boolean; error?: string | null }
+  const result = data ?? {}
   return { ok: result.ok === true, error: result.error ?? null }
 }
 

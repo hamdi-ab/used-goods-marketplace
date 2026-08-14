@@ -1,0 +1,104 @@
+import type {
+  BrowseListing,
+  BrowseSeller,
+  Condition,
+  ListingImage,
+} from "./constants"
+
+// ---- The two shapes the browse feed can arrive in ----
+//
+// The browse and favorites feeds select PostgREST nested joins
+// (seller:profiles(...), images:listing_images(...)), while the search feed
+// consumes the flat search_listings RPC row (seller_* columns + a precomputed
+// image_url/image_count). One mapper below turns either into the single
+// BrowseListing display shape, so "which image is the cover" and "how the
+// seller is stitched" never fork.
+
+export interface NestedBrowseRow {
+  id: string
+  title: string
+  price: number
+  condition: Condition
+  city: string | null
+  published_at: string
+  seller: BrowseSeller[] | null
+  images: ListingImage[] | null
+}
+
+export interface FlatSearchRow {
+  id: string
+  title: string
+  price: number
+  condition: Condition
+  city: string | null
+  published_at: string
+  image_url: string | null
+  image_count: number
+  seller_id: string | null
+  seller_full_name: string | null
+  seller_avatar_url: string | null
+  seller_role: string | null
+  seller_trust_score: number | null
+}
+
+export type BrowseRow = NestedBrowseRow | FlatSearchRow
+
+/** Shared cover-pick: the lowest display_order image is the listing's cover.
+ * One rule for every listing read shape that renders a thumbnail (browse feed,
+ * favorites feed, seller dashboard) so it never forks. */
+export function pickCoverImage(
+  images: { image_url: string; display_order: number }[] | null
+): string | null {
+  return (
+    [...(images ?? [])].sort((a, b) => a.display_order - b.display_order)[0]
+      ?.image_url ?? null
+  )
+}
+
+/** Map a nested (browse/favorites) or flat (search RPC) row to the display
+ * shape both feeds render. Nested rows always carry the `images` key (even
+ * when null), which is how the two shapes are told apart. */
+export function mapBrowseListing(row: BrowseRow): BrowseListing {
+  if ("images" in row) {
+    const seller = row.seller?.[0] ?? null
+    return {
+      id: row.id,
+      title: row.title,
+      price: row.price,
+      condition: row.condition,
+      city: row.city,
+      published_at: row.published_at,
+      image_url: pickCoverImage(row.images),
+      image_count: (row.images ?? []).length,
+      seller: seller
+        ? {
+            id: seller.id,
+            full_name: seller.full_name,
+            avatar_url: seller.avatar_url,
+            role: seller.role,
+            trust_score: seller.trust_score,
+          }
+        : null,
+    }
+  }
+
+  return {
+    id: row.id,
+    title: row.title,
+    price: row.price,
+    condition: row.condition,
+    city: row.city,
+    published_at: row.published_at,
+    image_url: row.image_url,
+    image_count: row.image_count,
+    seller: row.seller_id
+      ? {
+          id: row.seller_id,
+          full_name: row.seller_full_name,
+          avatar_url: row.seller_avatar_url,
+          role: row.seller_role,
+          trust_score: row.seller_trust_score,
+        }
+      : null,
+  }
+}

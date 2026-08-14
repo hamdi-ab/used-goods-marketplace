@@ -1,6 +1,7 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
+import { callRpc } from "@/lib/supabase/rpc"
 import { isValidUuid } from "@/lib/listings"
 
 export * from "@/lib/reviews/constants"
@@ -82,6 +83,13 @@ export interface ReviewResult {
   sellerId: string | null
 }
 
+/** Result shape the submit_review RPC returns (jsonb { ok, error, seller_id }). */
+interface ReviewRpcData {
+  ok?: boolean
+  error?: string | null
+  seller_id?: string | null
+}
+
 // A new review, written by the buyer of an accepted offer. The RPC derives the
 // seller from the offer and recomputes the seller's trust score (AC5).
 export async function submitReviewRow(input: {
@@ -93,20 +101,16 @@ export async function submitReviewRow(input: {
     return { ok: false, error: "invalid offer id", sellerId: null }
   }
   const supabase = await createClient()
-  const { data, error } = await supabase.rpc("submit_review", {
+  const { data, error } = await callRpc<ReviewRpcData>(supabase, "submit_review", {
     p_offer_id: input.offerId,
     p_rating: input.rating,
     p_comment: input.comment?.trim() || null,
   })
   if (error) {
-    console.error("submitReviewRow:", error.message)
-    return { ok: false, error: error.message, sellerId: null }
+    console.error("submitReviewRow:", error)
+    return { ok: false, error, sellerId: null }
   }
-  const result = (data ?? {}) as {
-    ok?: boolean
-    error?: string | null
-    seller_id?: string | null
-  }
+  const result = data ?? {}
   return {
     ok: result.ok === true,
     error: result.error ?? null,

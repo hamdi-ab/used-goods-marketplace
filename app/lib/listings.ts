@@ -1,13 +1,10 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
-import {
-  detectImageMime,
-  EXT_BY_MIME,
-  MAX_IMAGE_BYTES,
-  ALLOWED_IMAGE_MIME,
-  uploadObjects,
-} from "@/lib/media"
+import type { Supabase } from "@/lib/supabase/types"
+import { callRpc } from "@/lib/supabase/rpc"
+import { uploadObjects } from "@/lib/media"
+import { listingImageAdapter } from "@/lib/media/listing-adapter"
 
 import {
   BROWSE_LIMIT_MAX,
@@ -18,7 +15,6 @@ import {
 } from "./listings/constants"
 import type {
   BrowseListing,
-  BrowseSeller,
   Category,
   Condition,
   Listing,
@@ -30,60 +26,18 @@ import type {
 } from "./listings/constants"
 import type { SearchSort } from "@/lib/search"
 import { MAX_PAGING_OFFSET } from "@/lib/pagination"
+import { mapBrowseListing, pickCoverImage } from "./listings/browse-mapper"
+import type { NestedBrowseRow } from "./listings/browse-mapper"
 
 // Re-export the pure value objects so imports from "@/lib/listings" keep
 // resolving. Definitions live in ./listings/constants (server-free).
 export * from "./listings/constants"
 
-// ---- Internal row shape (server-only; not part of the public value object) ----
-
-export interface RawListingRow {
-  id: string
-  title: string
-  price: number
-  condition: Condition
-  city: string | null
-  published_at: string
-  seller: BrowseSeller[] | null
-  images: ListingImage[] | null
-}
-
-// Shared cover-pick: the lowest display_order image is the listing's cover.
-// One rule for every listing read shape that renders a thumbnail (browse feed,
-// favorites feed, seller dashboard) so "which image is the cover" never forks.
-function pickCoverImage(
-  images: { image_url: string; display_order: number }[] | null
-): string | null {
-  return (
-    [...(images ?? [])].sort((a, b) => a.display_order - b.display_order)[0]
-      ?.image_url ?? null
-  )
-}
-
-// Shared row mapper for browse-shaped listing selects. Used by the public
-// browse feed and the favorites feed so both render cards identically.
-export function mapBrowseListing(l: RawListingRow): BrowseListing {
-  const seller = l.seller?.[0] ?? null
-  return {
-    id: l.id,
-    title: l.title,
-    price: l.price,
-    condition: l.condition,
-    city: l.city,
-    published_at: l.published_at,
-    image_url: pickCoverImage(l.images),
-    image_count: (l.images ?? []).length,
-    seller: seller
-      ? {
-          id: seller.id,
-          full_name: seller.full_name,
-          avatar_url: seller.avatar_url,
-          role: seller.role,
-          trust_score: seller.trust_score,
-        }
-      : null,
-  }
-}
+// Re-export the browse row mapper + nested row shape so the favorites feed and
+// the offers read path use the one cover/seller rule. Definitions live in
+// ./listings/browse-mapper (server-free).
+export { mapBrowseListing } from "./listings/browse-mapper"
+export type { NestedBrowseRow as RawListingRow } from "./listings/browse-mapper"
 
 // ---- Reads ----
 
@@ -251,7 +205,7 @@ export async function fetchListings(opts: {
     return { listings: [], count, hasMore: false, error: error.message }
   }
 
-  const listings: BrowseListing[] = (data as RawListingRow[] | null ?? []).map(
+  const listings: BrowseListing[] = (data as NestedBrowseRow[] | null ?? []).map(
     mapBrowseListing
   )
 
@@ -308,43 +262,29 @@ export async function searchListings(
   const supabase = await createClient()
   const offset = Math.min(Math.max(opts.offset ?? 0, 0), MAX_PAGING_OFFSET)
 
-  const { data, error } = await supabase.rpc("search_listings", {
-    p_query: opts.q || null,
-    p_category_slug: opts.categorySlug || null,
-    p_min_price: opts.minPrice ?? null,
-    p_max_price: opts.maxPrice ?? null,
-    p_condition: opts.condition ?? null,
-    p_city: opts.city || null,
-    p_sort: opts.sort ?? "newest",
-    p_limit: PAGE_SIZE,
-    p_offset: offset,
-  })
+  const { data, error } = await callRpc<SearchListingRow[]>(
+    supabase,
+    "search_listings",
+    {
+      p_query: opts.q || null,
+      p_category_slug: opts.categorySlug || null,
+      p_min_price: opts.minPrice ?? null,
+      p_max_price: opts.maxPrice ?? null,
+      p_condition: opts.condition ?? null,
+      p_city: opts.city || null,
+      p_sort: opts.sort ?? "newest",
+      p_limit: PAGE_SIZE,
+      p_offset: offset,
+    }
+  )
 
   if (error) {
-    console.error("searchListings:", error.message)
-    return { listings: [], count: 0, hasMore: false, error: error.message }
+    console.error("searchListings:", error)
+    return { listings: [], count: 0, hasMore: false, error }
   }
 
   const rows = (data ?? []) as SearchListingRow[]
-  const listings: BrowseListing[] = rows.map((row) => ({
-    id: row.id,
-    title: row.title,
-    price: row.price,
-    condition: row.condition,
-    city: row.city,
-    published_at: row.published_at,
-    image_url: row.image_url,
-    image_count: row.image_count,
-    seller: row.seller_id
-      ? {
-          id: row.seller_id,
-          full_name: row.seller_full_name,
-          avatar_url: row.seller_avatar_url,
-          role: row.seller_role,
-          trust_score: row.seller_trust_score,
-        }
-      : null,
-  }))
+  const listings: BrowseListing[] = rows.map(mapBrowseListing)
 
   const count = rows.length > 0 ? rows[0].total_count : 0
   return {
@@ -399,7 +339,6 @@ export async function createListing(
   const uploadError = await uploadListingPhotos(
     supabase,
     listing.id,
-    sellerId,
     values.photos ?? []
   )
   if (uploadError) {
@@ -456,47 +395,21 @@ export async function softDeleteListing(
 }
 
 export async function uploadListingPhotos(
-  supabase: Awaited<ReturnType<typeof createClient>>,
+  supabase: Supabase,
   listingId: string,
-  sellerId: string,
   files: File[]
 ): Promise<string | null> {
   if (files.length > MAX_IMAGES) {
     return `Up to ${MAX_IMAGES} photos allowed`
   }
 
-  // The listing-image adapter: one of two adapters behind the shared Media
-  // upload seam (see lib/media). Bucket + path + reconciliation vary; the
-  // validate/upload/publicUrl/cleanup skeleton does not.
+  // The listing-image adapter (see lib/media/listing-adapter): one of the two
+  // adapters behind the shared Media upload seam. Bucket + path + validation +
+  // reconcile all live in the media layer, so the listing domain never knows
+  // storage details.
   const result = await uploadObjects(
     files.map((file, i) => ({ file, index: i })),
-    {
-      bucket: "listing-images",
-      validate: async (file) => {
-        const detected = await detectImageMime(file)
-        if (!detected || !ALLOWED_IMAGE_MIME.includes(detected)) {
-          return `${file.name || "Photo"} is not a valid JPG, PNG or WebP image`
-        }
-        if (file.size > MAX_IMAGE_BYTES) {
-          return "Each photo must be 5 MB or smaller"
-        }
-        return null
-      },
-      path: async (file, i) => {
-        const ext = EXT_BY_MIME[(await detectImageMime(file)) ?? ""] ?? "jpg"
-        return `${listingId}/${crypto.randomUUID()}-${i}.${ext}`
-      },
-      upsert: false,
-      reconcile: async (publicUrl, _file, i) => {
-        const { error } = await supabase.from("listing_images").insert({
-          listing_id: listingId,
-          image_url: publicUrl,
-          display_order: i,
-          alt_text: null,
-        })
-        return error ? error.message : null
-      },
-    },
+    listingImageAdapter({ listingId, supabase }),
     supabase
   )
 

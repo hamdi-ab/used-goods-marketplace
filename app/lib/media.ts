@@ -1,49 +1,21 @@
 import "server-only"
 
-import { createClient } from "@/lib/supabase/server"
+import type { Supabase } from "@/lib/supabase/types"
 
-export type Supabase = Awaited<ReturnType<typeof createClient>>
-
-// ---- Image primitives (shared by every upload adapter) ----
-
-export const MAX_IMAGE_BYTES = 5 * 1024 * 1024
-export const ALLOWED_IMAGE_MIME = ["image/jpeg", "image/png", "image/webp"]
-
-export const EXT_BY_MIME: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-}
-
-/** Returns the image MIME derived from magic bytes, or null if it's not a real
- * image (rejects executables masquerading as images). */
-export async function detectImageMime(file: File): Promise<string | null> {
-  const slice = file.slice(0, 12)
-  const buf = await slice.arrayBuffer()
-  const b = new Uint8Array(buf)
-  if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) return "image/jpeg"
-  if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) return "image/png"
-  // RIFF....WEBP
-  if (
-    b[0] === 0x52 &&
-    b[1] === 0x49 &&
-    b[2] === 0x46 &&
-    b[3] === 0x46 &&
-    b[8] === 0x57 &&
-    b[9] === 0x45 &&
-    b[10] === 0x42 &&
-    b[11] === 0x50
-  ) {
-    return "image/webp"
-  }
-  return null
-}
+export type { Supabase } from "@/lib/supabase/types"
+export {
+  ALLOWED_IMAGE_MIME,
+  detectImageMime,
+  EXT_BY_MIME,
+  MAX_IMAGE_BYTES,
+} from "./media/primitives"
 
 // ---- Upload seam ----
 //
 // One adapter = hypothetical seam; two = real. The listing gallery and the
 // profile avatar are two adapters (different bucket / path / reconcile), so the
-// shared skeleton below earns its seam. Each adapter supplies:
+// shared skeleton below earns its seam. Each adapter lives in this layer
+// (./media/listing-adapter, ./media/avatar-adapter) and supplies:
 //   - validate(file):        magic-byte + size rules, with its own error wording
 //   - path(file, index):     the storage object name
 //   - reconcile(url, file, i): persist the URL (row insert / profile update)
