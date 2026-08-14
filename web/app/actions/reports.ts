@@ -3,7 +3,7 @@
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
 
-import { requireUser } from "@/lib/auth"
+import { requireAdmin, requireUser } from "@/lib/auth"
 import {
   createReport as createReportRow,
   resolveReport as resolveReportRow,
@@ -101,10 +101,7 @@ export async function adminResolveReport(
     return { message: "Invalid report request" }
   }
 
-  const user = await requireUser()
-  if (user.role !== "admin") {
-    return { message: "Not allowed" }
-  }
+  await requireAdmin()
 
   const result = await resolveReportRow(
     parsed.data.reportId,

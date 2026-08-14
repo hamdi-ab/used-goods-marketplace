@@ -1,10 +1,9 @@
 "use server"
 
 import { z } from "zod"
-import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 
-import { getCurrentUser } from "@/lib/auth"
+import { requireSeller } from "@/lib/auth"
 import { recordAiUsage } from "@/lib/ai/telemetry"
 import {
   createListing as createListingRow,
@@ -96,10 +95,7 @@ export async function createListing(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  const user = await getCurrentUser()
-  if (!user || (user.role !== "seller" && user.role !== "admin")) {
-    redirect("/profile")
-  }
+  const user = await requireSeller()
 
   try {
     const result = await createListingRow(
@@ -147,10 +143,7 @@ export async function updateListing(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  const user = await getCurrentUser()
-  if (!user || (user.role !== "seller" && user.role !== "admin")) {
-    redirect("/profile")
-  }
+  const user = await requireSeller()
 
   try {
     const result = await updateListingRow(
@@ -191,11 +184,7 @@ export async function deleteListing(
   const id = formValue(formData, "id")
   if (!id) return { message: "Missing listing id", ok: false }
 
-  const user = await getCurrentUser()
-  if (!user) redirect("/login")
-  if (user.role !== "seller" && user.role !== "admin") {
-    redirect("/profile")
-  }
+  const user = await requireSeller()
 
   try {
     const result = await softDeleteListing(id, user.id)
