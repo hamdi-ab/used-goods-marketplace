@@ -8,6 +8,7 @@ export type RpcName =
   | "submit_review"
   | "submit_report"
   | "resolve_report"
+  | "record_verification"
 
 export type RpcArgs = Record<string, string | number | null>
 

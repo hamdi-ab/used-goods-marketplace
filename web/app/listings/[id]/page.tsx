@@ -12,10 +12,11 @@ import { FavoriteButton } from "@/components/favorites/favorite-button"
 import { MakeOfferButton } from "@/components/offers/make-offer-button"
 import { ContactButton } from "@/components/contact/contact-button"
 import { ReportButton } from "@/components/reports/report-button"
+import { SellerTrustBadges } from "@/components/verification/seller-trust-badges"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { initials } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
@@ -172,20 +173,23 @@ export default async function ListingPage({
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0">
-                <CardTitle className="text-base">
-                  <Link
-                    href={`/users/${seller?.id ?? l.seller_id}`}
-                    className="text-primary hover:underline"
-                  >
-                    {seller?.full_name ?? "View seller profile"}
-                  </Link>
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Trust score {seller?.trust_score ?? 50}
-                </p>
-              </div>
-            </CardHeader>
-          </Card>
+                 <CardTitle className="text-base">
+                   <Link
+                     href={`/users/${seller?.id ?? l.seller_id}`}
+                     className="text-primary hover:underline"
+                   >
+                     {seller?.full_name ?? "View seller profile"}
+                   </Link>
+                 </CardTitle>
+                 <p className="text-sm text-muted-foreground">
+                   Trust score {seller?.trust_score ?? 50}
+                 </p>
+               </div>
+             </CardHeader>
+             <CardContent>
+               <SellerTrustBadges seller={seller} />
+             </CardContent>
+           </Card>
 
           <Button asChild size="lg">
             <Link href={`/users/${seller?.id ?? l.seller_id}`}>

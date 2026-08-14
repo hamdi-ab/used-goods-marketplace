@@ -99,7 +99,7 @@ export async function fetchListing(
   if (opts.includeSeller !== false) {
     const { data: s } = await supabase
       .from("profiles")
-      .select("id, full_name, avatar_url, role, trust_score")
+      .select("id, full_name, avatar_url, role, trust_score, phone_verified, fayda_verified")
       .eq("id", listing.seller_id)
       .maybeSingle()
     seller = s as ListingWithRelations["seller"]
@@ -189,7 +189,7 @@ export async function fetchListings(opts: {
     .from("listings")
     .select(
       `id, title, price, condition, city, published_at,
-       seller:profiles(id, full_name, avatar_url, role, trust_score),
+       seller:profiles(id, full_name, avatar_url, role, trust_score, phone_verified, fayda_verified),
        images:listing_images(id, image_url, display_order)`,
       { count: "exact" }
     )
@@ -249,6 +249,8 @@ interface SearchListingRow {
   seller_avatar_url: string | null
   seller_role: string | null
   seller_trust_score: number | null
+  seller_phone_verified: boolean | null
+  seller_fayda_verified: boolean | null
   total_count: number
 }
 
