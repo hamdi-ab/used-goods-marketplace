@@ -1,6 +1,7 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
+import { callOutcomeRpc } from "@/lib/supabase/rpc"
 import {
   isValidUuid,
   mapBrowseListing,
@@ -178,10 +179,11 @@ export interface OfferResult {
   error: string | null
 }
 
-// A new offer. RLS enforces the published + not-own-listing rules (INV-005,
-// ListingMarkedSold); the explicit uuid gate keeps junk ids from reaching the DB.
+// A new offer. The submit_offer RPC enforces the published + not-own-listing
+// rules (INV-005, ListingMarkedSold), validates amount/message, and applies a
+// per-buyer-per-listing rate limit; the explicit uuid gate keeps junk ids from
+// reaching the DB. The buyer is resolved from the session inside the RPC.
 export async function submitOfferRow(input: {
-  userId: string
   listingId: string
   amount: number
   message: string | null
@@ -190,17 +192,12 @@ export async function submitOfferRow(input: {
     return { ok: false, error: "invalid listing id" }
   }
   const supabase = await createClient()
-  const { error } = await supabase.from("offers").insert({
-    listing_id: input.listingId,
-    buyer_id: input.userId,
-    amount: input.amount,
-    message: input.message?.trim() || null,
-  })
-  if (error) {
-    console.error("submitOfferRow:", error.message)
-    return { ok: false, error: error.message }
-  }
-  return { ok: true, error: null }
+  const result = await callOutcomeRpc(supabase, "submit_offer", {
+    p_listing_id: input.listingId,
+    p_amount: input.amount,
+    p_message: input.message?.trim() || null,
+  }, "submitOfferRow")
+  return { ok: result.ok === true, error: result.error ?? null }
 }
 
 async function runOfferRpc(
@@ -208,12 +205,7 @@ async function runOfferRpc(
   args: Record<string, string | number>
 ): Promise<OfferResult> {
   const supabase = await createClient()
-  const { data, error } = await supabase.rpc(fn, args)
-  if (error) {
-    console.error(`${fn}:`, error.message)
-    return { ok: false, error: error.message }
-  }
-  const result = (data ?? {}) as { ok?: boolean; error?: string | null }
+  const result = await callOutcomeRpc(supabase, fn, args, fn)
   return { ok: result.ok === true, error: result.error ?? null }
 }
 

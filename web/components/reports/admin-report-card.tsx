@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useActionState } from "react"
 import { ExternalLinkIcon, TrashIcon, XIcon } from "lucide-react"
 
@@ -23,13 +24,14 @@ function ReportTarget({ report }: { report: ReportWithRelations }) {
   if (listing) {
     return (
       <div className="flex items-start gap-3">
-        <div className="size-14 shrink-0 overflow-hidden rounded-md border bg-muted">
+        <div className="relative size-14 shrink-0 overflow-hidden rounded-md border bg-muted">
           {listing.image_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={listing.image_url}
               alt={listing.title}
-              className="h-full w-full object-cover"
+              fill
+              sizes="56px"
+              className="object-cover"
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">

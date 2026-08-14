@@ -6,6 +6,7 @@ import { useActionState } from "react"
 import { submitOffer } from "@/app/actions/offers"
 import { formatPrice } from "@/lib/listings/constants"
 import { OFFER_MESSAGE_MAX } from "@/lib/offers/constants"
+import { TEXTAREA_CLASS } from "@/lib/form-fields"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -76,7 +77,7 @@ export function OfferModal({
             rows={4}
             maxLength={OFFER_MESSAGE_MAX}
             placeholder="e.g. I can collect this weekend, would you take…"
-            className="resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-within:ring-2 focus-within:ring-ring/50"
+            className={TEXTAREA_CLASS}
           />
           <FieldError message={state.errors?.message?.[0]} />
         </div>

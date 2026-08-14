@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Image from "next/image"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { MapPinIcon, TagIcon } from "lucide-react"
@@ -73,20 +74,27 @@ export default async function ListingPage({
         <div>
           {cover ? (
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={cover} alt={l.title} className="h-full w-full object-cover" />
+              <Image
+                src={cover}
+                alt={l.title}
+                fill
+                priority
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+              />
               {images.length > 1 ? (
                 <div className="mt-3 grid grid-cols-5 gap-2">
                   {images.map((img) => (
                     <div
                       key={img.id}
-                      className="aspect-video w-full overflow-hidden rounded-md border"
+                      className="relative aspect-video w-full overflow-hidden rounded-md border"
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                      <Image
                         src={img.image_url}
                         alt={img.alt_text ?? l.title}
-                        className="h-full w-full object-cover"
+                        fill
+                        sizes="(max-width: 768px) 18vw, 10vw"
+                        className="object-cover"
                       />
                     </div>
                   ))}

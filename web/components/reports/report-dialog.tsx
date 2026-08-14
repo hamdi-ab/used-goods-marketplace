@@ -10,6 +10,7 @@ import {
   REPORT_REASON_LABELS,
   REPORT_NOTE_MAX,
 } from "@/lib/reports/constants"
+import { TEXTAREA_CLASS } from "@/lib/form-fields"
 import { Button } from "@/components/ui/button"
 import {
   DialogHeader,
@@ -101,7 +102,7 @@ export function ReportDialog({
               rows={3}
               maxLength={REPORT_NOTE_MAX}
               placeholder="Add any details that will help the moderator."
-              className="resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-within:ring-2 focus-within:ring-ring/50"
+              className={TEXTAREA_CLASS}
             />
             <FieldError message={state.errors?.note?.[0]} />
           </div>

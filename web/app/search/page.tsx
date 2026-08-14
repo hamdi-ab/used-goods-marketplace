@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
@@ -5,6 +6,12 @@ import { fetchCategories, searchListings } from "@/lib/listings"
 import { buildSearchUrl, nextOffset, parseSearchParams } from "@/lib/search"
 import { ListingCard } from "@/components/listings/listing-card"
 import { SearchFilters } from "@/components/search/search-filters"
+
+export const metadata: Metadata = {
+  title: "Search listings",
+  description:
+    "Search and filter used goods listings on VinTech Marketplace by keyword, category, price, condition, and city.",
+}
 
 function SearchIcon({ className }: { className?: string }) {
   return (

@@ -7,6 +7,7 @@ import { XIcon, UploadIcon } from "lucide-react"
 import { createListing } from "@/app/actions/listings"
 import { CONDITIONS, type Condition } from "@/lib/listings/constants"
 import type { Category } from "@/lib/listings"
+import { FIELD_CLASS, TEXTAREA_CLASS } from "@/lib/form-fields"
 import { AiAssist } from "@/components/listings/ai-assist"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -106,6 +107,7 @@ export function CreateListingForm({
                       setPreviews((p) => p.filter((_, idx) => idx !== i))
                       setPhotoFiles((p) => p.filter((_, idx) => idx !== i))
                     }}
+                    aria-label={`Remove photo ${i + 1}`}
                     className="absolute right-1 top-1 rounded bg-background/80 p-0.5"
                   >
                     <XIcon className="size-4" />
@@ -159,7 +161,7 @@ export function CreateListingForm({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={5}
-              className="resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-within:ring-2 focus-within:ring-ring/50"
+              className={TEXTAREA_CLASS}
               placeholder="Include condition, brand, age, what's included..."
             />
             <FieldError message={state.errors?.description?.[0]} />
@@ -210,7 +212,7 @@ export function CreateListingForm({
               name="categoryId"
               value={categoryId ?? ""}
               onChange={(e) => setCategoryId(e.target.value || null)}
-              className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/50"
+              className={FIELD_CLASS}
               aria-invalid={!!state.errors?.categoryId}
             >
               <option value="">Pick a category</option>

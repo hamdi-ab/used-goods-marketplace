@@ -1,6 +1,7 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
+import { callOutcomeRpc } from "@/lib/supabase/rpc"
 import type { SellerContactInfo, ContactMethod } from "./contact/constants"
 
 export * from "./contact/constants"
@@ -48,15 +49,15 @@ export async function recordContactAttempt(params: {
 }): Promise<ContactAttemptResult> {
   const supabase = await createClient()
 
-  const { error } = await supabase.from("contact_attempts").insert({
-    contact_method: params.contactMethod,
-    listing_id: params.listingId ?? null,
-    seller_id: params.sellerId,
-  })
-
-  if (error) {
-    console.error("recordContactAttempt:", error.message)
-    return { ok: false, error: error.message }
-  }
-  return { ok: true, error: null }
+  const result = await callOutcomeRpc(
+    supabase,
+    "record_contact_attempt",
+    {
+      p_contact_method: params.contactMethod,
+      p_seller_id: params.sellerId,
+      p_listing_id: params.listingId ?? null,
+    },
+    "recordContactAttempt"
+  )
+  return { ok: result.ok === true, error: result.error ?? null }
 }

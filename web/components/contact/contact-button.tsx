@@ -6,9 +6,14 @@ import { MessageCircleIcon } from "lucide-react"
 
 import { buildLoginUrl } from "@/lib/contact/constants"
 import type { SellerContactInfo } from "@/lib/contact"
+import { lazyDialog } from "@/lib/lazy-dialog"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { ContactDialog } from "@/components/contact/contact-dialog"
+
+// T15: load the contact form only when the dialog opens (code splitting).
+const ContactDialog = lazyDialog(() =>
+  import("@/components/contact/contact-dialog").then((m) => m.ContactDialog)
+)
 
 interface ContactButtonProps {
   listingId?: string | null

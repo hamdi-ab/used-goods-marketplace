@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import Image from "next/image"
 import Link from "next/link"
 import { SendIcon } from "lucide-react"
 
@@ -56,13 +57,14 @@ export default async function OffersPage() {
               <Card>
                 <CardContent className="p-4">
                   <div className="flex items-start gap-4">
-                    <div className="size-20 shrink-0 overflow-hidden rounded-md border bg-muted">
+                    <div className="relative size-20 shrink-0 overflow-hidden rounded-md border bg-muted">
                       {offer.listing?.image_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
+                        <Image
                           src={offer.listing.image_url}
                           alt=""
-                          className="h-full w-full object-cover"
+                          fill
+                          sizes="80px"
+                          className="object-cover"
                         />
                       ) : (
                         <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">

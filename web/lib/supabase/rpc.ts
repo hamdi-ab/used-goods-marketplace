@@ -9,12 +9,23 @@ export type RpcName =
   | "submit_report"
   | "resolve_report"
   | "record_verification"
+  | "submit_offer"
+  | "accept_offer"
+  | "decline_offer"
+  | "counter_offer"
+  | "record_contact_attempt"
 
 export type RpcArgs = Record<string, string | number | null>
 
 export interface RpcResult<T> {
   data: T | null
   error: string | null
+}
+
+/** The jsonb envelope every SECURITY DEFINER write-RPC returns. */
+export interface RpcOutcome {
+  ok?: boolean
+  error?: string | null
 }
 
 /** One typed seam for every RPC call. Mirrors offers.ts::runOfferRpc: the name
@@ -28,4 +39,20 @@ export async function callRpc<T>(
 ): Promise<RpcResult<T>> {
   const { data, error } = await supabase.rpc(name, args)
   return { data: (data ?? null) as T | null, error: error?.message ?? null }
+}
+
+/** Normalise a write-RPC's `{ ok, error }` envelope, collapsing the jsonb
+ * payload and the transport error into one `{ ok, error }` result. */
+export async function callOutcomeRpc(
+  supabase: Supabase,
+  name: RpcName,
+  args: RpcArgs,
+  logLabel: string
+): Promise<RpcOutcome> {
+  const { data, error } = await callRpc<RpcOutcome>(supabase, name, args)
+  if (error) {
+    console.error(`${logLabel}:`, error)
+    return { ok: false, error }
+  }
+  return data ?? {}
 }
