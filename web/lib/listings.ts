@@ -44,8 +44,10 @@ export type { NestedBrowseRow as RawListingRow } from "./listings/browse-mapper"
 
 // ---- Reads ----
 
-export async function fetchCategories(): Promise<Category[]> {
-  const supabase = await createClient()
+export async function fetchCategories(
+  client?: Supabase
+): Promise<Category[]> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from("categories")
     .select("id, name, slug, parent_id")
@@ -67,10 +69,11 @@ export interface FetchListingOptions {
 
 export async function fetchListing(
   id: string,
-  opts: FetchListingOptions = {}
+  opts: FetchListingOptions = {},
+  client?: Supabase
 ): Promise<ListingWithRelations | null> {
   if (!isValidUuid(id)) return null
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
 
   const { data: listing } = await supabase
     .from("listings")
@@ -131,9 +134,10 @@ type RawSellerListingRow = Omit<Listing, "price"> & {
 }
 
 export async function fetchSellerListings(
-  sellerId: string
+  sellerId: string,
+  client?: Supabase
 ): Promise<SellerListingRow[]> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from("listings")
     .select(
@@ -160,17 +164,20 @@ export async function fetchSellerListings(
 }
 
 // Public, paginated browse of published listings (anon-readable via RLS).
-export async function fetchListings(opts: {
-  limit?: number
-  offset?: number
-  categorySlug?: string
-} = {}): Promise<{
+export async function fetchListings(
+  opts: {
+    limit?: number
+    offset?: number
+    categorySlug?: string
+  } = {},
+  client?: Supabase
+): Promise<{
   listings: BrowseListing[]
   count: number | null
   hasMore: boolean
   error: string | null
 }> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const limit = Math.min(opts.limit ?? PAGE_SIZE, BROWSE_LIMIT_MAX)
   // offset is an untrusted cursor from the URL; parseBrowseParams
   // (lib/browse) is the single source of truth that validates + clamps it
@@ -247,9 +254,10 @@ type SearchListingRow = FlatSearchRow & { total_count: number }
 // that never crosses the 1000-row ceiling, with `hasMore` derived from the
 // exact count the RPC returns alongside the slice.
 export async function searchListings(
-  opts: SearchOptions = {}
+  opts: SearchOptions = {},
+  client?: Supabase
 ): Promise<SearchResult> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const offset = Math.min(Math.max(opts.offset ?? 0, 0), MAX_PAGING_OFFSET)
 
   const { data, error } = await callRpc<SearchListingRow[]>(

@@ -1,6 +1,7 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
+import type { Supabase } from "@/lib/supabase/types"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
 import { isValidUuid } from "@/lib/listings"
 
@@ -43,10 +44,11 @@ const REVIEW_COLUMNS =
 // The seller's reviews, newest first, with the reviewer's public identity.
 // RLS exposes every review to the public, so any visitor can render the list.
 export async function fetchSellerReviews(
-  sellerId: string
+  sellerId: string,
+  client?: Supabase
 ): Promise<SellerReviewRow[]> {
   if (!isValidUuid(sellerId)) return []
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from("reviews")
     .select(REVIEW_COLUMNS)

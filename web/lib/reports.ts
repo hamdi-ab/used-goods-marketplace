@@ -1,6 +1,7 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
+import type { Supabase } from "@/lib/supabase/types"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
 import { pickCoverImage } from "@/lib/listings/browse-mapper"
 import { OPEN_REPORT_STATUSES } from "./reports/constants"
@@ -91,9 +92,10 @@ const REPORT_JOINS = `${REPORT_COLUMNS},
  * without a second round-trip.
  */
 export async function fetchMyReports(
-  userId: string
+  userId: string,
+  client?: Supabase
 ): Promise<MyReportRow[]> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
 
   const { data, error } = await supabase
     .from("reports")
@@ -115,8 +117,10 @@ export async function fetchMyReports(
  * The admin moderation queue: all open reports with the reported item's
  * context (listing + seller profile, or just the seller profile).
  */
-export async function fetchAdminReports(): Promise<ReportWithRelations[]> {
-  const supabase = await createClient()
+export async function fetchAdminReports(
+  client?: Supabase
+): Promise<ReportWithRelations[]> {
+  const supabase = client ?? (await createClient())
 
   const { data, error } = await supabase
     .from("reports")

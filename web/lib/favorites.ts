@@ -1,6 +1,7 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
+import type { Supabase } from "@/lib/supabase/types"
 import {
   isValidUuid,
   mapBrowseListing,
@@ -13,8 +14,11 @@ export * from "@/lib/favorites/constants"
 
 // ---- Reads ----
 
-export async function fetchFavoriteIds(userId: string): Promise<string[]> {
-  const supabase = await createClient()
+export async function fetchFavoriteIds(
+  userId: string,
+  client?: Supabase
+): Promise<string[]> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from("favorites")
     .select("listing_id")
@@ -30,9 +34,10 @@ export async function fetchFavoriteIds(userId: string): Promise<string[]> {
 // listings that are no longer readable (unpublished, deleted, sold). Only
 // still-available favorites are returned, most recently favorited first.
 export async function fetchFavoriteListings(
-  userId: string
+  userId: string,
+  client?: Supabase
 ): Promise<BrowseListing[]> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from("favorites")
     .select(

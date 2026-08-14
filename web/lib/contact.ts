@@ -1,6 +1,7 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
+import type { Supabase } from "@/lib/supabase/types"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
 import type { SellerContactInfo, ContactMethod } from "./contact/constants"
 
@@ -21,9 +22,10 @@ export interface ContactAttemptResult {
  * phone_public = true) means the value is NULL unless the owner opted in.
  */
 export async function fetchSellerContactInfo(
-  sellerId: string
+  sellerId: string,
+  client?: Supabase
 ): Promise<SellerContactInfo | null> {
-  const supabase = await createClient()
+  const supabase = client ?? (await createClient())
 
   const { data: profile, error } = await supabase
     .from("profiles")

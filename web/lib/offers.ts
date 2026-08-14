@@ -1,6 +1,7 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
+import type { Supabase } from "@/lib/supabase/types"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
 import {
   isValidUuid,
@@ -85,8 +86,11 @@ const OFFER_COLUMNS = "id, listing_id, amount, message, status, created_at"
 // The buyer's offer history, newest first. RLS keeps this to the user's own
 // offers; the listing join drops rows for listings the buyer can no longer see
 // (deleted, unpublished, or sold without an accepted offer of theirs).
-export async function fetchBuyerOffers(userId: string): Promise<BuyerOfferRow[]> {
-  const supabase = await createClient()
+export async function fetchBuyerOffers(
+  userId: string,
+  client?: Supabase
+): Promise<BuyerOfferRow[]> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from("offers")
     .select(
@@ -121,8 +125,11 @@ export async function fetchBuyerOffers(userId: string): Promise<BuyerOfferRow[]>
 // the seller's own listings; the explicit seller filter is a query hint that
 // keeps PostgREST from scanning the whole table. The buyer profile join names
 // the person behind each offer.
-export async function fetchSellerOffers(userId: string): Promise<SellerOfferRow[]> {
-  const supabase = await createClient()
+export async function fetchSellerOffers(
+  userId: string,
+  client?: Supabase
+): Promise<SellerOfferRow[]> {
+  const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from("offers")
     .select(
@@ -157,8 +164,11 @@ export async function fetchSellerOffers(userId: string): Promise<SellerOfferRow[
 // Open offers (pending or countered) on the seller's listings, for the dashboard
 // summary. RLS scopes the count to the caller's own listings; the explicit
 // seller filter is the same PostgREST hint used by fetchSellerOffers.
-export async function countIncomingOffers(userId: string): Promise<number> {
-  const supabase = await createClient()
+export async function countIncomingOffers(
+  userId: string,
+  client?: Supabase
+): Promise<number> {
+  const supabase = client ?? (await createClient())
   const { count, error } = await supabase
     .from("offers")
     .select("id", { count: "exact", head: true })

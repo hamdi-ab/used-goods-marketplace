@@ -3,6 +3,7 @@ import "server-only"
 import { cache } from "react"
 
 import { createClient } from "@/lib/supabase/server"
+import type { Supabase } from "@/lib/supabase/types"
 
 // ---- Row shapes ----
 
@@ -46,8 +47,11 @@ const PUBLIC_PROFILE_COLUMNS =
 /** Own-profile read for the /profile page. Cached so metadata and the body of a
  * request (and any sibling server component) share one round trip. */
 export const fetchOwnProfile = cache(
-  async (userId: string): Promise<OwnProfileRow | null> => {
-    const supabase = await createClient()
+  async (
+    userId: string,
+    client?: Supabase
+  ): Promise<OwnProfileRow | null> => {
+    const supabase = client ?? (await createClient())
     const { data: profile, error } = await supabase
       .from("profiles")
       .select(OWN_PROFILE_COLUMNS)
@@ -65,8 +69,11 @@ export const fetchOwnProfile = cache(
  * Trust-badge flags (phone_verified, fayda_verified) are public by T12 RLS
  * design. */
 export const fetchPublicProfile = cache(
-  async (userId: string): Promise<PublicProfileRow | null> => {
-    const supabase = await createClient()
+  async (
+    userId: string,
+    client?: Supabase
+  ): Promise<PublicProfileRow | null> => {
+    const supabase = client ?? (await createClient())
 
     const { data: profile, error } = await supabase
       .from("profiles")
