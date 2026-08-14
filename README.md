@@ -1,17 +1,17 @@
 # Used Goods Marketplace — VinTech Challenge 2026
 
 This repository is the single source of truth for the product (see `docs/`)
-and now hosts the web application under `app/`.
+and now hosts the web application under `web/`.
 
 ## Application
 
-The web app lives in `app/` (Next.js App Router, Tailwind CSS, shadcn/ui).
+The web app lives in `web/` (Next.js App Router, Tailwind CSS, shadcn/ui).
 
 ```bash
-cd app
+cd web
 npm install
 npm run dev
 ```
 
-See [app/README.md](app/README.md) for full setup, the Supabase local stack
+See [web/README.md](web/README.md) for full setup, the Supabase local stack
 commands, and the design-token overview.
