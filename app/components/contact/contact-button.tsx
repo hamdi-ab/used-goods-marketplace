@@ -10,17 +10,19 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { ContactDialog } from "@/components/contact/contact-dialog"
 
+interface ContactButtonProps {
+  listingId?: string | null
+  sellerId: string
+  signedIn: boolean
+  contactInfo: SellerContactInfo | null
+}
+
 export function ContactButton({
   listingId,
   sellerId,
   signedIn,
   contactInfo,
-}: {
-  listingId?: string | null
-  sellerId: string
-  signedIn: boolean
-  contactInfo: SellerContactInfo | null
-}) {
+}: ContactButtonProps) {
   const [open, setOpen] = useState(false)
   // Incrementing the key on each open forces ContactDialog to remount,
   // resetting its useActionState. Without this, a previously-opened contact

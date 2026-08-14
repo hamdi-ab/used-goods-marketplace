@@ -4,9 +4,11 @@
 -- §22 (migration naming). The contact method and listing context are captured
 -- so the admin queue and trust-score RPC can audit contact-driven traffic.
 --
--- Phone is surfaced only when the seller has opted in (profiles.phone_public,
--- added by T03). Column-level RLS on the listings fetch enforces this read-guarded
--- privacy (Security spec §19: phone is private by default).
+-- Phone privacy is enforced by column-level RLS on profiles.phone (see the
+-- T03 migration 20260812120000_profile_phone_public.sql: "Phone visible to
+-- owner or when public"); the column evaluates to NULL for callers without
+-- consent, so select-time masking is handled by the database, not app code.
+-- (Security spec §19: phone is private by default.)
 
 create type if not exists public.contact_method as enum ('telegram', 'phone');
 

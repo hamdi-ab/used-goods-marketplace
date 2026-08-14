@@ -6,6 +6,8 @@ import { requireUser } from "@/lib/auth"
 import {
   recordContactAttempt,
   fetchSellerContactInfo,
+  isContactMethodAvailable,
+  buildContactUrl,
 } from "@/lib/contact"
 import { CONTACT_METHODS } from "@/lib/contact/constants"
 import type { ContactMethod } from "@/lib/contact/constants"
@@ -53,30 +55,18 @@ export async function recordContact(
     return { message: "Seller not found" }
   }
 
-  let url: string | null = null
-
-  if (parsed.data.contactMethod === "telegram") {
-    if (!info.telegram_username) {
-      return { message: "Seller has not connected Telegram" }
-    }
-    // Telegram deep-link: t.me/<username>
-    url = `https://t.me/${info.telegram_username}`
-  } else if (parsed.data.contactMethod === "phone") {
-    if (!info.phone || !info.phone_public) {
-      return { message: "Seller has not made their phone number available" }
-    }
-    url = `tel:${info.phone.replace(/\D/g, "")}`
+  const method = parsed.data.contactMethod as ContactMethod
+  if (!isContactMethodAvailable(info, method)) {
+    return { message: "This contact method is not available for this seller" }
   }
 
-  if (!url) {
-    return { message: "No contact method available" }
-  }
+  const url = buildContactUrl(method, info)
 
   // Record the contact attempt (AC3). Failures here are non-fatal: we still
   // return the URL so the buyer can contact the seller even if the audit log
   // write fails.
   const result = await recordContactAttempt({
-    contactMethod: parsed.data.contactMethod as ContactMethod,
+    contactMethod: method,
     listingId: parsed.data.listingId,
     sellerId: parsed.data.sellerId,
   })

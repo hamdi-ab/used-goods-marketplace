@@ -2,12 +2,15 @@
 
 import { useEffect } from "react"
 import { useActionState } from "react"
-import { SendIcon, PhoneIcon } from "lucide-react"
+import { SendIcon } from "lucide-react"
 
 import { recordContact } from "@/app/actions/contact"
 import type { RecordContactState } from "@/app/actions/contact"
-import { CONTACT_METHOD_LABELS } from "@/lib/contact/constants"
-import type { SellerContactInfo } from "@/lib/contact"
+import {
+  availableContactMethods,
+  CONTACT_METHOD_LABELS,
+} from "@/lib/contact/constants"
+import type { SellerContactInfo, ContactMethod } from "@/lib/contact/constants"
 import { Button } from "@/components/ui/button"
 import {
   DialogHeader,
@@ -16,26 +19,28 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog"
 
-function ContactOption({
-  method,
-  info,
-  formAction,
-  pending,
-  listingId,
-  sellerId,
-}: {
-  method: "telegram" | "phone"
-  info: SellerContactInfo
+interface ContactOptionProps {
+  method: ContactMethod
   formAction: (formData: FormData) => void
   pending: boolean
   listingId: string | null
   sellerId: string
-}) {
-  const available =
-    method === "telegram"
-      ? Boolean(info.telegram_username)
-      : Boolean(info.phone && info.phone_public)
+}
 
+interface ContactDialogProps {
+  listingId: string | null
+  sellerId: string
+  contactInfo: SellerContactInfo | null
+  onClose: () => void
+}
+
+function ContactOption({
+  method,
+  formAction,
+  pending,
+  listingId,
+  sellerId,
+}: ContactOptionProps) {
   return (
     <form action={formAction}>
       {listingId ? (
@@ -45,18 +50,17 @@ function ContactOption({
       <input type="hidden" name="contactMethod" value={method} readOnly />
       <Button
         type="submit"
-        variant={available ? "outline" : "ghost"}
+        variant="outline"
         size="lg"
         className="w-full justify-start"
-        disabled={pending || !available}
+        disabled={pending}
       >
         {method === "telegram" ? (
           <SendIcon className="mr-2.5 size-4" />
         ) : (
-          <PhoneIcon className="mr-2.5 size-4" />
+          <SendIcon className="mr-2.5 size-4" />
         )}
         {CONTACT_METHOD_LABELS[method]}
-        {available ? null : " (not available)"}
       </Button>
     </form>
   )
@@ -67,12 +71,7 @@ export function ContactDialog({
   sellerId,
   contactInfo,
   onClose,
-}: {
-  listingId: string | null
-  sellerId: string
-  contactInfo: SellerContactInfo | null
-  onClose: () => void
-}) {
+}: ContactDialogProps) {
   const [state, formAction, pending] = useActionState<
     RecordContactState,
     FormData
@@ -86,10 +85,10 @@ export function ContactDialog({
     }
   }, [state.url, onClose])
 
-  const hasAnyMethod =
-    contactInfo !== null &&
-    (Boolean(contactInfo.telegram_username) ||
-      Boolean(contactInfo.phone && contactInfo.phone_public))
+  const methods = contactInfo
+    ? availableContactMethods(contactInfo)
+    : []
+  const hasAnyMethod = methods.length > 0
 
   return (
     <>
@@ -118,22 +117,16 @@ export function ContactDialog({
         </p>
       ) : (
         <div className="mt-2 flex flex-col gap-2">
-          <ContactOption
-            method="telegram"
-            info={contactInfo}
-            formAction={formAction}
-            pending={pending}
-            listingId={listingId}
-            sellerId={sellerId}
-          />
-          <ContactOption
-            method="phone"
-            info={contactInfo}
-            formAction={formAction}
-            pending={pending}
-            listingId={listingId}
-            sellerId={sellerId}
-          />
+          {methods.map((method) => (
+            <ContactOption
+              key={method}
+              method={method}
+              formAction={formAction}
+              pending={pending}
+              listingId={listingId}
+              sellerId={sellerId}
+            />
+          ))}
         </div>
       )}
 
