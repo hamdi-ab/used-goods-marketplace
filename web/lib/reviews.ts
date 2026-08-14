@@ -1,7 +1,7 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
-import { callRpc } from "@/lib/supabase/rpc"
+import { callOutcomeRpc } from "@/lib/supabase/rpc"
 import { isValidUuid } from "@/lib/listings"
 
 export * from "@/lib/reviews/constants"
@@ -101,16 +101,16 @@ export async function submitReviewRow(input: {
     return { ok: false, error: "invalid offer id", sellerId: null }
   }
   const supabase = await createClient()
-  const { data, error } = await callRpc<ReviewRpcData>(supabase, "submit_review", {
-    p_offer_id: input.offerId,
-    p_rating: input.rating,
-    p_comment: input.comment?.trim() || null,
-  })
-  if (error) {
-    console.error("submitReviewRow:", error)
-    return { ok: false, error, sellerId: null }
-  }
-  const result = data ?? {}
+  const result = await callOutcomeRpc<ReviewRpcData>(
+    supabase,
+    "submit_review",
+    {
+      p_offer_id: input.offerId,
+      p_rating: input.rating,
+      p_comment: input.comment?.trim() || null,
+    },
+    "submitReviewRow"
+  )
   return {
     ok: result.ok === true,
     error: result.error ?? null,

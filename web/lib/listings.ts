@@ -27,7 +27,10 @@ import type {
 import type { SearchSort } from "@/lib/search"
 import { MAX_PAGING_OFFSET } from "@/lib/pagination"
 import { mapBrowseListing, pickCoverImage } from "./listings/browse-mapper"
-import type { NestedBrowseRow } from "./listings/browse-mapper"
+import type {
+  FlatSearchRow,
+  NestedBrowseRow,
+} from "./listings/browse-mapper"
 
 // Re-export the pure value objects so imports from "@/lib/listings" keep
 // resolving. Definitions live in ./listings/constants (server-free).
@@ -234,25 +237,10 @@ export interface SearchResult {
   error: string | null
 }
 
-/** Row shape returned by the `search_listings` RPC (see migrations). */
-interface SearchListingRow {
-  id: string
-  title: string
-  price: number
-  condition: Condition
-  city: string | null
-  published_at: string
-  image_url: string | null
-  image_count: number
-  seller_id: string | null
-  seller_full_name: string | null
-  seller_avatar_url: string | null
-  seller_role: string | null
-  seller_trust_score: number | null
-  seller_phone_verified: boolean | null
-  seller_fayda_verified: boolean | null
-  total_count: number
-}
+/** Row shape returned by the `search_listings` RPC (see migrations). It is the
+ * same flat browse row the mapper consumes (so the seller/image contract lives
+ * once), plus the exact-count column the RPC adds alongside the slice. */
+type SearchListingRow = FlatSearchRow & { total_count: number }
 
 // Keyword + filters + sort + count in one round trip via the search_listings
 // RPC (T06, Search Service). Paging mirrors fetchListings: one PAGE_SIZE window

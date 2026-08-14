@@ -200,26 +200,38 @@ export async function submitOfferRow(input: {
   return { ok: result.ok === true, error: result.error ?? null }
 }
 
-async function runOfferRpc(
-  fn: "accept_offer" | "decline_offer" | "counter_offer",
-  args: Record<string, string | number>
-): Promise<OfferResult> {
+export async function acceptOfferRow(offerId: string): Promise<OfferResult> {
   const supabase = await createClient()
-  const result = await callOutcomeRpc(supabase, fn, args, fn)
+  const result = await callOutcomeRpc(
+    supabase,
+    "accept_offer",
+    { p_offer_id: offerId },
+    "acceptOfferRow"
+  )
   return { ok: result.ok === true, error: result.error ?? null }
 }
 
-export function acceptOfferRow(offerId: string): Promise<OfferResult> {
-  return runOfferRpc("accept_offer", { p_offer_id: offerId })
+export async function declineOfferRow(offerId: string): Promise<OfferResult> {
+  const supabase = await createClient()
+  const result = await callOutcomeRpc(
+    supabase,
+    "decline_offer",
+    { p_offer_id: offerId },
+    "declineOfferRow"
+  )
+  return { ok: result.ok === true, error: result.error ?? null }
 }
 
-export function declineOfferRow(offerId: string): Promise<OfferResult> {
-  return runOfferRpc("decline_offer", { p_offer_id: offerId })
-}
-
-export function counterOfferRow(
+export async function counterOfferRow(
   offerId: string,
   amount: number
 ): Promise<OfferResult> {
-  return runOfferRpc("counter_offer", { p_offer_id: offerId, p_amount: amount })
+  const supabase = await createClient()
+  const result = await callOutcomeRpc(
+    supabase,
+    "counter_offer",
+    { p_offer_id: offerId, p_amount: amount },
+    "counterOfferRow"
+  )
+  return { ok: result.ok === true, error: result.error ?? null }
 }
