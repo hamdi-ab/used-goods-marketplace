@@ -6,12 +6,8 @@ import { revalidatePath } from "next/cache"
 
 import { getCurrentUser } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
-import {
-  ALLOWED_IMAGE_MIME,
-  MAX_IMAGE_BYTES,
-  detectImageMime,
-  uploadObjects,
-} from "@/lib/media"
+import { uploadObjects } from "@/lib/media"
+import { avatarAdapter } from "@/lib/media/avatar-adapter"
 
 const onboardingSchema = z.object({
   fullName: z.string().min(2, "Enter your full name"),
@@ -148,36 +144,12 @@ export async function uploadAvatar(
   }
 
   const supabase = await createClient()
-  // The avatar adapter: second adapter behind the shared Media upload seam.
-  // Validation now uses magic bytes (not the client MIME type) — matching the
-  // listing-image path so both adapters share one security surface.
+  // The avatar adapter lives in the media layer (see lib/media/avatar-adapter)
+  // — magic-byte validation matching the listing-image path, so both adapters
+  // share one security surface.
   const result = await uploadObjects(
     [{ file, index: 0 }],
-    {
-      bucket: "profiles",
-      upsert: true,
-      validate: async (file) => {
-        const mime = await detectImageMime(file)
-        if (!mime || !ALLOWED_IMAGE_MIME.includes(mime)) {
-          return "Upload a JPG, PNG or WebP image"
-        }
-        if (file.size > MAX_IMAGE_BYTES) {
-          return "Avatar must be 5 MB or smaller"
-        }
-        return null
-      },
-      path: () => {
-        const ext = (file.name.split(".").pop() || "png").toLowerCase()
-        return `avatars/${uid}/${Date.now()}.${ext}`
-      },
-      reconcile: async (publicUrl) => {
-        const { error } = await supabase
-          .from("profiles")
-          .update({ avatar_url: publicUrl })
-          .eq("id", uid)
-        return error ? error.message : null
-      },
-    },
+    avatarAdapter({ uid, supabase }),
     supabase
   )
 
