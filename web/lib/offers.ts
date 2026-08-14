@@ -3,12 +3,10 @@ import "server-only"
 import { createClient } from "@/lib/supabase/server"
 import type { Supabase } from "@/lib/supabase/types"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
-import {
-  isValidUuid,
-  mapBrowseListing,
-  type BrowseListing,
-  type RawListingRow,
-} from "@/lib/listings"
+import { isValidUuid } from "@/lib/listings/constants"
+import type { BrowseListing } from "@/lib/listings/constants"
+import { mapNestedBrowseListing } from "@/lib/listings/browse-mapper"
+import type { NestedBrowseRow } from "@/lib/listings/browse-mapper"
 import {
   OPEN_OFFER_STATUSES,
   type OfferStatus,
@@ -39,10 +37,10 @@ export interface SellerOfferRow extends BuyerOfferRow {
 }
 
 // A join row from the raw PostgREST shape. The embedded `listing` may lack a
-// `seller` join (buyer dashboard never asks for it); mapBrowseListing treats a
-// missing seller as null, so the cast is safe.
-type RawOfferListingRow = Omit<RawListingRow, "seller"> & {
-  seller?: RawListingRow["seller"]
+// `seller` join (buyer dashboard never asks for it); mapNestedBrowseListing
+// treats a missing seller as null, so the cast is safe.
+type RawOfferListingRow = Omit<NestedBrowseRow, "seller"> & {
+  seller?: NestedBrowseRow["seller"]
 }
 
 interface RawOfferRow {
@@ -57,7 +55,7 @@ interface RawOfferRow {
 function mapOfferListing(
   listing: RawOfferListingRow | null
 ): BrowseListing | null {
-  return listing ? mapBrowseListing(listing as RawListingRow) : null
+  return listing ? mapNestedBrowseListing(listing as NestedBrowseRow) : null
 }
 
 function mapRawOfferRow(

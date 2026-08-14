@@ -2,12 +2,10 @@ import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
 import type { Supabase } from "@/lib/supabase/types"
-import {
-  isValidUuid,
-  mapBrowseListing,
-  type BrowseListing,
-  type RawListingRow,
-} from "@/lib/listings"
+import { isValidUuid } from "@/lib/listings/constants"
+import type { BrowseListing } from "@/lib/listings/constants"
+import { mapNestedBrowseListing } from "@/lib/listings/browse-mapper"
+import type { NestedBrowseRow } from "@/lib/listings/browse-mapper"
 import { toggleFavoriteState } from "@/lib/favorites/constants"
 
 export * from "@/lib/favorites/constants"
@@ -58,13 +56,13 @@ export async function fetchFavoriteListings(
   // but listing_id -> listings is a to-one join: PostgREST returns a single
   // row (or null when the listing is no longer readable under RLS).
   const rows = (data ?? []) as unknown as {
-    listing: RawListingRow | null
+    listing: NestedBrowseRow | null
   }[]
 
   return rows
     .map((row) => row.listing)
-    .filter((listing): listing is RawListingRow => listing !== null)
-    .map(mapBrowseListing)
+    .filter((listing): listing is NestedBrowseRow => listing !== null)
+    .map(mapNestedBrowseListing)
 }
 
 // ---- Writes (called by the toggle server action) ----

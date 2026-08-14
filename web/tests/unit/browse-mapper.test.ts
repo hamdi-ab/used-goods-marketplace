@@ -1,11 +1,15 @@
 import { describe, it, expect } from "vitest"
 
-import { mapBrowseListing, pickCoverImage } from "@/lib/listings/browse-mapper"
+import {
+  mapFlatSearchListing,
+  mapNestedBrowseListing,
+  pickCoverImage,
+} from "@/lib/listings/browse-mapper"
 import type { Condition } from "@/lib/listings/constants"
 
 const condition: Condition = "Fair"
 
-describe("browse-mapper.mapBrowseListing (nested browse rows)", () => {
+describe("browse-mapper.mapNestedBrowseListing (nested browse rows)", () => {
   const nested = {
     id: "l1",
     title: "Chair",
@@ -29,7 +33,7 @@ describe("browse-mapper.mapBrowseListing (nested browse rows)", () => {
   }
 
   it("picks the lowest display_order image as the cover", () => {
-    const listing = mapBrowseListing(nested)
+    const listing = mapNestedBrowseListing(nested)
     expect(listing.image_url).toBe("/b.jpg")
     expect(listing.image_count).toBe(2)
     expect(listing.seller).toEqual({
@@ -44,7 +48,7 @@ describe("browse-mapper.mapBrowseListing (nested browse rows)", () => {
   })
 
   it("handles a row with no seller or images", () => {
-    const listing = mapBrowseListing({
+    const listing = mapNestedBrowseListing({
       ...nested,
       seller: null,
       images: null,
@@ -55,7 +59,7 @@ describe("browse-mapper.mapBrowseListing (nested browse rows)", () => {
   })
 })
 
-describe("browse-mapper.mapBrowseListing (search RPC rows)", () => {
+describe("browse-mapper.mapFlatSearchListing (search RPC rows)", () => {
   const flat = {
     id: "l1",
     title: "Chair",
@@ -73,7 +77,7 @@ describe("browse-mapper.mapBrowseListing (search RPC rows)", () => {
   }
 
   it("stitches the flat seller columns into the shared display shape", () => {
-    expect(mapBrowseListing(flat)).toEqual({
+    expect(mapFlatSearchListing(flat)).toEqual({
       id: "l1",
       title: "Chair",
       price: 100,
@@ -95,7 +99,7 @@ describe("browse-mapper.mapBrowseListing (search RPC rows)", () => {
   })
 
   it("maps a search row with no seller", () => {
-    const listing = mapBrowseListing({ ...flat, seller_id: null })
+    const listing = mapFlatSearchListing({ ...flat, seller_id: null })
     expect(listing.seller).toBeNull()
   })
 })

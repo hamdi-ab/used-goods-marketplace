@@ -26,7 +26,11 @@ import type {
 } from "./listings/constants"
 import type { SearchSort } from "@/lib/search"
 import { MAX_PAGING_OFFSET } from "@/lib/pagination"
-import { mapBrowseListing, pickCoverImage } from "./listings/browse-mapper"
+import {
+  mapFlatSearchListing,
+  mapNestedBrowseListing,
+  pickCoverImage,
+} from "./listings/browse-mapper"
 import type {
   FlatSearchRow,
   NestedBrowseRow,
@@ -35,12 +39,6 @@ import type {
 // Re-export the pure value objects so imports from "@/lib/listings" keep
 // resolving. Definitions live in ./listings/constants (server-free).
 export * from "./listings/constants"
-
-// Re-export the browse row mapper + nested row shape so the favorites feed and
-// the offers read path use the one cover/seller rule. Definitions live in
-// ./listings/browse-mapper (server-free).
-export { mapBrowseListing } from "./listings/browse-mapper"
-export type { NestedBrowseRow as RawListingRow } from "./listings/browse-mapper"
 
 // ---- Reads ----
 
@@ -216,7 +214,7 @@ export async function fetchListings(
   }
 
   const listings: BrowseListing[] = (data as NestedBrowseRow[] | null ?? []).map(
-    mapBrowseListing
+    mapNestedBrowseListing
   )
 
   const hasMore =
@@ -282,7 +280,7 @@ export async function searchListings(
   }
 
   const rows = (data ?? []) as SearchListingRow[]
-  const listings: BrowseListing[] = rows.map(mapBrowseListing)
+  const listings: BrowseListing[] = rows.map(mapFlatSearchListing)
 
   const count = rows.length > 0 ? rows[0].total_count : 0
   return {
