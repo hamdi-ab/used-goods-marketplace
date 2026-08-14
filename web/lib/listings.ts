@@ -327,6 +327,7 @@ export async function createListing(
       sub_city: values.subCity ?? null,
       address: values.address ?? null,
       negotiable: values.negotiable ?? false,
+      ai_assisted: values.ai_assisted ?? false,
       status: "published" as ListingStatus,
     })
     .select("id")

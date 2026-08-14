@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation"
 import { XIcon, UploadIcon } from "lucide-react"
 
 import { createListing } from "@/app/actions/listings"
-import { CONDITIONS } from "@/lib/listings/constants"
+import { CONDITIONS, type Condition } from "@/lib/listings/constants"
 import type { Category } from "@/lib/listings"
+import { AiAssist } from "@/components/listings/ai-assist"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -24,8 +25,18 @@ export function CreateListingForm({
   const router = useRouter()
   const [state, formAction, pending] = useActionState(createListing, {})
   const [previews, setPreviews] = useState<string[]>([])
+  const [photoFiles, setPhotoFiles] = useState<File[]>([])
   const fileRef = useRef<HTMLInputElement>(null)
   const urlRefs = useRef<string[]>([])
+
+  // T14: the AI-fillable fields are controlled so the assistant can pre-fill
+  // them (editable, never auto-submitted). The native form still posts their
+  // DOM values on submit.
+  const [title, setTitle] = useState("")
+  const [description, setDescription] = useState("")
+  const [categoryId, setCategoryId] = useState<string | null>(null)
+  const [condition, setCondition] = useState<Condition>("" as Condition)
+  const [aiAssisted, setAiAssisted] = useState(false)
 
   useEffect(() => {
     return () => {
@@ -41,16 +52,18 @@ export function CreateListingForm({
 
   function handlePhotos(e: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
-    // revoke prior previews
     urlRefs.current.forEach((url) => URL.revokeObjectURL(url))
     urlRefs.current = []
     const urls = files.map((f) => URL.createObjectURL(f))
     urlRefs.current = urls
     setPreviews(urls)
+    setPhotoFiles(files.filter((f) => f.size > 0))
   }
 
   return (
     <form action={formAction}>
+      <input type="hidden" name="ai_assisted" value={aiAssisted ? "on" : ""} />
+
       <Card className="mb-6">
         <CardHeader>
           <CardTitle>Photos *</CardTitle>
@@ -89,7 +102,8 @@ export function CreateListingForm({
                     type="button"
                     onClick={() => {
                       URL.revokeObjectURL(url)
-                      setPreviews((p) => p.filter((u) => u !== url))
+                      setPreviews((p) => p.filter((_, idx) => idx !== i))
+                      setPhotoFiles((p) => p.filter((_, idx) => idx !== i))
                     }}
                     className="absolute right-1 top-1 rounded bg-background/80 p-0.5"
                   >
@@ -98,6 +112,20 @@ export function CreateListingForm({
                 </div>
               ))}
             </div>
+          ) : null}
+
+          {photoFiles.length > 0 ? (
+            <AiAssist
+              categories={categories}
+              photos={photoFiles}
+              onApply={(s) => {
+                setTitle(s.title)
+                setDescription(s.description)
+                if (s.categoryId) setCategoryId(s.categoryId)
+                if (s.condition) setCondition(s.condition)
+                setAiAssisted(true)
+              }}
+            />
           ) : null}
         </CardContent>
       </Card>
@@ -109,12 +137,14 @@ export function CreateListingForm({
         <CardContent className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="title">Title *</Label>
-              <Input
-                id="title"
-                name="title"
-                placeholder="What are you selling?"
-                aria-invalid={!!state.errors?.title}
-              />
+            <Input
+              id="title"
+              name="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="What are you selling?"
+              aria-invalid={!!state.errors?.title}
+            />
             <FieldError message={state.errors?.title?.[0]} />
           </div>
 
@@ -123,6 +153,8 @@ export function CreateListingForm({
             <textarea
               id="description"
               name="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               rows={5}
               className="resize-y rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-within:ring-2 focus-within:ring-ring/50"
               placeholder="Include condition, brand, age, what's included..."
@@ -155,6 +187,8 @@ export function CreateListingForm({
                       type="radio"
                       name="condition"
                       value={c}
+                      checked={condition === c}
+                      onChange={() => setCondition(c)}
                       required
                       className="accent-primary"
                     />
@@ -171,6 +205,8 @@ export function CreateListingForm({
             <select
               id="categoryId"
               name="categoryId"
+              value={categoryId ?? ""}
+              onChange={(e) => setCategoryId(e.target.value || null)}
               className="w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring/50"
               aria-invalid={!!state.errors?.categoryId}
             >
@@ -211,14 +247,14 @@ export function CreateListingForm({
               />
             </div>
           </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="address">Address (optional)</Label>
-              <Input
-                id="address"
-                name="address"
-                placeholder="Street address or landmark"
-              />
-            </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="address">Address (optional)</Label>
+            <Input
+              id="address"
+              name="address"
+              placeholder="Street address or landmark"
+            />
+          </div>
           <label className="flex items-center gap-2 text-sm">
             <input type="checkbox" name="negotiable" className="accent-primary" />
             Price is negotiable
