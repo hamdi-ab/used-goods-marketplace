@@ -56,7 +56,7 @@ Tools:
 - React Testing Library
 - @vitest/coverage-v8
 
-### Unit Testing Setup (app/)
+### Unit Testing Setup (web/)
 
 | Concern | Convention |
 |---------|------------|

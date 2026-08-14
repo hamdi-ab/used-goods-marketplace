@@ -5,7 +5,7 @@ This repo is the documentation home for the **Used Goods Marketplace**, the VinT
 ## Repo layout
 
 ```
-app/                      Web application (Next.js App Router, Tailwind, shadcn/ui)
+web/                      Web application (Next.js App Router, Tailwind, shadcn/ui)
 docs/
 ├── 00-strategy/          Winning strategy + product vision
 ├── 01-prd/               PRD: overview, goals, personas, stories, FR/NFR, features, flows, IA
@@ -16,7 +16,7 @@ docs/
 load-test/                k6 load-test scenario + runbook (T19, NFR-SCALE-001 concurrency)
 ```
 
-**Application run command:** `cd app && npm run dev` (see `app/README.md` for setup, Supabase local stack, and scripts). CI workflows live in `.github/workflows/`.
+**Application run command:** `cd web && npm run dev` (see `web/README.md` for setup, Supabase local stack, and scripts). CI workflows live in `.github/workflows/`.
 
 **Numbering contract.** Every folder's files are numbered from `00` upward. The folder name's leading number is the doc family; the file's leading number is its position within the family. Never introduce a gap or a duplicate when adding a doc. Design-series family prefixes (`vds`/`vcl`/`vux`) were retired; do not reintroduce them.
 
@@ -43,9 +43,9 @@ load-test/                k6 load-test scenario + runbook (T19, NFR-SCALE-001 co
 
 ## App assets (T18+)
 
-- The only non-doc code in this repo is the image set under `app/public/images/` (T18). It is the app scaffold's `public/` directory; the app itself is built by later tickets.
-- Assets are token-locked SVG sources + 2x PNG rasters, one flat-vector style on `#2563EB` + navy `#172554`. The manifest at `app/public/images/README.md` is the authority on contents, usage, and style.
-- No image-generation API was usable on the project's Google key (free tier quota `limit: 0`), so the set is hand-crafted SVG emitted from `app/public/images/_tools/generate.js`; `render.sh` rasterizes via headless Chrome. Regenerate both after touching `generate.js`.
+- The only non-doc code in this repo is the image set under `web/public/images/` (T18). It is the app scaffold's `public/` directory; the app itself is built by later tickets.
+- Assets are token-locked SVG sources + 2x PNG rasters, one flat-vector style on `#2563EB` + navy `#172554`. The manifest at `web/public/images/README.md` is the authority on contents, usage, and style.
+- No image-generation API was usable on the project's Google key (free tier quota `limit: 0`), so the set is hand-crafted SVG emitted from `web/public/images/_tools/generate.js`; `render.sh` rasterizes via headless Chrome. Regenerate both after touching `generate.js`.
 - Do not introduce ad hoc scenes or off-palette colors; reuse the generator primitives.
 
 ## Rules of thumb
