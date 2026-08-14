@@ -5,7 +5,7 @@ This repo is the documentation home for the **Used Goods Marketplace**, the VinT
 ## Repo layout
 
 ```
-app/                      Web application (Next.js App Router, Tailwind, shadcn/ui)
+web/                      Web application (Next.js App Router, Tailwind, shadcn/ui)
 docs/
 ├── 00-strategy/          Winning strategy + product vision
 ├── 01-prd/               PRD: overview, goals, personas, stories, FR/NFR, features, flows, IA
@@ -15,7 +15,7 @@ docs/
 └── agents/               Agent working notes (tracker conventions)
 ```
 
-**Application run command:** `cd app && npm run dev` (see `app/README.md` for setup, Supabase local stack, and scripts). CI workflows live in `.github/workflows/`.
+**Application run command:** `cd web && npm run dev` (see `web/README.md` for setup, Supabase local stack, and scripts). CI workflows live in `.github/workflows/`.
 
 **Numbering contract.** Every folder's files are numbered from `00` upward. The folder name's leading number is the doc family; the file's leading number is its position within the family. Never introduce a gap or a duplicate when adding a doc. Design-series family prefixes (`vds`/`vcl`/`vux`) were retired; do not reintroduce them.
 

@@ -15,7 +15,7 @@ Design and architecture source of truth: the repository `docs/` tree
 
 ## Quick start
 
-From this `app/` directory:
+From this `web/` directory:
 
 ```bash
 npm install
@@ -24,7 +24,7 @@ npm run dev
 
 Open http://localhost:3000.
 
-> From the repository root the run command is `cd app && npm run dev`.
+> From the repository root the run command is `cd web && npm run dev`.
 
 ## Scripts
 
@@ -65,7 +65,7 @@ Install the Supabase CLI:
   or `scoop install supabase`
 
 Start the local stack (Postgres, Auth, Storage, and friends) from this
-`app/` directory. Requires Docker Desktop to be running:
+`web/` directory. Requires Docker Desktop to be running:
 
 ```bash
 supabase start
@@ -75,7 +75,7 @@ Stop it with `supabase stop`. On first run the CLI pulls the service images,
 which can take a few minutes.
 
 Once running, `supabase start` prints the local `SUPABASE_URL` and
-`SUPABASE_ANON_KEY`. Create `app/.env.local` (never commit it):
+`SUPABASE_ANON_KEY`. Create `web/.env.local` (never commit it):
 
 ```text
 NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
