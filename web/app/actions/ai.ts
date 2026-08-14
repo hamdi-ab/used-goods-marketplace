@@ -1,12 +1,13 @@
 "use server"
 
 import { generateListingSuggestions } from "@/lib/ai/listings"
+import { recordAiUsage } from "@/lib/ai/telemetry"
 import type { AIListingResult, AIListingSuggestion } from "@/lib/ai/constants"
 import type { Category } from "@/lib/listings/constants"
 
 export interface AiSuggestionsState {
   ok?: boolean
-  reason?: "unavailable" | "rate_limited" | "degraded"
+  reason?: Extract<AIListingResult, { ok: false }>["reason"]
   message?: string
   suggestion?: AIListingSuggestion
 }
@@ -17,13 +18,17 @@ export interface AiSuggestionsState {
  * to the Gemini seam (lib/ai/listings), and returns a typed state object. The
  * AI key never reaches the client — the action runs server-side, mirroring the
  * GenerateListingService → Gemini Provider flow (docs/05-backend §9).
+ *
+ * FS-005 analytics: the seller's already-typed title/description (optional
+ * inputs) are forwarded to the prompt, and the interaction is recorded as
+ * ai_used (first assist) or ai_regenerated (Regenerate).
  */
 export async function generateListingSuggestionsAction(
   _prevState: AiSuggestionsState,
   formData: FormData
 ): Promise<AiSuggestionsState> {
   const files = (formData.getAll("photos") as File[]).filter(
-    (f): f is File => f instanceof File && f.size > 0
+    (f): f is File => f instanceof File
   )
   if (!files.length) {
     return { ok: false, reason: "degraded", message: "Add a photo first" }
@@ -39,7 +44,18 @@ export async function generateListingSuggestionsAction(
     }
   }
 
-  const result: AIListingResult = await generateListingSuggestions(files, categories)
+  const readText = (key: string): string | undefined => {
+    const v = formData.get(key)
+    return typeof v === "string" && v.trim() ? v : undefined
+  }
+
+  recordAiUsage(formData.get("ai_event") === "regenerate" ? "ai_regenerated" : "ai_used")
+
+  const result: AIListingResult = await generateListingSuggestions(
+    files,
+    categories,
+    { title: readText("title"), description: readText("description") }
+  )
   if (result.ok) {
     return { ok: true, suggestion: result.suggestion }
   }

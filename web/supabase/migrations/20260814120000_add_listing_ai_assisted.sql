@@ -4,12 +4,8 @@
 -- opt-in — only set when the seller accepts AI suggestions — and is purely
 -- informational: AI never publishes automatically (FS-005 / AC-2), and editing
 -- a suggested value afterward does not clear the flag (the listing still used
--- AI assistance). Per DB spec §17 (index boolean filter columns).
+-- AI assistance). No index is added: no read path filters on the flag (browse
+-- and search surface published listings via their own indexes), so an index
+-- here would be speculative.
 alter table public.listings
   add column if not exists ai_assisted boolean not null default false;
-
--- Only published, non-deleted listings are surfaced in browse/search, so only
--- they are worth indexing for an "AI-assisted" scan/filter.
-create index if not exists listings_ai_assisted_idx
-  on public.listings (ai_assisted)
-  where status = 'published' and deleted_at is null;

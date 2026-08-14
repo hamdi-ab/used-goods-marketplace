@@ -35,7 +35,8 @@ export function CreateListingForm({
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
   const [categoryId, setCategoryId] = useState<string | null>(null)
-  const [condition, setCondition] = useState<Condition>("" as Condition)
+  // "" is the unselected radio state — a real Condition value, never a cast lie.
+  const [condition, setCondition] = useState<Condition | "">("")
   const [aiAssisted, setAiAssisted] = useState(false)
 
   useEffect(() => {
@@ -118,6 +119,8 @@ export function CreateListingForm({
             <AiAssist
               categories={categories}
               photos={photoFiles}
+              title={title}
+              description={description}
               onApply={(s) => {
                 setTitle(s.title)
                 setDescription(s.description)

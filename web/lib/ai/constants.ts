@@ -7,14 +7,20 @@
  * contract is testable without hitting the network or holding a credential.
  */
 
+import { CONDITIONS } from "@/lib/listings/constants"
+
 export const AI_LISTING_MODEL = "gemini-2.5-flash"
 export const AI_LISTING_BASE_URL = `https://generativelanguage.googleapis.com/v1/models/${AI_LISTING_MODEL}:generateContent`
 
-// Mirrors the listing_condition enum (DB spec §18), NOT the broader vocabulary
-// in the vision-proof runbook: Gemini must emit one of our three stored values
-// so it can be saved verbatim. (The UI reuses `CONDITIONS` from listings; this
-// constant keeps the AI seam self-contained if the sets ever diverge.)
-export const AI_LISTING_CONDITIONS = ["Brand New", "Lightly Used", "Fair"] as const
+// NFR-AI-002: AI responses should complete within 10 seconds. The seam passes
+// this to AbortSignal.timeout so a hung Gemini call degrades instead of leaving
+// the seller stuck on "Generating…".
+export const AI_LISTING_TIMEOUT_MS = 10_000
+
+// Reuses the shared listing_condition vocabulary (lib/listings/constants) so the
+// AI seam and the DB enum (DB spec §8) can never drift apart. Gemini must emit
+// one of our three stored values so it can be saved verbatim.
+export const AI_LISTING_CONDITIONS = CONDITIONS
 export type AICondition = (typeof AI_LISTING_CONDITIONS)[number]
 
 export interface AIListingSuggestion {
@@ -35,10 +41,32 @@ export type AIListingResult =
       message: string
     }
 
+// Optional context the seller already typed (FS-005 Inputs): the prompt treats it
+// as ground truth to refine rather than discard.
+export interface AIPromptContext {
+  title?: string
+  description?: string
+}
+
 // The prompt sent with every image set. `categoryNames` is interpolated so the
-// model can only emit a category the seller actually has.
-export const PROMPT_TEMPLATE = (categoryNames: string[]) =>
-  `You are a product listing assistant. Return a STRICT JSON object matching the response schema for this used-item photo. title: a concise, searchable title (≤70 chars). description: 1–2 sentences. category: one of: ${categoryNames.join(", ")}. keywords: 1–5 tags. condition: one of: Brand New, Lightly Used, Fair. quality_score: integer 0-100. Do NOT add prose, markdown, or fields outside the schema.`
+// model can only emit a category the seller actually has; `context` lets it
+// refine the seller's already-typed title/description.
+export const buildPrompt = (
+  categoryNames: string[],
+  context: AIPromptContext = {}
+): string => {
+  const typed = [
+    context.title ? `Title: ${context.title}` : "",
+    context.description ? `Description: ${context.description}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n")
+  return `You are a product listing assistant. Return a STRICT JSON object matching the response schema for this used-item photo. title: a concise, searchable title (≤70 chars). description: 1–2 sentences. category: one of: ${categoryNames.join(", ")}. keywords: 1–5 tags. condition: one of: ${AI_LISTING_CONDITIONS.join(", ")}. quality_score: integer 0-100.${
+    typed
+      ? ` The seller already typed this optional context — keep its meaning, refine the wording, and do not contradict it:\n${typed}`
+      : ""
+  } Do NOT add prose, markdown, or fields outside the schema.`
+}
 
 // JSON Schema (Gemini `responseSchema`). `category` enum is populated from the
 // seller's live categories so the model can only return a stored value.

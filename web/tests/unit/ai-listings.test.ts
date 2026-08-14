@@ -152,4 +152,27 @@ describe("generateListingSuggestions (T14 / FS-005)", () => {
     expect(imageParts).toHaveLength(2)
     expect(parsed.generationConfig.responseMimeType).toBe("application/json")
   })
+
+  it("degrades when the request is aborted by the 10s timeout (NFR-AI-002)", async () => {
+    fetchMock.mockRejectedValueOnce(
+      new DOMException("The operation was aborted.", "AbortError")
+    )
+    const res = await generateListingSuggestions([photo()], CATEGORIES)
+    expect(res.ok).toBe(false)
+    expect(res.ok ? "" : res.reason).toBe("degraded")
+  })
+
+  it("sends the seller's optional title/description as prompt context (FS-005 Inputs)", async () => {
+    fetchMock.mockResolvedValueOnce(geminiResponse(validJson()))
+    const res = await generateListingSuggestions([photo()], CATEGORIES, {
+      title: "Wooden stool",
+      description: "Solid oak, light wear",
+    })
+    expect(res.ok).toBe(true)
+    const call = fetchMock.mock.calls[0] as [string, { body: string }]
+    const parsed = JSON.parse(call[1].body)
+    const promptText = parsed.contents[0].parts[0].text as string
+    expect(promptText).toContain("Title: Wooden stool")
+    expect(promptText).toContain("Description: Solid oak, light wear")
+  })
 })

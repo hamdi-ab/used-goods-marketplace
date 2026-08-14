@@ -5,17 +5,22 @@ import type { Category } from "@/lib/listings/constants"
 import {
   AI_LISTING_BASE_URL,
   AI_LISTING_CONDITIONS,
+  AI_LISTING_TIMEOUT_MS,
   type AICondition,
   type AIListingResult,
+  type AIPromptContext,
+  buildPrompt,
   buildResponseSchema,
-  PROMPT_TEMPLATE,
 } from "./constants"
 
 // ---- Rate limiting (AC-4) ----
-// Simple per-process sliding window. Good enough for the demo MVP; a
-// multi-instance deployment would back this with a shared store (Redis/Upstash),
-// but the feature is explicitly non-gating — a miss here just degrades to manual.
-// Env is read per-call so tests (and runtime overrides) can vary the limit.
+// Per-process sliding window: exactly `AI_RATE_LIMIT` (default 10) calls are
+// allowed per 60s window; the (limit+1)-th call within the window is rejected.
+// On the Vercel serverless target (ADR-017) each function instance keeps its
+// own window, so this is a per-instance cap rather than a global one — accepted
+// because the feature is non-gating: a miss simply degrades to manual listing
+// (NFR-AI-003). A shared store (Redis/Upstash) is the documented future
+// hardening. Env is read per-call so tests (and runtime overrides) can vary it.
 const AI_RATE_WINDOW_MS = 60_000
 const aiCallTimestamps: number[] = []
 
@@ -26,8 +31,8 @@ export function resetAiRateLimiter(): void {
 function aiRateLimited(now: number): boolean {
   const limit = Number(process.env.AI_RATE_LIMIT ?? 10)
   const cutoff = now - AI_RATE_WINDOW_MS
-  for (let i = aiCallTimestamps.length - 1; i >= 0; i--) {
-    if (aiCallTimestamps[i] < cutoff) aiCallTimestamps.splice(i, 1)
+  while (aiCallTimestamps.length && aiCallTimestamps[0] < cutoff) {
+    aiCallTimestamps.shift()
   }
   if (aiCallTimestamps.length >= limit) return true
   aiCallTimestamps.push(now)
@@ -60,7 +65,7 @@ const suggestionSchema = (categoryNames: string[]) =>
           (AI_LISTING_CONDITIONS as readonly string[]).includes(v),
         "invalid condition"
       ),
-      quality_score: z.number().int().min(0).max(100),
+    quality_score: z.number().int().min(0).max(100),
   })
 
 interface GeminiResponse {
@@ -69,23 +74,26 @@ interface GeminiResponse {
 
 /**
  * Call Gemini (flash-class multimodal) with the given photos and return a typed,
- * schema-validated suggestion. Every failure — missing key, rate limit, network
- * error, non-2xx, malformed JSON, schema mismatch — resolves to a degraded
- * result (AC-3/AC-4) so the caller can always fall back to manual creation.
+ * schema-validated suggestion. Every failure — missing key, rate limit, timeout,
+ * network error, non-2xx, malformed JSON, schema mismatch — resolves to a
+ * degraded result (AC-3/AC-4, NFR-AI-002/NFR-AI-003) so the caller can always
+ * fall back to manual creation. Messages are end-seller-safe: no server-config
+ * details leak to the UI (AC-3).
  */
 export async function generateListingSuggestions(
   photos: File[],
-  categories: Category[]
+  categories: Category[],
+  context: AIPromptContext = {}
 ): Promise<AIListingResult> {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
-    return { ok: false, reason: "unavailable", message: "AI key not configured" }
+    return { ok: false, reason: "unavailable", message: "AI assist is unavailable right now" }
   }
   if (aiRateLimited(Date.now())) {
     return {
       ok: false,
       reason: "rate_limited",
-      message: "AI assist is rate limited",
+      message: "AI assist is busy right now — try again shortly",
     }
   }
 
@@ -108,7 +116,7 @@ export async function generateListingSuggestions(
     contents: [
       {
         parts: [
-          { text: PROMPT_TEMPLATE(categoryNames) },
+          { text: buildPrompt(categoryNames, context) },
           ...parts.map((p) => ({
             inlineData: { mimeType: p.mimeType, data: p.data },
           })),
@@ -129,6 +137,9 @@ export async function generateListingSuggestions(
       method: "POST",
       headers: { "content-type": "application/json" },
       body: JSON.stringify(body),
+      // NFR-AI-002: hard 10s ceiling — a slow/hung model degrades instead of
+      // leaving the seller stuck.
+      signal: AbortSignal.timeout(AI_LISTING_TIMEOUT_MS),
     })
   } catch {
     return { ok: false, reason: "degraded", message: "AI request failed" }
@@ -138,36 +149,36 @@ export async function generateListingSuggestions(
     return {
       ok: false,
       reason: "rate_limited",
-      message: `Gemini responded ${res.status}`,
+      message: "AI assist is busy right now — try again shortly",
     }
   }
   if (res.status === 403) {
     return {
       ok: false,
       reason: "unavailable",
-      message: `Gemini responded ${res.status}`,
+      message: "AI assist is unavailable right now",
     }
   }
   if (!res.ok) {
-    return { ok: false, reason: "degraded", message: `Gemini responded ${res.status}` }
+    return { ok: false, reason: "degraded", message: "AI request failed" }
   }
 
   const json = (await res.json().catch(() => null)) as GeminiResponse | null
   const text = json?.candidates?.[0]?.content?.parts?.[0]?.text
   if (!text) {
-    return { ok: false, reason: "degraded", message: "Empty AI response" }
+    return { ok: false, reason: "degraded", message: "AI request failed" }
   }
 
   let parsed: unknown
   try {
     parsed = JSON.parse(text)
   } catch {
-    return { ok: false, reason: "degraded", message: "Malformed AI response" }
+    return { ok: false, reason: "degraded", message: "AI request failed" }
   }
 
   const result = suggestionSchema(categoryNames).safeParse(parsed)
   if (!result.success) {
-    return { ok: false, reason: "degraded", message: "Unparseable AI response" }
+    return { ok: false, reason: "degraded", message: "AI request failed" }
   }
 
   const out = result.data

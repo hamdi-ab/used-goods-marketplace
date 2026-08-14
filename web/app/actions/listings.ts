@@ -5,6 +5,7 @@ import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 
 import { getCurrentUser } from "@/lib/auth"
+import { recordAiUsage } from "@/lib/ai/telemetry"
 import {
   createListing as createListingRow,
   updateListing as updateListingRow,
@@ -109,6 +110,10 @@ export async function createListing(
     if ("error" in result) {
       return { message: result.error }
     }
+
+    // FS-005 analytics: a listing created with AI assistance counts as an
+    // accepted suggestion (the seller pressed Apply, not just generated).
+    if (parsed.data.ai_assisted) recordAiUsage("ai_accepted")
 
     revalidatePath("/dashboard")
     revalidatePath(`/listings/${result.id}`)
