@@ -77,6 +77,8 @@ export interface Listing {
   published_at: string
   created_at: string
   updated_at: string
+  /** T14: true when the listing's fields were applied from AI suggestions. */
+  ai_assisted: boolean
 }
 
 export interface ListingWithRelations {
@@ -104,6 +106,7 @@ export interface ListingPayload {
   subCity?: string
   address?: string
   negotiable: boolean
+  ai_assisted?: boolean
   photos?: File[]
 }
 
@@ -122,7 +125,7 @@ export interface ListingEditPayload {
 }
 
 export const LISTING_COLUMNS =
-  "id, seller_id, category_id, title, description, price, condition, negotiable, city, sub_city, address, status, view_count, favorite_count, published_at, created_at, updated_at"
+  "id, seller_id, category_id, title, description, price, condition, negotiable, city, sub_city, address, status, view_count, favorite_count, published_at, created_at, updated_at, ai_assisted"
 
 export const PAGE_SIZE = 12
 // Supabase/PostgREST caps a single select result set at 1000 rows. Browse is
