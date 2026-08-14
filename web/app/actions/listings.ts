@@ -5,6 +5,7 @@ import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 
 import { getCurrentUser } from "@/lib/auth"
+import { recordAiUsage } from "@/lib/ai/telemetry"
 import {
   createListing as createListingRow,
   updateListing as updateListingRow,
@@ -31,6 +32,7 @@ const createSchema = z.object({
   subCity: z.string().max(100).optional(),
   address: z.string().max(200).optional(),
   negotiable: z.boolean().optional(),
+  ai_assisted: z.boolean().optional(),
   photos: z.array(z.instanceof(File)).min(1, "Add at least one photo").max(MAX_IMAGES, `Up to ${MAX_IMAGES} photos allowed`),
 })
 
@@ -85,8 +87,9 @@ export async function createListing(
     city: formData.get("city"),
     subCity: formValue(formData, "subCity"),
     address: formValue(formData, "address"),
-    negotiable: formData.get("negotiable") === "on",
-    photos: files.length ? files : undefined,
+     negotiable: formData.get("negotiable") === "on",
+     ai_assisted: formData.get("ai_assisted") === "on",
+     photos: files.length ? files : undefined,
   })
 
   if (!parsed.success) {
@@ -107,6 +110,10 @@ export async function createListing(
     if ("error" in result) {
       return { message: result.error }
     }
+
+    // FS-005 analytics: a listing created with AI assistance counts as an
+    // accepted suggestion (the seller pressed Apply, not just generated).
+    if (parsed.data.ai_assisted) recordAiUsage("ai_accepted")
 
     revalidatePath("/dashboard")
     revalidatePath(`/listings/${result.id}`)

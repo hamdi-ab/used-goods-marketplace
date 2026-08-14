@@ -106,6 +106,9 @@ export default async function ListingPage({
               {l.title}
             </h1>
             <Badge variant="secondary">{formatCondition(l.condition)}</Badge>
+            {l.ai_assisted ? (
+              <Badge variant="outline">AI-assisted</Badge>
+            ) : null}
             <FavoriteButton listingId={l.id} initial={favorited} />
             <ReportButton
               target={{ type: "listing", listingId: l.id }}
