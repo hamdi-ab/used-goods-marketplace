@@ -22,14 +22,12 @@ marketplace. Target length: **3–5 minutes, ≤ 5:00**.
 - [ ] Recording tool ready (OS-native or OBS); trim to ≤ 5:00.
 - [ ] Browser window clean, e.g. 1440×900, no bookmarks bar clutter.
 
-## 1. Demo accounts (use these in the video)
+## 1. Demo accounts
 
-| Account | Email | Password | Role |
-|---|---|---|---|
-| Seller (phone-verified) | `amira.sellers@vintch.local` | `demo1234` | Posts listings |
-| Seller (Fayda-verified) | `fayad.verified@vintch.local` | `demo1234` | Trust-badge variety |
-| Buyer | `biniam.buyer@vintch.local` | `demo1234` | Searches, offers |
-| Admin | `admin@vintch.local` | `admin1234` | Moderation queue (optional) |
+Use the demo accounts (canonical table in
+[`web/README.md`](../../web/README.md) under "Database migrations"): sign in as
+the buyer (`biniam.buyer@vintch.local`) for the search/offer flow, and as a
+seller (e.g. `amira.sellers@vintch.local`) for the create-listing flow.
 
 ## 2. Shot list
 

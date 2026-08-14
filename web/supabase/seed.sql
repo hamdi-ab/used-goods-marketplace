@@ -167,32 +167,36 @@ begin
      'Steel bedside table', 'Minimal steel frame bedside table, minor scuffs.', 950,
      'Fair', false, 'Dire Dawa', null, 'published', now())
   on conflict (id) do nothing;
-
-  insert into public.listing_images (listing_id, image_url, display_order, alt_text)
-  select l.id, '/images/illustrations/trust-safe-transactions.svg', 0, 'Demo listing image'
-  from public.listings l
-  where l.seller_id in (seller_phone, seller_fayda, seller_plain)
-    and not exists (select 1 from public.listing_images where listing_id = l.id);
 end $$;
 
 -----------------------------------------------------------------------------
 -- T16 demo seed: a populated Addis Ababa marketplace (issue #20 AC-4) so the
 -- browse/search/detail/offer walkthrough has a full catalog to work with.
--- ~58 listings across every category (DB spec §7), spread across the demo
--- sellers above (most on Amira so the phone-verified seller badge shows up
--- across cards) and Addis Ababa sub-cities (Bole, Piassa, Merkato,
--- Kazanchis, Arada, Yeka). A few Dire Dawa rows from Kebede exercise the
--- city filter. IDs are deterministic
+-- ~67 listings across every category (DB spec §7), weighted toward the persona
+-- pain-point categories Electronics / Furniture / Home Appliances (each 10,
+-- per the plan in docs/03-engineering/10-submission-readiness.md §3.2), spread
+-- across the demo sellers above (most on Amira so the phone-verified seller
+-- badge shows up across cards) and Addis Ababa sub-cities (Bole, Piassa,
+-- Merkato, Kazanchis, Arada, Yeka). IDs are deterministic
 -- (20000000-...-00000000000N) so re-running `supabase db reset` stays
 -- idempotent (on conflict (id) do nothing). Image URLs are local illustration
 -- / photo SVG stand-ins for demo only; swap for real product photos before
 -- production hosting.
+--
+-- The same block seeds the trust framework the demo relies on (plan §3.3):
+-- six accepted offers from the demo buyer on real listings (marking them
+-- sold), six matching reviews, and a trust_score recomputed from those reviews
+-- with the same formula submit_review uses (round(avg(rating) * 20)) — so the
+-- seller trust bars in the demo are earned, not hard-coded with no backing
+-- rows. Unlike production, seed inserts bypass the SECURITY DEFINER RPCs
+-- because the seed runs as the postgres role on `db reset`.
 -----------------------------------------------------------------------------
 do $$
 declare
   seller_phone uuid := '00000000-0000-0000-0000-000000000002';
   seller_fayda uuid := '00000000-0000-0000-0000-000000000003';
   seller_plain uuid := '00000000-0000-0000-0000-000000000004';
+  a_buyer uuid := '00000000-0000-0000-0000-000000000005';
   rec record;
 begin
   for rec in select * from (values
@@ -320,7 +324,28 @@ begin
     (57, seller_phone, 'other', 'DSLR camera bag + tripod',
      'Large padded camera bag plus aluminum tripod. Both in good condition, padding intact.', 5000, 'Lightly Used', false, 'Yeka', 12),
     (58, seller_fayda, 'other', 'Ergonomic office chair',
-     'Ergonomic mesh office chair with lumbar support, adjustable height and armrests. One caster replaced.', 6500, 'Fair', false, 'Bole', 21)
+     'Ergonomic mesh office chair with lumbar support, adjustable height and armrests. One caster replaced.', 6500, 'Fair', false, 'Bole', 21),
+    ------------------------------------------------------------------ Electronics (weighted: +3)
+    (59, seller_phone, 'electronics', 'iPhone 13 128GB',
+     'iPhone 13, 128GB, battery health 92%, Face ID works, includes original box and cable. Minor wear on the frame.', 52000, 'Lightly Used', false, 'Bole', 4),
+    (60, seller_fayda, 'electronics', 'Samsung Galaxy Tab S6 Lite',
+     'Galaxy Tab S6 Lite, 64GB, with S-pen. Used mostly for notes, screen protector fitted since day one.', 21000, 'Lightly Used', true, 'Piassa', 8),
+    (61, seller_phone, 'electronics', 'Apple Watch SE 40mm',
+     'Apple Watch SE (2nd gen), 40mm GPS. Unopened, still sealed in box. Wrong size gift.', 18500, 'Brand New', false, 'Kazanchis', 2),
+    ------------------------------------------------------------------ Furniture (weighted: +3)
+    (62, seller_fayda, 'furniture', '2-door wardrobe',
+     '2-door wooden wardrobe, 180cm tall, with a mirror on one door. Minor scratches, hinges work smoothly.', 9500, 'Fair', true, 'Bole', 27),
+    (63, seller_phone, 'furniture', 'Patio table + 4 chairs',
+     'Round patio table with four folding chairs, aluminum frame and glass top. Light use, no rust.', 12500, 'Lightly Used', true, 'Merkato', 16),
+    (64, seller_fayda, 'furniture', 'Children study desk',
+     'Adjustable-height children study desk with a shelf. Good condition, some pencil marks that clean off easily.', 4800, 'Lightly Used', false, 'Yeka', 19),
+    ------------------------------------------------------------------ Home Appliances (weighted: +3)
+    (65, seller_phone, 'home-appliances', 'Blender 1.5L',
+     '1.5L blender with 2 speeds and pulse, 600W. Box included, never used.', 3200, 'Brand New', false, 'Piassa', 1),
+    (66, seller_fayda, 'home-appliances', 'Ironing board + steam iron',
+     'Folding ironing board with adjustable height plus a steam iron. Board padding is worn but fully functional.', 2500, 'Fair', false, 'Bole', 14),
+    (67, seller_phone, 'home-appliances', '16-inch stand fan',
+     '16-inch oscillating stand fan, 3 speeds, remote control. Sealed in box, never opened.', 2800, 'Brand New', false, 'Merkato', 3)
   ) as t(k int, seller_id uuid, category_slug text, title text, description text,
         price numeric, condition public.listing_condition, negotiable boolean, sub_city text, age_days int)
   loop
@@ -338,7 +363,7 @@ begin
   end loop;
 
   -- One stand-in image per demo listing that does not already have one
-  -- (covers the T12 three listings and the ~58 above). Rows are numbered to
+  -- (covers the T12 three listings and the ~67 above). Rows are numbered to
   -- rotate between a few local assets so cards look varied during the demo.
   with ranked as (
     select l.id, l.title,
@@ -358,4 +383,65 @@ begin
          0,
          coalesce(title, 'Demo listing image')
   from ranked;
+
+  -- Earned trust framework (plan §3.3): six completed transactions from the
+  -- demo buyer on six published listings (two per seller). Each accepted offer
+  -- marks its listing sold with the winning buyer stamped (ListingMarkedSold,
+  -- mirroring accept_offer), and each transaction gets one review — so the
+  -- seller trust bars in the demo are backed by real reviews, not just the
+  -- hard-coded trust_score from T12. trust_score is then recomputed with the
+  -- same formula submit_review uses, so the badge score equals the earned
+  -- average (Amira 90, Fayad 80, Kebede 60). Deterministic IDs keep the seed
+  -- idempotent.
+  insert into public.offers (id, listing_id, buyer_id, amount, message, status)
+  values
+    ('30000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001',
+     a_buyer, 26000, 'Hi, would you accept 26000 for the iPhone?', 'accepted'),
+    ('30000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000008',
+     a_buyer, 35000, 'Is 35000 okay for the sofa set, delivered?', 'accepted'),
+    ('30000000-0000-0000-0000-000000000003', '20000000-0000-0000-0000-000000000004',
+     a_buyer, 23000, '23000 for the Galaxy A54 if you can deliver to Piassa.', 'accepted'),
+    ('30000000-0000-0000-0000-000000000004', '20000000-0000-0000-0000-000000000016',
+     a_buyer, 55000, 'Would you take 55000 for the fridge?', 'accepted'),
+    ('30000000-0000-0000-0000-000000000005', '20000000-0000-0000-0000-000000000011',
+     a_buyer, 5000, '5000 for the bookshelf, I can pick it up.', 'accepted'),
+    ('30000000-0000-0000-0000-000000000006', '20000000-0000-0000-0000-000000000023',
+     a_buyer, 150000, '150000 for the Boxer if the documents are ready.', 'accepted')
+  on conflict (id) do nothing;
+
+  update public.listings
+    set status = 'sold', sold_to_buyer_id = a_buyer
+    where id in (
+      '20000000-0000-0000-0000-000000000001',
+      '20000000-0000-0000-0000-000000000008',
+      '20000000-0000-0000-0000-000000000004',
+      '20000000-0000-0000-0000-000000000016',
+      '20000000-0000-0000-0000-000000000011',
+      '20000000-0000-0000-0000-000000000023'
+    );
+
+  insert into public.reviews (offer_id, seller_id, buyer_id, rating, comment)
+  values
+    ('30000000-0000-0000-0000-000000000001', seller_phone, a_buyer, 5,
+     'Exactly as described, met in Bole and it was an easy transaction.'),
+    ('30000000-0000-0000-0000-000000000002', seller_phone, a_buyer, 4,
+     'Good sofa, delivery arranged without fuss. Slight delay but fair price.'),
+    ('30000000-0000-0000-0000-000000000003', seller_fayda, a_buyer, 4,
+     'Phone was clean and boxed as promised, smooth meetup.'),
+    ('30000000-0000-0000-0000-000000000004', seller_fayda, a_buyer, 4,
+     'Fridge works perfectly, still under warranty as said.'),
+    ('30000000-0000-0000-0000-000000000005', seller_plain, a_buyer, 3,
+     'Bookshelf is sturdy but a bit more scuffed than the photos showed.'),
+    ('30000000-0000-0000-0000-000000000006', seller_plain, a_buyer, 3,
+     'Bike runs well and papers were ready, though price took some negotiation.')
+  on conflict (offer_id) do nothing;
+
+  -- ReviewSubmitted -> Recalculate Trust Score (domain model §9; same formula
+  -- as submit_review). Overrides the T12 hard-coded values with earned ones.
+  update public.profiles
+    set trust_score = (
+      select round(avg(rating) * 20)::smallint
+      from public.reviews where seller_id = public.profiles.id
+    )
+    where id in (seller_phone, seller_fayda, seller_plain);
 end $$;

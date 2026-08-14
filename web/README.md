@@ -149,9 +149,11 @@ accounts below (change passwords before any shared hosting):
 | Seller (plain) | `kebede.trader@vintch.local` | `demo1234` | Unverified state |
 | Buyer | `biniam.buyer@vintch.local` | `demo1234` | Browsing / offers |
 
-The seed also publishes ~60 Addis Ababa listings across every category
-(Bole, Piassa, Merkato, Kazanchis, …) so search/filter/detail have a full
-catalog to work with.
+The seed also publishes ~69 Addis Ababa listings across every category
+(Bole, Piassa, Merkato, Kazanchis, …), weighted toward Electronics, Furniture,
+and Home Appliances, so search/filter/detail have a full catalog to work
+with. Six of those are marked sold behind the demo sellers' earned reviews
+and ratings, leaving ~63 live listings to browse.
 
 ## Authentication & roles
 

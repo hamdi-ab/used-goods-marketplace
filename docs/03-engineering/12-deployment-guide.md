@@ -93,11 +93,12 @@ Production, Preview, and Development environments:
 
 | Variable | Value | Notes |
 |---|---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | `https://<project-ref>.supabase.co` | Public, safe to expose |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon key from Supabase | Public, safe to expose |
-| `SUPABASE_SERVICE_ROLE_KEY` | service role key | Secret — used only by Server Actions on the server |
-| `GEMINI_API_KEY` | Gemini API key | Secret — AI listing assistant |
-| `NEXT_PUBLIC_SITE_URL` | the Vercel production URL | Optional — used for metadata/sitemap |
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://<project-ref>.supabase.co` | Public — the Supabase project URL (read by `lib/supabase/server.ts`) |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | anon key from Supabase | Public — RLS-scoped client key (read by `lib/supabase/server.ts`) |
+| `GEMINI_API_KEY` | Gemini API key | Secret — AI listing assistant (`lib/ai/listings.ts`) |
+| `AI_RATE_LIMIT` | `10` | Optional — per-process AI-call rate window (`lib/ai/listings.ts`); defaults to 10 |
+| `NEXT_PUBLIC_SITE_URL` | the Vercel production URL | Public — metadata/sitemap base (`lib/site.ts`); has a sensible fallback, set to the real URL |
+| `SUPABASE_SERVICE_ROLE_KEY` | service role key | Secret — **not read by the app today**; provisioned for parity with CI/CD §9 and reserved for admin/seed tooling. Do not expose client-side |
 
 Never commit these to git. The repo ships `.env.example` for the public-shape
 only.
@@ -120,18 +121,14 @@ are created per-PR automatically.
 
 # 5. Demo accounts
 
-The seed creates the accounts below (all password `demo1234` except admin):
+The seed creates the demo accounts (admin + phone-verified seller, Fayda-
+verified seller, plain seller, and buyer — all with the documented
+credentials). The canonical account table lives in
+[`web/README.md`](../../web/README.md) (under "Database migrations") and is
+the single source of truth — update it there if accounts ever change.
 
-| Account | Email | Role | Purpose |
-|---|---|---|---|
-| Admin | `admin@vintch.local` | admin | Moderation queue (Reports) — password `admin1234` |
-| Seller (phone-verified) | `amira.sellers@vintch.local` | seller | "Verified Seller" trust badge |
-| Seller (Fayda-verified) | `fayad.verified@vintch.local` | seller | "Verified Seller" trust badge |
-| Seller (plain) | `kebede.trader@vintch.local` | seller | Unverified seller badge state |
-| Buyer | `biniam.buyer@vintch.local` | buyer | Browsing, offers, favorites |
-
-**Change the passwords before shared hosting.** See the tracker note in
-`docs/agents/issue-tracker.md` for the canonical list.
+**Change the demo passwords before shared hosting** (all demo accounts share
+`demo1234`, admin uses `admin1234`).
 
 # 6. Rollback / recovery
 
