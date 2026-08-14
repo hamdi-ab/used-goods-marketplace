@@ -47,9 +47,9 @@ export type BrowseRow = NestedBrowseRow | FlatSearchRow
 
 /** Shared cover-pick: the lowest display_order image is the listing's cover.
  * One rule for every listing read shape that renders a thumbnail (browse feed,
- * favorites feed, seller dashboard) so it never forks. */
+ * favorites feed, seller dashboard, admin report queue) so it never forks. */
 export function pickCoverImage(
-  images: { image_url: string; display_order: number }[] | null
+  images: { image_url: string; display_order: number }[] | null | undefined
 ): string | null {
   return (
     [...(images ?? [])].sort((a, b) => a.display_order - b.display_order)[0]

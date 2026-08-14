@@ -2,6 +2,7 @@ import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
+import { pickCoverImage } from "@/lib/listings/browse-mapper"
 import { OPEN_REPORT_STATUSES } from "./reports/constants"
 import type { ReportReason, ReportStatus } from "./reports/constants"
 
@@ -222,15 +223,6 @@ interface RawReportRow {
     trust_score: number | null
   } | null
   reporter: { id: string; full_name: string | null; avatar_url: string | null } | null
-}
-
-function pickCoverImage(
-  images: { image_url: string; display_order: number }[] | null | undefined
-): string | null {
-  return (
-    [...(images ?? [])].sort((a, b) => a.display_order - b.display_order)[0]
-      ?.image_url ?? null
-  )
 }
 
 function normalizeAdminReport(row: RawReportRow): ReportWithRelations {

@@ -15,6 +15,15 @@ export type NavItem = {
 
 export const siteName = "VinTech Marketplace"
 
+// The login redirect target shared by signed-out CTAs (heart, make an offer,
+// contact seller, report). Login honors a `?next=` query param (see
+// app/login/page.tsx), so a signed-out visitor lands back on the exact page
+// after signing in. One definition, re-exported per domain so client
+// components need no URL-building logic.
+export function buildLoginUrl(pathname: string): string {
+  return `/login?next=${encodeURIComponent(pathname)}`
+}
+
 // Component standards §12 caps primary destinations at 5. Dashboard and
 // Profile live in the account menu (components/auth/user-menu.tsx) instead.
 export const primaryNav: NavItem[] = [
