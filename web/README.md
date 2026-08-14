@@ -8,6 +8,48 @@ Design and architecture source of truth: the repository `docs/` tree
 (design authority: `docs/04-design/00-design-foundations.md`; CI/CD shape:
 `docs/03-engineering/02-ci-cd-strategy.md`).
 
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 16 (App Router, React Server Components) |
+| Language | TypeScript |
+| UI | React 19, Tailwind CSS 4, shadcn/ui (Radix) |
+| Backend | Supabase (PostgreSQL, Auth, Storage, RLS) |
+| AI (optional) | Google Gemini API — AI listing assistant |
+| Validation | Zod (server actions) |
+| Testing | Vitest, ESLint, TypeScript |
+| CI/CD | GitHub Actions (lint, typecheck, test, build) + Vercel |
+
+## System architecture
+
+```text
+             Browser (desktop / mobile)
+                        │
+              Next.js App (this dir) — RSC + Server Actions
+                        │
+      ┌─────────────────┴──────────────────┐
+   Supabase (BaaS)                     Gemini API
+   │  ├─ PostgreSQL (RLS)               (AI listing assist)
+   │  ├─ Auth (email + password, JWT)
+   │  └─ Storage (avatars, listing-images)
+```
+
+The app is a stateless Next.js frontend over Supabase-as-backend:
+
+- **Reads** run as server components / Server Actions that call Supabase
+  PostgREST; every table has Row Level Security policies scoping rows to the
+  caller (see `supabase/migrations/`).
+- **Privileged or stateful writes** (offers, reviews, reports, contact
+  attempts) go through `SECURITY DEFINER` RPCs that re-check the caller,
+  enforce invariants, and apply rate limits — never a raw client insert.
+- **AI listing assist** is optional; manual listing creation always works
+  (ADR-009, Gemini free tier).
+
+The full architecture, ADRs, DB schema, and API surface are documented in
+`docs/02-architecture/`. The deployment guide for hosted Supabase + Vercel is
+`docs/03-engineering/12-deployment-guide.md`.
+
 ## Requirements
 
 - Node.js 20+ and npm
@@ -96,9 +138,22 @@ and load the seed on the local stack:
 supabase db reset
 ```
 
-`supabase db reset` also runs `supabase/seed.sql`, which creates one admin
-account for moderation: **admin@vintch.local / admin1234** (change the
-password before any shared hosting).
+`supabase db reset` also runs `supabase/seed.sql`, which creates the demo
+accounts below (change passwords before any shared hosting):
+
+| Account | Email | Password | Role |
+|---|---|---|---|
+| Admin | `admin@vintch.local` | `admin1234` | Moderation queue |
+| Seller (phone-verified) | `amira.sellers@vintch.local` | `demo1234` | Trust badge + listings |
+| Seller (Fayda-verified) | `fayad.verified@vintch.local` | `demo1234` | Trust badge + listings |
+| Seller (plain) | `kebede.trader@vintch.local` | `demo1234` | Unverified state |
+| Buyer | `biniam.buyer@vintch.local` | `demo1234` | Browsing / offers |
+
+The seed also publishes ~69 Addis Ababa listings across every category
+(Bole, Piassa, Merkato, Kazanchis, …), weighted toward Electronics, Furniture,
+and Home Appliances, so search/filter/detail have a full catalog to work
+with. Six of those are marked sold behind the demo sellers' earned reviews
+and ratings, leaving ~63 live listings to browse.
 
 ## Authentication & roles
 
