@@ -20,10 +20,17 @@ function supabaseImageHost(): { protocol: "http" | "https"; hostname: string } |
 
 const imageHost = supabaseImageHost();
 
+// LAN devices accessing the dev server (e.g. a phone on the same network) need
+// their origin allowlisted or Next.js blocks dev chunk fetches. Set
+// ALLOWED_DEV_ORIGINS in .env.local (gitignored) as a comma-separated list,
+// e.g. ALLOWED_DEV_ORIGINS=192.168.1.6. localhost/127.0.0.1 are always allowed.
+const allowedDevOrigins = process.env.ALLOWED_DEV_ORIGINS
+  ? process.env.ALLOWED_DEV_ORIGINS.split(",").map((s) => s.trim()).filter(Boolean)
+  : undefined;
+
 const nextConfig: NextConfig = {
   experimental: { serverActions: { bodySizeLimit: "50mb" } },
-  // localhost/127.0.0.1 are allowed by default; add your LAN IP here only if
-  // you open the dev server from another device on the network.
+  ...(allowedDevOrigins ? { allowedDevOrigins } : {}),
   images: {
     remotePatterns: imageHost
       ? [{ protocol: imageHost.protocol, hostname: imageHost.hostname, pathname: "/**" }]
