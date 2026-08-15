@@ -20,10 +20,17 @@ function supabaseImageHost(): { protocol: "http" | "https"; hostname: string } |
 
 const imageHost = supabaseImageHost();
 
+// Hosts allowed to fetch dev chunks/HMR. localhost is allowed by default, but
+// 127.0.0.1 and LAN device IPs are not, so they must be allowlisted or the
+// page renders without hydration. Set ALLOWED_DEV_ORIGINS in .env.local
+// (gitignored) as a comma-separated list, e.g. 127.0.0.1,192.168.1.6.
+const allowedDevOrigins = process.env.ALLOWED_DEV_ORIGINS
+  ? process.env.ALLOWED_DEV_ORIGINS.split(",").map((s) => s.trim()).filter(Boolean)
+  : undefined;
+
 const nextConfig: NextConfig = {
   experimental: { serverActions: { bodySizeLimit: "50mb" } },
-  // localhost/127.0.0.1 are allowed by default; add your LAN IP here only if
-  // you open the dev server from another device on the network.
+  ...(allowedDevOrigins ? { allowedDevOrigins } : {}),
   images: {
     remotePatterns: imageHost
       ? [{ protocol: imageHost.protocol, hostname: imageHost.hostname, pathname: "/**" }]
