@@ -1,7 +1,6 @@
 "use client"
 
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import {
   HeartIcon,
   LayoutDashboardIcon,
@@ -11,7 +10,7 @@ import {
 } from "lucide-react"
 
 import { useAuth } from "@/components/auth/auth-provider"
-import { createClient } from "@/lib/supabase/client"
+import { useSignOut } from "@/components/auth/use-sign-out"
 import { initials } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -26,14 +25,7 @@ import {
 
 export function UserMenu() {
   const { user, loading } = useAuth()
-  const router = useRouter()
-
-  async function handleSignOut() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    router.refresh()
-    router.push("/")
-  }
+  const signOut = useSignOut()
 
   if (loading) {
     return <div className="size-8 animate-pulse rounded-full bg-muted" aria-hidden />
@@ -96,7 +88,7 @@ export function UserMenu() {
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild variant="destructive">
-          <button type="button" onClick={handleSignOut} className="w-full">
+          <button type="button" onClick={() => void signOut()} className="w-full">
             <LogOutIcon className="size-4" />
             Sign out
           </button>

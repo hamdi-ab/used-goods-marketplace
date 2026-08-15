@@ -2,15 +2,14 @@
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 
 import { createClient } from "@/lib/supabase/client"
 import { AuthCard } from "@/components/auth/auth-card"
+import { useSignOut } from "@/components/auth/use-sign-out"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { PasswordInput } from "@/components/ui/password-input"
 
@@ -25,7 +24,7 @@ const resetPasswordSchema = z.object({
 type ResetPasswordValues = z.infer<typeof resetPasswordSchema>
 
 export function ResetPasswordForm() {
-  const router = useRouter()
+  const signOut = useSignOut()
   const [loading, setLoading] = useState(true)
   const [invalid, setInvalid] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -58,9 +57,7 @@ export function ResetPasswordForm() {
       return
     }
 
-    await supabase.auth.signOut()
-    router.refresh()
-    router.push("/login")
+    await signOut("/login")
   }
 
   if (loading) {

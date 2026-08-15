@@ -85,7 +85,7 @@ Applied in `app/globals.css` and sourced from the design authority:
 - Primary color: `#2563EB` (Primary 500), with the full primary scale in the
   CSS variables
 - Font: Geist (via `next/font/google`), heading + body
-- Spacing: 8-point grid tokens (`--spacing-xs` … `--spacing-5xl`)
+- Spacing: Tailwind's default numeric scale (`px-4`, `gap-4`, `size-8`)
 - Semantic colors: success `#22C55E`, warning `#F59E0B`, error `#EF4444`,
   info `#0EA5E9`
 - Icons: Lucide React
