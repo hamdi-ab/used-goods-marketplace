@@ -17,9 +17,10 @@ export interface ContactAttemptResult {
 // ---- Reads ----
 
 /**
- * Fetch the contact surface for a seller. Phone is always selected from the DB
- * but the column-level RLS policy on profiles.phone (grants only when
- * phone_public = true) means the value is NULL unless the owner opted in.
+ * Fetch the contact surface for a seller. Phone is fetched separately and only
+ * when the owner has opted in (Security spec §19: phone is private by default),
+ * matching fetchPublicProfile. The row policy is row-level only, so phone is
+ * never selected in a public query unless phone_public is set.
  */
 export async function fetchSellerContactInfo(
   sellerId: string,
@@ -29,15 +30,25 @@ export async function fetchSellerContactInfo(
 
   const { data: profile, error } = await supabase
     .from("profiles")
-    .select("telegram_username, phone, phone_public")
+    .select("telegram_username, phone_public")
     .eq("id", sellerId)
     .maybeSingle()
 
   if (error || !profile) return null
 
+  let phone: string | null = null
+  if (profile.phone_public) {
+    const { data: withPhone } = await supabase
+      .from("profiles")
+      .select("phone")
+      .eq("id", sellerId)
+      .maybeSingle()
+    phone = withPhone?.phone ?? null
+  }
+
   return {
     telegram_username: profile.telegram_username ?? null,
-    phone: profile.phone ?? null,
+    phone,
     phone_public: profile.phone_public ?? false,
   }
 }

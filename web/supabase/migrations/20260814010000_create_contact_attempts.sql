@@ -4,13 +4,14 @@
 -- §22 (migration naming). The contact method and listing context are captured
 -- so the admin queue and trust-score RPC can audit contact-driven traffic.
 --
--- Phone privacy is enforced by column-level RLS on profiles.phone (see the
--- T03 migration 20260812120000_profile_phone_public.sql: "Phone visible to
--- owner or when public"); the column evaluates to NULL for callers without
--- consent, so select-time masking is handled by the database, not app code.
--- (Security spec §19: phone is private by default.)
+-- Phone privacy is enforced at the data-access layer: the app fetches phone
+-- only when the owner opted in (see the T03 migration 20260812120000
+-- profile_phone_public.sql and lib/profiles.ts fetchPublicProfile /
+-- lib/contact.ts fetchSellerContactInfo). Postgres row policies do not
+-- restrict columns, so phone is never selected in a public query unless
+-- phone_public is set. (Security spec §19: phone is private by default.)
 
-create type if not exists public.contact_method as enum ('telegram', 'phone');
+create type public.contact_method as enum ('telegram', 'phone');
 
 create table if not exists public.contact_attempts (
   id uuid primary key default gen_random_uuid(),
@@ -35,7 +36,7 @@ alter table public.contact_attempts enable row level security;
 
 -- Any authenticated user may record a contact attempt (audit log).
 -- RLS still scopes what they can read back.
-create policy if not exists "Contact attempts are insertable by everyone"
+create policy "Contact attempts are insertable by everyone"
   on public.contact_attempts for insert
   to authenticated
   with check (auth.uid() is not null);
@@ -43,12 +44,12 @@ create policy if not exists "Contact attempts are insertable by everyone"
 -- Only the attempt's own target relationship is visible — for now, admins
 -- have full read access and no per-user read policy is needed beyond admin.
 -- (Buyer read-back of "my contact attempts" is a future enhancement.)
-create policy if not exists "Contact attempts are readable by admins"
+create policy "Contact attempts are readable by admins"
   on public.contact_attempts for select
   to authenticated
   using (public.is_admin());
 
-create policy if not exists "Contact attempts are manageable by admins"
+create policy "Contact attempts are manageable by admins"
   on public.contact_attempts for all
   to authenticated
   using (public.is_admin())

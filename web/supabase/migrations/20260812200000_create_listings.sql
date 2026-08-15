@@ -17,8 +17,8 @@ create table if not exists public.categories (
 );
 
 -- Listing condition + status constrained to the documented value sets.
-create type if not exists public.listing_condition as enum ('Brand New', 'Lightly Used', 'Fair');
-create type if not exists public.listing_status as enum ('draft', 'published', 'sold', 'archived');
+create type public.listing_condition as enum ('Brand New', 'Lightly Used', 'Fair');
+create type public.listing_status as enum ('draft', 'published', 'sold', 'archived');
 
 create table if not exists public.listings (
   id uuid primary key default gen_random_uuid(),
@@ -74,7 +74,7 @@ create index if not exists listing_images_listing_id_idx on public.listing_image
 create index if not exists listing_images_display_order_idx on public.listing_images (listing_id, display_order);
 
 -- Keep listings.updated_at in sync (reuse the generic trigger from T02).
-create trigger if not exists listings_set_updated_at
+create trigger listings_set_updated_at
   before update on public.listings
   for each row execute function public.handle_updated_at();
 
@@ -87,39 +87,39 @@ create trigger if not exists listings_set_updated_at
 alter table public.listings enable row level security;
 alter table public.listing_images enable row level security;
 
-create policy if not exists "Listings are readable when published"
+create policy "Listings are readable when published"
   on public.listings for select
   to authenticated, anon
   using (status = 'published' and deleted_at is null);
 
-create policy if not exists "Listings are readable by the owner"
+create policy "Listings are readable by the owner"
   on public.listings for select
   to authenticated
   using ((select auth.uid()) = seller_id);
 
-create policy if not exists "Listings are insertable by the owner"
+create policy "Listings are insertable by the owner"
   on public.listings for insert
   to authenticated
   with check ((select auth.uid()) = seller_id);
 
-create policy if not exists "Listings are updatable by the owner"
+create policy "Listings are updatable by the owner"
   on public.listings for update
   to authenticated
   using ((select auth.uid()) = seller_id)
   with check ((select auth.uid()) = seller_id);
 
-create policy if not exists "Listings are deletable by the owner"
+create policy "Listings are deletable by the owner"
   on public.listings for delete
   to authenticated
   using ((select auth.uid()) = seller_id);
 
-create policy if not exists "Listings are manageable by admins"
+create policy "Listings are manageable by admins"
   on public.listings for all
   to authenticated
   using (public.is_admin())
   with check (public.is_admin());
 
-create policy if not exists "Listing images are readable with published listings"
+create policy "Listing images are readable with published listings"
   on public.listing_images for select
   to authenticated, anon
   using (
@@ -131,7 +131,7 @@ create policy if not exists "Listing images are readable with published listings
     )
   );
 
-create policy if not exists "Listing images are writable by the listing owner"
+create policy "Listing images are writable by the listing owner"
   on public.listing_images for insert
   to authenticated
   with check (
@@ -142,7 +142,7 @@ create policy if not exists "Listing images are writable by the listing owner"
     )
   );
 
-create policy if not exists "Listing images are updatable by the listing owner"
+create policy "Listing images are updatable by the listing owner"
   on public.listing_images for update
   to authenticated
   using (
@@ -153,7 +153,7 @@ create policy if not exists "Listing images are updatable by the listing owner"
     )
   );
 
-create policy if not exists "Listing images are deletable by the listing owner"
+create policy "Listing images are deletable by the listing owner"
   on public.listing_images for delete
   to authenticated
   using (
@@ -164,7 +164,7 @@ create policy if not exists "Listing images are deletable by the listing owner"
     )
   );
 
-create policy if not exists "Listing image admins full access"
+create policy "Listing image admins full access"
   on public.listing_images for all
   to authenticated
   using (public.is_admin())
@@ -187,21 +187,21 @@ values ('listing-images', 'listing-images', true, 5242880)
 on conflict (id) do update
   set public = excluded.public, file_size_limit = excluded.file_size_limit;
 
-create policy if not exists "Listing photos are publicly readable"
+create policy "Listing photos are publicly readable"
   on storage.objects for select
   to authenticated, anon
   using (bucket_id = 'listing-images');
 
-create policy if not exists "Listing photos are writable by the listing owner"
+create policy "Listing photos are writable by the listing owner"
   on storage.objects for all
   to authenticated
-  with check (
+  using (
     bucket_id = 'listing-images'
     and (storage.foldername(name))[0]::uuid in (
       select l.id from public.listings l where l.seller_id = (select auth.uid())
     )
   )
-  using (
+  with check (
     bucket_id = 'listing-images'
     and (storage.foldername(name))[0]::uuid in (
       select l.id from public.listings l where l.seller_id = (select auth.uid())

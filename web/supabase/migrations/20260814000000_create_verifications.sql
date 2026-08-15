@@ -25,8 +25,8 @@
 -- ownership model), so a seller IS the verified-seller badge. A profile with
 -- role='buyer' (or one with no flags) renders the "Not verified yet" empty state.
 
-create type if not exists public.verification_type as enum ('email', 'phone', 'telegram', 'fayda');
-create type if not exists public.verification_status as enum ('pending', 'verified', 'rejected');
+create type public.verification_type as enum ('email', 'phone', 'telegram', 'fayda');
+create type public.verification_status as enum ('pending', 'verified', 'rejected');
 
 create table if not exists public.verifications (
   id uuid primary key default gen_random_uuid(),
@@ -49,7 +49,7 @@ create unique index if not exists verifications_one_active_per_type
   on public.verifications (user_id, type)
   where status in ('pending', 'verified') and deleted_at is null;
 
-create trigger if not exists verifications_set_updated_at
+create trigger verifications_set_updated_at
   before update on public.verifications
   for each row execute function public.handle_updated_at();
 
@@ -70,7 +70,7 @@ alter table public.profiles
 ------------------------------------------------------------------------------
 alter table public.verifications enable row level security;
 
-create policy if not exists "Users read their own non-deleted verification records"
+create policy "Users read their own non-deleted verification records"
   on public.verifications for select
   to authenticated
   using ((select auth.uid()) = user_id and deleted_at is null);
@@ -79,7 +79,7 @@ create policy if not exists "Users read their own non-deleted verification recor
 -- record_verification RPC (admin-gated) is the sole writer, so an approved
 -- record can never be mutated (INV-009). Admins read the full audit trail,
 -- including superseded rows, but never touch verified rows' status directly.
-create policy if not exists "Admins read verification records"
+create policy "Admins read verification records"
   on public.verifications for select
   to authenticated
   using (public.is_admin() and deleted_at is null);
@@ -171,8 +171,9 @@ $$;
 ------------------------------------------------------------------------------
 -- Extend the public search RPC (T06) to expose seller verification flags so
 -- search-result listing cards render the same badge set as browse/favorites.
--- `create or replace` preserves the existing anon/authenticated EXECUTE grants.
-------------------------------------------------------------------------------
+-- The return type changes (two added columns), so the old function must be
+-- dropped before re-creating; the EXECUTE grants are re-applied below.
+drop function if exists public.search_listings(text, text, numeric, numeric, public.listing_condition, text, text, int, int);
 create or replace function public.search_listings(
   p_query text default null,
   p_category_slug text default null,

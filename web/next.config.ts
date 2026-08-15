@@ -22,6 +22,8 @@ const imageHost = supabaseImageHost();
 
 const nextConfig: NextConfig = {
   experimental: { serverActions: { bodySizeLimit: "50mb" } },
+  // localhost/127.0.0.1 are allowed by default; add your LAN IP here only if
+  // you open the dev server from another device on the network.
   images: {
     remotePatterns: imageHost
       ? [{ protocol: imageHost.protocol, hostname: imageHost.hostname, pathname: "/**" }]
