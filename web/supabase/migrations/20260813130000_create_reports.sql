@@ -9,11 +9,11 @@
 -- so a single action atomically closes the report and applies the moderation
 -- verdict to the targeted listing/seller.
 
-create type if not exists public.report_reason as enum (
+create type public.report_reason as enum (
   'spam', 'fraud', 'duplicate', 'wrong_category', 'offensive_content', 'other'
 );
 
-create type if not exists public.report_status as enum (
+create type public.report_status as enum (
   'open', 'resolved', 'rejected'
 );
 
@@ -43,7 +43,7 @@ create index if not exists reports_seller_id_idx on public.reports (reported_sel
 create index if not exists reports_status_idx on public.reports (status);
 create index if not exists reports_created_at_idx on public.reports (created_at);
 
-create trigger if not exists reports_set_updated_at
+create trigger reports_set_updated_at
   before update on public.reports
   for each row execute function public.handle_updated_at();
 
@@ -53,17 +53,17 @@ create trigger if not exists reports_set_updated_at
 ------------------------------------------------------------------------------
 alter table public.reports enable row level security;
 
-create policy if not exists "Reports are readable by the reporter"
+create policy "Reports are readable by the reporter"
   on public.reports for select
   to authenticated
   using ((select auth.uid()) = reporter_id);
 
-create policy if not exists "Reports are readable by admins"
+create policy "Reports are readable by admins"
   on public.reports for select
   to authenticated
   using (public.is_admin());
 
-create policy if not exists "Reports are manageable by admins"
+create policy "Reports are manageable by admins"
   on public.reports for all
   to authenticated
   using (public.is_admin())
@@ -82,9 +82,9 @@ grant select on public.reports to authenticated;
 -- Returns jsonb { ok, error } so the caller gets a single result.
 ------------------------------------------------------------------------------
 create or replace function public.submit_report(
+  p_reason public.report_reason,
   p_listing_id uuid default null,
   p_seller_id uuid default null,
-  p_reason public.report_reason,
   p_note text default null
 )
 returns jsonb

@@ -21,7 +21,7 @@
 -- policy references listings one way — no policy queries the other table, so
 -- RLS expansion cannot recurse.
 
-create type if not exists public.offer_status as enum ('pending', 'countered', 'accepted', 'declined');
+create type public.offer_status as enum ('pending', 'countered', 'accepted', 'declined');
 
 create table if not exists public.offers (
   id uuid primary key default gen_random_uuid(),
@@ -35,13 +35,13 @@ create table if not exists public.offers (
 );
 
 alter table public.offers
-  add constraint if not exists offers_message_length
+  add constraint offers_message_length
   check (message is null or char_length(message) between 1 and 500);
 
 -- App-side ceiling (app/lib/offers/constants.ts OFFER_AMOUNT_MAX), enforced at
 -- the write boundary so submit and counter both reject absurd amounts.
 alter table public.offers
-  add constraint if not exists offers_amount_cap
+  add constraint offers_amount_cap
   check (amount <= 100000000);
 
 -- ListingMarkedSold bookkeeping: who won the sale, stamped by accept_offer.
@@ -55,7 +55,7 @@ create index if not exists offers_buyer_id_idx on public.offers (buyer_id);
 create index if not exists offers_listing_id_idx on public.offers (listing_id);
 create index if not exists offers_status_idx on public.offers (status);
 
-create trigger if not exists offers_set_updated_at
+create trigger offers_set_updated_at
   before update on public.offers
   for each row execute function public.handle_updated_at();
 
@@ -66,7 +66,7 @@ create trigger if not exists offers_set_updated_at
 -----------------------------------------------------------------------------
 alter table public.offers enable row level security;
 
-create policy if not exists "Offers are readable by the buyer or the listing seller"
+create policy "Offers are readable by the buyer or the listing seller"
   on public.offers for select
   to authenticated
   using (
@@ -81,7 +81,7 @@ create policy if not exists "Offers are readable by the buyer or the listing sel
 -- INV-005 + ListingMarkedSold: offers only land on published, live listings the
 -- buyer does not own. Blocking the insert for non-published listings is what
 -- stops new offers once a listing is sold (its status flips to 'sold').
-create policy if not exists "Offers are insertable by the buyer"
+create policy "Offers are insertable by the buyer"
   on public.offers for insert
   to authenticated
   with check (
@@ -97,7 +97,7 @@ create policy if not exists "Offers are insertable by the buyer"
 
 -- DB spec §20: admins can read and write any offer. The transition RPCs below
 -- accept admins too (each guards on public.is_admin()).
-create policy if not exists "Offers are manageable by admins"
+create policy "Offers are manageable by admins"
   on public.offers for all
   to authenticated
   using (public.is_admin())
@@ -110,12 +110,12 @@ create policy if not exists "Offers are manageable by admins"
 -- Both policies read only the sold_to_buyer_id stamp (see header note) so they
 -- stay out of the offers policy graph.
 -----------------------------------------------------------------------------
-create policy if not exists "Sold listings are readable by the accepted-offer buyer"
+create policy "Sold listings are readable by the accepted-offer buyer"
   on public.listings for select
   to authenticated
   using ((select auth.uid()) = sold_to_buyer_id);
 
-create policy if not exists "Listing images are readable by the seller or accepted-offer buyer"
+create policy "Listing images are readable by the seller or accepted-offer buyer"
   on public.listing_images for select
   to authenticated
   using (

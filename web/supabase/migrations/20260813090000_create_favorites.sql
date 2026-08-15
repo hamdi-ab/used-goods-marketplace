@@ -33,7 +33,7 @@ begin
 end;
 $$;
 
-create trigger if not exists favorites_sync_listing_count
+create trigger favorites_sync_listing_count
   after insert or delete on public.favorites
   for each row execute function public.sync_favorite_count();
 
@@ -43,17 +43,17 @@ create trigger if not exists favorites_sync_listing_count
 -----------------------------------------------------------------------------
 alter table public.favorites enable row level security;
 
-create policy if not exists "Favorites are readable by the owner"
+create policy "Favorites are readable by the owner"
   on public.favorites for select
   to authenticated
   using ((select auth.uid()) = user_id);
 
-create policy if not exists "Favorites are insertable by the owner"
+create policy "Favorites are insertable by the owner"
   on public.favorites for insert
   to authenticated
   with check ((select auth.uid()) = user_id);
 
-create policy if not exists "Favorites are deletable by the owner"
+create policy "Favorites are deletable by the owner"
   on public.favorites for delete
   to authenticated
   using ((select auth.uid()) = user_id);

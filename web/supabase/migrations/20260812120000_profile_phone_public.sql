@@ -11,28 +11,14 @@
 -- Public-opt-in for phone visibility.
 alter table public.profiles add column if not exists phone_public boolean not null default false;
 
--- Public profiles are readable (rows) by anyone. Sensitive columns are masked
--- separately via column-level policies below so phone is never exposed without
--- the owner's consent, even if a caller explicitly selects it (column-level RLS).
-create policy if not exists "Profiles are publicly readable"
+-- Public profiles are readable (rows) by anyone. Postgres has no column-level
+-- RLS, so phone exposure is gated at the data-access layer (Privacy §18/19):
+-- fetchPublicProfile in lib/profiles.ts selects phone only when the owner's
+-- phone_public flag is set; public queries never include the column.
+create policy "Profiles are publicly readable"
   on public.profiles for select
   to authenticated, anon
   using (true);
-
--- Column-level security for phone (Privacy §18/19): never expose it without
--- consent. Authenticated callers may read their OWN phone; all others need
--- the owner's phone_public opt-in. Anonymous never see phone unless public.
-create policy if not exists "Phone visible to owner or when public (authenticated)"
-  on public.profiles for select
-  to authenticated
-  columns (phone)
-  using (phone_public or auth.uid() = id);
-
-create policy if not exists "Phone visible only when public (anon)"
-  on public.profiles for select
-  to anon
-  columns (phone)
-  using (phone_public);
 
 -- Keep the existing owner/admin policies (they remain in force; row policies are
 -- additive). No changes to insert/update/delete policies here — owners still
@@ -47,21 +33,21 @@ on conflict (id) do update
 
 -- Allow any reader to resolve public avatar URLs (public bucket reads are
 -- served without RLS checks at /storage/v1/object/public/profiles/...).
-create policy if not exists "Profile avatars are publicly readable"
+create policy "Profile avatars are publicly readable"
   on storage.objects for select
   to authenticated, anon
   using (bucket_id = 'profiles');
 
 -- Owners may manage their own avatar objects only (path prefix avatars/{uid}).
-create policy if not exists "Profile avatars are writable by the owner"
+create policy "Profile avatars are writable by the owner"
   on storage.objects for all
   to authenticated
-  with check (
+  using (
     bucket_id = 'profiles'
     and (storage.foldername(name))[0] = 'avatars'
     and (storage.foldername(name))[1] = auth.uid()::text
   )
-  using (
+  with check (
     bucket_id = 'profiles'
     and (storage.foldername(name))[0] = 'avatars'
     and (storage.foldername(name))[1] = auth.uid()::text

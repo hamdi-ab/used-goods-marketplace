@@ -20,7 +20,7 @@ create table if not exists public.reviews (
 );
 
 alter table public.reviews
-  add constraint if not exists reviews_comment_length
+  add constraint reviews_comment_length
   check (comment is null or char_length(comment) between 1 and 1000);
 
 -- Lookup paths: the seller's profile review list and "recent first".
@@ -35,7 +35,7 @@ create index if not exists reviews_seller_created_idx on public.reviews (seller_
 ------------------------------------------------------------------------------
 alter table public.reviews enable row level security;
 
-create policy if not exists "Reviews are publicly readable"
+create policy "Reviews are publicly readable"
   on public.reviews for select
   to authenticated, anon
   using (true);
