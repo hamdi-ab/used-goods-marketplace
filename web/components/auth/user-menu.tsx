@@ -10,7 +10,7 @@ import {
 } from "lucide-react"
 
 import { useAuth } from "@/components/auth/auth-provider"
-import { signOut } from "@/app/actions/auth"
+import { useSignOut } from "@/components/auth/use-sign-out"
 import { initials } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -25,6 +25,7 @@ import {
 
 export function UserMenu() {
   const { user, loading } = useAuth()
+  const signOut = useSignOut()
 
   if (loading) {
     return <div className="size-8 animate-pulse rounded-full bg-muted" aria-hidden />
@@ -86,14 +87,12 @@ export function UserMenu() {
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <form action={signOut}>
-          <DropdownMenuItem asChild variant="destructive">
-            <button type="submit" className="w-full">
-              <LogOutIcon className="size-4" />
-              Sign out
-            </button>
-          </DropdownMenuItem>
-        </form>
+        <DropdownMenuItem asChild variant="destructive">
+          <button type="button" onClick={() => void signOut()} className="w-full">
+            <LogOutIcon className="size-4" />
+            Sign out
+          </button>
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
