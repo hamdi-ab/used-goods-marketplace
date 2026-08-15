@@ -9,6 +9,13 @@ const PASSWORD = "demo1234"
 // UI flips to logged-out WITHOUT a page reload — the exact behavior that broke.
 test.describe("auth flow", () => {
   test("login and sign out round-trips through the header menu", async ({ page }) => {
+    // Count full document loads: a reload during sign-out would prove the old
+    // server-action flow, so the counter must stay at 1 (the initial goto).
+    await page.addInitScript(() => {
+      const w = window as unknown as { __documentLoads?: number }
+      w.__documentLoads = (w.__documentLoads ?? 0) + 1
+    })
+
     await page.goto("/login")
     await page.getByLabel("Email").fill(EMAIL)
     await page.getByLabel("Password", { exact: true }).fill(PASSWORD)
@@ -28,6 +35,11 @@ test.describe("auth flow", () => {
     await expect(avatar).toHaveCount(0)
     await expect(page.getByRole("link", { name: "Log in" })).toBeVisible()
     await expect(page).toHaveURL("/")
+
+    const loads = await page.evaluate(
+      () => (window as unknown as { __documentLoads: number }).__documentLoads
+    )
+    expect(loads).toBe(1)
   })
 
   test("password visibility toggle flips the input type", async ({ page }) => {

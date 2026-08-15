@@ -38,11 +38,22 @@ export async function signInAs(
 
 // Top-level await probe: describe.skipIf needs a plain boolean at collect time,
 // before any beforeAll runs. Module load is the only point we know it early.
-export const integrationAvailable = (async () => {
+// (Do not wrap this in an async function — a Promise here would make the gate
+// `!Promise` === always false, silently disabling the skip on a down stack.)
+async function probeSupabase(): Promise<boolean> {
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/`)
     return res.status < 500
   } catch {
     return false
   }
-})()
+}
+
+export const integrationAvailable = await probeSupabase()
+
+/** Seller ids of an embedded `listing:listings(...)` offers result. */
+export function sellerIdsOf(
+  rows: { listing: unknown }[] | null
+): (string | undefined)[] {
+  return rows?.map((o) => (o.listing as unknown as { seller_id?: string }).seller_id) ?? []
+}
