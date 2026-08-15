@@ -197,7 +197,7 @@ export async function fetchListings(
     .from("listings")
     .select(
       `id, title, price, condition, city, published_at,
-       seller:profiles(id, full_name, avatar_url, role, trust_score, phone_verified, fayda_verified),
+       seller:profiles!listings_seller_id_fkey(id, full_name, avatar_url, role, trust_score, phone_verified, fayda_verified),
        images:listing_images(id, image_url, display_order)`,
       { count: "exact" }
     )
