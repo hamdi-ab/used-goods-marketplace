@@ -39,7 +39,7 @@ interface RawReviewRow {
 }
 
 const REVIEW_COLUMNS =
-  "id, rating, comment, created_at, buyer:profiles(id, full_name, avatar_url)"
+  "id, rating, comment, created_at, buyer:profiles!reviews_buyer_id_fkey(id, full_name, avatar_url)"
 
 // The seller's reviews, newest first, with the reviewer's public identity.
 // RLS exposes every review to the public, so any visitor can render the list.

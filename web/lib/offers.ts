@@ -133,7 +133,7 @@ export async function fetchSellerOffers(
     .select(
       `${OFFER_COLUMNS},
        listing:listings(id, title, price, condition, city, published_at,
-         seller:profiles(id, full_name, avatar_url, role, trust_score),
+         seller:profiles!listings_seller_id_fkey(id, full_name, avatar_url, role, trust_score),
          images:listing_images(id, image_url, display_order)),
        buyer:profiles(id, full_name, avatar_url)`
     )

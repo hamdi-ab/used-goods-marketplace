@@ -147,7 +147,7 @@ begin
   values
     (seller_phone, 'phone', 'verified', admin_id, 'Demo phone verification.'),
     (seller_fayda, 'fayda', 'verified', admin_id, 'Demo Fayda placeholder verification.')
-  on conflict on constraint verifications_one_active_per_type do nothing;
+  on conflict (user_id, type) where status in ('pending', 'verified') and deleted_at is null do nothing;
 
   -- One published listing per seller so listing cards render the badge set.
   -- The image_url is a local illustration stand-in for demo only.
@@ -346,8 +346,7 @@ begin
      'Folding ironing board with adjustable height plus a steam iron. Board padding is worn but fully functional.', 2500, 'Fair', false, 'Bole', 14),
     (67, seller_phone, 'home-appliances', '16-inch stand fan',
      '16-inch oscillating stand fan, 3 speeds, remote control. Sealed in box, never opened.', 2800, 'Brand New', false, 'Merkato', 3)
-  ) as t(k int, seller_id uuid, category_slug text, title text, description text,
-        price numeric, condition public.listing_condition, negotiable boolean, sub_city text, age_days int)
+  ) as t(k, seller_id, category_slug, title, description, price, condition, negotiable, sub_city, age_days)
   loop
     insert into public.listings (id, seller_id, category_id, title, description, price,
                                  condition, negotiable, city, sub_city, status, published_at)
@@ -355,7 +354,7 @@ begin
       ('20000000-0000-0000-0000-' || lpad(rec.k::text, 12, '0'))::uuid,
       rec.seller_id,
       (select id from public.categories where slug = rec.category_slug limit 1),
-      rec.title, rec.description, rec.price, rec.condition, rec.negotiable,
+      rec.title, rec.description, rec.price, rec.condition::public.listing_condition, rec.negotiable,
       'Addis Ababa', rec.sub_city, 'published',
       now() - make_interval(days => rec.age_days)
     )
