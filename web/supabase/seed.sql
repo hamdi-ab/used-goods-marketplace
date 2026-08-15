@@ -12,6 +12,10 @@ insert into auth.users (
   email_confirmed_at,
   raw_app_meta_data,
   raw_user_meta_data,
+  confirmation_token,
+  recovery_token,
+  email_change_token_new,
+  email_change,
   created_at,
   updated_at
 )
@@ -25,6 +29,10 @@ select
   now(),
   jsonb_build_object('provider', 'email', 'providers', array['email']),
   jsonb_build_object('full_name', 'Marketplace Admin'),
+  '',
+  '',
+  '',
+  '',
   now(),
   now()
 where not exists (
@@ -81,26 +89,30 @@ declare
   demo_password text := extensions.crypt('demo1234', extensions.gen_salt('bf'));
 begin
   -- auth users (the on_auth_user_created trigger creates the profile rows).
+  -- The token columns are set to '' because GoTrue v2.195.0 crashes when it
+  -- scans a NULL confirmation/recovery token during password login.
   insert into auth.users (instance_id, id, aud, role, email, encrypted_password,
                           email_confirmed_at, raw_app_meta_data, raw_user_meta_data,
+                          confirmation_token, recovery_token, email_change_token_new,
+                          email_change,
                           created_at, updated_at)
   values
     ('00000000-0000-0000-0000-000000000000', seller_phone, 'authenticated', 'authenticated',
      'amira.sellers@vintch.local', demo_password, now(),
      jsonb_build_object('provider', 'email', 'providers', array['email']),
-     jsonb_build_object('full_name', 'Amira Sellers'), now(), now()),
+     jsonb_build_object('full_name', 'Amira Sellers'), '', '', '', '', now(), now()),
     ('00000000-0000-0000-0000-000000000000', seller_fayda, 'authenticated', 'authenticated',
      'fayad.verified@vintch.local', demo_password, now(),
      jsonb_build_object('provider', 'email', 'providers', array['email']),
-     jsonb_build_object('full_name', 'Fayad Verified'), now(), now()),
+     jsonb_build_object('full_name', 'Fayad Verified'), '', '', '', '', now(), now()),
     ('00000000-0000-0000-0000-000000000000', seller_plain, 'authenticated', 'authenticated',
      'kebede.trader@vintch.local', demo_password, now(),
      jsonb_build_object('provider', 'email', 'providers', array['email']),
-     jsonb_build_object('full_name', 'Kebede Trader'), now(), now()),
+     jsonb_build_object('full_name', 'Kebede Trader'), '', '', '', '', now(), now()),
     ('00000000-0000-0000-0000-000000000000', a_buyer, 'authenticated', 'authenticated',
      'biniam.buyer@vintch.local', demo_password, now(),
      jsonb_build_object('provider', 'email', 'providers', array['email']),
-     jsonb_build_object('full_name', 'Biniam Buyer'), now(), now())
+     jsonb_build_object('full_name', 'Biniam Buyer'), '', '', '', '', now(), now())
   on conflict (id) do nothing;
 
   -- identity rows (idempotent by user_id).

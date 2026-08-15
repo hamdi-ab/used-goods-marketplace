@@ -169,7 +169,7 @@ export async function countIncomingOffers(
   const supabase = client ?? (await createClient())
   const { count, error } = await supabase
     .from("offers")
-    .select("id", { count: "exact", head: true })
+    .select("listing:listings!offers_listing_id_fkey(id)", { count: "exact", head: true })
     .eq("listing.seller_id", userId)
     .in("status", OPEN_OFFER_STATUSES)
 

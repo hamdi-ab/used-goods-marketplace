@@ -13,6 +13,7 @@ import { AuthCard } from "@/components/auth/auth-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { PasswordInput } from "@/components/ui/password-input"
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email address"),
@@ -86,9 +87,8 @@ export function LoginForm({ next }: { next?: string }) {
               Forgot password?
             </Link>
           </div>
-          <Input
+          <PasswordInput
             id="password"
-            type="password"
             autoComplete="current-password"
             aria-invalid={!!errors.password}
             {...register("password")}

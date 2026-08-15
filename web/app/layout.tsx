@@ -55,7 +55,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="flex min-h-full flex-col bg-background font-sans text-foreground">
         <AuthProvider>
           <SiteHeader />
-          <div className="flex flex-1 flex-col">{children}</div>
+          <div className="flex w-full flex-1 flex-col">{children}</div>
           <SiteFooter />
         </AuthProvider>
       </body>
