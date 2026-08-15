@@ -20,10 +20,11 @@ function supabaseImageHost(): { protocol: "http" | "https"; hostname: string } |
 
 const imageHost = supabaseImageHost();
 
-// Hosts allowed to fetch dev chunks/HMR. localhost is allowed by default, but
-// 127.0.0.1 and LAN device IPs are not, so they must be allowlisted or the
-// page renders without hydration. Set ALLOWED_DEV_ORIGINS in .env.local
-// (gitignored) as a comma-separated list, e.g. 127.0.0.1,192.168.1.6.
+// LAN devices accessing the dev server (e.g. a phone on the same network) need
+// their origin allowlisted or Next.js blocks dev chunk fetches. Set
+// ALLOWED_DEV_ORIGINS in .env.local (gitignored) as a comma-separated list,
+// e.g. ALLOWED_DEV_ORIGINS=192.168.1.6. localhost/127.0.0.1 are always allowed.
+
 const allowedDevOrigins = process.env.ALLOWED_DEV_ORIGINS
   ? process.env.ALLOWED_DEV_ORIGINS.split(",").map((s) => s.trim()).filter(Boolean)
   : undefined;
