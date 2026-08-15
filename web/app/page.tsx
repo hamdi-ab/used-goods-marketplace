@@ -68,21 +68,27 @@ export default async function HomePage({
   const categories = await categoriesPromise
 
   return (
-    <main className="mx-auto w-full max-w-[1280px] px-4 py-10 sm:px-6 lg:py-12">
-      <section className="mb-12 text-center">
-        <h1 className="font-heading text-3xl font-semibold leading-tight tracking-tight text-foreground sm:text-4xl">
-          Marketplace for trusted second-hand goods
-        </h1>
-        <p className="mt-3 max-w-xl text-balance text-muted-foreground">
-          Buy and sell used items confidently across Addis Ababa.
-        </p>
-        <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-          <Button asChild size="lg">
-            <Link href="/search">Browse listings</Link>
-          </Button>
-          <Button asChild variant="outline" size="lg">
-            <Link href="/sell">Start selling</Link>
-          </Button>
+    <main className="mx-auto w-full max-w-[1280px] px-4 py-10 sm:px-6 lg:py-14">
+      <section className="relative mb-14 overflow-hidden rounded-2xl bg-gradient-to-b from-primary/5 via-muted/40 to-background px-4 py-12 text-center sm:px-8 sm:py-16 border border-border/60 shadow-xs">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent pointer-events-none" />
+        <div className="relative z-10 mx-auto max-w-2xl">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-3.5 py-1 text-xs font-semibold text-primary ring-1 ring-primary/20 mb-5">
+            <span>✨ Trusted Second-Hand Marketplace in Addis Ababa</span>
+          </div>
+          <h1 className="font-heading text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl text-balance">
+            Buy and sell used goods with total confidence
+          </h1>
+          <p className="mt-4 text-base sm:text-lg text-muted-foreground text-balance mx-auto max-w-xl">
+            Discover verified local sellers, inspect quality items, and transact securely across Addis Ababa.
+          </p>
+          <div className="mt-8 flex flex-col justify-center gap-3.5 sm:flex-row">
+            <Button asChild size="lg" className="shadow-sm font-medium">
+              <Link href="/search">Browse listings</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="shadow-xs font-medium bg-background">
+              <Link href="/sell">Start selling</Link>
+            </Button>
+          </div>
         </div>
       </section>
 

@@ -33,11 +33,11 @@ export function UserMenu() {
 
   if (!user) {
     return (
-      <div className="flex items-center gap-2">
-        <Button asChild variant="ghost" size="sm">
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
           <Link href="/login">Log in</Link>
         </Button>
-        <Button asChild size="sm" className="hidden sm:inline-flex">
+        <Button asChild size="sm" className="shadow-xs">
           <Link href="/register">Sign up</Link>
         </Button>
       </div>

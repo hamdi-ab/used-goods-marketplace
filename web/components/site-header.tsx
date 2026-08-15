@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { MenuIcon } from "lucide-react"
+import { MenuIcon, PlusIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { primaryNav, siteName } from "@/lib/nav"
@@ -48,10 +48,14 @@ export function SiteHeader() {
           })}
         </nav>
 
-        <div className="flex items-center gap-2">
-          <Button asChild variant="default" size="sm" className="hidden sm:inline-flex">
-            <Link href="/sell">Sell</Link>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Button asChild variant="outline" size="sm" className="hidden gap-1.5 shadow-xs sm:inline-flex">
+            <Link href="/sell">
+              <PlusIcon className="size-4" />
+              <span>Sell</span>
+            </Link>
           </Button>
+          <div className="hidden h-5 w-px bg-border sm:block" aria-hidden="true" />
           <UserMenu />
           <Sheet>
             <SheetTrigger asChild>
