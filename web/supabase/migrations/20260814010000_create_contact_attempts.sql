@@ -4,11 +4,12 @@
 -- §22 (migration naming). The contact method and listing context are captured
 -- so the admin queue and trust-score RPC can audit contact-driven traffic.
 --
--- Phone privacy is enforced by column-level RLS on profiles.phone (see the
--- T03 migration 20260812120000_profile_phone_public.sql: "Phone visible to
--- owner or when public"); the column evaluates to NULL for callers without
--- consent, so select-time masking is handled by the database, not app code.
--- (Security spec §19: phone is private by default.)
+-- Phone privacy is enforced at the data-access layer: the app fetches phone
+-- only when the owner opted in (see the T03 migration 20260812120000
+-- profile_phone_public.sql and lib/profiles.ts fetchPublicProfile /
+-- lib/contact.ts fetchSellerContactInfo). Postgres row policies do not
+-- restrict columns, so phone is never selected in a public query unless
+-- phone_public is set. (Security spec §19: phone is private by default.)
 
 create type public.contact_method as enum ('telegram', 'phone');
 
