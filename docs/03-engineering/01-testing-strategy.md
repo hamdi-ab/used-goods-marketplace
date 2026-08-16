@@ -2,7 +2,7 @@
 
 > **Project:** VinTech Challenge 2026
 >
-> **Version:** 1.0
+> **Version:** 1.1
 >
 > **Status:** Draft
 >
@@ -78,12 +78,43 @@ Examples:
 - Offer Submission → Notification
 - Image Upload → Storage
 
+### Integration Testing Setup (web/, live Supabase stack)
+
+Runs against the **running local Supabase stack** (not mocks), so it catches the
+query-shape and RLS class of bugs the mocked unit suite cannot see — e.g. the
+dashboard count that passed unit tests but failed against real PostgREST.
+
+| Concern | Convention |
+|---------|------------|
+| Runner | `vitest.integration.config.mts`, `environment: node`; aliases `server-only` and `@/lib/supabase/server` to stubs so `@/lib/...` seam modules load, but tests pass a real client so the stub `createClient` is never called |
+| Script | `npm run test:integration` |
+| Skip gate | `integrationAvailable` (top-level-await probe of `${SUPABASE_URL}/rest/v1/`) — each suite is `describe.skipIf(!integrationAvailable)` so a down stack skips, never fails |
+| Auth | `signInAs(email, password)` returns `{ client, userId }` with a real signed-in browser client; `anonClient()` for anon role |
+| Creds | `SEED` const mirrors `web/supabase/seed.sql` accounts (`demo1234`); seed user ids are deterministic UUIDs |
+
+Suites:
+- `tests/integration/query-shapes.test.ts` — relationship-filter regression
+  (embedded `listing:` shape succeeds, non-embedded relationship filter is
+  rejected) and the real `countIncomingOffers` contract.
+- `tests/integration/rls.test.ts` — the §8 matrix: offers (anon denied,
+  buyer-only own, seller-only owned listings, cross-seller isolation), profiles
+  (public read, owner-only update), listings (anon reads published, buyer cannot
+  update foreign).
+
 ## End-to-End Testing
 
 Purpose: Simulate complete user journeys.
 
-Tool:
-- Playwright
+### End-to-End Testing Setup (web/, Playwright)
+
+| Concern | Convention |
+|---------|------------|
+| Runner | `playwright.config.ts`; `testDir: tests/e2e`; `channel: "chrome"` (system Chrome, no browser download); `baseURL: http://localhost:3000` |
+| Server | `webServer` runs `npm run dev` with `reuseExistingServer: true` — reuse a dev server you already have running |
+| Script | `npm run test:e2e` |
+| Host | Use `localhost`, never `127.0.0.1` — Next 16 dev rejects `127.0.0.1` origins (chunk 403, no hydration) |
+| Timeouts | Dev-mode first compile of a route is slow (~6s); give URL/visibility assertions a generous timeout (e.g. 30s) |
+| Locators | Exact-match form fields (`getByLabel("Password", { exact: true })` — the show/hide toggle's `aria-label` also contains "Password"); scope the avatar to `[data-slot="dropdown-menu-trigger"]` (the Next.js dev-tools button also has `aria-haspopup="menu"`) |
 
 Critical flows:
 - User registration
@@ -93,6 +124,10 @@ Critical flows:
 - Favorite listing
 - Submit offer
 - Report listing
+
+Covered by smoke suite `tests/e2e/auth.spec.ts`: login → header menu → sign out
+round-trip (the client-state regression that shipped — asserts the UI flips to
+logged-out with no page reload) and the password visibility toggle.
 
 # 4. Test Coverage Goals
 
