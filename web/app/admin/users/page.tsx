@@ -21,7 +21,8 @@ export default async function AdminUsersPage() {
         </h1>
         <p className="mt-2 max-w-xl text-muted-foreground">
           {users.length} registered {users.length === 1 ? "user" : "users"}. Use
-          Suspend to demote a seller and archive their live listings.
+          Suspend to demote a seller and archive their live listings; Restore
+          re-instates a suspended seller.
         </p>
       </div>
 

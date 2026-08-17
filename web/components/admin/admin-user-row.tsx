@@ -1,9 +1,9 @@
 "use client"
 
 import { useActionState } from "react"
-import { UserRoundXIcon } from "lucide-react"
+import { RotateCcwIcon, UserRoundXIcon } from "lucide-react"
 
-import { adminSuspendUser } from "@/app/actions/admin"
+import { adminRestoreUser, adminSuspendUser } from "@/app/actions/admin"
 import type { AdminUserRow } from "@/lib/admin"
 import { ROLE_LABELS } from "@/lib/auth/types"
 import { Button } from "@/components/ui/button"
@@ -16,9 +16,18 @@ export function AdminUserRow({
 }: {
   user: AdminUserRow
 }) {
-  const [state, action, pending] = useActionState(adminSuspendUser, {})
+  const [suspendState, suspendAction, suspendPending] = useActionState(
+    adminSuspendUser,
+    {}
+  )
+  const [restoreState, restoreAction, restorePending] = useActionState(
+    adminRestoreUser,
+    {}
+  )
 
   const isAdmin = user.role === "admin"
+  const isSuspended = user.suspended_at != null
+  const message = suspendState?.message ?? restoreState?.message
 
   return (
     <li className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card p-4">
@@ -43,29 +52,51 @@ export function AdminUserRow({
 
       <div className="flex items-center gap-2">
         <Badge variant="secondary">{ROLE_LABELS[user.role] ?? user.role}</Badge>
+        {isSuspended ? (
+          <Badge variant="outline" className="border-red-200 text-red-700">
+            Suspended
+          </Badge>
+        ) : null}
         {user.phone_verified ? <Badge variant="outline">Phone ✓</Badge> : null}
         {user.fayda_verified ? <Badge variant="outline">Fayda ✓</Badge> : null}
 
         {!isAdmin ? (
-          <form action={action}>
-            <input type="hidden" name="userId" value={user.id} readOnly />
-            <Button
-              type="submit"
-              variant="outline"
-              size="sm"
-              disabled={pending}
-              className="border-red-200 text-red-800 hover:bg-red-50"
-            >
-              <UserRoundXIcon className="mr-1.5 size-3.5" />
-              Suspend
-            </Button>
-          </form>
+          isSuspended ? (
+            // Restore (fix #86): re-instates the seller role and clears the
+            // suspension marker so the user can list again.
+            <form action={restoreAction}>
+              <input type="hidden" name="userId" value={user.id} readOnly />
+              <Button
+                type="submit"
+                variant="outline"
+                size="sm"
+                disabled={restorePending}
+              >
+                <RotateCcwIcon className="mr-1.5 size-3.5" />
+                Restore
+              </Button>
+            </form>
+          ) : (
+            <form action={suspendAction}>
+              <input type="hidden" name="userId" value={user.id} readOnly />
+              <Button
+                type="submit"
+                variant="outline"
+                size="sm"
+                disabled={suspendPending}
+                className="border-red-200 text-red-800 hover:bg-red-50"
+              >
+                <UserRoundXIcon className="mr-1.5 size-3.5" />
+                Suspend
+              </Button>
+            </form>
+          )
         ) : null}
       </div>
 
-      {state?.message && state.ok !== true ? (
+      {message && suspendState?.ok !== true && restoreState?.ok !== true ? (
         <p role="alert" className="w-full text-sm text-destructive">
-          {state.message}
+          {message}
         </p>
       ) : null}
     </li>

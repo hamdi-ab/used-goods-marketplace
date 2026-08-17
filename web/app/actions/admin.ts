@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache"
 import { requireAdmin } from "@/lib/auth"
 import { uuidSchema } from "@/lib/uuid"
 import {
+  restoreUserRow,
   suspendUserRow,
   removeListingRow,
 } from "@/lib/admin"
@@ -36,6 +37,30 @@ export async function adminSuspendUser(
   const result = await suspendUserRow(parsed.data.id)
   if (!result.ok) {
     return { message: result.error ?? "Could not suspend the user" }
+  }
+
+  revalidatePath("/admin/users")
+  revalidatePath("/admin")
+  return { ok: true }
+}
+
+// Restore a suspended user (fix #86): re-instates the seller role and clears
+// the suspension marker, mirroring the suspend action's shape. Revalidation
+// flips the admin list so the user shows active again.
+export async function adminRestoreUser(
+  _prevState: AdminWriteState,
+  formData: FormData
+): Promise<AdminWriteState> {
+  const parsed = adminIdSchema.safeParse({ id: formValue(formData, "userId") })
+  if (!parsed.success) {
+    return { message: "Invalid user id" }
+  }
+
+  await requireAdmin()
+
+  const result = await restoreUserRow(parsed.data.id)
+  if (!result.ok) {
+    return { message: result.error ?? "Could not restore the user" }
   }
 
   revalidatePath("/admin/users")

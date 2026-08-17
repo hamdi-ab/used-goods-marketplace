@@ -315,3 +315,45 @@ describe.skipIf(!integrationAvailable)("RLS: promote_to_seller (#71)", () => {
     expect(restoreError).toBeNull()
   })
 })
+
+describe.skipIf(!integrationAvailable)("RLS: admin suspend / restore (#86)", () => {
+  it("suspend marks suspended_at and demotes; restore re-instates seller and clears the marker", async () => {
+    const { client: admin } = await signInAs(SEED.admin.email, SEED.admin.password)
+
+    const suspend = await admin
+      .from("profiles")
+      .update({ role: "buyer", suspended_at: new Date().toISOString() })
+      .eq("id", BINIAM_ID)
+    expect(suspend.error).toBeNull()
+
+    const { data: suspended } = await admin
+      .from("profiles")
+      .select("role, suspended_at")
+      .eq("id", BINIAM_ID)
+      .single()
+    expect(suspended?.role).toBe("buyer")
+    expect(suspended?.suspended_at).not.toBeNull()
+
+    // Restore: the marker clears and the seller role is re-instated.
+    const restore = await admin
+      .from("profiles")
+      .update({ role: "seller", suspended_at: null })
+      .eq("id", BINIAM_ID)
+    expect(restore.error).toBeNull()
+
+    const { data: restored } = await admin
+      .from("profiles")
+      .select("role, suspended_at")
+      .eq("id", BINIAM_ID)
+      .single()
+    expect(restored?.role).toBe("seller")
+    expect(restored?.suspended_at).toBeNull()
+
+    // Restore the seed role so later suites keep their buyer assumptions.
+    const cleanup = await admin
+      .from("profiles")
+      .update({ role: "buyer" })
+      .eq("id", BINIAM_ID)
+    expect(cleanup.error).toBeNull()
+  })
+})

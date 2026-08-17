@@ -23,11 +23,12 @@ export interface AdminUserRow {
   profile_completion: number | null
   phone_verified: boolean | null
   fayda_verified: boolean | null
+  suspended_at: string | null
   created_at: string
 }
 
 const ADMIN_USER_COLUMNS =
-  "id, full_name, role, city, phone, telegram_username, trust_score, profile_completion, phone_verified, fayda_verified, created_at"
+  "id, full_name, role, city, phone, telegram_username, trust_score, profile_completion, phone_verified, fayda_verified, suspended_at, created_at"
 
 export interface AdminListingRow {
   id: string
@@ -206,10 +207,10 @@ export interface AdminWriteResult {
 }
 
 /**
- * Suspend a user: demote to buyer and soft-delete their live listings. Mirrors
- * the resolve_report `block_seller` action so a suspended seller disappears
- * from all reads and is blocked by the requireSeller gate. RLS grants admins
- * full update access on profiles and listings.
+ * Suspend a user: demote to buyer, mark suspended_at, and soft-delete their
+ * live listings. Mirrors the resolve_report `block_seller` action so a
+ * suspended seller disappears from all reads and is blocked by the requireSeller
+ * gate. RLS grants admins full update access on profiles and listings.
  */
 export async function suspendUserRow(
   userId: string
@@ -218,7 +219,7 @@ export async function suspendUserRow(
 
   const { error: profileError } = await supabase
     .from("profiles")
-    .update({ role: "buyer" })
+    .update({ role: "buyer", suspended_at: new Date().toISOString() })
     .eq("id", userId)
   if (profileError) return { ok: false, error: profileError.message }
 
@@ -228,6 +229,34 @@ export async function suspendUserRow(
     .eq("seller_id", userId)
     .is("deleted_at", null)
   if (listingError) return { ok: false, error: listingError.message }
+
+  return { ok: true, error: null }
+}
+
+/**
+ * Restore a suspended user (fix #86): re-instate the seller role and clear the
+ * suspension marker — the inverse of suspendUserRow's demotion, so a suspended
+ * seller can list again. Restoring a non-suspended row is a no-op (the admin UI
+ * only offers Restore on suspended users). The audit frames this as the admin
+ * counterpart to the self-service promote path (#71).
+ */
+export async function restoreUserRow(
+  userId: string
+): Promise<AdminWriteResult> {
+  const supabase = await createClient()
+
+  const { data: rows } = await supabase
+    .from("profiles")
+    .select("suspended_at")
+    .eq("id", userId)
+  const suspended = (rows ?? [])[0]?.suspended_at != null
+  if (!suspended) return { ok: true, error: null }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ role: "seller", suspended_at: null })
+    .eq("id", userId)
+  if (error) return { ok: false, error: error.message }
 
   return { ok: true, error: null }
 }
