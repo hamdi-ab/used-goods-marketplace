@@ -132,7 +132,7 @@ describe("profile reads", () => {
 })
 
 describe("profile writes", () => {
-  it("completeOwnProfile strips the @ from telegram and marks completion 100", async () => {
+  it("completeOwnProfile strips the @ from telegram (completion is generated, #82)", async () => {
     const { b, updates } = captureBuilder({ data: null, error: null })
     mockCreateClient.mockResolvedValue(db(() => b))
 
@@ -146,9 +146,10 @@ describe("profile writes", () => {
     expect(result).toEqual({ ok: true, error: null })
     expect(updates[0]).toMatchObject({
       telegram_username: "alem",
-      profile_completion: 100,
       full_name: "Alem",
     })
+    // The generated column (fix #82) is recomputed by the DB; never written.
+    expect(updates[0]).not.toHaveProperty("profile_completion")
   })
 
   it("completeOwnProfile surfaces a database error", async () => {

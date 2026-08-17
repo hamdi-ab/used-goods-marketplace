@@ -112,7 +112,6 @@ interface ProfileFields {
   phone?: string | null
   telegram_username?: string | null
   bio?: string | null
-  profile_completion?: number | null
   phone_public?: boolean | null
 }
 
@@ -130,10 +129,10 @@ export async function updateProfileRow(
   return { ok: true, error: null }
 }
 
-/** Onboarding completion: persists the profile's initial fields and marks the
- * profile complete (profile_completion: 100 is the domain rule that flips the
- * "complete your profile" gate). Telegram handles are normalized here so the
- * rule lives next to the write, not in the action. */
+/** Onboarding completion: persists the profile's initial fields. Telegram
+ * handles are normalized here so the rule lives next to the write, not in the
+ * action. profile_completion is a generated column (fix #82) computed from the
+ * populated fields — it is never written directly. */
 export async function completeOwnProfile(
   userId: string,
   values: {
@@ -154,7 +153,6 @@ export async function completeOwnProfile(
       ? values.telegramUsername.replace(/^@/, "")
       : null,
     bio: values.bio || null,
-    profile_completion: 100,
   })
 }
 

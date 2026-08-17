@@ -133,7 +133,7 @@ Every business table includes:
 | sub_city | TEXT | Nullable |
 | bio | TEXT | Nullable |
 | trust_score | SMALLINT | 0–100 |
-| profile_completion | SMALLINT | 0–100 |
+| profile_completion | SMALLINT | 0–100; generated — 20% per populated field (avatar_url, phone, telegram_username, city, bio), recomputed on every write (fix #82) |
 | role | TEXT | buyer / seller / admin |
 
 **Indexes:** phone, city

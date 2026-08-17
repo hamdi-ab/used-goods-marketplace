@@ -726,3 +726,57 @@ describe.skipIf(!integrationAvailable)("RLS: listing views (#74)", () => {
     expect(resetError).toBeNull()
   })
 })
+
+describe.skipIf(!integrationAvailable)("RLS: profile completion (#82)", () => {
+  it("recomputes profile_completion from populated fields on every write", async () => {
+    const { client: biniam, userId } = await signInAs(
+      SEED.biniam.email,
+      SEED.biniam.password
+    )
+
+    // Seed biniam has city only -> 20%.
+    const { data: before } = await biniam
+      .from("profiles")
+      .select("profile_completion")
+      .eq("id", userId)
+      .single()
+    expect(before?.profile_completion).toBe(20)
+
+    // Adding a phone flips it to 40% with no separate completion write.
+    const { error: updateError } = await biniam
+      .from("profiles")
+      .update({ phone: "+251911000005" })
+      .eq("id", userId)
+    expect(updateError).toBeNull()
+    const { data: mid } = await biniam
+      .from("profiles")
+      .select("profile_completion")
+      .eq("id", userId)
+      .single()
+    expect(mid?.profile_completion).toBe(40)
+
+    // A read-only consumer (the onboarding gate) sees the same computed value
+    // without selecting the fields itself — the column is authoritative.
+    const { data: gate } = await biniam
+      .from("profiles")
+      .select("full_name, city, profile_completion")
+      .eq("id", userId)
+      .single()
+    expect(gate?.full_name?.trim()).toBeTruthy()
+    expect(gate?.city?.trim()).toBeTruthy()
+    expect(gate?.profile_completion).toBe(40)
+
+    // Clean up: clearing the phone restores the seed completion.
+    const { error: resetError } = await biniam
+      .from("profiles")
+      .update({ phone: null })
+      .eq("id", userId)
+    expect(resetError).toBeNull()
+    const { data: after } = await biniam
+      .from("profiles")
+      .select("profile_completion")
+      .eq("id", userId)
+      .single()
+    expect(after?.profile_completion).toBe(20)
+  })
+})

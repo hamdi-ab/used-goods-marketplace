@@ -21,7 +21,7 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, role, profile_completion")
+    .select("full_name, role, city")
     .eq("id", authUser.id)
     .maybeSingle()
 
@@ -30,7 +30,14 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
     email: authUser.email ?? "",
     role: normalizeRole(profile?.role),
     fullName: profile?.full_name ?? null,
-    profileCompleted: (profile?.profile_completion ?? 0) >= 100,
+    // Onboarding is done once its required fields (full name + city, per the
+    // onboarding schema) are populated. profile_completion (fix #82) is a
+    // separate, richer metric (20% per populated field) and must not gate the
+    // onboarding redirect — a user with only the required fields would loop
+    // back to /onboarding forever.
+    profileCompleted: Boolean(
+      profile?.full_name?.trim() && profile?.city?.trim()
+    ),
   }
 })
 
