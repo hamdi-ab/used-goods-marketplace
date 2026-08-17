@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import type { ReactNode } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { SendIcon } from "lucide-react"
@@ -6,6 +7,7 @@ import { SendIcon } from "lucide-react"
 import { requireUser } from "@/lib/auth"
 import { fetchBuyerOffers } from "@/lib/offers"
 import { formatPrice } from "@/lib/listings"
+import { nextOffset, parseOffset } from "@/lib/pagination"
 import { formatShortDate } from "@/lib/utils"
 import { OfferStatusBadge } from "@/components/offers/offer-status-badge"
 import { BuyerOfferActions } from "@/components/offers/buyer-offer-actions"
@@ -21,36 +23,43 @@ export const metadata: Metadata = {
   description: "Offers you have made on the VinTech Marketplace.",
 }
 
-export default async function OffersPage() {
+export default async function OffersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const user = await requireUser()
-  const offers = await fetchBuyerOffers(user.id)
+  const offset = parseOffset((await searchParams).offset)
+  const { offers, hasMore, error } = await fetchBuyerOffers(user.id, {
+    offset,
+  })
 
-  return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
-        <h1 className="font-heading text-2xl font-semibold text-foreground">
-          My offers
-        </h1>
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/offers/seller">View incoming offers →</Link>
+  let body: ReactNode
+  if (error) {
+    body = (
+      <p className="py-8 text-sm text-muted-foreground">
+        Could not load offers. Try again.
+      </p>
+    )
+  } else if (offers.length === 0) {
+    body = (
+      <div className="flex flex-col items-center py-16 text-center">
+        <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-muted">
+          <SendIcon className="size-6 text-muted-foreground" />
+        </div>
+        <h2 className="font-heading text-lg font-semibold">No offers yet</h2>
+        <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+          When you make an offer on a listing it shows up here, where you can
+          see whether the seller accepted, declined, or countered it.
+        </p>
+        <Button asChild size="sm" className="mt-4">
+          <Link href="/">Browse listings</Link>
         </Button>
       </div>
-
-      {offers.length === 0 ? (
-        <div className="flex flex-col items-center py-16 text-center">
-          <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-muted">
-            <SendIcon className="size-6 text-muted-foreground" />
-          </div>
-          <h2 className="font-heading text-lg font-semibold">No offers yet</h2>
-          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-            When you make an offer on a listing it shows up here, where you can
-            see whether the seller accepted, declined, or countered it.
-          </p>
-          <Button asChild size="sm" className="mt-4">
-            <Link href="/">Browse listings</Link>
-          </Button>
-        </div>
-      ) : (
+    )
+  } else {
+    body = (
+      <>
         <ul className="flex flex-col gap-4">
           {offers.map((offer) => (
             <li key={offer.id}>
@@ -136,7 +145,32 @@ export default async function OffersPage() {
             </li>
           ))}
         </ul>
-      )}
+        {hasMore ? (
+          <div className="mt-8 flex justify-center">
+            <Link
+              href={`/offers?offset=${nextOffset(offset)}`}
+              className="text-sm font-medium underline"
+            >
+              Load more
+            </Link>
+          </div>
+        ) : null}
+      </>
+    )
+  }
+
+  return (
+    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+        <h1 className="font-heading text-2xl font-semibold text-foreground">
+          My offers
+        </h1>
+        <Button asChild variant="ghost" size="sm">
+          <Link href="/offers/seller">View incoming offers →</Link>
+        </Button>
+      </div>
+
+      {body}
     </main>
   )
 }

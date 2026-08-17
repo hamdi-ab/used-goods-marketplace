@@ -3,7 +3,7 @@ import "server-only"
 import { createClient } from "@/lib/supabase/server"
 import type { Supabase } from "@/lib/supabase/types"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
-import { isValidUuid } from "@/lib/listings/constants"
+import { isValidUuid, PAGE_SIZE } from "@/lib/listings/constants"
 import type { BrowseListing } from "@/lib/listings/constants"
 import { mapNestedBrowseListing } from "@/lib/listings/browse-mapper"
 import type { NestedBrowseRow } from "@/lib/listings/browse-mapper"
@@ -36,6 +36,21 @@ export interface SellerOfferRow extends BuyerOfferRow {
     avatar_url: string | null
   } | null
 }
+
+/**
+ * Paged result for an offers feed. `hasMore` is derived from the server count
+ * so the UI can stop rendering "Load more" without guessing (P1.14, #81).
+ * Generic over the row shape so the buyer feed stays `BuyerOfferRow[]`-typed
+ * and the seller feed stays `SellerOfferRow[]`-typed at the call site.
+ */
+export interface OffersPage<T extends OfferRow = OfferRow> {
+  offers: T[]
+  count: number | null
+  hasMore: boolean
+  error: string | null
+}
+
+export type OfferRow = BuyerOfferRow | SellerOfferRow
 
 // A join row from the raw PostgREST shape. The embedded `listing` may lack a
 // `seller` join (buyer dashboard never asks for it); mapNestedBrowseListing
@@ -84,43 +99,66 @@ function mapRawOfferRow(
 
 const OFFER_COLUMNS = "id, listing_id, amount, message, status, created_at, expires_at"
 
+/** Shared paging args for the offers feeds. limit/offset mirror the browse
+ * pattern (fetchListings): PAGE_SIZE rows per window, newest first, with a
+ * server count so the UI can render "Load more" without guessing (P1.14, #81).
+ * Offers don't touch the 1000-row browse ceiling — the MAX_PAGING_OFFSET
+ * guard stays scoped to search/browse only, as the audit notes. */
+export interface OffersPageArgs {
+  limit?: number
+  offset?: number
+}
+
+function resolveWindow(args: OffersPageArgs): { limit: number; offset: number } {
+  return {
+    limit: Math.min(args.limit ?? PAGE_SIZE, PAGE_SIZE),
+    offset: args.offset ?? 0,
+  }
+}
+
 // The buyer's offer history, newest first. RLS keeps this to the user's own
 // offers; the listing join drops rows for listings the buyer can no longer see
 // (deleted, unpublished, or sold without an accepted offer of theirs).
 export async function fetchBuyerOffers(
   userId: string,
+  args: OffersPageArgs = {},
   client?: Supabase
-): Promise<BuyerOfferRow[]> {
+): Promise<OffersPage<BuyerOfferRow>> {
   const supabase = client ?? (await createClient())
-  const { data, error } = await supabase
+  const { limit, offset } = resolveWindow(args)
+  const { data, error, count } = await supabase
     .from("offers")
     .select(
       `${OFFER_COLUMNS},
        listing:listings(id, title, price, condition, city, published_at,
          images:listing_images(id, image_url, display_order)),
-       review:reviews(id, rating)`
+       review:reviews(id, rating)`,
+      { count: "exact" }
     )
     .eq("buyer_id", userId)
     .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1)
 
   if (error) {
     console.error("fetchBuyerOffers:", error.message)
-    return []
+    return { offers: [], count, hasMore: false, error: error.message }
   }
 
-  const rows = (data ?? []) as unknown as {
+  const offers = (data ?? []) as unknown as {
     id: string
     listing_id: string
     amount: number
     message: string | null
-     status: OfferStatus
-     created_at: string
-     expires_at: string | null
-     listing: RawOfferListingRow | null
+    status: OfferStatus
+    created_at: string
+    expires_at: string | null
+    listing: RawOfferListingRow | null
     review: { id: string; rating: number } | null
   }[]
 
-  return rows.map((row) => mapRawOfferRow(row, false))
+  const mapped = offers.map((row) => mapRawOfferRow(row, false))
+  const hasMore = typeof count === "number" && offset + mapped.length < count
+  return { offers: mapped, count, hasMore, error: null }
 }
 
 // The seller's incoming offers, newest first. RLS restricts this to offers on
@@ -129,39 +167,45 @@ export async function fetchBuyerOffers(
 // the person behind each offer.
 export async function fetchSellerOffers(
   userId: string,
+  args: OffersPageArgs = {},
   client?: Supabase
-): Promise<SellerOfferRow[]> {
+): Promise<OffersPage<SellerOfferRow>> {
   const supabase = client ?? (await createClient())
-  const { data, error } = await supabase
+  const { limit, offset } = resolveWindow(args)
+  const { data, error, count } = await supabase
     .from("offers")
     .select(
       `${OFFER_COLUMNS},
        listing:listings(id, title, price, condition, city, published_at,
          seller:profiles!listings_seller_id_fkey(id, full_name, avatar_url, role, trust_score),
          images:listing_images(id, image_url, display_order)),
-       buyer:profiles(id, full_name, avatar_url)`
+       buyer:profiles(id, full_name, avatar_url)`,
+      { count: "exact" }
     )
     .eq("listing.seller_id", userId)
     .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1)
 
   if (error) {
     console.error("fetchSellerOffers:", error.message)
-    return []
+    return { offers: [], count, hasMore: false, error: error.message }
   }
 
-  const rows = (data ?? []) as unknown as {
+  const offers = (data ?? []) as unknown as {
     id: string
     listing_id: string
     amount: number
     message: string | null
-     status: OfferStatus
-     created_at: string
-     expires_at: string | null
-     listing: RawOfferListingRow | null
+    status: OfferStatus
+    created_at: string
+    expires_at: string | null
+    listing: RawOfferListingRow | null
     buyer: { id: string; full_name: string | null; avatar_url: string | null } | null
   }[]
 
-  return rows.map((row) => mapRawOfferRow(row, true))
+  const mapped = offers.map((row) => mapRawOfferRow(row, true))
+  const hasMore = typeof count === "number" && offset + mapped.length < count
+  return { offers: mapped, count, hasMore, error: null }
 }
 
 // Open offers (pending or countered) on the seller's listings, for the dashboard

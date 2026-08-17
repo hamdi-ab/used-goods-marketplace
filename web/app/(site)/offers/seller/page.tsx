@@ -1,10 +1,12 @@
 import type { Metadata } from "next"
+import type { ReactNode } from "react"
 import Link from "next/link"
 import { InboxIcon } from "lucide-react"
 
 import { requireUser } from "@/lib/auth"
 import { fetchSellerOffers } from "@/lib/offers"
 import { formatPrice } from "@/lib/listings"
+import { nextOffset, parseOffset } from "@/lib/pagination"
 import { formatShortDate, initials } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { OfferStatusBadge } from "@/components/offers/offer-status-badge"
@@ -19,40 +21,43 @@ export const metadata: Metadata = {
   description: "Offers buyers have made on your listings.",
 }
 
-export default async function SellerOffersPage() {
+export default async function SellerOffersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const user = await requireUser()
-  const offers = await fetchSellerOffers(user.id)
+  const offset = parseOffset((await searchParams).offset)
+  const { offers, hasMore, error } = await fetchSellerOffers(user.id, {
+    offset,
+  })
 
-  return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mb-2 flex flex-wrap items-end justify-between gap-3">
-        <h1 className="font-heading text-2xl font-semibold text-foreground">
-          Incoming offers
-        </h1>
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/offers">← View my offers</Link>
+  let body: ReactNode
+  if (error) {
+    body = (
+      <p className="py-8 text-sm text-muted-foreground">
+        Could not load offers. Try again.
+      </p>
+    )
+  } else if (offers.length === 0) {
+    body = (
+      <div className="flex flex-col items-center py-16 text-center">
+        <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-muted">
+          <InboxIcon className="size-6 text-muted-foreground" />
+        </div>
+        <h2 className="font-heading text-lg font-semibold">No offers yet</h2>
+        <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+          When a buyer makes an offer on one of your listings it appears here
+          for you to accept, decline, or counter.
+        </p>
+        <Button asChild size="sm" className="mt-4">
+          <Link href="/dashboard">Go to dashboard</Link>
         </Button>
       </div>
-      <p className="mb-8 text-sm text-muted-foreground">
-        Offers from buyers on your listings. Accept the right price and the
-        listing is marked sold.
-      </p>
-
-      {offers.length === 0 ? (
-        <div className="flex flex-col items-center py-16 text-center">
-          <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-muted">
-            <InboxIcon className="size-6 text-muted-foreground" />
-          </div>
-          <h2 className="font-heading text-lg font-semibold">No offers yet</h2>
-          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-            When a buyer makes an offer on one of your listings it appears here
-            for you to accept, decline, or counter.
-          </p>
-          <Button asChild size="sm" className="mt-4">
-            <Link href="/dashboard">Go to dashboard</Link>
-          </Button>
-        </div>
-      ) : (
+    )
+  } else {
+    body = (
+      <>
         <ul className="flex flex-col gap-4">
           {offers.map((offer) => (
             <li key={offer.id}>
@@ -119,7 +124,36 @@ export default async function SellerOffersPage() {
             </li>
           ))}
         </ul>
-      )}
+        {hasMore ? (
+          <div className="mt-8 flex justify-center">
+            <Link
+              href={`/offers/seller?offset=${nextOffset(offset)}`}
+              className="text-sm font-medium underline"
+            >
+              Load more
+            </Link>
+          </div>
+        ) : null}
+      </>
+    )
+  }
+
+  return (
+    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mb-2 flex flex-wrap items-end justify-between gap-3">
+        <h1 className="font-heading text-2xl font-semibold text-foreground">
+          Incoming offers
+        </h1>
+        <Button asChild variant="ghost" size="sm">
+          <Link href="/offers">← View my offers</Link>
+        </Button>
+      </div>
+      <p className="mb-8 text-sm text-muted-foreground">
+        Offers from buyers on your listings. Accept the right price and the
+        listing is marked sold.
+      </p>
+
+      {body}
     </main>
   )
 }
