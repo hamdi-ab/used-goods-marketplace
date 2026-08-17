@@ -1,0 +1,50 @@
+/**
+ * Pure notifications domain value objects (fix #72).
+ *
+ * Framework-agnostic constants and helpers shared by Server and Client modules
+ * (mirrors lib/reports/constants, lib/verifications/constants). The DB stores
+ * `type` as text (DB spec §14); the typed union + labels live here so the
+ * inbox, the toast copy, and the RLS trigger bodies never fork.
+ */
+
+export const NOTIFICATION_TYPES = [
+  "offer_received",
+  "offer_accepted",
+  "review_received",
+  "report_resolved",
+] as const
+export type NotificationType = (typeof NOTIFICATION_TYPES)[number]
+
+export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
+  offer_received: "New offer",
+  offer_accepted: "Offer accepted",
+  review_received: "New review",
+  report_resolved: "Report reviewed",
+}
+
+// The inbox page cap and the client poll interval (config.toml realtime is
+// disabled locally, so the useNotifications hook polls for new rows instead of
+// subscribing; the interval is deliberately modest to keep the dev stack quiet).
+export const NOTIFICATION_MAX_ITEMS = 50
+export const NOTIFICATION_POLL_MS = 15000
+
+/** Deep-link target for a notification, from its metadata, or null for types
+ * with no page to jump to. Offer/review events land on the offers surfaces;
+ * offer_received jumps straight to the listing so the seller can review it. */
+export function notificationHref(
+  type: NotificationType,
+  metadata: Record<string, string | number | null>
+): string | null {
+  switch (type) {
+    case "offer_received": {
+      const listingId = metadata.listing_id
+      return typeof listingId === "string" ? `/listings/${listingId}` : null
+    }
+    case "offer_accepted":
+      return "/offers"
+    case "review_received":
+      return "/offers"
+    case "report_resolved":
+      return null
+  }
+}

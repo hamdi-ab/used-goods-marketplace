@@ -7,6 +7,7 @@ import { MenuIcon, PlusIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { primaryNav, siteName } from "@/lib/nav"
 import { useAuth } from "@/components/auth/auth-provider"
+import { NotificationBell } from "@/components/notifications/notification-bell"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { MobileNav } from "@/components/mobile-nav"
@@ -66,6 +67,7 @@ export function SiteHeader() {
             </Button>
           ) : null}
           <div className="hidden h-5 w-px bg-border sm:block" aria-hidden="true" />
+          <NotificationBell />
           <UserMenu />
           <Sheet>
             <SheetTrigger asChild>

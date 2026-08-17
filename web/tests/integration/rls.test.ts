@@ -453,3 +453,200 @@ describe.skipIf(!integrationAvailable)("RLS: verification workflow (#73)", () =>
     expect(after?.fayda_verified).toBe(false)
   })
 })
+
+describe.skipIf(!integrationAvailable)("RLS: notifications (#72)", () => {
+  it("an offer submission notifies the listing seller, never other users", async () => {
+    // biniam offers on one of amira's published listings.
+    const { client: buyer } = await signInAs(SEED.biniam.email, SEED.biniam.password)
+    const { data: listing } = await buyer
+      .from("listings")
+      .select("id")
+      .eq("seller_id", AMIRA_ID)
+      .eq("status", "published")
+      .is("deleted_at", null)
+      .limit(1)
+      .maybeSingle()
+    expect(listing?.id).toBeTruthy()
+    if (!listing) throw new Error("expected an amira published listing")
+
+    const submitted = await buyer.rpc("submit_offer", {
+      p_listing_id: listing.id,
+      p_amount: 120,
+      p_message: "Notification test offer",
+    })
+    expect(submitted.error).toBeNull()
+    expect(submitted.data).toMatchObject({ ok: true })
+
+    // The seller gets an unread offer_received notification.
+    const { client: seller } = await signInAs(SEED.amira.email, SEED.amira.password)
+    const { data: notes } = await seller
+      .from("notifications")
+      .select("id, type, title, is_read")
+      .eq("type", "offer_received")
+      .order("created_at", { ascending: false })
+      .limit(1)
+    expect(notes?.[0]?.type).toBe("offer_received")
+    expect(notes?.[0]?.is_read).toBe(false)
+    expect(notes?.[0]?.title).toContain("New offer")
+
+    // Another user cannot read the seller's notifications (owner-only RLS).
+    const { client: other } = await signInAs(SEED.fayad.email, SEED.fayad.password)
+    const { data: leak } = await other
+      .from("notifications")
+      .select("id")
+      .eq("user_id", AMIRA_ID)
+    expect(leak ?? []).toHaveLength(0)
+
+    // The owner can mark the notification read.
+    const notificationId = notes?.[0]?.id
+    expect(notificationId).toBeTruthy()
+    const { error: readError } = await seller
+      .from("notifications")
+      .update({ is_read: true })
+      .eq("id", notificationId)
+    expect(readError).toBeNull()
+    const { data: after } = await seller
+      .from("notifications")
+      .select("is_read")
+      .eq("id", notificationId)
+      .single()
+    expect(after?.is_read).toBe(true)
+
+    // Clean up: amira declines the pending offer so the suite stays idempotent.
+    const { data: offers } = await seller
+      .from("offers")
+      .select("id")
+      .eq("listing_id", listing.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+    const { error: declineError } = await seller.rpc("decline_offer", {
+      p_offer_id: offers?.[0]?.id,
+    })
+    expect(declineError).toBeNull()
+  })
+
+  it("accepting an offer notifies the buyer, and a review notifies the seller", async () => {
+    const { client: buyer } = await signInAs(SEED.biniam.email, SEED.biniam.password)
+    const { data: listing } = await buyer
+      .from("listings")
+      .select("id")
+      .eq("seller_id", AMIRA_ID)
+      .eq("status", "published")
+      .is("deleted_at", null)
+      .limit(1)
+      .maybeSingle()
+    expect(listing?.id).toBeTruthy()
+    if (!listing) throw new Error("expected an amira published listing")
+
+    const submitted = await buyer.rpc("submit_offer", {
+      p_listing_id: listing.id,
+      p_amount: 90,
+    })
+    expect(submitted.error).toBeNull()
+    expect(submitted.data).toMatchObject({ ok: true })
+
+    // amira accepts the offer -> biniam is notified.
+    const { client: seller } = await signInAs(SEED.amira.email, SEED.amira.password)
+    const { data: offers } = await seller
+      .from("offers")
+      .select("id")
+      .eq("listing_id", listing.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+    const offerId = offers?.[0]?.id
+    expect(offerId).toBeTruthy()
+
+    const { error: acceptError } = await seller.rpc("accept_offer", {
+      p_offer_id: offerId,
+    })
+    expect(acceptError).toBeNull()
+
+    const { data: buyerNotes } = await buyer
+      .from("notifications")
+      .select("type")
+      .eq("type", "offer_accepted")
+      .order("created_at", { ascending: false })
+      .limit(1)
+    expect(buyerNotes?.[0]?.type).toBe("offer_accepted")
+
+    // biniam reviews the completed sale -> amira is notified.
+    const { error: reviewError } = await buyer.rpc("submit_review", {
+      p_offer_id: offerId,
+      p_rating: 5,
+      p_comment: "Smooth deal",
+    })
+    expect(reviewError).toBeNull()
+
+    const { data: sellerNotes } = await seller
+      .from("notifications")
+      .select("type")
+      .eq("type", "review_received")
+      .order("created_at", { ascending: false })
+      .limit(1)
+    expect(sellerNotes?.[0]?.type).toBe("review_received")
+
+    // Clean up: restore the listing to published (the accepted offer sold it)
+    // and amira's seed trust score, which the review recomputed.
+    const { client: admin } = await signInAs(SEED.admin.email, SEED.admin.password)
+    const { error: restoreListing } = await admin
+      .from("listings")
+      .update({ status: "published", sold_to_buyer_id: null })
+      .eq("id", listing.id)
+    expect(restoreListing).toBeNull()
+    const { error: restoreTrust } = await admin
+      .from("profiles")
+      .update({ trust_score: 85 })
+      .eq("id", AMIRA_ID)
+    expect(restoreTrust).toBeNull()
+  })
+
+  it("resolving a report notifies the reporter", async () => {
+    const { client: reporter } = await signInAs(SEED.biniam.email, SEED.biniam.password)
+    const { data: listing } = await reporter
+      .from("listings")
+      .select("id")
+      .eq("seller_id", AMIRA_ID)
+      .eq("status", "published")
+      .is("deleted_at", null)
+      .limit(1)
+      .maybeSingle()
+    expect(listing?.id).toBeTruthy()
+    if (!listing) throw new Error("expected an amira published listing")
+
+    const { error: reportError } = await reporter.rpc("submit_report", {
+      p_reason: "spam",
+      p_listing_id: listing.id,
+      p_seller_id: null,
+      p_note: null,
+    })
+    expect(reportError).toBeNull()
+
+    const { client: admin } = await signInAs(SEED.admin.email, SEED.admin.password)
+    const { data: report } = await admin
+      .from("reports")
+      .select("id")
+      .eq("reporter_id", BINIAM_ID)
+      .eq("reported_listing_id", listing.id)
+      .eq("status", "open")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    expect(report?.id).toBeTruthy()
+    if (!report) throw new Error("expected an open report")
+
+    const { error: resolveError } = await admin.rpc("resolve_report", {
+      p_report_id: report.id,
+      p_action: "reject",
+      p_admin_note: null,
+    })
+    expect(resolveError).toBeNull()
+
+    const { data: reporterNotes } = await reporter
+      .from("notifications")
+      .select("type, title")
+      .eq("type", "report_resolved")
+      .order("created_at", { ascending: false })
+      .limit(1)
+    expect(reporterNotes?.[0]?.type).toBe("report_resolved")
+  })
+})
