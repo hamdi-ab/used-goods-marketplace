@@ -257,4 +257,17 @@ describe.skipIf(!integrationAvailable)("RLS: rate_usage / consume_rate_budget (#
     })
     expect(second.data?.allowed).toBe(false)
   })
+
+  it("admins can audit rate usage; traders cannot read the table", async () => {
+    const { client: admin } = await signInAs(SEED.admin.email, SEED.admin.password)
+    const { data, error } = await admin.from("rate_usage").select("id").limit(1)
+    expect(error).toBeNull()
+    // Earlier tests in this suite consumed budget, so at least one row exists
+    // and the admin audit surface is reachable.
+    expect(data?.length ?? 0).toBeGreaterThan(0)
+
+    const { client: trader } = await signInAs(SEED.amira.email, SEED.amira.password)
+    const { data: traderData } = await trader.from("rate_usage").select("id")
+    expect(traderData ?? []).toHaveLength(0)
+  })
 })

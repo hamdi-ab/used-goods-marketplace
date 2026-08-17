@@ -139,14 +139,16 @@ export async function uploadAvatar(
     return { url: null, error: "Not authorized" }
   }
 
-  const budget = await consumeRateBudget()
-  if (!budget.ok) {
-    return { url: null, error: budget.message ?? null }
-  }
-
   const file = formData.get("avatar") as File | null
   if (!file || !file.size) {
     return { url: null, error: "Choose an image to upload" }
+  }
+
+  // Charge the global budget only for a genuine upload attempt (after the
+  // cheap client-input checks above).
+  const budget = await consumeRateBudget()
+  if (!budget.ok) {
+    return { url: null, error: budget.message ?? null }
   }
 
   const supabase = await createClient()

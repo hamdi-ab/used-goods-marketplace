@@ -11,6 +11,11 @@
 -- revoked so the limit cannot be bypassed. The window is 1 hour, matching the
 -- spec. The per-call limit (p_limit) is capped server-side at the bucket
 -- default so a caller can lower it (tests) but never raise it.
+--
+-- Every write action today requires auth (requireSeller/requireTrader), so no
+-- action reaches the anon bucket; the anon path exists per the spec §22 claim
+-- and is enforced + integration-tested at the RPC layer for any anon caller of
+-- a future anon surface.
 
 create table if not exists public.rate_usage (
   id uuid primary key default gen_random_uuid(),
@@ -79,6 +84,10 @@ begin
   -- or write-amplified via a huge p_limit.
   v_limit := greatest(least(coalesce(p_limit, v_default), v_default), 1);
 
+  -- Serialize same-bucket checks so the count-then-insert cannot overshoot
+  -- under concurrent calls (the documented NFR-PERF-002 concurrency shape).
+  perform pg_advisory_xact_lock(hashtext(v_bucket));
+
   select count(*) into v_recent
   from public.rate_usage
   where bucket_key = v_bucket
@@ -99,5 +108,7 @@ revoke all on function public.consume_rate_budget(integer, text) from public;
 grant execute on function public.consume_rate_budget(integer, text) to anon;
 grant execute on function public.consume_rate_budget(integer, text) to authenticated;
 
--- Rate usage is written only via the RPC now (global token bucket).
+-- Rate usage is written only via the RPC now (global token bucket); SELECT
+-- stays open to admins so the audit policy above is reachable.
 revoke all on table public.rate_usage from anon, authenticated;
+grant select on public.rate_usage to authenticated;
