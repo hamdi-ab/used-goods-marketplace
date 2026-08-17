@@ -3,23 +3,22 @@
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
 
-import { requireAdmin, requireTrader } from "@/lib/auth"
+import { requireAdmin, requireUser } from "@/lib/auth"
 import {
   createReport as createReportRow,
   resolveReport as resolveReportRow,
   REPORT_REASONS,
   REPORT_NOTE_MAX,
 } from "@/lib/reports"
-import { uuidSchema } from "@/lib/uuid"
 
 function formValue(formData: FormData, key: string): string | undefined {
   const v = formData.get(key)
   return typeof v === "string" && v.length > 0 ? v : undefined
 }
 
-const submitReportSchema = z.object({
-  listingId: uuidSchema.optional(),
-  sellerId: uuidSchema.optional(),
+export const submitReportSchema = z.object({
+  listingId: z.string().uuid().optional(),
+  sellerId: z.string().uuid().optional(),
   reason: z.enum(REPORT_REASONS),
   note: z
     .string()
@@ -27,11 +26,14 @@ const submitReportSchema = z.object({
     .optional(),
 }).refine(
   (data) => {
-    const hasListing = data.listingId !== undefined && data.listingId !== null
-    const hasSeller = data.sellerId !== undefined && data.sellerId !== null
-    return hasListing || hasSeller
+    const hasListing = Boolean(data.listingId)
+    const hasSeller = Boolean(data.sellerId)
+    // Exactly one target — the DB reports_target_one constraint requires XOR,
+    // so a dual (or empty) target is rejected here with a field-level error
+    // instead of a generic SQL violation (audit P1.17, #84).
+    return hasListing !== hasSeller
   },
-  { message: "A report must target a listing or a seller" }
+  { message: "A report must target a listing or a seller, but not both" }
 )
 
 export type SubmitReportState = {
@@ -55,10 +57,9 @@ export async function submitReport(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  // Gate on a signed-in trader session before reaching the RPC; the RPC itself
-  // resolves the reporter from auth.uid() and enforces rate limiting. Admins
-  // moderate reports, they do not file them (ADR-020).
-  await requireTrader()
+  // Gate on a signed-in session before reaching the RPC; the RPC itself
+  // resolves the reporter from auth.uid() and enforces rate limiting.
+  await requireUser()
 
   const result = await createReportRow({
     listingId: parsed.data.listingId ?? null,
@@ -75,7 +76,7 @@ export async function submitReport(
 }
 
 const resolveSchema = z.object({
-  reportId: uuidSchema,
+  reportId: z.string().uuid(),
   action: z.enum(["remove_listing", "block_seller", "reject"]),
   adminNote: z
     .string()
