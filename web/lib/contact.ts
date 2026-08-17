@@ -19,8 +19,9 @@ export interface ContactAttemptResult {
 /**
  * Fetch the contact surface for a seller. Phone is fetched separately and only
  * when the owner has opted in (Security spec §19: phone is private by default),
- * matching fetchPublicProfile. The row policy is row-level only, so phone is
- * never selected in a public query unless phone_public is set.
+ * matching fetchPublicProfile. The public columns come from the profiles_public
+ * view (fix #70): anon has no wholesale SELECT on the base table, so phone is
+ * unreachable there; the opt-in phone pull below stays on the base table.
  */
 export async function fetchSellerContactInfo(
   sellerId: string,
@@ -29,7 +30,7 @@ export async function fetchSellerContactInfo(
   const supabase = client ?? (await createClient())
 
   const { data: profile, error } = await supabase
-    .from("profiles")
+    .from("profiles_public")
     .select("telegram_username, phone_public")
     .eq("id", sellerId)
     .maybeSingle()

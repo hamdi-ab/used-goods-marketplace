@@ -39,6 +39,9 @@ export interface PublicProfileRow {
 const OWN_PROFILE_COLUMNS =
   "avatar_url, full_name, phone, telegram_username, city, sub_city, bio, trust_score, profile_completion, role, phone_public"
 
+// Must match the profiles_public view projection
+// (web/supabase/migrations/20260816000000_profiles_public_view.sql) — that view
+// is the enforced public column set at the DB boundary (fix #70).
 const PUBLIC_PROFILE_COLUMNS =
   "full_name, avatar_url, city, sub_city, bio, telegram_username, trust_score, role, phone_public, phone_verified, fayda_verified"
 
@@ -67,7 +70,9 @@ export const fetchOwnProfile = cache(
  * and the page body share one round trip. Phone is fetched separately and only
  * when the owner has opted in (Security spec §19: phone is private by default).
  * Trust-badge flags (phone_verified, fayda_verified) are public by T12 RLS
- * design. */
+ * design. The public read comes from the profiles_public view (fix #70): the
+ * base table no longer grants anon a wholesale SELECT, and the view is the
+ * canonical public column set enforced at the DB boundary. */
 export const fetchPublicProfile = cache(
   async (
     userId: string,
@@ -76,7 +81,7 @@ export const fetchPublicProfile = cache(
     const supabase = client ?? (await createClient())
 
     const { data: profile, error } = await supabase
-      .from("profiles")
+      .from("profiles_public")
       .select(PUBLIC_PROFILE_COLUMNS)
       .eq("id", userId)
       .maybeSingle()

@@ -114,6 +114,20 @@ describe("profile reads", () => {
     const result = await fetchPublicProfile("user-public")
     expect(result?.phone).toBe("+251 911 999 999")
   })
+
+  it("fetchPublicProfile reads the public surface from profiles_public (#70)", async () => {
+    const tables: string[] = []
+    const q = queue([{ data: { ...ownRow, phone_public: false, phone: null }, error: null }])
+    mockCreateClient.mockResolvedValue(
+      db((t) => {
+        tables.push(t)
+        return q
+      })
+    )
+    const result = await fetchPublicProfile("user-surface")
+    expect(tables[0]).toBe("profiles_public")
+    expect(result).not.toBeNull()
+  })
 })
 
 describe("profile writes", () => {

@@ -96,6 +96,34 @@ describe.skipIf(!integrationAvailable)("RLS: profiles", () => {
     expect(error).toBeNull()
     expect(data ?? []).toHaveLength(0)
   })
+
+  it("anon cannot read phone from profiles (#70 column grant closes the leak)", async () => {
+    const { data, error } = await anonClient().from("profiles").select("phone")
+    expect(error).not.toBeNull()
+    expect(data).toBeNull()
+  })
+
+  it("anon still reads the public profiles columns (browse/detail joins)", async () => {
+    const { data, error } = await anonClient()
+      .from("profiles")
+      .select("id, full_name, city, role, trust_score, phone_verified")
+    expect(error).toBeNull()
+    expect(data?.length ?? 0).toBeGreaterThan(0)
+    expect(data?.some((p) => p.id === AMIRA_ID)).toBe(true)
+  })
+
+  it("profiles_public is anon-readable and exposes no phone column", async () => {
+    const { data, error } = await anonClient()
+      .from("profiles_public")
+      .select("id, full_name, role, trust_score, phone_verified, fayda_verified")
+    expect(error).toBeNull()
+    expect(data?.length ?? 0).toBeGreaterThan(0)
+
+    const { error: phoneError } = await anonClient()
+      .from("profiles_public")
+      .select("phone")
+    expect(phoneError).not.toBeNull()
+  })
 })
 
 describe.skipIf(!integrationAvailable)("RLS: listings", () => {

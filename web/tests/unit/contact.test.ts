@@ -5,7 +5,7 @@ vi.mock("@/lib/supabase/server", () => ({
 }))
 
 import { createClient } from "@/lib/supabase/server"
-import { recordContactAttempt } from "@/lib/contact"
+import { fetchSellerContactInfo, recordContactAttempt } from "@/lib/contact"
 import {
   CONTACT_METHODS,
   CONTACT_METHOD_LABELS,
@@ -106,6 +106,52 @@ describe("buildContactUrl", () => {
   it("strips non-digits from phone for the tel: scheme", () => {
     const info = makeInfo({ phone: "07911 123 456", phone_public: true })
     expect(buildContactUrl("phone", info)).toBe("tel:07911123456")
+  })
+})
+
+describe("fetchSellerContactInfo (profiles_public read, #70)", () => {
+  // Two-query dance: the public columns come from the profiles_public view,
+  // then the opt-in phone pull stays on the base table.
+  const queue = (results: unknown[]): Record<string, unknown> => {
+    let i = 0
+    const b: Record<string, unknown> = {
+      select: () => b,
+      eq: () => b,
+      maybeSingle: () => b,
+      then: (resolve: (value: unknown) => unknown) =>
+        Promise.resolve(results[i++] ?? { data: null, error: null }).then(resolve),
+    }
+    return b
+  }
+
+  it("reads the public contact columns from profiles_public", async () => {
+    const tables: string[] = []
+    const q = queue([
+      { data: { telegram_username: "alice", phone_public: true }, error: null },
+      { data: { phone: "+251 911 111 111" }, error: null },
+    ])
+    mockCreateClient.mockResolvedValue({
+      from: (t: string) => {
+        tables.push(t)
+        return q
+      },
+    } as never)
+
+    const info = await fetchSellerContactInfo("s-1")
+    expect(tables[0]).toBe("profiles_public")
+    expect(tables[1]).toBe("profiles")
+    expect(info?.telegram_username).toBe("alice")
+    expect(info?.phone).toBe("+251 911 111 111")
+  })
+
+  it("keeps phone private unless phone_public is set", async () => {
+    const q = queue([
+      { data: { telegram_username: "alice", phone_public: false }, error: null },
+    ])
+    mockCreateClient.mockResolvedValue({ from: () => q } as never)
+
+    const info = await fetchSellerContactInfo("s-2")
+    expect(info?.phone).toBeNull()
   })
 })
 
