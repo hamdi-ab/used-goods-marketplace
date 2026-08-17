@@ -158,12 +158,12 @@ export default async function DashboardPage() {
                 Moderation
               </CardTitle>
               <CardDescription>
-                Review reported listings and sellers in the moderation queue.
+                Manage users, listings, and the moderation queue.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <Button asChild variant="outline">
-                <Link href="/admin/reports">Open reports</Link>
+                <Link href="/admin">Open admin</Link>
               </Button>
             </CardContent>
           </Card>
