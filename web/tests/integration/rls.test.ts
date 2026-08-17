@@ -126,6 +126,30 @@ describe.skipIf(!integrationAvailable)("RLS: profiles", () => {
   })
 })
 
+describe.skipIf(!integrationAvailable)("RLS: ai_requests (#69)", () => {
+  it("anon cannot record an AI request (no execute grant on the RPC)", async () => {
+    const { data, error } = await anonClient().rpc("record_ai_request", {
+      p_limit: 10,
+    })
+    expect(error).not.toBeNull()
+    expect(data).toBeNull()
+  })
+
+  it("a buyer cannot record an AI request (seller-only gate)", async () => {
+    const { client } = await signInAs(SEED.biniam.email, SEED.biniam.password)
+    const { data, error } = await client.rpc("record_ai_request", { p_limit: 10 })
+    expect(error).toBeNull()
+    expect(data?.allowed).toBe(false)
+  })
+
+  it("a seller can record an AI request", async () => {
+    const { client } = await signInAs(SEED.amira.email, SEED.amira.password)
+    const { data, error } = await client.rpc("record_ai_request", { p_limit: 10 })
+    expect(error).toBeNull()
+    expect(data?.allowed).toBe(true)
+  })
+})
+
 describe.skipIf(!integrationAvailable)("RLS: listings", () => {
   it("anon reads published listings", async () => {
     const { data, error } = await anonClient()
@@ -138,10 +162,14 @@ describe.skipIf(!integrationAvailable)("RLS: listings", () => {
 
   it("a seller updates their own listing", async () => {
     const { client } = await signInAs(SEED.amira.email, SEED.amira.password)
+    // Deterministic target: constrain to Amira's own published listings rather
+    // than the physically-first published row, whose heap order shifts as the
+    // integration suite mutates rows between runs.
     const { data: target } = await client
       .from("listings")
       .select("id")
       .eq("status", "published")
+      .eq("seller_id", AMIRA_ID)
       .limit(1)
     const listingId = target?.[0]?.id
     expect(listingId).toBeDefined()

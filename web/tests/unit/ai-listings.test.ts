@@ -1,7 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest"
 import type { Category } from "@/lib/listings/constants"
 
-import { resetAiRateLimiter, generateListingSuggestions } from "@/lib/ai/listings"
+vi.mock("@/lib/supabase/server", () => ({
+  createClient: vi.fn(),
+}))
+
+import { createClient } from "@/lib/supabase/server"
+import { generateListingSuggestions } from "@/lib/ai/listings"
+
+const mockedCreateClient = vi.mocked(createClient)
+let rpcMock: ReturnType<typeof vi.fn>
 
 const CATEGORIES: Category[] = [
   { id: "c-electronics", name: "Electronics", slug: "electronics", parent_id: null },
@@ -9,8 +17,14 @@ const CATEGORIES: Category[] = [
   { id: "c-books", name: "Books", slug: "books", parent_id: null },
 ]
 
+// Real image signatures so the magic-byte validator (#69) accepts them.
+const JPEG_MAGIC = new Uint8Array([
+  0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01,
+])
+const PNG_MAGIC = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])
+
 const photo = (name = "photo.jpg"): File =>
-  new File(["unused-bytes"], name, { type: "image/jpeg" })
+  new File([JPEG_MAGIC], name, { type: "image/jpeg" })
 
 const validJson = (over: Record<string, unknown> = {}) =>
   JSON.stringify({
@@ -36,7 +50,12 @@ beforeEach(() => {
   fetchMock = vi.fn()
   // The seam calls the global fetch (server-only); stub it per-test.
   globalThis.fetch = fetchMock as unknown as typeof globalThis.fetch
-  resetAiRateLimiter()
+
+  // The shared limiter (record_ai_request RPC) allows by default.
+  rpcMock = vi.fn()
+  rpcMock.mockResolvedValue({ data: { allowed: true, error: null }, error: null })
+  mockedCreateClient.mockResolvedValue({ rpc: rpcMock } as never)
+
   process.env.GEMINI_API_KEY = "test-key"
   delete process.env.AI_RATE_LIMIT
 })
@@ -56,15 +75,65 @@ describe("generateListingSuggestions (T14 / FS-005)", () => {
     expect(fetchMock).not.toHaveBeenCalled()
   })
 
-  it("returns rate_limited when the in-process window is exhausted (AC-4)", async () => {
-    process.env.AI_RATE_LIMIT = "2"
+  it("returns rate_limited when the shared window is exhausted (AC-4, #69)", async () => {
     const ok = geminiResponse(validJson())
     fetchMock.mockResolvedValueOnce(ok).mockResolvedValueOnce(ok)
+    rpcMock
+      .mockResolvedValueOnce({ data: { allowed: true, error: null }, error: null })
+      .mockResolvedValueOnce({ data: { allowed: true, error: null }, error: null })
+      .mockResolvedValueOnce({ data: { allowed: false, error: "rate limit exceeded" }, error: null })
     expect((await generateListingSuggestions([photo()], CATEGORIES)).ok).toBe(true)
     expect((await generateListingSuggestions([photo()], CATEGORIES)).ok).toBe(true)
     const third = await generateListingSuggestions([photo()], CATEGORIES)
     expect(third.ok).toBe(false)
     expect(third.ok ? "" : third.reason).toBe("rate_limited")
+    // The denied request never reached Gemini.
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it("passes the configured AI_RATE_LIMIT to the shared limiter (#69)", async () => {
+    process.env.AI_RATE_LIMIT = "2"
+    fetchMock.mockResolvedValueOnce(geminiResponse(validJson()))
+    await generateListingSuggestions([photo()], CATEGORIES)
+    expect(rpcMock).toHaveBeenCalledWith("record_ai_request", { p_limit: 2 })
+  })
+
+  it("rejects a file whose magic bytes are not an image (renamed executable)", async () => {
+    const exe = new File(
+      [new Uint8Array([0x4d, 0x5a, 0x90, 0x00])],
+      "photo.jpg",
+      { type: "image/jpeg" }
+    )
+    const res = await generateListingSuggestions([exe], CATEGORIES)
+    expect(res.ok).toBe(false)
+    expect(res.ok ? "" : res.message).toContain("not a valid JPG, PNG or WebP")
+    expect(fetchMock).not.toHaveBeenCalled()
+    expect(rpcMock).not.toHaveBeenCalled()
+  })
+
+  it("rejects an oversized photo before forwarding (#69)", async () => {
+    const big = new File(
+      [JPEG_MAGIC, new Uint8Array(6 * 1024 * 1024)],
+      "big.jpg",
+      { type: "image/jpeg" }
+    )
+    const res = await generateListingSuggestions([big], CATEGORIES)
+    expect(res.ok).toBe(false)
+    expect(res.ok ? "" : res.message).toBe("Each photo must be 5 MB or smaller")
+    expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it("forwards the magic-byte mime, not the client-declared type (#69)", async () => {
+    fetchMock.mockResolvedValueOnce(geminiResponse(validJson()))
+    const sneaky = new File([PNG_MAGIC], "sneaky.bin", { type: "application/octet-stream" })
+    const res = await generateListingSuggestions([sneaky], CATEGORIES)
+    expect(res.ok).toBe(true)
+    const call = fetchMock.mock.calls[0] as [string, { body: string }]
+    const parsed = JSON.parse(call[1].body)
+    const imageParts = parsed.contents[0].parts.filter((p: unknown) =>
+      Object.prototype.hasOwnProperty.call(p, "inlineData")
+    )
+    expect(imageParts[0].inlineData.mimeType).toBe("image/png")
   })
 
   it("treats a 429 from Gemini as rate_limited", async () => {
