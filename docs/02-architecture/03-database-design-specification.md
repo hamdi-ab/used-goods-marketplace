@@ -132,7 +132,7 @@ Every business table includes:
 | city | TEXT | Required |
 | sub_city | TEXT | Nullable |
 | bio | TEXT | Nullable |
-| trust_score | SMALLINT | 0–100 |
+| trust_score | SMALLINT | 0–100; composite recompute `recompute_trust_score()` (fix #83): round(0.35·avg rating×20 + 0.25·profile_completion + 0.20·min(10, sold listings)×10 + 0.10·(phone_verified+fayda_verified)×50 + 0.10·max(0, 100−25·resolved reports)), clamped 0–100; recalculated by `submit_review`, `accept_offer`, `record_verification`, `resolve_report` |
 | profile_completion | SMALLINT | 0–100; generated — 20% per populated field (avatar_url, phone, telegram_username, city, bio), recomputed on every write (fix #82) |
 | role | TEXT | buyer / seller / admin |
 

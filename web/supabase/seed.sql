@@ -401,8 +401,8 @@ begin
   -- mirroring accept_offer), and each transaction gets one review — so the
   -- seller trust bars in the demo are backed by real reviews, not just the
   -- hard-coded trust_score from T12. trust_score is then recomputed with the
-  -- same formula submit_review uses, so the badge score equals the earned
-  -- average (Amira 90, Fayad 80, Kebede 60). Deterministic IDs keep the seed
+  -- composite formula (#83), so the badge score equals the earned score
+  -- (Amira 61, Fayad 57, Kebede 40). Deterministic IDs keep the seed
   -- idempotent.
   insert into public.offers (id, listing_id, buyer_id, amount, message, status)
   values
@@ -447,12 +447,11 @@ begin
      'Bike runs well and papers were ready, though price took some negotiation.')
   on conflict (offer_id) do nothing;
 
-  -- ReviewSubmitted -> Recalculate Trust Score (domain model §9; same formula
-  -- as submit_review). Overrides the T12 hard-coded values with earned ones.
-  update public.profiles
-    set trust_score = (
-      select round(avg(rating) * 20)::smallint
-      from public.reviews where seller_id = public.profiles.id
-    )
-    where id in (seller_phone, seller_fayda, seller_plain);
+  -- ReviewSubmitted/ListingMarkedSold/VerificationApproved -> Recalculate Trust
+  -- Score (domain model §9). Recomputes the composite (PRD FR 140-147, #83)
+  -- for the demo sellers, overriding the hard-coded T12 values with earned
+  -- ones so the badge score matches the formula the write paths use.
+  select public.recompute_trust_score(id)
+    from public.profiles
+   where id in (seller_phone, seller_fayda, seller_plain);
 end $$;

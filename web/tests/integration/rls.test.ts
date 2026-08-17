@@ -11,6 +11,7 @@ import {
 // Seed user ids are deterministic (web/supabase/seed.sql):
 const AMIRA_ID = "00000000-0000-0000-0000-000000000002" // seller_phone
 const FAYAD_ID = "00000000-0000-0000-0000-000000000003" // seller_fayda
+const KEBEDE_ID = "00000000-0000-0000-0000-000000000004" // seller_plain
 const BINIAM_ID = "00000000-0000-0000-0000-000000000005" // a_buyer
 
 // RLS matrix (docs/03-engineering/01-testing-strategy.md §8): the policies
@@ -434,8 +435,8 @@ describe.skipIf(!integrationAvailable)("RLS: verification workflow (#73)", () =>
 
     // Cleanup: a rejection rescinds the flag and soft-deletes the live row
     // (approved records are immutable in place, INV-009 — the RPC supersedes
-    // them), so a later run can request the same type again. The +20/-20
-    // trust deltas cancel out, keeping biniam's seed trust intact.
+    // them), so a later run can request the same type again. Trust is governed
+    // by the composite recompute (#83); the #83 suite restores seed trust.
     const rescinded = await admin.rpc("record_verification", {
       p_user_id: BINIAM_ID,
       p_type: "fayda",
@@ -778,5 +779,138 @@ describe.skipIf(!integrationAvailable)("RLS: profile completion (#82)", () => {
       .eq("id", userId)
       .single()
     expect(after?.profile_completion).toBe(20)
+  })
+})
+
+describe.skipIf(!integrationAvailable)("RLS: trust score composite (#83)", () => {
+  it("recomputes trust from all five signals on verification changes", async () => {
+    const { client: admin } = await signInAs(SEED.admin.email, SEED.admin.password)
+
+    // biniam's data is deterministic in the seed: completion 20, no reviews,
+    // no sold listings, no resolved reports, no verification. The composite
+    // gives round(0.25*20 + 0.10*100) = 15; a phone verification adds the 50
+    // verification component: round(0.25*20 + 0.10*50 + 0.10*100) = 20.
+    const approved = await admin.rpc("record_verification", {
+      p_user_id: BINIAM_ID,
+      p_type: "phone",
+      p_status: "verified",
+      p_notes: null,
+    })
+    expect(approved.error).toBeNull()
+    expect(approved.data?.ok).toBe(true)
+
+    const { data: verified } = await admin
+      .from("profiles")
+      .select("trust_score, phone_verified")
+      .eq("id", BINIAM_ID)
+      .single()
+    expect(verified?.phone_verified).toBe(true)
+    expect(verified?.trust_score).toBe(20)
+
+    // Rejecting rescinds the flag and recomputes the score back down.
+    const rejected = await admin.rpc("record_verification", {
+      p_user_id: BINIAM_ID,
+      p_type: "phone",
+      p_status: "rejected",
+      p_notes: null,
+    })
+    expect(rejected.error).toBeNull()
+    expect(rejected.data?.ok).toBe(true)
+
+    const { data: after } = await admin
+      .from("profiles")
+      .select("trust_score, phone_verified")
+      .eq("id", BINIAM_ID)
+      .single()
+    expect(after?.phone_verified).toBe(false)
+    expect(after?.trust_score).toBe(15)
+
+    // Cleanup: restore biniam's seed trust so the suite stays idempotent.
+    const { error: restore } = await admin
+      .from("profiles")
+      .update({ trust_score: 50 })
+      .eq("id", BINIAM_ID)
+    expect(restore).toBeNull()
+  })
+
+  it("deducts trust when a resolved report penalizes a seller", async () => {
+    // Kebede's data is deterministic: completion 20, two sold listings, two
+    // reviews averaging 3 (rating component 60), no verification, no resolved
+    // reports -> round(0.35*60 + 0.25*20 + 0.20*20 + 0.10*100) = 40. One
+    // resolved report costs 25 off the reports signal (100 -> 75):
+    // round(0.35*60 + 0.25*20 + 0.20*20 + 0.10*75) = 38.
+    const { client: reporter } = await signInAs(SEED.biniam.email, SEED.biniam.password)
+    const { data: listing } = await reporter
+      .from("listings")
+      .select("id")
+      .eq("seller_id", KEBEDE_ID)
+      .eq("status", "published")
+      .is("deleted_at", null)
+      .limit(1)
+      .maybeSingle()
+    expect(listing?.id).toBeTruthy()
+    if (!listing) throw new Error("expected a kebede published listing")
+
+    const { client: admin } = await signInAs(SEED.admin.email, SEED.admin.password)
+    const { data: before } = await admin
+      .from("profiles")
+      .select("trust_score")
+      .eq("id", KEBEDE_ID)
+      .single()
+    expect(before?.trust_score).toBe(60)
+
+    const reported = await reporter.rpc("submit_report", {
+      p_reason: "spam",
+      p_listing_id: listing.id,
+      p_seller_id: null,
+      p_note: null,
+    })
+    expect(reported.error).toBeNull()
+    expect(reported.data).toMatchObject({ ok: true })
+
+    const { data: report } = await admin
+      .from("reports")
+      .select("id")
+      .eq("reporter_id", BINIAM_ID)
+      .eq("reported_listing_id", listing.id)
+      .eq("status", "open")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    expect(report?.id).toBeTruthy()
+    if (!report) throw new Error("expected an open report")
+
+    const resolved = await admin.rpc("resolve_report", {
+      p_report_id: report.id,
+      p_action: "remove_listing",
+      p_admin_note: null,
+    })
+    expect(resolved.error).toBeNull()
+    expect(resolved.data).toMatchObject({ ok: true })
+
+    const { data: after } = await admin
+      .from("profiles")
+      .select("trust_score")
+      .eq("id", KEBEDE_ID)
+      .single()
+    expect(after?.trust_score).toBe(38)
+
+    // Cleanup: drop the resolved report, restore the removed listing and
+    // kebede's seed trust so later runs start identical.
+    const { error: delReport } = await admin
+      .from("reports")
+      .delete()
+      .eq("id", report.id)
+    expect(delReport).toBeNull()
+    const { error: restoreListing } = await admin
+      .from("listings")
+      .update({ status: "published", deleted_at: null })
+      .eq("id", listing.id)
+    expect(restoreListing).toBeNull()
+    const { error: restoreTrust } = await admin
+      .from("profiles")
+      .update({ trust_score: 60 })
+      .eq("id", KEBEDE_ID)
+    expect(restoreTrust).toBeNull()
   })
 })
