@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache"
 
 import { recordAiUsage } from "@/lib/ai/telemetry"
 import { requireSeller } from "@/lib/auth"
+import { consumeRateBudget } from "@/lib/rate-limit"
 import {
   createListing as createListingRow,
   updateListing as updateListingRow,
@@ -98,6 +99,11 @@ export async function createListing(
 
   const user = await requireSeller()
 
+  const budget = await consumeRateBudget()
+  if (!budget.ok) {
+    return { message: budget.message }
+  }
+
   try {
     const result = await createListingRow(
       { ...parsed.data, negotiable: parsed.data.negotiable ?? false },
@@ -146,6 +152,11 @@ export async function updateListing(
 
   const user = await requireSeller()
 
+  const budget = await consumeRateBudget()
+  if (!budget.ok) {
+    return { message: budget.message }
+  }
+
   try {
     const result = await updateListingRow(
       {
@@ -186,6 +197,11 @@ export async function deleteListing(
   if (!id) return { message: "Missing listing id", ok: false }
 
   const user = await requireSeller()
+
+  const budget = await consumeRateBudget()
+  if (!budget.ok) {
+    return { message: budget.message, ok: false }
+  }
 
   try {
     const result = await softDeleteListing(id, user.id)

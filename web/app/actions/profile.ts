@@ -5,6 +5,7 @@ import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 
 import { getCurrentUser } from "@/lib/auth"
+import { consumeRateBudget } from "@/lib/rate-limit"
 import { createClient } from "@/lib/supabase/server"
 import { completeOwnProfile, updateOwnProfile } from "@/lib/profiles"
 import { uploadObjects } from "@/lib/media"
@@ -43,6 +44,11 @@ export async function completeProfile(
 
   const user = await getCurrentUser()
   if (!user) redirect("/login")
+
+  const budget = await consumeRateBudget()
+  if (!budget.ok) {
+    return { message: budget.message }
+  }
 
   const result = await completeOwnProfile(user.id, {
     fullName: parsed.data.fullName,
@@ -100,6 +106,11 @@ export async function updateProfile(
   const user = await getCurrentUser()
   if (!user) redirect("/login")
 
+  const budget = await consumeRateBudget()
+  if (!budget.ok) {
+    return { message: budget.message }
+  }
+
   const result = await updateOwnProfile(user.id, {
     city: parsed.data.city,
     subCity: parsed.data.subCity,
@@ -126,6 +137,11 @@ export async function uploadAvatar(
   const user = await getCurrentUser()
   if (!user || user.id !== uid) {
     return { url: null, error: "Not authorized" }
+  }
+
+  const budget = await consumeRateBudget()
+  if (!budget.ok) {
+    return { url: null, error: budget.message ?? null }
   }
 
   const file = formData.get("avatar") as File | null

@@ -202,3 +202,59 @@ describe.skipIf(!integrationAvailable)("RLS: listings", () => {
     expect(data ?? []).toHaveLength(0)
   })
 })
+
+describe.skipIf(!integrationAvailable)("RLS: rate_usage / consume_rate_budget (#85)", () => {
+  it("anon without a fingerprint is denied (no bucket to charge)", async () => {
+    const { data, error } = await anonClient().rpc("consume_rate_budget", {
+      p_limit: null,
+      p_fingerprint: null,
+    })
+    expect(error).toBeNull()
+    expect(data?.allowed).toBe(false)
+  })
+
+  it("anon with a valid fingerprint consumes from the anon bucket", async () => {
+    const fp = "aaaaaaaa-bbbb-cccc-dddd-eeeeffff0000"
+    const { data, error } = await anonClient().rpc("consume_rate_budget", {
+      p_limit: null,
+      p_fingerprint: fp,
+    })
+    expect(error).toBeNull()
+    expect(data?.allowed).toBe(true)
+  })
+
+  it("anon with a malformed fingerprint is denied", async () => {
+    const { data, error } = await anonClient().rpc("consume_rate_budget", {
+      p_limit: null,
+      p_fingerprint: "not-a-uuid",
+    })
+    expect(error).toBeNull()
+    expect(data?.allowed).toBe(false)
+  })
+
+  it("an authenticated trader consumes from the auth bucket", async () => {
+    const { client } = await signInAs(SEED.amira.email, SEED.amira.password)
+    const { data, error } = await client.rpc("consume_rate_budget", {
+      p_limit: null,
+      p_fingerprint: null,
+    })
+    expect(error).toBeNull()
+    expect(data?.allowed).toBe(true)
+  })
+
+  it("a bucket is exhausted once its limit is spent (p_limit is server-capped)", async () => {
+    const { client } = await signInAs(SEED.fayad.email, SEED.fayad.password)
+    // A caller may lower the limit (tests) but never raise it; two calls at a
+    // limit of 1 must exhaust the bucket on the second call.
+    const first = await client.rpc("consume_rate_budget", {
+      p_limit: 1,
+      p_fingerprint: null,
+    })
+    expect(first.data?.allowed).toBe(true)
+    const second = await client.rpc("consume_rate_budget", {
+      p_limit: 1,
+      p_fingerprint: null,
+    })
+    expect(second.data?.allowed).toBe(false)
+  })
+})
