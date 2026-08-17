@@ -68,6 +68,7 @@ export default async function ListingPage({
   const cover = images[0]?.image_url
   const roleLabel =
     ROLE_LABELS[(seller?.role ?? "seller") as UserRole] ?? "Seller"
+  const isOwner = Boolean(user && user.id === l.seller_id)
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -119,10 +120,11 @@ export default async function ListingPage({
             {l.ai_assisted ? (
               <Badge variant="outline">AI-assisted</Badge>
             ) : null}
-            <FavoriteButton listingId={l.id} initial={favorited} />
+            <FavoriteButton listingId={l.id} initial={favorited} isOwner={isOwner} />
             <ReportButton
               target={{ type: "listing", listingId: l.id }}
               signedIn={Boolean(user)}
+              isOwner={isOwner}
             />
           </div>
 
@@ -134,7 +136,7 @@ export default async function ListingPage({
           <MakeOfferButton
             listingId={l.id}
             listingPrice={l.price}
-            isOwner={Boolean(user && user.id === l.seller_id)}
+            isOwner={isOwner}
             available={l.status === "published"}
             signedIn={Boolean(user)}
           />
@@ -144,6 +146,7 @@ export default async function ListingPage({
             sellerId={l.seller_id}
             signedIn={Boolean(user)}
             contactInfo={contactInfo}
+            isOwner={isOwner}
           />
 
           {category ? (

@@ -21,9 +21,12 @@ type Target =
 export function ReportButton({
   target,
   signedIn,
+  isOwner,
 }: {
   target: Target
   signedIn: boolean
+  /** The signed-in user is the listed seller; owners cannot report themselves. */
+  isOwner?: boolean
 }) {
   const [open, setOpen] = useState(false)
   // Incrementing the key on each open forces ReportDialog to remount, which
@@ -35,6 +38,9 @@ export function ReportButton({
     setOpen(nextOpen)
     if (nextOpen) setOpenKey((k) => k + 1)
   }
+
+  // A seller cannot report their own listing.
+  if (isOwner) return null
 
   const label = target.type === "listing" ? "Report listing" : "Report seller"
   const href =

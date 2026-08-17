@@ -20,6 +20,8 @@ interface ContactButtonProps {
   sellerId: string
   signedIn: boolean
   contactInfo: SellerContactInfo | null
+  /** The signed-in user is the listing/seller owner; hide the buy-side CTA. */
+  isOwner?: boolean
 }
 
 export function ContactButton({
@@ -27,12 +29,16 @@ export function ContactButton({
   sellerId,
   signedIn,
   contactInfo,
+  isOwner,
 }: ContactButtonProps) {
   const [open, setOpen] = useState(false)
   // Incrementing the key on each open forces ContactDialog to remount,
   // resetting its useActionState. Without this, a previously-opened contact
   // method's URL would fire again on reopen via the useEffect.
   const [openKey, setOpenKey] = useState(0)
+
+  // A seller never contacts themselves about their own listing.
+  if (isOwner) return null
 
   const handleOpenChange = (nextOpen: boolean) => {
     setOpen(nextOpen)
