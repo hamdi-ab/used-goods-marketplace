@@ -11,8 +11,8 @@ export function MobileNav() {
   const pathname = usePathname()
   const { role } = useAuth()
 
-  // Admins are moderation-only (ADR-020): the console sidebar is their
-  // navigation, so the mobile sheet shows only a home link.
+  // Admins are moderation-only (ADR-020): the sidebar is hidden on mobile, so
+  // the sheet surfaces the full console nav (View Site + sections) instead.
   const nav = role === "admin" ? adminNav : mobileNav
 
   return (

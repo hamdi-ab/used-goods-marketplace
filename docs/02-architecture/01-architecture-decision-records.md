@@ -566,7 +566,7 @@ Admin is a moderation role, not a trading role. A signed-in admin must not be ab
 1. **Read-only inspection:** admins may browse the marketplace and open any listing or profile (the console links out to public pages for this).
 2. **Moderation writes only:** admins may `resolveReport`, `suspendUserRow`, `removeListingRow`. No other writes.
 3. **Blocked writes:** admins are blocked from creating/editing/deleting listings (`requireSeller` no longer admits admin), from `toggleFavorite`, from all offer actions, from `submitReview`, from `createReport`, and from `recordContactAttempt`.
-4. **Role-aware shell:** the header/nav swap per role — an admin's top nav is just "Home" (view-site door); the `/admin` sidebar carries the console navigation (Dashboard, Users, Listings, Reports, Statistics).
+4. **Role-aware shell:** admin routes (`/admin/**`) render inside a dedicated dashboard shell — a fixed sidebar (brand, View Site, Dashboard, Users, Listings, Reports, Statistics, user card + sign out) with the public site header/footer excluded via a `(site)` route group. Admins browsing public pages get the normal storefront header with no primary nav (their user menu carries the "Admin console" door).
 5. **Role-aware login landing:** an admin logs in to `/admin`. A `?next` target is honored only if it is a read-safe page; trader destinations (`/sell`, `/offers`, `/favorites`, listing edit) fall back to `/admin`.
 6. **`/dashboard` untouched:** it stays buyer/seller territory; the admin's account menu "Dashboard" item becomes "Admin console" → `/admin`. Visiting `/dashboard` directly as admin renders harmlessly.
 

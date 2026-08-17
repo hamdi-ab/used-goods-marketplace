@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation"
 import { MenuIcon, PlusIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { adminNav, primaryNav, siteName } from "@/lib/nav"
+import { primaryNav, siteName } from "@/lib/nav"
 import { useAuth } from "@/components/auth/auth-provider"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
@@ -17,7 +17,6 @@ export function SiteHeader() {
   const { role } = useAuth()
 
   const isAdmin = role === "admin"
-  const nav = isAdmin ? adminNav : primaryNav
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:backdrop-blur">
@@ -32,26 +31,30 @@ export function SiteHeader() {
           <span className="hidden sm:inline">{siteName}</span>
         </Link>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
-          {nav.map((item) => {
-            const active = pathname === item.href
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                  active
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-              >
-                {item.title}
-              </Link>
-            )
-          })}
-        </nav>
+        {/* Admins (ADR-020) navigate from the console sidebar; the header
+            stays clean instead of showing a lone Home link. */}
+        {!isAdmin ? (
+          <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
+            {primaryNav.map((item) => {
+              const active = pathname === item.href
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                    active
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  {item.title}
+                </Link>
+              )
+            })}
+          </nav>
+        ) : null}
 
         <div className="flex items-center gap-2 sm:gap-3">
           {!isAdmin ? (

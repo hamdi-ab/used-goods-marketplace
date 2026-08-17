@@ -1,9 +1,14 @@
 import {
-  HomeIcon,
-  SearchIcon,
-  PlusIcon,
-  HeartIcon,
+  BarChart3Icon,
+  FlagIcon,
   HandshakeIcon,
+  HeartIcon,
+  HomeIcon,
+  LayoutDashboardIcon,
+  ListIcon,
+  PlusIcon,
+  SearchIcon,
+  UsersIcon,
   type LucideIcon,
 } from "lucide-react"
 
@@ -42,10 +47,16 @@ export const mobileNav: NavItem[] = [
   { title: "Favorites", href: "/favorites", icon: HeartIcon },
 ]
 
-// Admins are moderation-only (ADR-020): the header and mobile sheet surface a
-// single view-site door; the /admin sidebar carries the console navigation.
+// Admins are moderation-only (ADR-020): the top header shows no nav (it would
+// be a lone Home link), so Home leads the console nav itself — a view-site
+// door on top of the /admin sidebar sections.
 export const adminNav: NavItem[] = [
   { title: "Home", href: "/", icon: HomeIcon },
+  { title: "Dashboard", href: "/admin", icon: LayoutDashboardIcon },
+  { title: "Users", href: "/admin/users", icon: UsersIcon },
+  { title: "Listings", href: "/admin/listings", icon: ListIcon },
+  { title: "Reports", href: "/admin/reports", icon: FlagIcon },
+  { title: "Statistics", href: "/admin/statistics", icon: BarChart3Icon },
 ]
 
 export const footerNav: NavItem[] = [
