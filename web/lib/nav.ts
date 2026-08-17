@@ -1,5 +1,6 @@
 import {
   BarChart3Icon,
+  BadgeCheckIcon,
   FlagIcon,
   HandshakeIcon,
   HeartIcon,
@@ -57,6 +58,7 @@ export const adminNav: NavItem[] = [
   { title: "Users", href: "/admin/users", icon: UsersIcon },
   { title: "Listings", href: "/admin/listings", icon: ListIcon },
   { title: "Reports", href: "/admin/reports", icon: FlagIcon },
+  { title: "Verifications", href: "/admin/verifications", icon: BadgeCheckIcon },
   { title: "Statistics", href: "/admin/statistics", icon: BarChart3Icon },
 ]
 

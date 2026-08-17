@@ -9,6 +9,7 @@ export type RpcName =
   | "submit_report"
   | "resolve_report"
   | "record_verification"
+  | "request_verification"
   | "submit_offer"
   | "accept_offer"
   | "decline_offer"

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 
 import { getCurrentUser } from "@/lib/auth"
 import { fetchOwnProfile, type OwnProfileRow } from "@/lib/profiles"
+import { fetchMyVerifications } from "@/lib/verifications"
 import { ProfileForm } from "@/components/profile/profile-form"
 
 export const metadata: Metadata = {
@@ -14,9 +15,16 @@ export default async function ProfilePage() {
   const user = await getCurrentUser()
   if (!user) redirect("/login")
 
-  const profile = await fetchOwnProfile(user.id)
+  const [profile, verifications] = await Promise.all([
+    fetchOwnProfile(user.id),
+    fetchMyVerifications(user.id),
+  ])
 
   return (
-    <ProfileForm user={user} profile={(profile ?? {}) as OwnProfileRow} />
+    <ProfileForm
+      user={user}
+      profile={(profile ?? {}) as OwnProfileRow}
+      verifications={verifications}
+    />
   )
 }

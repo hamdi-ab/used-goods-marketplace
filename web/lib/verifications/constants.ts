@@ -27,6 +27,34 @@ export type VerificationBadge = (typeof VERIFICATION_BADGES)[number]
 export type VerificationType = "email" | "phone" | "telegram" | "fayda"
 export type VerificationStatus = "pending" | "verified" | "rejected"
 
+/**
+ * Types a user can request for themselves via request_verification (fix #73):
+ * the two public badge types. email/telegram have no badge yet and stay
+ * admin-only (the RPC refuses them).
+ */
+export const SELF_SERVE_TYPES = ["phone", "fayda"] as const
+export type SelfServeType = (typeof SELF_SERVE_TYPES)[number]
+
+/** Every DB enum member, for the admin record_verification decision form. */
+export const VERIFICATION_TYPES = ["email", "phone", "telegram", "fayda"] as const
+
+/** record_verification rejects notes longer than 2000 chars; the zod schema
+ * mirrors that cap so the admin form validates before the RPC round trip. */
+export const VERIFICATION_NOTES_MAX = 2000
+
+export const VERIFICATION_TYPE_LABELS: Record<VerificationType, string> = {
+  email: "Email",
+  phone: "Phone",
+  telegram: "Telegram",
+  fayda: "Fayda",
+}
+
+export const VERIFICATION_STATUS_LABELS: Record<VerificationStatus, string> = {
+  pending: "Pending review",
+  verified: "Verified",
+  rejected: "Rejected",
+}
+
 export const VERIFICATION_BADGE_LABELS: Record<VerificationBadge, string> = {
   "verified-seller": "Verified Seller",
   phone: "Phone Verified",

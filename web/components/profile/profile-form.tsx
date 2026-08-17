@@ -12,7 +12,9 @@ import Link from "next/link"
 
 import { ROLE_LABELS, type SessionUser } from "@/lib/auth/types"
 import { initials } from "@/lib/utils"
+import type { MyVerificationRow } from "@/lib/verifications"
 import { promoteToSeller, updateProfile, uploadAvatar } from "@/app/actions/profile"
+import { VerificationCard } from "@/components/profile/verification-card"
 
 type ProfileRow = {
   avatar_url: string | null
@@ -35,9 +37,11 @@ function FieldError({ message }: { message: string | undefined }) {
 export function ProfileForm({
   user,
   profile,
+  verifications,
 }: {
   user: SessionUser
   profile: ProfileRow
+  verifications: MyVerificationRow[]
 }) {
   const [state, formAction, pending] = useActionState(updateProfile, {})
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? null)
@@ -88,6 +92,12 @@ export function ProfileForm({
             </form>
           </CardContent>
         </Card>
+      ) : null}
+
+      {/* Self-serve verification (fix #73): traders request phone/Fayda checks;
+          admins are moderation-only (ADR-020), so the card is trader-only. */}
+      {user.role !== "admin" ? (
+        <VerificationCard verifications={verifications} />
       ) : null}
 
       <Card className="mb-6 gap-6">

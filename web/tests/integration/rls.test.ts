@@ -357,3 +357,99 @@ describe.skipIf(!integrationAvailable)("RLS: admin suspend / restore (#86)", () 
     expect(cleanup.error).toBeNull()
   })
 })
+
+describe.skipIf(!integrationAvailable)("RLS: verification workflow (#73)", () => {
+  it("anon cannot call request_verification (no execute grant)", async () => {
+    const { data, error } = await anonClient().rpc("request_verification", {
+      p_type: "phone",
+    })
+    expect(error).not.toBeNull()
+    expect(data).toBeNull()
+  })
+
+  it("a trader requests fayda verification, then an admin approves it", async () => {
+    // biniam has no live verification row (seed), so the request path is open.
+    const { client } = await signInAs(SEED.biniam.email, SEED.biniam.password)
+
+    const requested = await client.rpc("request_verification", {
+      p_type: "fayda",
+    })
+    expect(requested.error).toBeNull()
+    expect(requested.data?.ok).toBe(true)
+
+    // One live request per type: a duplicate is refused.
+    const duplicate = await client.rpc("request_verification", {
+      p_type: "fayda",
+    })
+    expect(duplicate.error).toBeNull()
+    expect(duplicate.data?.ok).toBe(false)
+
+    // The pending row is visible to the owner.
+    const { data: own } = await client
+      .from("verifications")
+      .select("type, status")
+      .eq("user_id", BINIAM_ID)
+      .order("created_at", { ascending: false })
+    expect(own?.some((v) => v.type === "fayda" && v.status === "pending")).toBe(true)
+
+    // It is queued for the admin review surface (admins read all rows).
+    const { client: admin } = await signInAs(SEED.admin.email, SEED.admin.password)
+    const { data: queued } = await admin
+      .from("verifications")
+      .select("user_id, type, status")
+      .eq("status", "pending")
+    expect(
+      queued?.some(
+        (v) => v.user_id === BINIAM_ID && v.type === "fayda" && v.status === "pending"
+      )
+    ).toBe(true)
+
+    // A non-admin calling record_verification is refused by the admin gate.
+    const { client: trader } = await signInAs(SEED.amira.email, SEED.amira.password)
+    const refused = await trader.rpc("record_verification", {
+      p_user_id: BINIAM_ID,
+      p_type: "fayda",
+      p_status: "verified",
+      p_notes: null,
+    })
+    expect(refused.error).toBeNull()
+    expect(refused.data?.ok).toBe(false)
+
+    // The admin approves: the audit row lands verified and the flag flips.
+    const approved = await admin.rpc("record_verification", {
+      p_user_id: BINIAM_ID,
+      p_type: "fayda",
+      p_status: "verified",
+      p_notes: null,
+    })
+    expect(approved.error).toBeNull()
+    expect(approved.data?.ok).toBe(true)
+
+    const { data: row } = await admin
+      .from("profiles")
+      .select("fayda_verified")
+      .eq("id", BINIAM_ID)
+      .single()
+    expect(row?.fayda_verified).toBe(true)
+
+    // Cleanup: a rejection rescinds the flag and soft-deletes the live row
+    // (approved records are immutable in place, INV-009 — the RPC supersedes
+    // them), so a later run can request the same type again. The +20/-20
+    // trust deltas cancel out, keeping biniam's seed trust intact.
+    const rescinded = await admin.rpc("record_verification", {
+      p_user_id: BINIAM_ID,
+      p_type: "fayda",
+      p_status: "rejected",
+      p_notes: null,
+    })
+    expect(rescinded.error).toBeNull()
+    expect(rescinded.data?.ok).toBe(true)
+
+    const { data: after } = await admin
+      .from("profiles")
+      .select("fayda_verified")
+      .eq("id", BINIAM_ID)
+      .single()
+    expect(after?.fayda_verified).toBe(false)
+  })
+})
