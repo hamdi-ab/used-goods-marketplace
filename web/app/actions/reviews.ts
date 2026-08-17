@@ -10,6 +10,7 @@ import {
   RATING_MIN,
   REVIEW_COMMENT_MAX,
 } from "@/lib/reviews/constants"
+import { uuidSchema } from "@/lib/uuid"
 
 function formValue(formData: FormData, key: string): string | undefined {
   const v = formData.get(key)
@@ -17,7 +18,7 @@ function formValue(formData: FormData, key: string): string | undefined {
 }
 
 const reviewSchema = z.object({
-  offerId: z.string().uuid(),
+  offerId: uuidSchema,
   rating: z.coerce
     .number({ message: "Pick a rating" })
     .int()

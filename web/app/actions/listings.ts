@@ -3,8 +3,8 @@
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
 
-import { requireSeller } from "@/lib/auth"
 import { recordAiUsage } from "@/lib/ai/telemetry"
+import { requireSeller } from "@/lib/auth"
 import {
   createListing as createListingRow,
   updateListing as updateListingRow,
@@ -13,6 +13,7 @@ import {
   STATUSES,
   MAX_IMAGES,
 } from "@/lib/listings"
+import { uuidSchema } from "@/lib/uuid"
 
 function formValue(formData: FormData, key: string): string | undefined {
   const v = formData.get(key)
@@ -26,7 +27,7 @@ const createSchema = z.object({
     .number({ message: "Enter a price" })
     .gt(0, "Price must be greater than 0"),
   condition: z.enum(CONDITIONS),
-  categoryId: z.string().uuid().optional(),
+  categoryId: uuidSchema.optional(),
   city: z.string().min(1, "Enter a city").max(100),
   subCity: z.string().max(100).optional(),
   address: z.string().max(200).optional(),
@@ -36,14 +37,14 @@ const createSchema = z.object({
 })
 
 const editSchema = z.object({
-  id: z.string().uuid(),
+  id: uuidSchema,
   title: z.string().min(5, "Title needs at least 5 characters").max(120),
   description: z.string().max(2000).optional().refine((v) => !v || v.length >= 20, "Description needs at least 20 characters"),
   price: z.coerce
     .number({ message: "Enter a price" })
     .gt(0, "Price must be greater than 0"),
   condition: z.enum(CONDITIONS),
-  categoryId: z.string().uuid().optional(),
+  categoryId: uuidSchema.optional(),
   city: z.string().min(1, "Enter a city").max(100),
   subCity: z.string().max(100).optional(),
   address: z.string().max(200).optional(),

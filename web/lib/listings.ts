@@ -5,13 +5,13 @@ import type { Supabase } from "@/lib/supabase/types"
 import { callRpc } from "@/lib/supabase/rpc"
 import { uploadObjects } from "@/lib/media"
 import { listingImageAdapter } from "@/lib/media/listing-adapter"
+import { isValidUuid } from "@/lib/uuid"
 
 import {
   BROWSE_LIMIT_MAX,
   LISTING_COLUMNS,
   MAX_IMAGES,
   PAGE_SIZE,
-  isValidUuid,
 } from "./listings/constants"
 import type {
   BrowseListing,

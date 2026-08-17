@@ -12,6 +12,7 @@ import {
   OFFER_AMOUNT_MAX,
   OFFER_MESSAGE_MAX,
 } from "@/lib/offers"
+import { uuidSchema } from "@/lib/uuid"
 
 function formValue(formData: FormData, key: string): string | undefined {
   const v = formData.get(key)
@@ -26,7 +27,7 @@ const amountSchema = z.coerce
   .max(OFFER_AMOUNT_MAX, "Amount is too large")
 
 const submitOfferSchema = z.object({
-  listingId: z.string().uuid(),
+  listingId: uuidSchema,
   amount: amountSchema,
   message: z.string().max(OFFER_MESSAGE_MAX, "Keep the message under 500 characters").optional(),
 })
@@ -71,8 +72,8 @@ export async function submitOffer(
 
 const offerActionSchema = z.object({
   action: z.enum(["accept", "decline", "counter"]),
-  offerId: z.string().uuid(),
-  listingId: z.string().uuid(),
+  offerId: uuidSchema,
+  listingId: uuidSchema,
   amount: amountSchema.optional(),
 })
 

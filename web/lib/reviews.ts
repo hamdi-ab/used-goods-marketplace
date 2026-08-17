@@ -3,7 +3,7 @@ import "server-only"
 import { createClient } from "@/lib/supabase/server"
 import type { Supabase } from "@/lib/supabase/types"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
-import { isValidUuid } from "@/lib/listings"
+import { isValidUuid } from "@/lib/uuid"
 
 export * from "@/lib/reviews/constants"
 

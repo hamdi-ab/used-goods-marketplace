@@ -10,6 +10,7 @@ import {
   buildContactUrl,
 } from "@/lib/contact"
 import { CONTACT_METHODS } from "@/lib/contact/constants"
+import { uuidSchema } from "@/lib/uuid"
 import type { ContactMethod } from "@/lib/contact/constants"
 
 function formValue(formData: FormData, key: string): string | undefined {
@@ -18,8 +19,8 @@ function formValue(formData: FormData, key: string): string | undefined {
 }
 
 const recordContactSchema = z.object({
-  listingId: z.string().uuid().optional(),
-  sellerId: z.string().uuid(),
+  listingId: uuidSchema.optional(),
+  sellerId: uuidSchema,
   contactMethod: z.enum(CONTACT_METHODS),
 })
 

@@ -195,10 +195,3 @@ export const CONDITION_COLORS: Record<Condition, string> = {
   "Lightly Used": "bg-blue-100 text-blue-800",
   "Fair": "bg-amber-100 text-amber-800",
 }
-
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-
-export function isValidUuid(id: string): boolean {
-  return UUID_RE.test(id)
-}
