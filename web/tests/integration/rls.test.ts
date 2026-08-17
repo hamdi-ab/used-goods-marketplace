@@ -650,3 +650,79 @@ describe.skipIf(!integrationAvailable)("RLS: notifications (#72)", () => {
     expect(reporterNotes?.[0]?.type).toBe("report_resolved")
   })
 })
+
+describe.skipIf(!integrationAvailable)("RLS: listing views (#74)", () => {
+  it("increments view_count once per viewer and keeps the event buffer admin-only", async () => {
+    // Pick one of amira's published listings and its seed view_count.
+    const { client: biniam } = await signInAs(SEED.biniam.email, SEED.biniam.password)
+    const { data: listing } = await biniam
+      .from("listings")
+      .select("id, view_count")
+      .eq("seller_id", AMIRA_ID)
+      .eq("status", "published")
+      .is("deleted_at", null)
+      .limit(1)
+      .maybeSingle()
+    expect(listing?.id).toBeTruthy()
+    if (!listing) throw new Error("expected an amira published listing")
+    const original = listing.view_count
+
+    // biniam views -> exactly one new view.
+    const viewed = await biniam.rpc("record_listing_view", {
+      p_listing_ids: [listing.id],
+    })
+    expect(viewed.error).toBeNull()
+    expect(viewed.data).toMatchObject({ ok: true, count: 1 })
+
+    // A retry inside the dedupe window is idempotent.
+    const retried = await biniam.rpc("record_listing_view", {
+      p_listing_ids: [listing.id],
+    })
+    expect(retried.error).toBeNull()
+    expect(retried.data).toMatchObject({ ok: true, count: 0 })
+
+    const { data: afterBiniam } = await biniam
+      .from("listings")
+      .select("view_count")
+      .eq("id", listing.id)
+      .single()
+    expect(afterBiniam?.view_count).toBe(original + 1)
+
+    // A distinct viewer (anon visitor) counts as a new view.
+    const anon = anonClient()
+    const anonView = await anon.rpc("record_listing_view", {
+      p_listing_ids: [listing.id],
+    })
+    expect(anonView.error).toBeNull()
+    expect(anonView.data).toMatchObject({ ok: true, count: 1 })
+    const { data: afterAnon } = await biniam
+      .from("listings")
+      .select("view_count")
+      .eq("id", listing.id)
+      .single()
+    expect(afterAnon?.view_count).toBe(original + 2)
+
+    // RLS: a trader sees no event rows (admins only); anon has no table grant.
+    const { data: leaked } = await biniam
+      .from("listing_view_events")
+      .select("id")
+      .eq("listing_id", listing.id)
+    expect(leaked ?? []).toHaveLength(0)
+    const { error: anonRead } = await anon.from("listing_view_events").select("id")
+    expect(anonRead?.code).toBe("42501")
+
+    // Clean up: drop the event rows and restore the seed view_count so the
+    // suite stays idempotent (admin holds the "manageable by admins" policy).
+    const { client: admin } = await signInAs(SEED.admin.email, SEED.admin.password)
+    const { error: deleteError } = await admin
+      .from("listing_view_events")
+      .delete()
+      .eq("listing_id", listing.id)
+    expect(deleteError).toBeNull()
+    const { error: resetError } = await admin
+      .from("listings")
+      .update({ view_count: original })
+      .eq("id", listing.id)
+    expect(resetError).toBeNull()
+  })
+})

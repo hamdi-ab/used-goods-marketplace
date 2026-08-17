@@ -10,6 +10,7 @@ import { fetchListing, formatCondition, formatPrice } from "@/lib/listings"
 import { fetchFavoriteIds } from "@/lib/favorites"
 import { fetchSellerContactInfo } from "@/lib/contact"
 import { FavoriteButton } from "@/components/favorites/favorite-button"
+import { ListingViewTracker } from "@/components/listings/listing-view-tracker"
 import { MakeOfferButton } from "@/components/offers/make-offer-button"
 import { ContactButton } from "@/components/contact/contact-button"
 import { ReportButton } from "@/components/reports/report-button"
@@ -70,6 +71,7 @@ export default async function ListingPage({
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+      <ListingViewTracker listingId={l.id} />
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div>
           {cover ? (
