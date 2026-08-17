@@ -9,6 +9,7 @@ import {
   REPORT_NOTE_MAX,
   REPORT_RATE_LIMIT_COUNT,
   REPORT_RATE_LIMIT_WINDOW_MS,
+  SELLER_REPORT_REASONS,
   type ReportReason,
   type ReportStatus,
 } from "@/lib/reports/constants"
@@ -35,6 +36,23 @@ describe("reports reasons", () => {
     const declared = new Set<string>(REPORT_REASONS)
     const labeled = Object.keys(REPORT_REASON_LABELS) as ReportReason[]
     expect(labeled.every((s) => declared.has(s))).toBe(true)
+  })
+
+  it("scopes seller reasons to person-level complaints", () => {
+    expect(SELLER_REPORT_REASONS).toEqual([
+      "spam",
+      "fraud",
+      "offensive_content",
+      "other",
+    ])
+  })
+
+  it("keeps seller reasons a labeled subset of listing reasons", () => {
+    const declared = new Set<string>(REPORT_REASONS)
+    for (const reason of SELLER_REPORT_REASONS) {
+      expect(declared.has(reason)).toBe(true)
+      expect(REPORT_REASON_LABELS[reason]).toBeTruthy()
+    }
   })
 })
 

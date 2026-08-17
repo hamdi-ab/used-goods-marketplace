@@ -19,6 +19,15 @@ export const REPORT_REASONS = [
 
 export type ReportReason = (typeof REPORT_REASONS)[number]
 
+// Seller reports use a subset: listing-specific reasons (duplicate,
+// wrong_category) make no sense for a person.
+export const SELLER_REPORT_REASONS: ReportReason[] = [
+  "spam",
+  "fraud",
+  "offensive_content",
+  "other",
+]
+
 export const REPORT_REASON_LABELS: Record<ReportReason, string> = {
   spam: "Spam",
   fraud: "Fraud",

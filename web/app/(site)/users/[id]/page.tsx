@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ContactButton } from "@/components/contact/contact-button"
+import { ReportButton } from "@/components/reports/report-button"
 import { ReviewStars } from "@/components/reviews/review-stars"
 
 export async function generateMetadata({
@@ -152,11 +153,17 @@ export default async function UserProfilePage({
            </dl>
 
           {user?.id !== id ? (
-            <ContactButton
-              sellerId={id}
-              signedIn={Boolean(user)}
-              contactInfo={contactInfo}
-            />
+            <div className="flex flex-wrap items-center gap-3">
+              <ContactButton
+                sellerId={id}
+                signedIn={Boolean(user)}
+                contactInfo={contactInfo}
+              />
+              <ReportButton
+                target={{ type: "seller", sellerId: id }}
+                signedIn={Boolean(user)}
+              />
+            </div>
           ) : null}
         </CardContent>
        </Card>

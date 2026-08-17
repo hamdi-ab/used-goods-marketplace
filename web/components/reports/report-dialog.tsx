@@ -9,6 +9,7 @@ import {
   REPORT_REASONS,
   REPORT_REASON_LABELS,
   REPORT_NOTE_MAX,
+  SELLER_REPORT_REASONS,
 } from "@/lib/reports/constants"
 import { TEXTAREA_CLASS } from "@/lib/form-fields"
 import { Button } from "@/components/ui/button"
@@ -63,12 +64,17 @@ export function ReportDialog({
     )
   }
 
+  // A report targets exactly one of listing or seller; the reason list is
+  // scoped to the target (listing-specific reasons do not apply to a seller).
+  const reasons = sellerId ? SELLER_REPORT_REASONS : REPORT_REASONS
+  const targetLabel = sellerId ? "seller" : "item"
+
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Report item</DialogTitle>
+        <DialogTitle>Report {targetLabel}</DialogTitle>
         <DialogDescription>
-          Let us know why this item or seller should be reviewed. A moderator
+          Let us know why this {targetLabel} should be reviewed. A moderator
           will look at your report shortly.
         </DialogDescription>
       </DialogHeader>
@@ -80,7 +86,7 @@ export function ReportDialog({
         <div className="mt-4 flex flex-col gap-3">
           <fieldset className="flex flex-col gap-2">
             <legend className="text-sm font-medium">Reason</legend>
-            {REPORT_REASONS.map((r) => (
+            {reasons.map((r) => (
               <label
                 key={r}
                 className="flex items-center gap-2 text-sm"

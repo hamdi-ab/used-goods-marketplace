@@ -207,11 +207,6 @@ export default async function ListingPage({
               View seller profile
             </Link>
           </Button>
-
-          <ReportButton
-            target={{ type: "seller", sellerId: l.seller_id }}
-            signedIn={Boolean(user)}
-          />
         </div>
       </div>
 
