@@ -445,6 +445,13 @@ The schema is designed to support:
 
 without breaking existing tables.
 
+**Implemented as a #97 demo exception:** `payments` — the Chapa sandbox
+direct-payment ledger for accepted offers (test-mode only, out of MVP billing
+scope). See `web/supabase/migrations/20260817000000_create_payments.sql`; it
+adds the `payments` table and `begin/complete/fail_payment` +
+`confirm_payment_receipt` RPCs without touching the existing tables listed
+above.
+
 # 25. Summary
 
 This database design provides a normalized, scalable, and secure foundation for the marketplace.

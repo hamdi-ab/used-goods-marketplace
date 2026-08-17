@@ -10,6 +10,10 @@ import {
   OPEN_OFFER_STATUSES,
   type OfferStatus,
 } from "@/lib/offers/constants"
+import {
+  type OfferPayment,
+  pickPayment,
+} from "@/lib/payments/constants"
 
 export * from "@/lib/offers/constants"
 
@@ -21,12 +25,14 @@ export interface BuyerOfferRow {
   amount: number
   message: string | null
   status: OfferStatus
-   created_at: string
-   expires_at: string | null
-   listing: BrowseListing | null
-   // The review on this offer, if the buyer has already rated the seller (T10).
-   review: { id: string; rating: number } | null
- }
+  created_at: string
+  expires_at: string | null
+  listing: BrowseListing | null
+  // The review on this offer, if the buyer has already rated the seller (T10).
+  review: { id: string; rating: number } | null
+  // The payment on this offer (#97); null until a payment is begun.
+  payment: OfferPayment | null
+}
 
 export interface SellerOfferRow extends BuyerOfferRow {
   buyer: {
@@ -79,6 +85,7 @@ function mapRawOfferRow(
     listing: RawOfferListingRow | null
     buyer?: { id: string; full_name: string | null; avatar_url: string | null } | null
     review?: { id: string; rating: number } | null
+    payment?: OfferPayment[] | null
   },
   withBuyer: boolean
 ): SellerOfferRow {
@@ -92,6 +99,7 @@ function mapRawOfferRow(
     expires_at: row.expires_at,
     listing: mapOfferListing(row.listing),
     review: row.review ?? null,
+    payment: pickPayment(row.payment),
     buyer: withBuyer ? (row.buyer ?? null) : null,
   }
 }
@@ -131,7 +139,8 @@ export async function fetchBuyerOffers(
       `${OFFER_COLUMNS},
        listing:listings(id, title, price, condition, city, published_at,
          images:listing_images(id, image_url, display_order)),
-       review:reviews(id, rating)`,
+review:reviews(id, rating),
+       payment:payments(id, amount, currency, status, mode, buyer_confirmed, paid_at, confirmed_at)`,
       { count: "exact" }
     )
     .eq("buyer_id", userId)
@@ -153,6 +162,7 @@ export async function fetchBuyerOffers(
     expires_at: string | null
     listing: RawOfferListingRow | null
     review: { id: string; rating: number } | null
+    payment: OfferPayment[] | null
   }[]
 
   const mapped = offers.map((row) => mapRawOfferRow(row, false))
@@ -178,7 +188,8 @@ export async function fetchSellerOffers(
        listing:listings(id, title, price, condition, city, published_at,
          seller:profiles!listings_seller_id_fkey(id, full_name, avatar_url, role, trust_score),
          images:listing_images(id, image_url, display_order)),
-       buyer:profiles(id, full_name, avatar_url)`,
+buyer:profiles(id, full_name, avatar_url),
+       payment:payments(id, amount, currency, status, mode, buyer_confirmed, paid_at, confirmed_at)`,
       { count: "exact" }
     )
     .eq("listing.seller_id", userId)
@@ -200,6 +211,7 @@ export async function fetchSellerOffers(
     expires_at: string | null
     listing: RawOfferListingRow | null
     buyer: { id: string; full_name: string | null; avatar_url: string | null } | null
+    payment: OfferPayment[] | null
   }[]
 
   const mapped = offers.map((row) => mapRawOfferRow(row, true))

@@ -1,0 +1,89 @@
+import { describe, it, expect } from "vitest"
+
+import {
+  PAYMENT_CURRENCY,
+  PAYMENT_STATUSES,
+  paymentPhase,
+  pickPayment,
+  type OfferPayment,
+  type PaymentPhase,
+} from "@/lib/payments/constants"
+
+function payment(overrides: Partial<OfferPayment> = {}): OfferPayment {
+  return {
+    id: "11111111-1111-4111-8111-111111111111",
+    amount: 500,
+    currency: "ETB",
+    status: "pending",
+    mode: "test",
+    buyer_confirmed: false,
+    paid_at: null,
+    confirmed_at: null,
+    ...overrides,
+  }
+}
+
+describe("payments status surface", () => {
+  it("declares the three statuses", () => {
+    expect(PAYMENT_STATUSES).toEqual(["pending", "paid", "failed"])
+  })
+
+  it("only ever moves ETB (mirrors the payments_currency_etb check)", () => {
+    expect(PAYMENT_CURRENCY).toBe("ETB")
+  })
+})
+
+describe("payments.pickPayment", () => {
+  it("returns null for an empty embed", () => {
+    expect(pickPayment(null)).toBeNull()
+    expect(pickPayment([])).toBeNull()
+  })
+
+  it("prefers a paid row over pending and failed retries", () => {
+    const rows = [
+      payment({ id: "a", status: "failed" }),
+      payment({ id: "b", status: "pending" }),
+      payment({ id: "c", status: "paid" }),
+    ]
+    expect(pickPayment(rows)?.id).toBe("c")
+  })
+
+  it("prefers a pending attempt over a failed retry", () => {
+    const rows = [
+      payment({ id: "a", status: "failed" }),
+      payment({ id: "b", status: "pending" }),
+    ]
+    expect(pickPayment(rows)?.id).toBe("b")
+  })
+
+  it("returns a single row unchanged", () => {
+    const row = payment({ status: "paid", buyer_confirmed: true })
+    expect(pickPayment([row])).toEqual(row)
+  })
+})
+
+describe("payments.paymentPhase", () => {
+  it("treats null, pending, and failed payments as unpaid", () => {
+    expect(paymentPhase(null)).toBe("unpaid")
+    expect(paymentPhase(payment())).toBe("unpaid")
+    expect(paymentPhase(payment({ status: "failed" }))).toBe("unpaid")
+  })
+
+  it("is paid until the buyer confirms receipt", () => {
+    expect(paymentPhase(payment({ status: "paid" }))).toBe("paid")
+  })
+
+  it("is confirmed once the buyer confirms receipt", () => {
+    expect(paymentPhase(payment({ status: "paid", buyer_confirmed: true }))).toBe(
+      "confirmed"
+    )
+  })
+
+  it("covers every declared status", () => {
+    const phases = new Set<PaymentPhase>([
+      paymentPhase(null),
+      ...PAYMENT_STATUSES.map((s) => paymentPhase(payment({ status: s }))),
+    ])
+    expect(phases).toEqual(new Set(["unpaid", "paid"]))
+  })
+})

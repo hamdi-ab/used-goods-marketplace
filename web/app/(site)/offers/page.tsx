@@ -6,11 +6,13 @@ import { SendIcon } from "lucide-react"
 
 import { requireUser } from "@/lib/auth"
 import { fetchBuyerOffers } from "@/lib/offers"
+import { verifyOfferPayment } from "@/lib/payments"
 import { formatPrice } from "@/lib/listings"
 import { nextOffset, parseOffset } from "@/lib/pagination"
 import { formatShortDate } from "@/lib/utils"
 import { OfferStatusBadge } from "@/components/offers/offer-status-badge"
 import { BuyerOfferActions } from "@/components/offers/buyer-offer-actions"
+import { BuyerPayment } from "@/components/offers/buyer-payment"
 import { ReviewForm } from "@/components/reviews/review-form"
 import { ReviewStars } from "@/components/reviews/review-stars"
 import { Button } from "@/components/ui/button"
@@ -29,7 +31,19 @@ export default async function OffersPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const user = await requireUser()
-  const offset = parseOffset((await searchParams).offset)
+  const params = await searchParams
+  const offset = parseOffset(params.offset)
+
+  // #97 — the buyer returns here from Chapa's hosted checkout with the tx_ref
+  // in the URL. Verify server-side FIRST (fulfillment gated on test-mode
+  // success) so the offer list below — fetched after — reads the payment row
+  // as paid and shows the confirm-receipt step on the very first return. The
+  // banner reinforces the result. Idempotent on refresh.
+  const verifyResult =
+    typeof params.tx_ref === "string" && typeof params.offer === "string"
+      ? await verifyOfferPayment({ offerId: params.offer, txRef: params.tx_ref })
+      : null
+
   const { offers, hasMore, error } = await fetchBuyerOffers(user.id, {
     offset,
   })
@@ -60,6 +74,28 @@ export default async function OffersPage({
   } else {
     body = (
       <>
+        {verifyResult ? (
+          verifyResult.ok ? (
+            <div className="mb-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+              <p className="font-medium">
+                Payment received —{" "}
+                {formatPrice(verifyResult.amount, { maxFractionDigits: 2 })}
+              </p>
+              <p className="mt-1">
+                Confirm receipt below once you have the item to close the deal.
+              </p>
+            </div>
+          ) : (
+            <div className="mb-6 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+              <p className="font-medium">Payment not completed</p>
+              <p className="mt-1">
+                {verifyResult.error} You can try the payment again on the offer
+                below.
+              </p>
+            </div>
+          )
+        ) : null}
+
         <ul className="flex flex-col gap-4">
           {offers.map((offer) => (
             <li key={offer.id}>
@@ -124,21 +160,24 @@ export default async function OffersPage({
                   ) : null}
 
                   {offer.status === "accepted" ? (
-                    <div className="mt-4 border-t pt-3">
-                      {offer.review ? (
-                        <div className="flex items-center gap-2">
-                          <ReviewStars rating={offer.review.rating} />
-                          <span className="text-sm text-muted-foreground">
-                            You rated this transaction {offer.review.rating}/5
-                          </span>
-                        </div>
-                      ) : (
-                        <ReviewForm
-                          offerId={offer.id}
-                          listingTitle={offer.listing?.title}
-                        />
-                      )}
-                    </div>
+                    <>
+                      <BuyerPayment offer={offer} />
+                      <div className="mt-4 border-t pt-3">
+                        {offer.review ? (
+                          <div className="flex items-center gap-2">
+                            <ReviewStars rating={offer.review.rating} />
+                            <span className="text-sm text-muted-foreground">
+                              You rated this transaction {offer.review.rating}/5
+                            </span>
+                          </div>
+                        ) : (
+                          <ReviewForm
+                            offerId={offer.id}
+                            listingTitle={offer.listing?.title}
+                          />
+                        )}
+                      </div>
+                    </>
                   ) : null}
                 </CardContent>
               </Card>
