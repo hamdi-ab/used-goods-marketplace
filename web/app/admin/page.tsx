@@ -4,16 +4,11 @@ import {
   BarChart3Icon,
   FlagIcon,
   ListIcon,
-  ShoppingBagIcon,
+  ShieldAlertIcon,
   UsersIcon,
-  VerifiedIcon,
-  PackageOpenIcon,
 } from "lucide-react"
 
 import { fetchAdminReports } from "@/lib/reports"
-import {
-  fetchMarketplaceStats,
-} from "@/lib/admin"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -29,42 +24,10 @@ export const metadata: Metadata = {
   description: "Marketplace administration dashboard.",
 }
 
-function StatCard({
-  label,
-  value,
-  href,
-  icon: Icon,
-  accent = "text-primary",
-}: {
-  label: string
-  value: number | string
-  href: string
-  icon: typeof UsersIcon
-  accent?: string
-}) {
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardDescription className="flex items-center gap-1.5">
-          <Icon className={`size-4 ${accent}`} />
-          {label}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <p className="font-heading text-3xl font-semibold text-foreground">
-          {value}
-        </p>
-        <Button asChild variant="ghost" size="sm" className="mt-2 px-0 text-primary hover:bg-transparent">
-          <Link href={href}>Manage →</Link>
-        </Button>
-      </CardContent>
-    </Card>
-  )
-}
-
 export default async function AdminDashboardPage() {
-  const stats = await fetchMarketplaceStats()
   const reports = await fetchAdminReports()
+
+  const openCount = reports.length
 
   return (
     <div>
@@ -73,50 +36,65 @@ export default async function AdminDashboardPage() {
           Admin dashboard
         </h1>
         <p className="mt-2 max-w-xl text-muted-foreground">
-          Moderate listings and sellers, and monitor the health of the
-          marketplace.
+          Moderate listings and sellers, and keep an eye on what needs
+          attention. Head to Statistics for the full marketplace numbers.
         </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatCard
-          label="Users"
-          value={stats.totalUsers}
-          href="/admin/users"
-          icon={UsersIcon}
-        />
-        <StatCard
-          label="Listings"
-          value={stats.totalListings}
-          href="/admin/listings"
-          icon={ListIcon}
-        />
-        <StatCard
-          label="Active listings"
-          value={stats.activeListings}
-          href="/admin/listings"
-          icon={PackageOpenIcon}
-        />
-        <StatCard
-          label="Products sold"
-          value={stats.productsSold}
-          href="/admin/listings"
-          icon={ShoppingBagIcon}
-        />
-        <StatCard
-          label="Verified sellers"
-          value={stats.verifiedSellers}
-          href="/admin/users"
-          icon={VerifiedIcon}
-          accent="text-green-600"
-        />
-        <StatCard
-          label="Open reports"
-          value={stats.openReports}
-          href="/admin/reports"
-          icon={FlagIcon}
-          accent="text-amber-600"
-        />
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription className="flex items-center gap-1.5">
+              <ShieldAlertIcon className="size-4 text-amber-600" />
+              Moderation
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="font-heading text-3xl font-semibold text-foreground">
+              {openCount}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Open reports awaiting your review
+            </p>
+            <Button asChild variant="ghost" size="sm" className="mt-2 px-0 text-primary hover:bg-transparent">
+              <Link href="/admin/reports">Review queue →</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription className="flex items-center gap-1.5">
+              <UsersIcon className="size-4 text-primary" />
+              Users
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Review accounts, verify sellers, and suspend offenders.
+            </p>
+            <Button asChild variant="ghost" size="sm" className="mt-2 px-0 text-primary hover:bg-transparent">
+              <Link href="/admin/users">Manage users →</Link>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription className="flex items-center gap-1.5">
+              <ListIcon className="size-4 text-primary" />
+              Listings
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Inspect the catalog and remove policy-violating listings.
+            </p>
+            <Button asChild variant="ghost" size="sm" className="mt-2 px-0 text-primary hover:bg-transparent">
+              <Link href="/admin/listings">Manage listings →</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
 
       <div className="mt-8">
@@ -125,8 +103,8 @@ export default async function AdminDashboardPage() {
             <CardTitle className="flex items-center gap-2">
               <FlagIcon className="size-5 text-primary" />
               Moderation queue
-              {reports.length > 0 ? (
-                <Badge variant="secondary">{reports.length} open</Badge>
+              {openCount > 0 ? (
+                <Badge variant="secondary">{openCount} open</Badge>
               ) : null}
             </CardTitle>
             <CardDescription>
@@ -134,7 +112,7 @@ export default async function AdminDashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {reports.length === 0 ? (
+            {openCount === 0 ? (
               <p className="text-sm text-muted-foreground">
                 All caught up — there are no open reports right now.
               </p>
@@ -181,7 +159,7 @@ export default async function AdminDashboardPage() {
               Marketplace statistics
             </CardTitle>
             <CardDescription>
-              A full breakdown of users, listings, and sales activity.
+              Users, listings, sales, and verification numbers at a glance.
             </CardDescription>
           </CardHeader>
           <CardContent>
