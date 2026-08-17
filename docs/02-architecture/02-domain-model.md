@@ -396,13 +396,19 @@ Represents trust signals.
 
 **Email:** Phone
 
-**Telegram:** Future Fayda
+**Telegram:** Fayda (self-issued via OIDC, verify-only)
 
 ### Status
 
 **Pending:** Verified
 
 Rejected
+
+### Issuance (two paths)
+
+**Admin-issued:** Email, Phone, Telegram — recorded via `record_verification` (admin-gated RPC).
+
+**Self-issued:** Fayda — recorded via `record_fayda_verification` (auth.uid() for own profile) after a successful server-side OIDC exchange. Stores only the unique Fayda `sub` on the verification record; no PII.
 
 # 6. Ownership Rules
 
