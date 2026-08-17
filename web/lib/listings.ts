@@ -5,13 +5,13 @@ import type { Supabase } from "@/lib/supabase/types"
 import { callRpc } from "@/lib/supabase/rpc"
 import { uploadObjects } from "@/lib/media"
 import { listingImageAdapter } from "@/lib/media/listing-adapter"
-import { isValidUuid } from "@/lib/uuid"
 
 import {
   BROWSE_LIMIT_MAX,
   LISTING_COLUMNS,
   MAX_IMAGES,
   PAGE_SIZE,
+  isValidUuid,
 } from "./listings/constants"
 import type {
   BrowseListing,
@@ -196,12 +196,12 @@ export async function fetchListings(
   let query = supabase
     .from("listings")
     .select(
-      `id, title, price, condition, city, published_at,
-       seller:profiles!listings_seller_id_fkey(id, full_name, avatar_url, role, trust_score, phone_verified, fayda_verified),
-       images:listing_images(id, image_url, display_order)`,
+      `id, title, price, condition, city, status, published_at,
+        seller:profiles!listings_seller_id_fkey(id, full_name, avatar_url, role, trust_score, phone_verified, fayda_verified),
+        images:listing_images(id, image_url, display_order)`,
       { count: "exact" }
     )
-    .eq("status", "published")
+    .in("status", ["published", "sold"])
   if (categoryId) query = query.eq("category_id", categoryId)
 
   const { data, error, count } = await query

@@ -17,6 +17,8 @@ const builder = (result: unknown): Record<string, unknown> => {
     select: () => b,
     eq: () => b,
     is: () => b,
+    in: () => b,
+    in_: () => b,
     order: () => b,
     range: () => b,
     maybeSingle: () => b,
@@ -33,6 +35,8 @@ const queue = (results: unknown[]): Record<string, unknown> => {
     select: () => b,
     eq: () => b,
     is: () => b,
+    in: () => b,
+    in_: () => b,
     order: () => b,
     range: () => b,
     maybeSingle: () => b,
@@ -51,6 +55,7 @@ const nestedRow = () => ({
   price: 100,
   condition: "Fair",
   city: "Bole",
+  status: "published" as const,
   published_at: "2026-01-01",
   seller: [
     {
