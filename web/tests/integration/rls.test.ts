@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
 
+import { OFFER_EXPIRY_MS } from "@/lib/offers/constants"
 import {
   anonClient,
   integrationAvailable,
@@ -912,5 +913,141 @@ describe.skipIf(!integrationAvailable)("RLS: trust score composite (#83)", () =>
       .update({ trust_score: 60 })
       .eq("id", KEBEDE_ID)
     expect(restoreTrust).toBeNull()
+  })
+
+  it("stamps an expiry deadline on submit and clears it on accept", async () => {
+    const { client: buyer, userId: buyerId } = await signInAs(
+      SEED.biniam.email,
+      SEED.biniam.password
+    )
+    const { data: listing } = await buyer
+      .from("listings")
+      .select("id")
+      .eq("seller_id", AMIRA_ID)
+      .eq("status", "published")
+      .is("deleted_at", null)
+      .limit(1)
+      .maybeSingle()
+    expect(listing?.id).toBeTruthy()
+    if (!listing) throw new Error("expected an amira published listing")
+
+    const submitted = await buyer.rpc("submit_offer", {
+      p_listing_id: listing.id,
+      p_amount: 12500,
+      p_message: null,
+    })
+    expect(submitted.error).toBeNull()
+    expect(submitted.data).toMatchObject({ ok: true })
+
+    // submit_offer stamps the 7-day deadline; the offer is still pending.
+    const { data: pending } = await buyer
+      .from("offers")
+      .select("id, status, expires_at")
+      .eq("buyer_id", buyerId)
+      .eq("listing_id", listing.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    expect(pending?.status).toBe("pending")
+    expect(pending?.expires_at).toBeTruthy()
+    if (!pending?.expires_at) throw new Error("expected expires_at")
+    const remaining = new Date(pending.expires_at).getTime() - Date.now()
+    // ~7 days, within a one-minute tolerance for clock skew between client and DB.
+    expect(remaining).toBeGreaterThan(OFFER_EXPIRY_MS - 60_000)
+    expect(remaining).toBeLessThan(OFFER_EXPIRY_MS + 60_000)
+
+    // amira accepts -> the listing is sold and the pending clock is cleared.
+    const { client: seller } = await signInAs(SEED.amira.email, SEED.amira.password)
+    const { data: offers } = await seller
+      .from("offers")
+      .select("id")
+      .eq("listing_id", listing.id)
+      .eq("buyer_id", buyerId)
+      .eq("status", "pending")
+      .order("created_at", { ascending: false })
+      .limit(1)
+    const offerId = offers?.[0]?.id
+    expect(offerId).toBeTruthy()
+
+    const accepted = await seller.rpc("accept_offer", { p_offer_id: offerId })
+    expect(accepted.error).toBeNull()
+    expect(accepted.data).toMatchObject({ ok: true })
+
+    const { data: done } = await buyer
+      .from("offers")
+      .select("status, expires_at")
+      .eq("id", offerId)
+      .single()
+    expect(done?.status).toBe("accepted")
+    expect(done?.expires_at).toBeNull()
+
+    // Cleanup: restore the listing (the accepted offer sold it) and amira's
+    // seed trust, which the accept transition recomputed (#83).
+    const { client: admin } = await signInAs(SEED.admin.email, SEED.admin.password)
+    const { error: restoreListing } = await admin
+      .from("listings")
+      .update({ status: "published", sold_to_buyer_id: null })
+      .eq("id", listing.id)
+    expect(restoreListing).toBeNull()
+    const { error: restoreTrust } = await admin
+      .from("profiles")
+      .update({ trust_score: 85 })
+      .eq("id", AMIRA_ID)
+    expect(restoreTrust).toBeNull()
+  })
+
+  it("cancel_expired_offers is admin-callable and does not expire open offers", async () => {
+    const { client: buyer, userId: buyerId } = await signInAs(
+      SEED.biniam.email,
+      SEED.biniam.password
+    )
+    const { data: listing } = await buyer
+      .from("listings")
+      .select("id")
+      .eq("seller_id", AMIRA_ID)
+      .eq("status", "published")
+      .is("deleted_at", null)
+      .limit(1)
+      .maybeSingle()
+    expect(listing?.id).toBeTruthy()
+    if (!listing) throw new Error("expected an amira published listing")
+
+    const submitted = await buyer.rpc("submit_offer", {
+      p_listing_id: listing.id,
+      p_amount: 990,
+      p_message: null,
+    })
+    expect(submitted.error).toBeNull()
+    expect(submitted.data).toMatchObject({ ok: true })
+
+    const { data: pending } = await buyer
+      .from("offers")
+      .select("id, status")
+      .eq("buyer_id", buyerId)
+      .eq("listing_id", listing.id)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    expect(pending?.status).toBe("pending")
+    if (!pending) throw new Error("expected a pending offer")
+
+    const { client: admin } = await signInAs(SEED.admin.email, SEED.admin.password)
+    // Nothing is past its deadline, so the run is a no-op: the open offer
+    // stays pending (proves the job does not prematurely expire valid offers).
+    const { error: cancelError } = await admin.rpc("cancel_expired_offers")
+    expect(cancelError).toBeNull()
+
+    const { data: stillOpen } = await buyer
+      .from("offers")
+      .select("status")
+      .eq("id", pending.id)
+      .single()
+    expect(stillOpen?.status).toBe("pending")
+
+    // Cleanup: the seller declines so the offer leaves the pending window.
+    const { error: declineError } = await admin.rpc("decline_offer", {
+      p_offer_id: pending.id,
+    })
+    expect(declineError).toBeNull()
   })
 })

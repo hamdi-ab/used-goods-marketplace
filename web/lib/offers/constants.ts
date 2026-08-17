@@ -8,7 +8,9 @@
  * here (`export *`) so existing server-side imports keep resolving.
  */
 
-export const OFFER_STATUSES = ["pending", "countered", "accepted", "declined"] as const
+export const OFFER_EXPIRY_MS = 7 * 24 * 3_600_000
+
+export const OFFER_STATUSES = ["pending", "countered", "accepted", "declined", "expired"] as const
 
 export type OfferStatus = (typeof OFFER_STATUSES)[number]
 
@@ -21,6 +23,7 @@ export const OFFER_STATUS_LABELS: Record<OfferStatus, string> = {
   countered: "Countered",
   accepted: "Accepted",
   declined: "Declined",
+  expired: "Expired",
 }
 
 export const OFFER_STATUS_COLORS: Record<OfferStatus, string> = {
@@ -28,6 +31,7 @@ export const OFFER_STATUS_COLORS: Record<OfferStatus, string> = {
   countered: "bg-blue-100 text-blue-800",
   accepted: "bg-green-100 text-green-800",
   declined: "bg-red-100 text-red-800",
+  expired: "bg-gray-100 text-gray-800",
 }
 
 // App-side ceiling, enforced at the DB write boundary by the offers_amount_cap

@@ -98,6 +98,11 @@ export default async function OffersPage() {
                       <p className="mt-1 text-xs text-muted-foreground">
                         Submitted {formatShortDate(offer.created_at)}
                       </p>
+                      {offer.status === "pending" && offer.expires_at ? (
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Expires {formatShortDate(offer.expires_at)}
+                        </p>
+                      ) : null}
                     </div>
 
                     <OfferStatusBadge status={offer.status} />

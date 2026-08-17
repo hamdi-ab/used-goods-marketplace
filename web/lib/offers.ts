@@ -23,6 +23,7 @@ export interface BuyerOfferRow {
   message: string | null
   status: OfferStatus
   created_at: string
+  expires_at: string | null
   listing: BrowseListing | null
   // The review on this offer, if the buyer has already rated the seller (T10).
   review: { id: string; rating: number } | null
@@ -50,6 +51,7 @@ interface RawOfferRow {
   message: string | null
   status: OfferStatus
   created_at: string
+  expires_at: string | null
 }
 
 function mapOfferListing(
@@ -73,13 +75,14 @@ function mapRawOfferRow(
     message: row.message,
     status: row.status,
     created_at: row.created_at,
+    expires_at: row.expires_at ?? null,
     listing: mapOfferListing(row.listing),
     review: row.review ?? null,
     buyer: withBuyer ? (row.buyer ?? null) : null,
   }
 }
 
-const OFFER_COLUMNS = "id, listing_id, amount, message, status, created_at"
+const OFFER_COLUMNS = "id, listing_id, amount, message, status, created_at, expires_at"
 
 // The buyer's offer history, newest first. RLS keeps this to the user's own
 // offers; the listing join drops rows for listings the buyer can no longer see
@@ -112,6 +115,7 @@ export async function fetchBuyerOffers(
     message: string | null
     status: OfferStatus
     created_at: string
+    expires_at: string | null
     listing: RawOfferListingRow | null
     review: { id: string; rating: number } | null
   }[]
@@ -152,6 +156,7 @@ export async function fetchSellerOffers(
     message: string | null
     status: OfferStatus
     created_at: string
+    expires_at: string | null
     listing: RawOfferListingRow | null
     buyer: { id: string; full_name: string | null; avatar_url: string | null } | null
   }[]
