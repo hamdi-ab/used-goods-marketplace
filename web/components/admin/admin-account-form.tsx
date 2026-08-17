@@ -1,51 +1,26 @@
 "use client"
 
-import { useRef, useState, type ChangeEvent } from "react"
 import { LogOutIcon } from "lucide-react"
 import Link from "next/link"
 
 import type { SessionUser } from "@/lib/auth/types"
 import { initials } from "@/lib/utils"
 import { useSignOut } from "@/components/auth/use-sign-out"
-import { uploadAvatar } from "@/app/actions/profile"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-type AccountProfile = {
-  avatar_url: string | null
-  full_name: string | null
-  role: "buyer" | "seller" | "admin" | null
-}
-
 export function AdminAccountForm({
   user,
-  profile,
+  fullName,
 }: {
   user: SessionUser
-  profile: AccountProfile
+  fullName: string | null
 }) {
-  const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? null)
-  const [avatarError, setAvatarError] = useState<string | null>(null)
-  const [avatarUploading, setAvatarUploading] = useState(false)
-  const fileRef = useRef<HTMLInputElement>(null)
   const signOut = useSignOut()
 
-  const name = profile.full_name ?? user.fullName ?? user.email
-
-  async function handleAvatar(e: ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setAvatarUploading(true)
-    setAvatarError(null)
-    const form = new FormData()
-    form.set("avatar", file)
-    const res = await uploadAvatar(user.id, { url: null, error: null }, form)
-    setAvatarUploading(false)
-    if (res.error) setAvatarError(res.error)
-    else setAvatarUrl(res.url)
-  }
+  const name = fullName ?? user.fullName ?? user.email
 
   return (
     <div>
@@ -59,50 +34,16 @@ export function AdminAccountForm({
         </p>
       </div>
 
-      <Card className="mb-6 gap-6">
-        <CardHeader className="flex-row items-center justify-between">
-          <CardTitle>Avatar</CardTitle>
-          <div className="flex items-center gap-3">
-            <Avatar className="size-16">
-              <AvatarImage src={avatarUrl ?? undefined} alt={name} />
-              <AvatarFallback className="text-xl">{initials(name)}</AvatarFallback>
-            </Avatar>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => fileRef.current?.click()}
-              disabled={avatarUploading}
-            >
-              {avatarUrl ? "Change photo" : "Upload photo"}
-            </Button>
-            <input
-              ref={fileRef}
-              type="file"
-              name="avatar"
-              accept="image/png,image/jpeg,image/webp"
-              className="hidden"
-              onChange={handleAvatar}
-            />
-          </div>
-        </CardHeader>
-        <CardContent>
-          {avatarError ? (
-            <p className="text-sm text-destructive">{avatarError}</p>
-          ) : null}
-          <p className="text-xs text-muted-foreground">
-            JPG, PNG or WebP. Max 5 MB.
-          </p>
-        </CardContent>
-      </Card>
-
       <Card>
         <CardHeader>
           <CardTitle>Identity</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="min-w-0">
+          <div className="flex items-center gap-4">
+            <Avatar className="size-12">
+              <AvatarFallback>{initials(name)}</AvatarFallback>
+            </Avatar>
+            <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-foreground">{name}</p>
               <p className="truncate text-xs text-muted-foreground">{user.email}</p>
             </div>
