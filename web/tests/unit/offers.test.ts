@@ -21,7 +21,7 @@ import {
 const mockCreateClient = vi.mocked(createClient)
 
 describe("offers status machine", () => {
-  it("declares the AC statuses plus the expired terminal state (#75)", () => {
+  it("declares the AC statuses incl. expired (#75)", () => {
     expect(OFFER_STATUSES).toEqual([
       "pending",
       "countered",
@@ -50,10 +50,6 @@ describe("offers bounds mirror the DB constraints", () => {
     expect(OFFER_AMOUNT_MAX).toBeGreaterThan(0)
     expect(OFFER_MESSAGE_MAX).toBe(500)
   })
-
-  it("exposes the 7-day offer expiry horizon (#75)", () => {
-    expect(OFFER_EXPIRY_MS).toBe(7 * 24 * 3_600_000)
-  })
 })
 
 describe("offers.open statuses", () => {
@@ -64,6 +60,12 @@ describe("offers.open statuses", () => {
   it("every open status is a declared status", () => {
     const declared = new Set<string>(OFFER_STATUSES)
     expect(OPEN_OFFER_STATUSES.every((s) => declared.has(s))).toBe(true)
+  })
+})
+
+describe("offers expiry policy", () => {
+  it("exposes a 7-day expiry window in ms (#75)", () => {
+    expect(OFFER_EXPIRY_MS).toBe(7 * 24 * 3600 * 1000)
   })
 })
 

@@ -8,14 +8,12 @@
  * here (`export *`) so existing server-side imports keep resolving.
  */
 
-export const OFFER_EXPIRY_MS = 7 * 24 * 3_600_000
-
 export const OFFER_STATUSES = ["pending", "countered", "accepted", "declined", "expired"] as const
 
 export type OfferStatus = (typeof OFFER_STATUSES)[number]
 
 // Statuses that still need a reply from the seller. The dashboard's open-offers
-// count uses these; accepted/declined are terminal for the seller.
+// count uses these; accepted/declined/expired are terminal for the seller.
 export const OPEN_OFFER_STATUSES: OfferStatus[] = ["pending", "countered"]
 
 export const OFFER_STATUS_LABELS: Record<OfferStatus, string> = {
@@ -31,8 +29,13 @@ export const OFFER_STATUS_COLORS: Record<OfferStatus, string> = {
   countered: "bg-blue-100 text-blue-800",
   accepted: "bg-green-100 text-green-800",
   declined: "bg-red-100 text-red-800",
-  expired: "bg-gray-100 text-gray-800",
+  expired: "bg-slate-200 text-slate-700",
 }
+
+// The offer expiry horizon exposed to the client so it can render countdowns
+// and assert freshness; the source of truth is the DB (submit_offer stamps
+// expires_at = created_at + 7 days). Kept in ms to match Date math in tests.
+export const OFFER_EXPIRY_MS = 7 * 24 * 3600 * 1000
 
 // App-side ceiling, enforced at the DB write boundary by the offers_amount_cap
 // check (create_offers migration) and by counter_offer — a counter cannot

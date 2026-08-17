@@ -3,7 +3,7 @@ import "server-only"
 import { createClient } from "@/lib/supabase/server"
 import type { Supabase } from "@/lib/supabase/types"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
-import { isValidUuid } from "@/lib/uuid"
+import { isValidUuid } from "@/lib/listings/constants"
 import type { BrowseListing } from "@/lib/listings/constants"
 import { mapNestedBrowseListing } from "@/lib/listings/browse-mapper"
 import type { NestedBrowseRow } from "@/lib/listings/browse-mapper"
@@ -22,12 +22,12 @@ export interface BuyerOfferRow {
   amount: number
   message: string | null
   status: OfferStatus
-  created_at: string
-  expires_at: string | null
-  listing: BrowseListing | null
-  // The review on this offer, if the buyer has already rated the seller (T10).
-  review: { id: string; rating: number } | null
-}
+   created_at: string
+   expires_at: string | null
+   listing: BrowseListing | null
+   // The review on this offer, if the buyer has already rated the seller (T10).
+   review: { id: string; rating: number } | null
+ }
 
 export interface SellerOfferRow extends BuyerOfferRow {
   buyer: {
@@ -75,7 +75,7 @@ function mapRawOfferRow(
     message: row.message,
     status: row.status,
     created_at: row.created_at,
-    expires_at: row.expires_at ?? null,
+    expires_at: row.expires_at,
     listing: mapOfferListing(row.listing),
     review: row.review ?? null,
     buyer: withBuyer ? (row.buyer ?? null) : null,
@@ -113,10 +113,10 @@ export async function fetchBuyerOffers(
     listing_id: string
     amount: number
     message: string | null
-    status: OfferStatus
-    created_at: string
-    expires_at: string | null
-    listing: RawOfferListingRow | null
+     status: OfferStatus
+     created_at: string
+     expires_at: string | null
+     listing: RawOfferListingRow | null
     review: { id: string; rating: number } | null
   }[]
 
@@ -154,10 +154,10 @@ export async function fetchSellerOffers(
     listing_id: string
     amount: number
     message: string | null
-    status: OfferStatus
-    created_at: string
-    expires_at: string | null
-    listing: RawOfferListingRow | null
+     status: OfferStatus
+     created_at: string
+     expires_at: string | null
+     listing: RawOfferListingRow | null
     buyer: { id: string; full_name: string | null; avatar_url: string | null } | null
   }[]
 
