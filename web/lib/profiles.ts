@@ -179,3 +179,23 @@ export async function updateOwnProfile(
     phone_public: values.phonePublic ?? false,
   })
 }
+
+/** Become-a-seller (fix #71): promote the signed-in buyer via the RPC, which
+ * derives identity from auth.uid() and is idempotent — a re-promotion is a
+ * no-op success. Doubles as the restore path for an admin-suspended seller
+ * (audit #19), since the demotion to buyer is the same role transition. */
+export async function promoteToSellerRow(): Promise<{
+  ok: boolean
+  error: string | null
+}> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc("promote_to_seller")
+  if (error) return { ok: false, error: error.message }
+  if (!data?.ok) {
+    return {
+      ok: false,
+      error: (data?.error as string | null) ?? "Could not start selling",
+    }
+  }
+  return { ok: true, error: null }
+}

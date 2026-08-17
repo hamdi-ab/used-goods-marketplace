@@ -5,6 +5,7 @@ import { HeartIcon, InboxIcon, HandshakeIcon, LayoutDashboardIcon, PlusIcon, Shi
 import { requireUser, ROLE_LABELS } from "@/lib/auth"
 import { fetchSellerListings } from "@/lib/listings"
 import { countIncomingOffers } from "@/lib/offers"
+import { promoteToSeller } from "@/app/actions/profile"
 import { ListingManager } from "@/components/dashboard/listing-manager"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -71,9 +72,14 @@ export default async function DashboardPage() {
                 offers will live here.
               </p>
             </div>
-            <Button asChild variant="outline">
-              <Link href="/profile">Get started</Link>
-            </Button>
+            {/* Become-a-seller CTA (fix #71): one click promotes the buyer to
+                seller via the idempotent RPC; the dashboard re-renders with the
+                seller view on success. */}
+            <form action={promoteToSeller}>
+              <Button type="submit" variant="outline">
+                Start selling
+              </Button>
+            </form>
           </CardContent>
         </Card>
       )}

@@ -271,3 +271,47 @@ describe.skipIf(!integrationAvailable)("RLS: rate_usage / consume_rate_budget (#
     expect(traderData ?? []).toHaveLength(0)
   })
 })
+
+describe.skipIf(!integrationAvailable)("RLS: promote_to_seller (#71)", () => {
+  it("anon cannot call promote_to_seller (no execute grant)", async () => {
+    const { data, error } = await anonClient().rpc("promote_to_seller")
+    expect(error).not.toBeNull()
+    expect(data).toBeNull()
+  })
+
+  it("an admin cannot become a seller (ADR-020 moderation-only)", async () => {
+    const { client } = await signInAs(SEED.admin.email, SEED.admin.password)
+    const { data, error } = await client.rpc("promote_to_seller")
+    expect(error).toBeNull()
+    expect(data?.ok).toBe(false)
+  })
+
+  it("a buyer promotes to seller idempotently, then the seed role is restored", async () => {
+    const { client } = await signInAs(SEED.biniam.email, SEED.biniam.password)
+
+    const first = await client.rpc("promote_to_seller")
+    expect(first.error).toBeNull()
+    expect(first.data?.ok).toBe(true)
+
+    // The role actually flipped to seller.
+    const { data: row } = await client
+      .from("profiles")
+      .select("role")
+      .eq("id", BINIAM_ID)
+      .single()
+    expect(row?.role).toBe("seller")
+
+    // Idempotency guard: a second promotion is a successful no-op.
+    const second = await client.rpc("promote_to_seller")
+    expect(second.error).toBeNull()
+    expect(second.data?.ok).toBe(true)
+
+    // Restore the seed role so later suites keep their buyer assumptions.
+    const { client: admin } = await signInAs(SEED.admin.email, SEED.admin.password)
+    const { error: restoreError } = await admin
+      .from("profiles")
+      .update({ role: "buyer" })
+      .eq("id", BINIAM_ID)
+    expect(restoreError).toBeNull()
+  })
+})

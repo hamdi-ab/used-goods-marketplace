@@ -49,8 +49,9 @@ export async function requireSeller(): Promise<SessionUser> {
     redirect("/admin")
   }
   if (user.role !== "seller") {
-    // Not a seller yet — surface the profile page where this gate can be
-    // surfaced as a future "become a seller" prompt.
+    // Not a seller yet — land on /profile, where the "Start selling" nudge
+    // (fix #71) promotes a buyer to seller; the redirected page re-renders
+    // with the seller tools once the role flips.
     redirect("/profile")
   }
   return user

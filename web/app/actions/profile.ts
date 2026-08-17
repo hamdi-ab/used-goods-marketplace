@@ -4,10 +4,10 @@ import { z } from "zod"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 
-import { getCurrentUser } from "@/lib/auth"
+import { getCurrentUser, requireTrader } from "@/lib/auth"
 import { consumeRateBudget } from "@/lib/rate-limit"
 import { createClient } from "@/lib/supabase/server"
-import { completeOwnProfile, updateOwnProfile } from "@/lib/profiles"
+import { completeOwnProfile, promoteToSellerRow, updateOwnProfile } from "@/lib/profiles"
 import { uploadObjects } from "@/lib/media"
 import { avatarAdapter } from "@/lib/media/avatar-adapter"
 
@@ -166,4 +166,24 @@ export async function uploadAvatar(
   revalidatePath("/profile")
   revalidatePath(`/users/${user.id}`)
   return { url: result.publicUrls[0], error: null }
+}
+
+// Become-a-seller (fix #71): promote the signed-in trader via the idempotent
+// RPC. The dashboard "Start selling" CTA and the profile-page nudge both
+// submit this via plain forms (void return); success is self-evident because
+// revalidation re-renders the dashboard into the seller view and hides the
+// nudge (the role is read fresh on the next render). Spam is harmless — a
+// re-promotion is a no-op, so no global rate budget is charged.
+export async function promoteToSeller(): Promise<void> {
+  await requireTrader()
+
+  const result = await promoteToSellerRow()
+  if (!result.ok) {
+    // Rare failure — the promotion is idempotent and the main rejections
+    // redirect in requireTrader, so leave the page unchanged rather than throw.
+    return
+  }
+
+  revalidatePath("/dashboard")
+  revalidatePath("/profile")
 }

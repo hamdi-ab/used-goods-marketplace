@@ -12,7 +12,7 @@ import Link from "next/link"
 
 import { ROLE_LABELS, type SessionUser } from "@/lib/auth/types"
 import { initials } from "@/lib/utils"
-import { updateProfile, uploadAvatar } from "@/app/actions/profile"
+import { promoteToSeller, updateProfile, uploadAvatar } from "@/app/actions/profile"
 
 type ProfileRow = {
   avatar_url: string | null
@@ -68,6 +68,27 @@ export function ProfileForm({
         </h1>
         <Badge variant="secondary">{roleLabel}</Badge>
       </div>
+
+      {/* Onboarding nudge (fix #71): buyers see a one-click Start-selling prompt
+          here — requireSeller() bounces non-sellers to this page when they hit
+          /sell, so the path to promoting lands on the exact gate. */}
+      {user.role === "buyer" ? (
+        <Card className="mb-6 border-primary/40 bg-primary/5">
+          <CardContent className="flex flex-col items-start gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <CardTitle className="text-base">Start selling on the marketplace</CardTitle>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Unlock the seller tools and list your first item in a few taps.
+              </p>
+            </div>
+            <form action={promoteToSeller}>
+              <Button type="submit" variant="outline">
+                Start selling
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      ) : null}
 
       <Card className="mb-6 gap-6">
         <CardHeader className="flex-row items-center justify-between">
