@@ -56,6 +56,12 @@ export interface MarketplaceStats {
   openReports: number
 }
 
+export interface StatsBreakdown {
+  byStatus: Record<string, number>
+  byRole: Record<string, number>
+  byReportStatus: Record<string, number>
+}
+
 // ---- Reads ----
 
 export async function fetchAdminUsers(
@@ -146,6 +152,50 @@ export async function fetchMarketplaceStats(
     verifiedSellers: sellers.count ?? 0,
     openReports: reports.count ?? 0,
   }
+}
+
+/**
+ * Dimension splits for the statistics page: listings by status, users by
+ * role, reports by status. Cheap grouped counts over the same admin RLS read
+ * path as fetchMarketplaceStats.
+ */
+export async function fetchStatsBreakdown(
+  client?: Supabase
+): Promise<StatsBreakdown> {
+  const supabase = client ?? (await createClient())
+
+  const [listingRows, userRows, reportRows] = await Promise.all([
+    supabase.from("listings").select("status").is("deleted_at", null),
+    supabase
+      .from("profiles")
+      .select("role")
+      .is("deleted_at", null),
+    supabase.from("reports").select("status"),
+  ])
+
+  const byStatus: Record<string, number> = {}
+  for (const row of listingRows.data ?? []) {
+    const key = (row.status as string | null) ?? "unknown"
+    byStatus[key] = (byStatus[key] ?? 0) + 1
+  }
+
+  const byRole: Record<string, number> = {}
+  for (const row of userRows.data ?? []) {
+    const key = (row.role as string | null) ?? "unknown"
+    byRole[key] = (byRole[key] ?? 0) + 1
+  }
+
+  const byReportStatus: Record<string, number> = {}
+  for (const row of reportRows.data ?? []) {
+    const key = (row.status as string | null) ?? "unknown"
+    byReportStatus[key] = (byReportStatus[key] ?? 0) + 1
+  }
+
+  if (listingRows.error) console.error("fetchStatsBreakdown listings:", listingRows.error.message)
+  if (userRows.error) console.error("fetchStatsBreakdown users:", userRows.error.message)
+  if (reportRows.error) console.error("fetchStatsBreakdown reports:", reportRows.error.message)
+
+  return { byStatus, byRole, byReportStatus }
 }
 
 // ---- Writes ----

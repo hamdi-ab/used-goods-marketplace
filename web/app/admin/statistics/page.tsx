@@ -1,15 +1,15 @@
 import type { Metadata } from "next"
 import {
   BarChart3Icon,
+  FlagIcon,
   ListIcon,
   PackageOpenIcon,
   ShoppingBagIcon,
   UsersIcon,
   VerifiedIcon,
-  FlagIcon,
 } from "lucide-react"
 
-import { fetchMarketplaceStats } from "@/lib/admin"
+import { fetchMarketplaceStats, fetchStatsBreakdown } from "@/lib/admin"
 import {
   Card,
   CardContent,
@@ -50,8 +50,46 @@ function StatTile({
   )
 }
 
+function BreakdownRow({
+  label,
+  count,
+  total,
+}: {
+  label: string
+  count: number
+  total: number
+}) {
+  const pct = total > 0 ? Math.round((count / total) * 100) : 0
+  return (
+    <li className="flex items-center gap-3">
+      <span className="w-28 shrink-0 truncate text-sm font-medium text-foreground">
+        {label}
+      </span>
+      <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-muted">
+        <div
+          className="h-full rounded-full bg-primary/70"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <span className="w-10 shrink-0 text-right text-sm tabular-nums text-muted-foreground">
+        {count}
+      </span>
+    </li>
+  )
+}
+
 export default async function AdminStatisticsPage() {
-  const stats = await fetchMarketplaceStats()
+  const [stats, breakdown] = await Promise.all([
+    fetchMarketplaceStats(),
+    fetchStatsBreakdown(),
+  ])
+
+  const listingTotal = Object.values(breakdown.byStatus).reduce((a, b) => a + b, 0)
+  const userTotal = Object.values(breakdown.byRole).reduce((a, b) => a + b, 0)
+  const reportTotal = Object.values(breakdown.byReportStatus).reduce(
+    (a, b) => a + b,
+    0
+  )
 
   return (
     <div>
@@ -60,8 +98,8 @@ export default async function AdminStatisticsPage() {
           Statistics
         </h1>
         <p className="mt-2 max-w-xl text-muted-foreground">
-          A snapshot of marketplace activity, matching the Administration module
-          of the product requirements.
+          Marketplace metrics and their composition — the deeper breakdown
+          behind the dashboard&apos;s headline numbers.
         </p>
       </div>
 
@@ -104,6 +142,79 @@ export default async function AdminStatisticsPage() {
           accent="text-amber-600"
           hint="Awaiting moderation"
         />
+      </div>
+
+      <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Listings by status</CardTitle>
+            <CardDescription>How the catalog is split.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {listingTotal === 0 ? (
+              <p className="text-sm text-muted-foreground">No listings yet.</p>
+            ) : (
+              <ul className="flex flex-col gap-3">
+                {Object.entries(breakdown.byStatus).map(([status, count]) => (
+                  <BreakdownRow
+                    key={status}
+                    label={status}
+                    count={count}
+                    total={listingTotal}
+                  />
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Users by role</CardTitle>
+            <CardDescription>Account composition.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {userTotal === 0 ? (
+              <p className="text-sm text-muted-foreground">No users yet.</p>
+            ) : (
+              <ul className="flex flex-col gap-3">
+                {Object.entries(breakdown.byRole).map(([role, count]) => (
+                  <BreakdownRow
+                    key={role}
+                    label={role}
+                    count={count}
+                    total={userTotal}
+                  />
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Reports by status</CardTitle>
+            <CardDescription>Moderation workload.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {reportTotal === 0 ? (
+              <p className="text-sm text-muted-foreground">No reports yet.</p>
+            ) : (
+              <ul className="flex flex-col gap-3">
+                {Object.entries(breakdown.byReportStatus).map(
+                  ([status, count]) => (
+                    <BreakdownRow
+                      key={status}
+                      label={status}
+                      count={count}
+                      total={reportTotal}
+                    />
+                  )
+                )}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       <Card className="mt-8">
