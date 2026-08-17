@@ -1,7 +1,6 @@
 "use client"
 
 import { LogOutIcon } from "lucide-react"
-import Link from "next/link"
 
 import type { SessionUser } from "@/lib/auth/types"
 import { initials } from "@/lib/utils"
@@ -50,7 +49,8 @@ export function AdminAccountForm({
             <Badge variant="secondary">Admin</Badge>
           </div>
           <p className="text-xs text-muted-foreground">
-            Name and email are set at signup and cannot be changed here.
+            Name and email are set at signup and cannot be changed here. Admins
+            have no public marketplace profile.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <Button
@@ -62,9 +62,6 @@ export function AdminAccountForm({
             >
               <LogOutIcon className="mr-2 size-4" />
               Sign out
-            </Button>
-            <Button asChild variant="link" size="sm" className="px-0 text-primary">
-              <Link href={`/users/${user.id}`}>View public profile</Link>
             </Button>
           </div>
         </CardContent>
