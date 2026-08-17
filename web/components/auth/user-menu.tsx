@@ -6,6 +6,7 @@ import {
   LayoutDashboardIcon,
   LogOutIcon,
   PlusIcon,
+  ShieldIcon,
   UserRoundIcon,
 } from "lucide-react"
 
@@ -24,7 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export function UserMenu() {
-  const { user, loading } = useAuth()
+  const { user, role, loading } = useAuth()
   const signOut = useSignOut()
 
   if (loading) {
@@ -45,6 +46,7 @@ export function UserMenu() {
   }
 
   const name = (user.user_metadata?.full_name as string | undefined) ?? user.email
+  const isAdmin = role === "admin"
 
   return (
     <DropdownMenu>
@@ -62,30 +64,49 @@ export function UserMenu() {
           <span className="block truncate text-xs font-normal">{user.email}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/profile">
-            <UserRoundIcon className="size-4" />
-            Profile
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/dashboard">
-            <LayoutDashboardIcon className="size-4" />
-            Dashboard
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/favorites">
-            <HeartIcon className="size-4" />
-            Favorites
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/sell">
-            <PlusIcon className="size-4" />
-            Sell an item
-          </Link>
-        </DropdownMenuItem>
+        {isAdmin ? (
+          <>
+            <DropdownMenuItem asChild>
+              <Link href="/admin">
+                <ShieldIcon className="size-4" />
+                Admin console
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/profile">
+                <UserRoundIcon className="size-4" />
+                Profile
+              </Link>
+            </DropdownMenuItem>
+          </>
+        ) : (
+          <>
+            <DropdownMenuItem asChild>
+              <Link href="/profile">
+                <UserRoundIcon className="size-4" />
+                Profile
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard">
+                <LayoutDashboardIcon className="size-4" />
+                Dashboard
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/favorites">
+                <HeartIcon className="size-4" />
+                Favorites
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/sell">
+                <PlusIcon className="size-4" />
+                Sell an item
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild variant="destructive">
           <button type="button" onClick={() => void signOut()} className="w-full">

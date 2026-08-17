@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation"
 import { MenuIcon, PlusIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { primaryNav, siteName } from "@/lib/nav"
+import { adminNav, primaryNav, siteName } from "@/lib/nav"
+import { useAuth } from "@/components/auth/auth-provider"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { MobileNav } from "@/components/mobile-nav"
@@ -13,6 +14,10 @@ import { UserMenu } from "@/components/auth/user-menu"
 
 export function SiteHeader() {
   const pathname = usePathname()
+  const { role } = useAuth()
+
+  const isAdmin = role === "admin"
+  const nav = isAdmin ? adminNav : primaryNav
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:backdrop-blur">
@@ -28,7 +33,7 @@ export function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
-          {primaryNav.map((item) => {
+          {nav.map((item) => {
             const active = pathname === item.href
             return (
               <Link
@@ -49,12 +54,14 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <Button asChild variant="outline" size="sm" className="hidden gap-1.5 shadow-xs sm:inline-flex">
-            <Link href="/sell">
-              <PlusIcon className="size-4" />
-              <span>Sell</span>
-            </Link>
-          </Button>
+          {!isAdmin ? (
+            <Button asChild variant="outline" size="sm" className="hidden gap-1.5 shadow-xs sm:inline-flex">
+              <Link href="/sell">
+                <PlusIcon className="size-4" />
+                <span>Sell</span>
+              </Link>
+            </Button>
+          ) : null}
           <div className="hidden h-5 w-px bg-border sm:block" aria-hidden="true" />
           <UserMenu />
           <Sheet>

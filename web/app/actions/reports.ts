@@ -3,7 +3,7 @@
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
 
-import { requireAdmin, requireUser } from "@/lib/auth"
+import { requireAdmin, requireTrader } from "@/lib/auth"
 import {
   createReport as createReportRow,
   resolveReport as resolveReportRow,
@@ -55,9 +55,10 @@ export async function submitReport(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  // Gate on a signed-in session before reaching the RPC; the RPC itself
-  // resolves the reporter from auth.uid() and enforces rate limiting.
-  await requireUser()
+  // Gate on a signed-in trader session before reaching the RPC; the RPC itself
+  // resolves the reporter from auth.uid() and enforces rate limiting. Admins
+  // moderate reports, they do not file them (ADR-020).
+  await requireTrader()
 
   const result = await createReportRow({
     listingId: parsed.data.listingId ?? null,

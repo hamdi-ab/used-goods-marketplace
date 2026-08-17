@@ -19,3 +19,9 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   seller: "Seller",
   admin: "Admin",
 }
+
+// Single source of truth for "what role is this profile row". Guards against a
+// stray DB value quietly falling through to something other than buyer.
+export function normalizeRole(role: unknown): UserRole {
+  return role === "admin" || role === "seller" ? role : "buyer"
+}

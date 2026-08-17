@@ -110,9 +110,15 @@ Represents every authenticated person.
 
 - User ID
 - Email
-- Role
+- Role (buyer / seller / admin)
 - Created At
 - Last Login
+
+### Roles
+
+- **Buyer** — browses, favorites, offers, reviews.
+- **Seller** — a buyer who additionally publishes listings and manages offers.
+- **Admin** — moderation-only. Admins may read everything (inspect listings, profiles, and the console) but may not trade: no selling, offering, favoriting, reviewing, contacting sellers, or filing community reports. All non-moderation writes are blocked. See ADR-020.
 
 ### Responsibilities
 

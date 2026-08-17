@@ -42,6 +42,12 @@ export const mobileNav: NavItem[] = [
   { title: "Favorites", href: "/favorites", icon: HeartIcon },
 ]
 
+// Admins are moderation-only (ADR-020): the header and mobile sheet surface a
+// single view-site door; the /admin sidebar carries the console navigation.
+export const adminNav: NavItem[] = [
+  { title: "Home", href: "/", icon: HomeIcon },
+]
+
 export const footerNav: NavItem[] = [
   { title: "About", href: "/about" },
   { title: "Help Center", href: "/help" },

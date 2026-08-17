@@ -3,7 +3,7 @@
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
 
-import { requireUser } from "@/lib/auth"
+import { requireTrader } from "@/lib/auth"
 import { submitReviewRow } from "@/lib/reviews"
 import {
   RATING_MAX,
@@ -53,9 +53,9 @@ export async function submitReview(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  // Require a session so the RPC's auth.uid() resolves; the RPC itself re-checks
-  // that the caller is the accepted-offer buyer. (Mirrors offers/offerAction.)
-  await requireUser()
+  // Require a trader session so the RPC's auth.uid() resolves; the RPC itself
+  // re-checks that the caller is the accepted-offer buyer. (Mirrors offers/offerAction.)
+  await requireTrader()
 
   const result = await submitReviewRow({
     offerId: parsed.data.offerId,

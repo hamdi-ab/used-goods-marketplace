@@ -5,6 +5,7 @@ import { redirect } from "next/navigation"
 
 import { createClient } from "@/lib/supabase/server"
 import type { SessionUser, UserRole } from "./auth/types"
+import { normalizeRole } from "./auth/types"
 
 export type { SessionUser, UserRole }
 export { ROLE_LABELS } from "./auth/types"
@@ -24,14 +25,10 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
     .eq("id", authUser.id)
     .maybeSingle()
 
-  const role: UserRole = profile?.role === "admin" || profile?.role === "seller"
-    ? profile.role
-    : "buyer"
-
   return {
     id: authUser.id,
     email: authUser.email ?? "",
-    role,
+    role: normalizeRole(profile?.role),
     fullName: profile?.full_name ?? null,
     profileCompleted: (profile?.profile_completion ?? 0) >= 100,
   }
@@ -43,13 +40,29 @@ export async function requireUser(): Promise<SessionUser> {
   return user
 }
 
-// T04: only sellers (and admins) may create or edit listings.
+// T04: only sellers may create or edit listings. Admins are moderation-only
+// (ADR-020): they no longer pass the seller gate, so /sell and listing
+// edit/delete redirect an admin to the console (buyers go to /profile).
 export async function requireSeller(): Promise<SessionUser> {
   const user = await requireUser()
-  if (user.role !== "seller" && user.role !== "admin") {
+  if (user.role === "admin") {
+    redirect("/admin")
+  }
+  if (user.role !== "seller") {
     // Not a seller yet — surface the profile page where this gate can be
     // surfaced as a future "become a seller" prompt.
     redirect("/profile")
+  }
+  return user
+}
+
+// ADR-020: admins are moderation-only and do not trade (no selling, offering,
+// favoriting, reviewing, contacting sellers, or filing community reports).
+// Trader actions gate on this so an admin's writes are blocked server-side.
+export async function requireTrader(): Promise<SessionUser> {
+  const user = await requireUser()
+  if (user.role === "admin") {
+    redirect("/admin")
   }
   return user
 }

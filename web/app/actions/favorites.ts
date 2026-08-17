@@ -2,11 +2,11 @@
 
 import { revalidatePath } from "next/cache"
 
-import { requireUser } from "@/lib/auth"
+import { requireTrader } from "@/lib/auth"
 import { toggleFavoriteRow } from "@/lib/favorites"
 
 export async function toggleFavorite(formData: FormData): Promise<void> {
-  const user = await requireUser()
+  const user = await requireTrader()
   const listingId = formData.get("listingId")
   if (typeof listingId !== "string" || listingId.length === 0) return
 

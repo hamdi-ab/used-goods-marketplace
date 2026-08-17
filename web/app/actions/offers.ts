@@ -3,7 +3,7 @@
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
 
-import { requireUser } from "@/lib/auth"
+import { requireTrader } from "@/lib/auth"
 import {
   acceptOfferRow,
   counterOfferRow,
@@ -52,7 +52,7 @@ export async function submitOffer(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  await requireUser()
+  await requireTrader()
   const result = await submitOfferRow({
     listingId: parsed.data.listingId,
     amount: parsed.data.amount,
@@ -105,9 +105,9 @@ export async function offerAction(
     return { message: "Enter a counter amount" }
   }
 
-  // Gate on a signed-in session before reaching the RPC; the RPC itself
+  // Gate on a signed-in trader session before reaching the RPC; the RPC itself
   // re-checks that the caller owns the offer's listing.
-  await requireUser()
+  await requireTrader()
 
   const result =
     parsed.data.action === "accept"
