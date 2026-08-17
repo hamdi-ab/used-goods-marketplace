@@ -21,11 +21,11 @@ type Target =
 export function ReportButton({
   target,
   signedIn,
-  isOwner,
+  isOwner = false,
 }: {
   target: Target
   signedIn: boolean
-  /** The signed-in user is the listed seller; owners cannot report themselves. */
+  /** The listing's seller shouldn't report their own listing. */
   isOwner?: boolean
 }) {
   const [open, setOpen] = useState(false)
@@ -39,16 +39,14 @@ export function ReportButton({
     if (nextOpen) setOpenKey((k) => k + 1)
   }
 
-  // A seller cannot report their own listing.
-  if (isOwner) return null
-
   const label = target.type === "listing" ? "Report listing" : "Report seller"
   const href =
     target.type === "listing"
       ? `/listings/${target.listingId}`
       : `/users/${target.sellerId}`
 
-  // Signed-out visitors route through login (with a ?next= back to the page).
+  // T15: hide reporting/report-self actions from the owner.
+  if (isOwner) return null
   if (!signedIn) {
     return (
       <Button asChild variant="outline" size="sm">
