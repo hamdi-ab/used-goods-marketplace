@@ -41,8 +41,11 @@ function AdminUserFooter() {
   const name = (user.user_metadata?.full_name as string | undefined) ?? user.email
 
   return (
-    <div className="border-t border-border p-4">
-      <div className="flex items-center gap-3">
+    <div className="border-t border-border p-3">
+      <Link
+        href="/admin/account"
+        className="flex items-center gap-3 rounded-md px-2 py-2 transition-colors hover:bg-muted"
+      >
         <Avatar className="size-9">
           <AvatarFallback>{initials(name)}</AvatarFallback>
         </Avatar>
@@ -50,16 +53,16 @@ function AdminUserFooter() {
           <p className="truncate text-sm font-medium text-foreground">{name}</p>
           <p className="truncate text-xs text-muted-foreground">{user.email}</p>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          aria-label="Sign out"
-          onClick={() => void signOut()}
-          className="text-muted-foreground hover:text-destructive"
-        >
-          <LogOutIcon className="size-4" />
-        </Button>
-      </div>
+      </Link>
+      <Button
+        variant="ghost"
+        size="sm"
+        className="mt-1 w-full justify-start text-muted-foreground hover:text-destructive"
+        onClick={() => void signOut()}
+      >
+        <LogOutIcon className="size-4" />
+        Sign out
+      </Button>
     </div>
   )
 }

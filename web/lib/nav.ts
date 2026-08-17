@@ -8,6 +8,7 @@ import {
   ListIcon,
   PlusIcon,
   SearchIcon,
+  SettingsIcon,
   UsersIcon,
   type LucideIcon,
 } from "lucide-react"
@@ -57,6 +58,12 @@ export const adminNav: NavItem[] = [
   { title: "Listings", href: "/admin/listings", icon: ListIcon },
   { title: "Reports", href: "/admin/reports", icon: FlagIcon },
   { title: "Statistics", href: "/admin/statistics", icon: BarChart3Icon },
+]
+
+// Utility section pinned below the primary nav (component standards: settings
+// and account live at the sidebar bottom, styled quietly and set apart).
+export const adminAccountNav: NavItem[] = [
+  { title: "Account", href: "/admin/account", icon: SettingsIcon },
 ]
 
 export const footerNav: NavItem[] = [

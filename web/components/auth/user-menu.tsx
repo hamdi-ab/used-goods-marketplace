@@ -73,9 +73,9 @@ export function UserMenu() {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href="/profile">
+              <Link href="/admin/account">
                 <UserRoundIcon className="size-4" />
-                Profile
+                Account
               </Link>
             </DropdownMenuItem>
           </>

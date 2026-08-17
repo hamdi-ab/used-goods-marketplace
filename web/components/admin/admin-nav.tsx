@@ -3,18 +3,15 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-import { adminNav } from "@/lib/nav"
+import { adminAccountNav, adminNav } from "@/lib/nav"
 import { cn } from "@/lib/utils"
 
-export function AdminNav() {
+function NavList({ items }: { items: typeof adminNav }) {
   const pathname = usePathname()
 
   return (
-    <nav aria-label="Admin" className="flex flex-col gap-1">
-      <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-        Admin
-      </p>
-      {adminNav.map((item) => {
+    <div className="flex flex-col gap-1">
+      {items.map((item) => {
         const isHome = item.href === "/"
         const active = pathname === item.href
         const Icon = item.icon
@@ -40,6 +37,23 @@ export function AdminNav() {
           </div>
         )
       })}
+    </div>
+  )
+}
+
+export function AdminNav() {
+  return (
+    <nav aria-label="Admin" className="flex h-full flex-col justify-between gap-6">
+      <div>
+        <p className="px-3 pb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          Admin
+        </p>
+        <NavList items={adminNav} />
+      </div>
+      <div>
+        <div className="mx-3 mb-2 h-px bg-border" aria-hidden="true" />
+        <NavList items={adminAccountNav} />
+      </div>
     </nav>
   )
 }
