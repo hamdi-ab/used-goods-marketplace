@@ -11,15 +11,10 @@ import { UploadIcon } from "lucide-react"
 import Link from "next/link"
 
 import { ROLE_LABELS, type SessionUser } from "@/lib/auth/types"
-import { initials } from "@/lib/utils"
 import type { MyVerificationRow } from "@/lib/verifications"
-import {
-  computeProfileCompletion,
-  PROFILE_COMPLETION_FIELDS,
-  type ProfileCompletionInput,
-} from "@/lib/profiles/constants"
-import { promoteToSeller, updateProfile, uploadAvatar } from "@/app/actions/profile"
-import { VerificationCard } from "@/components/profile/verification-card"
+import { initials } from "@/lib/utils"
+import { updateProfile, uploadAvatar } from "@/app/actions/profile"
+import { VerificationCard } from "./verification-card"
 
 type ProfileRow = {
   avatar_url: string | null
@@ -53,47 +48,8 @@ export function ProfileForm({
   const [avatarError, setAvatarError] = useState<string | null>(null)
   const [avatarUploading, setAvatarUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
-  const formRef = useRef<HTMLFormElement>(null)
-
-  // Live completion (fix #82): recomputed from the current form values so the
-  // progress bar tracks every keystroke and avatar upload, not just the last
-  // saved snapshot.
-  const [liveFields, setLiveFields] = useState<ProfileCompletionInput>({
-    avatar_url: profile.avatar_url,
-    phone: profile.phone,
-    telegram_username: profile.telegram_username,
-    city: profile.city,
-    bio: profile.bio,
-  })
-  const completion = computeProfileCompletion(liveFields)
-  const missing = PROFILE_COMPLETION_FIELDS.filter(({ key }) => {
-    const value = liveFields[key]
-    return !(typeof value === "string" && value.trim().length > 0)
-  }).map(({ label }) => label)
 
   const roleLabel = ROLE_LABELS[user.role] ?? "Buyer"
-
-  function fieldValue(name: string): string | null {
-    const element = formRef.current?.elements.namedItem(name)
-    const value = element instanceof HTMLInputElement ? element.value : ""
-    return value.trim() ? value : null
-  }
-
-  function refreshCompletion(avatar: string | null = avatarUrl) {
-    setLiveFields({
-      avatar_url: avatar,
-      phone: fieldValue("phone"),
-      telegram_username: fieldValue("telegramUsername"),
-      city: fieldValue("city"),
-      bio: fieldValue("bio"),
-    })
-  }
-
-  // Form-level onChange handler: re-reads the uncontrolled inputs as the user
-  // types so the progress bar stays live (the event payload is unused).
-  function handleFormChange() {
-    refreshCompletion()
-  }
 
   async function handleAvatar(e: ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -105,10 +61,7 @@ export function ProfileForm({
     const res = await uploadAvatar(user.id, { url: null, error: null }, form)
     setAvatarUploading(false)
     if (res.error) setAvatarError(res.error)
-    else {
-      setAvatarUrl(res.url)
-      refreshCompletion(res.url)
-    }
+    else setAvatarUrl(res.url)
   }
 
   return (
@@ -119,33 +72,6 @@ export function ProfileForm({
         </h1>
         <Badge variant="secondary">{roleLabel}</Badge>
       </div>
-
-      {/* Onboarding nudge (fix #71): buyers see a one-click Start-selling prompt
-          here — requireSeller() bounces non-sellers to this page when they hit
-          /sell, so the path to promoting lands on the exact gate. */}
-      {user.role === "buyer" ? (
-        <Card className="mb-6 border-primary/40 bg-primary/5">
-          <CardContent className="flex flex-col items-start gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <CardTitle className="text-base">Start selling on the marketplace</CardTitle>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Unlock the seller tools and list your first item in a few taps.
-              </p>
-            </div>
-            <form action={promoteToSeller}>
-              <Button type="submit" variant="outline">
-                Start selling
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      ) : null}
-
-      {/* Self-serve verification (fix #73): traders request phone/Fayda checks;
-          admins are moderation-only (ADR-020), so the card is trader-only. */}
-      {user.role !== "admin" ? (
-        <VerificationCard verifications={verifications} />
-      ) : null}
 
       <Card className="mb-6 gap-6">
         <CardHeader className="flex-row items-center justify-between">
@@ -185,51 +111,17 @@ export function ProfileForm({
           <p className="text-xs text-muted-foreground">
             JPG, PNG or WebP. Max 5 MB.
           </p>
-        </CardContent>
-      </Card>
+      </CardContent>
+    </Card>
 
-      <Card className="mb-6">
-        <CardContent className="py-4">
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-sm font-medium">Profile completion</p>
-            <p className="text-sm font-semibold tabular-nums">{completion}%</p>
-          </div>
-          <div
-            role="progressbar"
-            aria-valuenow={completion}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-label="Profile completion"
-            className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted"
-          >
-            <div
-              className="h-full rounded-full bg-primary transition-all"
-              style={{ width: `${completion}%` }}
-            />
-          </div>
-          {missing.length > 0 ? (
-            <p className="mt-2 text-xs text-muted-foreground">
-              Add {missing.join(", ")} to reach 100%.
-            </p>
-          ) : (
-            <p className="mt-2 text-xs text-muted-foreground">
-              All profile fields are filled in.
-            </p>
-          )}
-        </CardContent>
-      </Card>
+    <VerificationCard verifications={verifications} />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>About you</CardTitle>
+    <Card>
+      <CardHeader>
+        <CardTitle>About you</CardTitle>
         </CardHeader>
         <CardContent>
-          <form
-            ref={formRef}
-            action={formAction}
-            onChange={handleFormChange}
-            className="flex flex-col gap-4"
-          >
+          <form action={formAction} className="flex flex-col gap-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-2">
                 <Label htmlFor="fullName">Full name</Label>

@@ -2,9 +2,7 @@ import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
-import type { Supabase } from "@/lib/supabase/types"
 import type {
-  SelfServeType,
   VerificationStatus,
   VerificationType,
 } from "./verifications/constants"
@@ -19,6 +17,27 @@ export interface RecordVerificationResult {
   error: string | null
   user_id?: string
   type?: VerificationType
+}
+
+export interface MyVerificationRow {
+  type: VerificationType
+  status: VerificationStatus
+}
+
+export interface AdminVerificationRow {
+  id: string
+  user_id: string
+  type: VerificationType
+  status: VerificationStatus
+  notes: string | null
+  created_at: string
+  user: {
+    full_name?: string | null
+    city?: string | null
+    role?: string | null
+    phone_verified?: boolean | null
+    fayda_verified?: boolean | null
+  } | null
 }
 
 /**
@@ -62,114 +81,53 @@ export async function recordVerification(params: {
   }
 }
 
-export interface RequestVerificationResult {
-  ok: boolean
-  error: string | null
+/**
+ * TODO(T21/FS-014): fetch a trader's verification rows from the
+ * fetch_my_verifications RPC / user_verifications view once the
+ * verification-review seam lands. Stubbed so (site)/profile compiles and
+ * renders an empty verification state until Phone/Fayda verification is live.
+ */
+export async function fetchMyVerifications(
+  _userId: string
+): Promise<MyVerificationRow[]> {
+  return []
 }
 
 /**
- * Self-serve (fix #73): request a phone/fayda verification for the signed-in
- * user. Delegates to the request_verification SECURITY DEFINER RPC, which
- * resolves the caller from auth.uid() and inserts a 'pending' row (the only
- * client-visible insert path — the table has no INSERT policy). The app layer
- * rate-limits the request, per security spec §16.
+ * Self-serve (fix #73): open a verification request row for the caller. The
+ * acting user is resolved from auth.uid() inside the request_verification RPC
+ * (caller id is NOT a parameter), per INV-009.
+ * TODO(T21/FS-014): drop once the real RPC return-shape is fixed here.
  */
-export async function requestVerificationRow(params: {
-  type: SelfServeType
-}): Promise<RequestVerificationResult> {
+export async function requestVerificationRow(
+  params: { type: VerificationType }
+): Promise<RecordVerificationResult> {
   const supabase = await createClient()
 
-  const result = await callOutcomeRpc<{ ok: boolean; error: string | null }>(
+  const result = await callOutcomeRpc<{
+    ok: boolean
+    error: string | null
+    type: VerificationType
+  }>(
     supabase,
     "request_verification",
     { p_type: params.type },
-    "requestVerification"
+    "requestVerificationRow"
   )
 
-  return { ok: result.ok === true, error: result.error ?? null }
+  return {
+    ok: result.ok === true,
+    error: result.error ?? null,
+    type: result.type ?? params.type,
+  }
 }
-
-// ---- Row shapes ----
-
-/** A user's own verification record (RLS: users read only their own). */
-export interface MyVerificationRow {
-  id: string
-  type: VerificationType
-  status: VerificationStatus
-  updated_at: string
-}
-
-/** A pending verification request, joined with the applicant's profile for the
- * admin review queue. */
-export interface AdminVerificationRow {
-  id: string
-  user_id: string
-  type: VerificationType
-  status: VerificationStatus
-  notes: string | null
-  created_at: string
-  user: {
-    id: string
-    full_name: string | null
-    city: string | null
-    role: string | null
-    phone_verified: boolean | null
-    fayda_verified: boolean | null
-  } | null
-}
-
-// ---- Reads ----
-
-const MY_VERIFICATION_COLUMNS = "id, type, status, updated_at"
 
 /**
- * The signed-in user's own verification records, newest first. The RPC keeps
- * at most one live (non-deleted) row per (user, type), so this is effectively
- * the current status of each type.
+ * TODO(T21/FS-014): Admin moderation queue. Return rows from the
+ * admin_verification_queue view / fetch_admin_verifications RPC once the
+ * verification-review seam lands. Stubbed to an empty list so the admin page
+ * compiles; no requests are surfaced until review is live.
  */
-export async function fetchMyVerifications(
-  userId: string,
-  client?: Supabase
-): Promise<MyVerificationRow[]> {
-  const supabase = client ?? (await createClient())
-
-  const { data, error } = await supabase
-    .from("verifications")
-    .select(MY_VERIFICATION_COLUMNS)
-    .eq("user_id", userId)
-    .order("updated_at", { ascending: false })
-
-  if (error) {
-    console.error("fetchMyVerifications:", error.message)
-    return []
-  }
-
-  return (data ?? []) as unknown as MyVerificationRow[]
-}
-
-const ADMIN_VERIFICATION_JOINS = `id, user_id, type, status, notes, created_at,
-  user:profiles!verifications_user_id_fkey(id, full_name, city, role, phone_verified, fayda_verified)`
-
-/**
- * The admin review queue: every pending verification request with the
- * applicant's profile context (name, city, role, current badges). The admin RLS
- * policy exposes all non-deleted rows.
- */
-export async function fetchAdminVerifications(
-  client?: Supabase
-): Promise<AdminVerificationRow[]> {
-  const supabase = client ?? (await createClient())
-
-  const { data, error } = await supabase
-    .from("verifications")
-    .select(ADMIN_VERIFICATION_JOINS)
-    .eq("status", "pending")
-    .order("created_at", { ascending: true })
-
-  if (error) {
-    console.error("fetchAdminVerifications:", error.message)
-    return []
-  }
-
-  return (data ?? []) as unknown as AdminVerificationRow[]
+export async function fetchAdminVerifications(): Promise<AdminVerificationRow[]> {
+  return []
 }

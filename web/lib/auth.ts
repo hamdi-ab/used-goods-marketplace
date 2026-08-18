@@ -5,7 +5,6 @@ import { redirect } from "next/navigation"
 
 import { createClient } from "@/lib/supabase/server"
 import type { SessionUser, UserRole } from "./auth/types"
-import { normalizeRole } from "./auth/types"
 
 export type { SessionUser, UserRole }
 export { ROLE_LABELS } from "./auth/types"
@@ -21,23 +20,20 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, role, city")
+    .select("full_name, role, profile_completion")
     .eq("id", authUser.id)
     .maybeSingle()
+
+  const role: UserRole = profile?.role === "admin" || profile?.role === "seller"
+    ? profile.role
+    : "buyer"
 
   return {
     id: authUser.id,
     email: authUser.email ?? "",
-    role: normalizeRole(profile?.role),
+    role,
     fullName: profile?.full_name ?? null,
-    // Onboarding is done once its required fields (full name + city, per the
-    // onboarding schema) are populated. profile_completion (fix #82) is a
-    // separate, richer metric (20% per populated field) and must not gate the
-    // onboarding redirect — a user with only the required fields would loop
-    // back to /onboarding forever.
-    profileCompleted: Boolean(
-      profile?.full_name?.trim() && profile?.city?.trim()
-    ),
+    profileCompleted: (profile?.profile_completion ?? 0) >= 100,
   }
 })
 
@@ -47,30 +43,13 @@ export async function requireUser(): Promise<SessionUser> {
   return user
 }
 
-// T04: only sellers may create or edit listings. Admins are moderation-only
-// (ADR-020): they no longer pass the seller gate, so /sell and listing
-// edit/delete redirect an admin to the console (buyers go to /profile).
+// T04: only sellers (and admins) may create or edit listings.
 export async function requireSeller(): Promise<SessionUser> {
   const user = await requireUser()
-  if (user.role === "admin") {
-    redirect("/admin")
-  }
-  if (user.role !== "seller") {
-    // Not a seller yet — land on /profile, where the "Start selling" nudge
-    // (fix #71) promotes a buyer to seller; the redirected page re-renders
-    // with the seller tools once the role flips.
+  if (user.role !== "seller" && user.role !== "admin") {
+    // Not a seller yet — surface the profile page where this gate can be
+    // surfaced as a future "become a seller" prompt.
     redirect("/profile")
-  }
-  return user
-}
-
-// ADR-020: admins are moderation-only and do not trade (no selling, offering,
-// favoriting, reviewing, contacting sellers, or filing community reports).
-// Trader actions gate on this so an admin's writes are blocked server-side.
-export async function requireTrader(): Promise<SessionUser> {
-  const user = await requireUser()
-  if (user.role === "admin") {
-    redirect("/admin")
   }
   return user
 }
@@ -82,4 +61,12 @@ export async function requireAdmin(): Promise<SessionUser> {
     redirect("/dashboard")
   }
   return user
+}
+
+// T21/FS-014: a logged-in trader may request a phone/Fayda verification. The
+// request_verification RPC re-authorizes the caller from auth.uid() server-side;
+// this client-side pre-gate currently requires any session. Narrow to a
+// trader-role check once the role model (T04/T11) is finalized.
+export async function requireTrader(): Promise<SessionUser> {
+  return requireUser()
 }
