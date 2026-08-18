@@ -7,7 +7,7 @@ import { requireAdmin, requireUser } from "@/lib/auth"
 import {
   createReport as createReportRow,
   resolveReport as resolveReportRow,
-  REPORT_REASONS,
+  submitReportSchema,
   REPORT_NOTE_MAX,
 } from "@/lib/reports"
 
@@ -15,26 +15,6 @@ function formValue(formData: FormData, key: string): string | undefined {
   const v = formData.get(key)
   return typeof v === "string" && v.length > 0 ? v : undefined
 }
-
-export const submitReportSchema = z.object({
-  listingId: z.string().uuid().optional(),
-  sellerId: z.string().uuid().optional(),
-  reason: z.enum(REPORT_REASONS),
-  note: z
-    .string()
-    .max(REPORT_NOTE_MAX, `Keep the note under ${REPORT_NOTE_MAX} characters`)
-    .optional(),
-}).refine(
-  (data) => {
-    const hasListing = Boolean(data.listingId)
-    const hasSeller = Boolean(data.sellerId)
-    // Exactly one target — the DB reports_target_one constraint requires XOR,
-    // so a dual (or empty) target is rejected here with a field-level error
-    // instead of a generic SQL violation (audit P1.17, #84).
-    return hasListing !== hasSeller
-  },
-  { message: "A report must target a listing or a seller, but not both" }
-)
 
 export type SubmitReportState = {
   errors?: Record<string, string[] | undefined>

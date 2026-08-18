@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest"
 
-import { submitReportSchema } from "@/app/actions/reports"
 import {
   REPORT_REASONS,
   REPORT_REASON_LABELS,
@@ -10,6 +9,7 @@ import {
   REPORT_NOTE_MAX,
   REPORT_RATE_LIMIT_COUNT,
   REPORT_RATE_LIMIT_WINDOW_MS,
+  submitReportSchema,
   type ReportReason,
   type ReportStatus,
 } from "@/lib/reports/constants"
