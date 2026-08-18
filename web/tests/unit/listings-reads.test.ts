@@ -4,6 +4,7 @@ import {
   fetchListing,
   fetchListings,
   fetchSellerListings,
+  fetchSimilarListings,
   searchListings,
 } from "@/lib/listings"
 
@@ -204,6 +205,62 @@ describe("searchListings", () => {
       hasMore: false,
       error: "boom",
     })
+  })
+})
+
+describe("fetchSimilarListings (#78)", () => {
+  const flatRow = () => ({
+    id: "similar-1",
+    title: "MacBook Air",
+    price: 59000,
+    condition: "Lightly Used",
+    city: "Bole",
+    published_at: "2026-01-01",
+    image_url: "mac.jpg",
+    image_count: 1,
+    seller_id: "seller-1",
+    seller_full_name: "Amira Sellers",
+    seller_avatar_url: null,
+    seller_role: "seller",
+    seller_trust_score: 85,
+    seller_phone_verified: true,
+    seller_fayda_verified: false,
+    total_count: 2,
+  })
+
+  it("maps flat RPC rows into BrowseListing rows", async () => {
+    const client = {
+      rpc: async () => ({ data: [flatRow()], error: null }),
+    } as never
+    const result = await fetchSimilarListings("20000000-0000-0000-0000-000000000007", 6, client)
+    expect(result.error).toBeNull()
+    expect(result.listings.length).toBe(1)
+    expect(result.listings[0].title).toBe("MacBook Air")
+    expect(result.listings[0].seller?.full_name).toBe("Amira Sellers")
+    expect(result.listings[0].image_url).toBe("mac.jpg")
+  })
+
+  it("clamps the requested count to the 6-12 window", async () => {
+    const calls: unknown[] = []
+    const client = {
+      async rpc(_name: string, args: { p_limit: number }) {
+        calls.push(args)
+        return { data: [], error: null }
+      },
+    } as never
+    await fetchSimilarListings("src", 100, client)
+    await fetchSimilarListings("src", 0, client)
+    const limits = (calls as { p_limit: number }[]).map((c) => c.p_limit)
+    expect(limits[0]).toBe(12)
+    expect(limits[1]).toBe(1)
+  })
+
+  it("returns an empty, error-bearing result when the RPC rejects", async () => {
+    const client = {
+      rpc: async () => ({ data: null, error: { message: "rpc down" } }),
+    } as never
+    const result = await fetchSimilarListings("src", 6, client)
+    expect(result).toMatchObject({ listings: [], count: 0, error: "rpc down" })
   })
 })
 

@@ -292,6 +292,51 @@ export async function searchListings(
   }
 }
 
+// ---- Similar listings (#78, P1.10) ----
+//
+// `listings_similar` returns published listings in the same category as the
+// source, within +/-50% price band (PRD US-010 AC: same category + similar
+// price range), newest first. Reuses the flat browse shape + mapper so the
+// seller/image contract stays single-sourced, and the same SECURITY DEFINER
+// posture as search_listings.
+
+export interface SimilarResult {
+  listings: BrowseListing[]
+  count: number
+  error: string | null
+}
+
+const SIMILAR_LIMIT_DEFAULT = 6
+const SIMILAR_LIMIT_MAX = 12
+
+export async function fetchSimilarListings(
+  listingId: string,
+  limit: number = SIMILAR_LIMIT_DEFAULT,
+  client?: Supabase
+): Promise<SimilarResult> {
+  const supabase = client ?? (await createClient())
+  const safeLimit = Math.min(Math.max(limit, 1), SIMILAR_LIMIT_MAX)
+
+  const { data, error } = await callRpc<FlatSearchRow & { total_count: number }[]>(
+    supabase,
+    "listings_similar",
+    {
+      p_listing_id: listingId,
+      p_limit: safeLimit,
+      p_offset: 0,
+    }
+  )
+
+  if (error) {
+    console.error("fetchSimilarListings:", error)
+    return { listings: [], count: 0, error }
+  }
+
+  const rows = (data ?? []) as (FlatSearchRow & { total_count: number })[]
+  const listings = rows.map(mapFlatSearchListing)
+  return { listings, count: rows.length, error: null }
+}
+
 // ---- Writes (called by server actions; DB access centralized here, §17) ----
 
 export async function createListing(

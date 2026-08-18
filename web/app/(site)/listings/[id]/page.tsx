@@ -11,6 +11,7 @@ import { fetchFavoriteIds } from "@/lib/favorites"
 import { fetchSellerContactInfo } from "@/lib/contact"
 import { FavoriteButton } from "@/components/favorites/favorite-button"
 import { ListingViewTracker } from "@/components/listings/listing-view-tracker"
+import { SimilarListings } from "@/components/listings/similar-listings"
 import { MakeOfferButton } from "@/components/offers/make-offer-button"
 import { ContactButton } from "@/components/contact/contact-button"
 import { ReportButton } from "@/components/reports/report-button"
@@ -214,6 +215,8 @@ export default async function ListingPage({
           </Button>
         </div>
       </div>
+
+      <SimilarListings listingId={l.id} />
 
       <div className="mt-8 text-center">
         <Button asChild variant="link">
