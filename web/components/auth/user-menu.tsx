@@ -6,7 +6,6 @@ import {
   LayoutDashboardIcon,
   LogOutIcon,
   PlusIcon,
-  ShieldIcon,
   UserRoundIcon,
   FlagIcon,
 } from "lucide-react"
@@ -26,7 +25,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export function UserMenu() {
-  const { user, role, loading } = useAuth()
+  const { user, loading } = useAuth()
   const signOut = useSignOut()
 
   if (loading) {
@@ -35,11 +34,11 @@ export function UserMenu() {
 
   if (!user) {
     return (
-      <div className="flex items-center gap-1.5 sm:gap-2">
-        <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">
+      <div className="flex items-center gap-2">
+        <Button asChild variant="ghost" size="sm">
           <Link href="/login">Log in</Link>
         </Button>
-        <Button asChild size="sm" className="shadow-xs">
+        <Button asChild size="sm" className="hidden sm:inline-flex">
           <Link href="/register">Sign up</Link>
         </Button>
       </div>
@@ -47,7 +46,6 @@ export function UserMenu() {
   }
 
   const name = (user.user_metadata?.full_name as string | undefined) ?? user.email
-  const isAdmin = role === "admin"
 
   return (
     <DropdownMenu>
@@ -65,55 +63,36 @@ export function UserMenu() {
           <span className="block truncate text-xs font-normal">{user.email}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {isAdmin ? (
-          <>
-            <DropdownMenuItem asChild>
-              <Link href="/admin">
-                <ShieldIcon className="size-4" />
-                Admin console
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/admin/account">
-                <UserRoundIcon className="size-4" />
-                Account
-              </Link>
-            </DropdownMenuItem>
-          </>
-        ) : (
-          <>
-            <DropdownMenuItem asChild>
-              <Link href="/profile">
-                <UserRoundIcon className="size-4" />
-                Profile
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/dashboard">
-                <LayoutDashboardIcon className="size-4" />
-                Dashboard
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/favorites">
-                <HeartIcon className="size-4" />
-                Favorites
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/reports">
-                <FlagIcon className="size-4" />
-                My reports
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/sell">
-                <PlusIcon className="size-4" />
-                Sell an item
-              </Link>
-            </DropdownMenuItem>
-          </>
-        )}
+        <DropdownMenuItem asChild>
+          <Link href="/profile">
+            <UserRoundIcon className="size-4" />
+            Profile
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/dashboard">
+            <LayoutDashboardIcon className="size-4" />
+            Dashboard
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/favorites">
+            <HeartIcon className="size-4" />
+            Favorites
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/reports">
+            <FlagIcon className="size-4" />
+            My reports
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/sell">
+            <PlusIcon className="size-4" />
+            Sell an item
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild variant="destructive">
           <button type="button" onClick={() => void signOut()} className="w-full">

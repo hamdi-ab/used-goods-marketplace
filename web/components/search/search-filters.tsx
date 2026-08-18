@@ -10,8 +10,8 @@ import {
 import { useRouter } from "next/navigation"
 import { SearchIcon, Loader2Icon } from "lucide-react"
 
+import { useDebounce } from "@/hooks/use-debounce"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { FIELD_CLASS } from "@/lib/form-fields"
@@ -35,17 +35,6 @@ const SELECT_SORT_LABELS: Record<(typeof SEARCH_SORTS)[number], string> = {
 }
 
 const DEBOUNCE_MS = 300
-
-// #79 (P1.10): small seam so rapid filter edits don't trigger a request per
-// keystroke — the URL is pushed once the form has been idle for DEBOUNCE_MS.
-function useDebounce<T>(value: T, ms: number): T {
-  const [held, setHeld] = useState(value)
-  useEffect(() => {
-    const id = setTimeout(() => setHeld(value), ms)
-    return () => clearTimeout(id)
-  }, [value, ms])
-  return held
-}
 
 export function SearchFilters({
   categories,
@@ -101,7 +90,7 @@ export function SearchFilters({
   useEffect(() => {
     if (debouncedQuery === activeQuery) return
     startTransition(() => {
-      router.push(debouncedQuery, { scroll: "bottom" })
+      router.push(debouncedQuery)
     })
   }, [debouncedQuery, activeQuery, router])
 
@@ -110,7 +99,7 @@ export function SearchFilters({
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     startTransition(() => {
-      router.push(debouncedQuery, { scroll: "bottom" })
+      router.push(debouncedQuery)
     })
   }
 
@@ -223,11 +212,12 @@ export function SearchFilters({
 
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-start gap-2">
-            <Checkbox
+            <input
               id="search-verified"
+              type="checkbox"
               checked={sellerVerified}
-              onCheckedChange={(v) => setSellerVerified(Boolean(v))}
-              className="mt-0.5"
+              onChange={(e) => setSellerVerified(e.target.checked)}
+              className="mt-0.5 size-4 cursor-pointer rounded border-input align-middle text-primary focus:ring-2 focus:ring-ring"
             />
             <Label htmlFor="search-verified" className="font-medium">
               Verified seller only

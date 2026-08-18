@@ -10,7 +10,6 @@ import {
   REPORT_REASONS,
   REPORT_REASON_LABELS,
   REPORT_NOTE_MAX,
-  SELLER_REPORT_REASONS,
 } from "@/lib/reports/constants"
 import { TEXTAREA_CLASS } from "@/lib/form-fields"
 import { Button } from "@/components/ui/button"
@@ -69,9 +68,10 @@ export function ReportDialog({
     )
   }
 
-  // A report targets exactly one of listing or seller; the reason list is
-  // scoped to the target (listing-specific reasons do not apply to a seller).
-  const reasons = sellerId ? SELLER_REPORT_REASONS : REPORT_REASONS
+  // #84 enforces XOR(target): a report targets exactly one of listing or
+  // seller. The reason vocabulary is shared (listing/seller both reuse the
+  // same REPORT_REASONS set post-schema), with the label scoped per target.
+  const reasons = REPORT_REASONS
   const targetLabel = sellerId ? "seller" : "item"
 
   return (
