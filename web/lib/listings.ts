@@ -231,6 +231,7 @@ export interface SearchOptions {
   maxPrice?: number
   condition?: Condition
   city?: string
+  sellerVerified?: boolean
   sort?: SearchSort
   offset?: number
 }
@@ -266,12 +267,13 @@ export async function searchListings(
       p_category_slug: opts.categorySlug || null,
       p_min_price: opts.minPrice ?? null,
       p_max_price: opts.maxPrice ?? null,
-      p_condition: opts.condition ?? null,
-      p_city: opts.city || null,
-      p_sort: opts.sort ?? "newest",
-      p_limit: PAGE_SIZE,
-      p_offset: offset,
-    }
+       p_condition: opts.condition ?? null,
+       p_city: opts.city || null,
+       p_verified_seller: opts.sellerVerified ?? null,
+       p_sort: opts.sort ?? "newest",
+       p_limit: PAGE_SIZE,
+       p_offset: offset,
+     }
   )
 
   if (error) {

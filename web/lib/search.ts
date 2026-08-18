@@ -13,6 +13,7 @@ export interface SearchQuery {
   maxPrice: number | undefined
   condition: Condition | undefined
   city: string
+  sellerVerified: boolean
   sort: SearchSort
   offset: number
 }
@@ -32,6 +33,7 @@ export function parseSearchParams(params: {
   max?: SearchParamValue
   condition?: SearchParamValue
   city?: SearchParamValue
+  verified?: SearchParamValue
   sort?: SearchParamValue
   offset?: SearchParamValue
 }): SearchQuery {
@@ -50,6 +52,8 @@ export function parseSearchParams(params: {
 
   const city = (single(params.city) ?? "").trim()
 
+  const sellerVerified = single(params.verified) === "1" || single(params.verified) === "true"
+
   const rawSort = single(params.sort) ?? ""
   const sort = (SEARCH_SORTS as readonly string[]).includes(rawSort)
     ? (rawSort as SearchSort)
@@ -62,6 +66,7 @@ export function parseSearchParams(params: {
     maxPrice,
     condition,
     city,
+    sellerVerified,
     sort,
     offset: parseOffset(single(params.offset)),
   }
@@ -82,6 +87,7 @@ export function buildSearchUrl(query: SearchQuery): string {
   if (query.maxPrice !== undefined) params.set("max", String(query.maxPrice))
   if (query.condition) params.set("condition", query.condition)
   if (query.city) params.set("city", query.city)
+  if (query.sellerVerified) params.set("verified", "1")
   if (query.sort !== "newest") params.set("sort", query.sort)
   if (query.offset) params.set("offset", String(query.offset))
   const qs = params.toString()

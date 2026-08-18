@@ -16,7 +16,7 @@ export type RpcName =
   | "counter_offer"
   | "record_contact_attempt"
 
-export type RpcArgs = Record<string, string | number | null>
+export type RpcArgs = Record<string, string | number | boolean | null>
 
 export interface RpcResult<T> {
   data: T | null

@@ -57,6 +57,7 @@ export default async function SearchPage({
     maxPrice: filters.maxPrice,
     condition: filters.condition,
     city: filters.city || undefined,
+    sellerVerified: filters.sellerVerified,
     sort: filters.sort,
     offset: filters.offset,
   })
