@@ -1,11 +1,9 @@
-"use client"
-
 import { cn } from "@/lib/utils"
 import {
   REPORT_STATUS_COLORS,
   REPORT_STATUS_LABELS,
   type ReportStatus,
-} from "@/lib/reports/constants"
+} from "@/lib/reports"
 import { Badge } from "@/components/ui/badge"
 
 export function ReportStatusBadge({ status }: { status: ReportStatus }) {

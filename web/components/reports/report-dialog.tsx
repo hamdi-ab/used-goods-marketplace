@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useActionState } from "react"
 import { CheckCircleIcon } from "lucide-react"
 
@@ -39,7 +40,8 @@ export function ReportDialog({
   >(submitReport, {})
 
   // T11 AC4: show a "report received" acknowledgement instead of silently
-  // closing — the reporter must see that their report was accepted.
+  // closing — the reporter must see that their report was accepted, and can
+  // follow through to /reports to track its status (#80).
   if (state.ok) {
     return (
       <>
@@ -56,7 +58,10 @@ export function ReportDialog({
           </p>
         </div>
         <DialogFooter>
-          <Button type="button" size="sm" onClick={onClose}>
+          <Button type="button" size="sm" asChild>
+            <Link href="/reports">View your reports</Link>
+          </Button>
+          <Button type="button" size="sm" variant="ghost" onClick={onClose}>
             Close
           </Button>
         </DialogFooter>

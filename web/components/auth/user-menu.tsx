@@ -8,6 +8,7 @@ import {
   PlusIcon,
   ShieldIcon,
   UserRoundIcon,
+  FlagIcon,
 } from "lucide-react"
 
 import { useAuth } from "@/components/auth/auth-provider"
@@ -97,6 +98,12 @@ export function UserMenu() {
               <Link href="/favorites">
                 <HeartIcon className="size-4" />
                 Favorites
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/reports">
+                <FlagIcon className="size-4" />
+                My reports
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
