@@ -2,7 +2,14 @@
 
 import { generateListingSuggestions } from "@/lib/ai/listings"
 import { recordAiUsage } from "@/lib/ai/telemetry"
+import { consumeAiGeneration, countAiGenerationsThisMonth } from "@/lib/ai/quota"
+import {
+  AI_LIMIT_MESSAGE,
+  aiLimit,
+  isAtCap,
+} from "@/lib/plans/constants"
 import { requireSeller } from "@/lib/auth"
+import { fetchSellerTier } from "@/lib/usage"
 import type { AIListingResult, AIListingSuggestion } from "@/lib/ai/constants"
 import type { Category } from "@/lib/listings/constants"
 
@@ -20,20 +27,16 @@ export interface AiSuggestionsState {
  * AI key never reaches the client — the action runs server-side, mirroring the
  * GenerateListingService → Gemini Provider flow (docs/05-backend §9).
  *
- * FS-005 analytics: the seller's already-typed title/description (optional
- * inputs) are forwarded to the prompt, and the interaction is recorded as
- * ai_used (first assist) or ai_regenerated (Regenerate).
- *
- * Auth + uploads (fix #69): the action requires seller auth before parsing
- * anything, so anonymous callers cannot consume Gemini quota; photo type /
- * magic bytes / size are validated in the AI seam before forwarding.
+ * T25 (map #54): a monthly AI quota is enforced here. The seller's tier sets the
+ * cap (T24); usage is counted server-side before the provider is called, so the
+ * §26 message short-circuits a wasted call when the cap is hit. A credit is
+ * consumed only on a valid draft (Generate/Regenerate with ok:true); failures
+ * and Apply consume nothing and the month resets automatically on the 1st.
  */
 export async function generateListingSuggestionsAction(
   _prevState: AiSuggestionsState,
   formData: FormData
 ): Promise<AiSuggestionsState> {
-  await requireSeller()
-
   const files = (formData.getAll("photos") as File[]).filter(
     (f): f is File => f instanceof File
   )
@@ -56,7 +59,22 @@ export async function generateListingSuggestionsAction(
     return typeof v === "string" && v.trim() ? v : undefined
   }
 
-  recordAiUsage(formData.get("ai_event") === "regenerate" ? "ai_regenerated" : "ai_used")
+  const isRegenerate = formData.get("ai_event") === "regenerate"
+  const aiEvent: "generate" | "regenerate" = isRegenerate ? "regenerate" : "generate"
+
+  recordAiUsage(isRegenerate ? "ai_regenerated" : "ai_used")
+
+  // T25: enforce the monthly AI quota before calling the provider.
+  const user = await requireSeller()
+  const tier = await fetchSellerTier(user.id)
+  const limit = aiLimit(tier)
+  const used = await countAiGenerationsThisMonth()
+  if (isAtCap(used, limit)) {
+    return {
+      ok: false,
+      message: AI_LIMIT_MESSAGE,
+    }
+  }
 
   const result: AIListingResult = await generateListingSuggestions(
     files,
@@ -64,6 +82,9 @@ export async function generateListingSuggestionsAction(
     { title: readText("title"), description: readText("description") }
   )
   if (result.ok) {
+    // Consume one credit only on a successfully generated draft. `limit` is
+    // null for the uncapped Business tier — the RPC records without capping.
+    await consumeAiGeneration(aiEvent, limit)
     return { ok: true, suggestion: result.suggestion }
   }
   return { ok: false, reason: result.reason, message: result.message }

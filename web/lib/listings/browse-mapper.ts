@@ -23,6 +23,7 @@ export interface NestedBrowseRow {
   city: string | null
   status: ListingStatus
   published_at: string
+  boosted_until?: string | null
   seller: BrowseSeller[] | null
   images: ListingImage[] | null
 }
@@ -34,6 +35,9 @@ export interface FlatSearchRow {
   condition: Condition
   city: string | null
   published_at: string
+  /** T29: from search_listings RPC; null/undefined when the nested browse path
+   * doesn't fetch it. */
+  boosted_until?: string | null
   image_url: string | null
   image_count: number
   seller_id: string | null
@@ -93,8 +97,9 @@ export function mapNestedBrowseListing(row: NestedBrowseRow): BrowseListing {
     condition: row.condition,
      city: row.city,
      status: row.status,
-     published_at: row.published_at,
-     image_url: pickCoverImage(row.images),
+      published_at: row.published_at,
+      boosted_until: row.boosted_until ?? null,
+      image_url: pickCoverImage(row.images),
     image_count: (row.images ?? []).length,
     seller: seller
       ? buildSeller({
@@ -120,6 +125,7 @@ export function mapFlatSearchListing(row: FlatSearchRow): BrowseListing {
     city: row.city,
     status: "published",
     published_at: row.published_at,
+    boosted_until: row.boosted_until ?? null,
     image_url: row.image_url,
     image_count: row.image_count,
     seller: row.seller_id

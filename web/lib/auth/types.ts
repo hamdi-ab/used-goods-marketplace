@@ -4,12 +4,15 @@
 // server-only auth module graph into the browser bundle.
 // Server-only helpers (getCurrentUser, requireUser) live in ../auth.
 
+import type { Tier } from "@/lib/plans/constants"
+
 export type UserRole = "buyer" | "seller" | "admin"
 
 export type SessionUser = {
   id: string
   email: string
   role: UserRole
+  tier: Tier
   fullName: string | null
   profileCompleted: boolean
 }
@@ -18,10 +21,4 @@ export const ROLE_LABELS: Record<UserRole, string> = {
   buyer: "Buyer",
   seller: "Seller",
   admin: "Admin",
-}
-
-// Single source of truth for "what role is this profile row". Guards against a
-// stray DB value quietly falling through to something other than buyer.
-export function normalizeRole(role: unknown): UserRole {
-  return role === "admin" || role === "seller" ? role : "buyer"
 }

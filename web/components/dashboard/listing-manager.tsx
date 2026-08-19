@@ -5,15 +5,19 @@ import Link from "next/link"
 import { useActionState, useState } from "react"
 import { EyeIcon, HeartIcon, PackageOpenIcon, PencilIcon, PlusIcon, XIcon } from "lucide-react"
 
-import { deleteListing } from "@/app/actions/listings"
+import { deleteListing, boostListing } from "@/app/actions/listings"
 import type { SellerListingRow } from "@/lib/listings"
 import { formatPrice } from "@/lib/listings/constants"
+import { isBoostActive, boostLabel } from "@/lib/boost"
 import { ListingStatusBadge } from "@/components/dashboard/listing-status-badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
 function ListingRow({ listing }: { listing: SellerListingRow }) {
   const [state, action, pending] = useActionState(deleteListing, {})
+  const [boostState, boostAction, boostPending] = useActionState(boostListing, {
+    ok: true,
+  })
   const [imgError, setImgError] = useState(false)
 
   return (
@@ -37,13 +41,19 @@ function ListingRow({ listing }: { listing: SellerListingRow }) {
             )}
           </div>
 
-          <div className="min-w-0 flex-1">
-            <Link
-              href={`/listings/${listing.id}`}
-              className="line-clamp-1 font-medium hover:underline"
-            >
-              {listing.title}
-            </Link>
+            <div className="min-w-0 flex-1">
+              <Link
+                href={`/listings/${listing.id}`}
+                className="line-clamp-1 font-medium hover:underline"
+              >
+                {listing.title}
+              </Link>
+              {listing.status === "published" &&
+              isBoostActive(listing.boosted_until) ? (
+                <span className="mt-1 block text-xs font-medium text-amber-600">
+                  Boosted — {boostLabel(listing.boosted_until)}
+                </span>
+              ) : null}
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <ListingStatusBadge status={listing.status} />
               <span className="text-sm font-semibold">
@@ -82,11 +92,47 @@ function ListingRow({ listing }: { listing: SellerListingRow }) {
                 {pending ? "Archiving…" : "Archive"}
               </Button>
             </form>
+            {listing.status === "published" &&
+            !isBoostActive(listing.boosted_until) ? (
+              <div className="flex items-center gap-1.5">
+                <form action={boostAction}>
+                  <input type="hidden" name="id" value={listing.id} readOnly />
+                  <input type="hidden" name="preset" value="standard" readOnly />
+                  <Button
+                    type="submit"
+                    variant="secondary"
+                    size="sm"
+                    disabled={boostPending}
+                    title="Boost to top of search for 3 days (49 ETB, paid off-platform)"
+                  >
+                    Boost 49
+                  </Button>
+                </form>
+                <form action={boostAction}>
+                  <input type="hidden" name="id" value={listing.id} readOnly />
+                  <input type="hidden" name="preset" value="premium" readOnly />
+                  <Button
+                    type="submit"
+                    variant="secondary"
+                    size="sm"
+                    disabled={boostPending}
+                    title="Boost to top of search for 7 days (99 ETB, paid off-platform)"
+                  >
+                    Boost 99
+                  </Button>
+                </form>
+              </div>
+            ) : null}
           </div>
 
           {state.message ? (
             <p role="alert" className="w-full text-sm text-destructive">
               {state.message}
+            </p>
+          ) : null}
+          {boostState.message && !boostState.ok ? (
+            <p role="alert" className="w-full text-sm text-destructive">
+              {boostState.message}
             </p>
           ) : null}
         </CardContent>

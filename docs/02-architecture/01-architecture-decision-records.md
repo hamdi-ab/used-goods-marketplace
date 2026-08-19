@@ -415,7 +415,7 @@ Excluding payments reduces scope while preserving a clear integration path.
 
 ### Status
 
-Deferred
+Deferred (Fayda: designed — self-issued OIDC, verify-only; see ADR-020)
 
 ### Decision
 
@@ -434,6 +434,8 @@ Future integration:
 ### Rationale
 
 Keeps the MVP simple while enabling stronger trust features later.
+
+Fayda integration is designed but deferred from the MVP build (live integration needs partner onboarding). The designed shape: a dev-only eSignet OIDC mock (ADR-020) driving a verify-only flow that stores only the unique Fayda `sub`; the real `esignet.ida.et` is a config swap. Tracker: issue #25 (T21, stretch).
 
 # ADR-016
 ## Analytics
@@ -546,39 +548,62 @@ Assumptions: 1 photo ≈ 0.3k–1.6k input tokens (post-resize), prompt + schema
 **Cons:** Free-tier rate limits cap concurrent listing generation; auto-tiling is provider-controlled, so actual token counts vary slightly and must be checked with `countTokens` at T14
 
 # ADR-020
-## Admin Role: Moderation-Only, Not a Trader
+## Fayda Verification: Self-Issued OIDC (Verify-Only)
+
+### Status
+
+Accepted (stretch — T21, issue #25)
+
+### Why this ADR exists
+
+ADR-015 defers Fayda. When designed, a future reader must know *how* a Fayda verification is recorded and why the `record_verification` RPC (admin-only) is not reused. This ADR pins the two RPCs and the PII boundary.
+
+### Decision
+
+1. **Goal:** demonstrate the real integration seam, not a live national check. The Fayda badge means "identity authenticated against the national-ID (OIDC)".
+2. **Verify-only:** request `scope=openid`, no `claims`. Store only the unique Fayda `sub` on the `verifications` audit row (new `sub` column) plus the `profiles.fayda_verified` cached flag. Zero PII; no raw JWT.
+3. **Self-issued write path:** new SECURITY DEFINER RPC `record_fayda_verification`, callable by `auth.uid()` for their own profile only, guarded by a successful server-side OIDC exchange (verified `sub` passed as proof). Mirrors `record_verification`'s flag-flip + trust-bump (+20, clamped 0-100) + audit-row logic for `type='fayda'`. The admin-gated `record_verification` stays untouched, keeping the two issuance paths distinct (domain model §Verification).
+4. **Mock fidelity:** the dev-only eSignet mock signs real RS256 JWTs and serves JWKS so the client's signature-validation path runs end-to-end; `private_key_jwt` client auth only (no `client_secret` — the real eSignet offers none).
+5. **Guardrail:** mock + `/verify-fayda/*` mounted only under `FAYDA_MOCK=1`; the production build hard-refuses the flag.
+
+### Rationale
+
+A user's own successful national-ID login is a *self-issued* trust signal — the admin-only RPC models *admin-issued* signals (email/phone/telegram), and conflating them would widen the admin function or force an impossible admin step into the flow. Verify-only keeps the profile free of national-ID-derived PII (Ethiopia PDP Proclamation 1321/2024) while still proving the integration seam.
+
+### Trade-offs
+
+**Pros:** real seam proved end-to-end (config swap to esignet.ida.et); no PII; admin RPC security posture unchanged; mock teaches correct client-auth behavior
+
+**Cons:** mock cannot exercise a live revocation/validity check; verify-only surrenders name auto-fill; extra RPC vs reusing `record_verification`; `esignet.ida.et` discovery must be re-verified at build time
+
+# ADR-021
+## Transaction Handling (Sale → Money → Goods)
 
 ### Status
 
 Accepted
 
-### Dependencies
-
-- ADR-006 (Row Level Security)
-- ADR-014 (No Payments in MVP)
-
 ### Why this ADR exists
 
-Admin is a moderation role, not a trading role. A signed-in admin must not be able to sell, offer, favorite, review, or file community reports — those are consumer activities. Admins may inspect (read) anything and may write only moderation actions (resolve reports, suspend users, remove listings). This follows separation of duties and least privilege: the moderator who decides whether a listing stays must never be the seller who benefits.
+ADR-014 defers payments but does not say how a sale is *settled*. This ADR pins the full transaction model for the submission, driven by the challenge brief: payment is listed as a "plus" ("Telebirr or chapa payment gateway integration is a plus"), not a required capability — while the *required* capabilities are discovery, direct communication (Telegram/call), and trust & safety. The deal loop must work end-to-end without payment infrastructure.
 
 ### Decision
 
-1. **Read-only inspection:** admins may browse the marketplace and open any listing or profile (the console links out to public pages for this).
-2. **Moderation writes only:** admins may `resolveReport`, `suspendUserRow`, `removeListingRow`. No other writes.
-3. **Blocked writes:** admins are blocked from creating/editing/deleting listings (`requireSeller` no longer admits admin), from `toggleFavorite`, from all offer actions, from `submitReview`, from `createReport`, and from `recordContactAttempt`.
-4. **Role-aware shell:** admin routes (`/admin/**`) render inside a dedicated dashboard shell — a fixed sidebar (brand, View Site, Dashboard, Users, Listings, Reports, Statistics, user card + sign out) with the public site header/footer excluded via a `(site)` route group. Admins browsing public pages get the normal storefront header with no primary nav (their user menu carries the "Admin console" door).
-5. **Role-aware login landing:** an admin logs in to `/admin`. A `?next` target is honored only if it is a read-safe page; trader destinations (`/sell`, `/offers`, `/favorites`, listing edit) fall back to `/admin`.
-6. **`/dashboard` untouched:** it stays buyer/seller territory; the admin's account menu "Dashboard" item becomes "Admin console" → `/admin`. Visiting `/dashboard` directly as admin renders harmlessly.
+1. **The deal is recorded in-app; money and goods move outside the app.** An accepted offer flips the listing to `sold` with `sold_to_buyer_id` (`accept_offer`); the buyer and seller then settle through the direct-communication layer (Telegram deep-link / phone call, ADR-013), exactly as Addis' P2P market operates today (cash, Telebirr, CBE Birr). No escrow, no wallet, no payout, no payment row.
+2. **No in-app payments ship in the MVP.** This is the operational form of ADR-014; it keeps the product honest and deployable and avoids the regulatory/compliance weight of unregulated financial rails (refunds, disputes, fraud, payout-KYC).
+3. **Chapa appears in the demo only, as a recorded bonus beat, not in the shipped app.** The `fm/chapa-sandbox-demo` branch (ticket #97) is a stretch artifact: with `CHAPA_DEMO_FALLBACK=true` it shows the full state machine (Pay with Chapa → test card → paid → buyer confirms receipt) with no network or account. It is recorded as a ~20 s optional shot and kept unmerged from the submission branch.
+4. **Judge-facing framing:** "The brief lists payments as a plus. We kept the core loop free of payment rails and demonstrated payment readiness in Chapa test mode — the migration path (Chapa) and national ID (Fayda) are mapped as trust and volume grow." This turns the absence of live payments from a gap into an architectural argument scored on Technical Execution and Scalability/Feasibility.
+5. **Post-challenge roadmap:** ticket #97 stays open; Chapa (and escrow, monetization doc §18) remain the genuine future path once the product outgrows meetup settlement.
 
 ### Rationale
 
-Separation of duties (the judge must not be the complainant or the beneficiary) and least privilege (grant only what the job needs). The Admin persona's "monitor marketplace activity" is served inside the console — the listings and users pages expose every record with read-only links — so admins do not need a trading shell to do their job.
+The challenge brief's required capabilities (condition status, filters, search, direct contact, verification indicators, report/flag, ratings) are all satisfied without payment rails; "purchase" is enabled by the offer→accept→sold loop plus direct contact. Keeping money and goods out of the MVP maximizes feasibility and demo reliability 7 days before the Aug 26 deadline.
 
 ### Trade-offs
 
-**Pros:** clean governance story, no admin conflict-of-interest vector, demo admin is purely a moderator
+**Pros:** zero payment-infra risk in the demo; honest, immediately deployable; matches the brief's "payment is a plus"; Chapa seam preserved for later; strong feasibility story
 
-**Cons:** admins who also want to trade need a separate consumer account; slightly more server-action guards to maintain
+**Cons:** no in-app payment revenue or buyer-protection escrow; "verify at cash-out" industry pattern (benchmark §5, tier 3) is deferred until a payout exists — the equivalent friction point in the MVP is contact-unlock / high-price ceiling / listing caps (benchmark §7.4)
 
 # ADR Summary
 
@@ -603,7 +628,8 @@ Separation of duties (the judge must not be the complainant or the beneficiary) 
 | ADR-017 | Vercel Deployment |
 | ADR-018 | RESTful API Design |
 | ADR-019 | Gemini Vision: Image Input Budget & Cost |
-| ADR-020 | Admin Role: Moderation-Only, Not a Trader |
+| ADR-020 | Fayda Verification: Self-Issued OIDC (Verify-Only) |
+| ADR-021 | Transaction Handling (Sale → Money → Goods) |
 
 # Conclusion
 

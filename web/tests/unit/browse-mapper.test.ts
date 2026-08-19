@@ -91,6 +91,7 @@ describe("browse-mapper.mapFlatSearchListing (search RPC rows)", () => {
       city: "Bole",
       status: "published",
       published_at: "2026-01-01",
+      boosted_until: null,
       image_url: "/cover.jpg",
       image_count: 3,
       seller: {
