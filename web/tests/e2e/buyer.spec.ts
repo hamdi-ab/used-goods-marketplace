@@ -104,4 +104,16 @@ test.describe("buyer", () => {
       page.getByRole("heading", { name: "Notifications", exact: true })
     ).toBeVisible()
   })
+
+  test("buyer dashboard shows the start-selling CTA", async ({ page }) => {
+    await page.goto("/dashboard")
+    await expect(page.getByRole("heading", { name: /Welcome back/ })).toBeVisible()
+    await expect(
+      page.getByRole("heading", { name: "Sell on the marketplace" })
+    ).toBeVisible()
+    await expect(page.getByRole("button", { name: "Start selling" })).toBeVisible()
+    await expect(
+      page.getByRole("heading", { name: "Your listings" })
+    ).toHaveCount(0)
+  })
 })

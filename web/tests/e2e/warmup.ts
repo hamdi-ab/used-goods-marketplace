@@ -44,6 +44,13 @@ const ROUTES = [
   "/admin/reports",
   "/admin/statistics",
   "/admin/verifications",
+  "/admin/account",
+  "/about",
+  "/help",
+  "/terms",
+  "/privacy",
+  "/safety",
+  "/contact",
 ]
 
 // The suite writes state through the UI (a favorite, an offer, a report, a
