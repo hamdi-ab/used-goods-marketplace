@@ -42,6 +42,11 @@ test.describe("admin", () => {
     await page.goto("/admin/verifications")
     await expect(page.getByRole("heading", { name: "Verification review" })).toBeVisible()
   })
+
+  test("account settings renders", async ({ page }) => {
+    await page.goto("/admin/account")
+    await expect(page.getByRole("heading", { name: /Account/ })).toBeVisible()
+  })
 })
 
 // Authz guard. Lives outside the admin describe because its beforeEach signs

@@ -57,6 +57,25 @@ test.describe("seller", () => {
     await page.goto("/offers/seller")
     await expect(page.getByRole("heading", { name: "Incoming offers" })).toBeVisible()
   })
+
+  test("own listing shows no offer/contact/report/favorite CTAs", async ({ page }) => {
+    // The seller's own listing must hide every interaction CTA (INV-005).
+    await page.goto("/dashboard")
+    const editHref = await page
+      .getByRole("link", { name: /Edit/ })
+      .first()
+      .getAttribute("href")
+    expect(editHref).toMatch(/^\/listings\/[0-9a-f-]{36}\/edit$/)
+
+    await page.goto(editHref!.replace(/\/edit$/, ""))
+    await expect(page).toHaveURL(/\/listings\/[0-9a-f-]{36}$/)
+    await expect(page.getByRole("button", { name: "Make an offer" })).toHaveCount(0)
+    await expect(page.getByRole("button", { name: "Contact seller" })).toHaveCount(0)
+    await expect(page.getByRole("button", { name: "Report listing" })).toHaveCount(0)
+    await expect(
+      page.locator('button[aria-label="Save to favorites"]')
+    ).toHaveCount(0)
+  })
 })
 
 // Authz guard. Lives outside the seller describe because its beforeEach signs

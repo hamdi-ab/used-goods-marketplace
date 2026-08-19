@@ -62,4 +62,19 @@ test.describe("guest", () => {
     await page.getByRole("link", { name: "View seller profile" }).click()
     await expect(page).toHaveURL(/\/users\//, { timeout: 30_000 })
   })
+
+  test("static pages all render", async ({ page }) => {
+    const pages: Array<[string, RegExp]> = [
+      ["/about", /About VinTech Marketplace/],
+      ["/help", /How can we help/],
+      ["/terms", /Terms of Service/],
+      ["/privacy", /Privacy Policy/],
+      ["/safety", /Safety tips/],
+      ["/contact", /Talk to us/],
+    ]
+    for (const [path, heading] of pages) {
+      await page.goto(path)
+      await expect(page.getByRole("heading", { name: heading, level: 1 })).toBeVisible()
+    }
+  })
 })

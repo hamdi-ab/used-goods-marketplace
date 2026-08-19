@@ -1,16 +1,23 @@
 # E2E Functionality Checklist by Role
 
 > **Project:** Used Goods Marketplace — VinTech Challenge 2026
-> **Version:** 1.0
+> **Version:** 2.0
 > **Owner:** engineering
-> **Status:** Draft (specs written; execution gated on local Supabase stack)
+> **Status:** Executed — 25/25 passing against the remote Supabase project
+> (`fqbtbprwruwollkkpbou`) on branch `fm/ui-layout-max-width-fix` (commit `0fb4c77`)
 
 ## Scope
 
 Every user-facing flow, grouped by role, with its Playwright spec coverage. The
 specs live in `web/tests/e2e/` and run via `web/playwright.config.ts` (system
-Chrome, auto-start `next dev`, requires the local Supabase stack up with seed
-data). Framework: `@playwright/test` (devDependency).
+Chrome, single worker, `globalSetup` warms all routes and resets demo state, so
+re-runs are idempotent). Framework: `@playwright/test` (devDependency).
+
+Coverage legend:
+
+- **[x]** — the flow is exercised through the UI; footnotes mark aspects that are
+  only asserted shallowly.
+- **[ ]** — not fully covered; each is called out inline and summarized under Gaps.
 
 ## Test accounts (seed)
 
@@ -24,56 +31,56 @@ data). Framework: `@playwright/test` (devDependency).
 
 ## Guest / Anonymous
 
-- [ ] Browse home: hero, category cards, listing grid, pagination (`/`)
-- [ ] Search with filters + sort (`/search`)
-- [ ] Read listing detail: gallery, price, trust panel, similar listings (`/listings/[id]`)
-- [ ] Read public seller profile + reviews (`/users/[id]`)
-- [ ] Static pages (`/about`, `/help`, `/terms`, `/privacy`, `/safety`, `/contact`)
-- [ ] Interactive CTAs (favorite, offer, contact, report) redirect to `/login?next=…`
+- [x] Browse home: hero, category cards, listing grid (`/`) — *pagination not asserted*
+- [x] Search with keyword; filters update the URL (`/search`) — *sort not asserted*
+- [x] Read listing detail: title + signed-out CTA routing (`/listings/[id]`) — *gallery/price/trust/similar not asserted*
+- [x] Public seller profile reachable from a listing (`/users/[id]`) — *reviews not asserted*
+- [x] Static pages (`/about`, `/help`, `/terms`, `/privacy`, `/safety`, `/contact`)
+- [x] Interactive CTAs (favorite, offer, contact, report) redirect to `/login?next=…`
 
 ## Buyer
 
-- [ ] Favorite / unfavorite listings; manage `/favorites`
-- [ ] Submit an offer on a listing (`/listings/[id]`)
-- [ ] Track own offers + status badges (`/offers`)
-- [ ] Respond to a counter-offer (accept / decline) (`/offers`)
-- [ ] Review an accepted transaction (1–5 stars) (`/offers`)
-- [ ] Contact seller (Telegram/phone, opt-in respected) (`/listings/[id]`, `/users/[id]`)
-- [ ] Report a listing or seller; track status in `/reports`
-- [ ] Notifications inbox + mark read / mark all read (`/notifications`)
-- [ ] Profile management: avatar, city/phone/Telegram/bio, phone-public toggle (`/profile`)
-- [ ] Request phone/Fayda verification (`/profile` → VerificationCard) — *T21, read seam stubbed*
-- [ ] Dashboard buyer view + "Start selling" CTA (`/dashboard`) — *promoteToSeller stub no-op (T21)*
+- [x] Favorite / unfavorite; manage `/favorites`
+- [x] Submit an offer on a listing (`/listings/[id]`) and see it in `/offers`
+- [ ] Track own offers + status badges (`/offers`) — *listing appears; badge states not asserted*
+- [ ] Respond to a counter-offer (accept / decline) (`/offers`) — **gap**
+- [ ] Review an accepted transaction (1–5 stars) (`/offers`) — **gap**
+- [ ] Contact seller (Telegram/phone, opt-in respected) (`/listings/[id]`) — **gap** (guest redirect asserted)
+- [x] Report a listing; land on `/reports` — *status tracking not asserted*
+- [x] Notifications inbox (`/notifications`) — smoke (renders only)
+- [x] Profile page: account form + verification card render (`/profile`) — *save / phone-public toggle not asserted*
+- [x] Request phone/Fayda verification (`/profile` → VerificationCard) — *T21, read seam stubbed*
+- [x] Dashboard buyer view + "Start selling" CTA (`/dashboard`) — *promoteToSeller action not clicked*
 
 ## Seller
 
-- [ ] Create a listing with photos (1–10) + AI Assist (`/sell`)
-- [ ] Edit own listing (`/listings/[id]/edit`)
-- [ ] Archive / soft-delete own listing (`/dashboard`)
-- [ ] Dashboard listing stats: views, favorites, edit/archive links (`/dashboard`)
-- [ ] Incoming offers: accept (marks sold), decline, counter (`/offers/seller`)
-- [ ] No offer/contact/report CTAs on own listing (ownership guard)
+- [x] Create a listing with photos + publish (`/sell`) — *AI Assist not asserted*
+- [x] Edit own listing (`/listings/[id]/edit`)
+- [x] Dashboard lists own listings with edit/archive actions (`/dashboard`) — *archive click not asserted*
+- [ ] Dashboard listing stats: views, favorites — *controls present; stats not asserted*
+- [x] Incoming offers page (`/offers/seller`) — smoke (renders only; accept/decline/counter **gap**)
+- [x] No offer/contact/report/favorite CTAs on own listing (ownership guard, INV-005)
 
 ## Admin
 
-- [ ] Admin KPI dashboard + moderation queue (`/admin`)
-- [ ] User management: suspend / restore (`/admin/users`)
-- [ ] Listing moderation: remove (`/admin/listings`)
-- [ ] Report moderation: remove listing / block seller / reject (`/admin/reports`)
-- [ ] Marketplace statistics (`/admin/statistics`)
-- [ ] Verification review (`/admin/verifications`) — *T21, queue stubbed to empty*
-- [ ] Admin account settings (`/admin/account`)
-- [ ] Admin sees seller surface (can create/edit listings)
+- [x] KPI dashboard + moderation queue (`/admin`) — smoke (renders)
+- [x] User management: suspend / restore controls (`/admin/users`) — smoke
+- [x] Listing moderation: remove controls (`/admin/listings`) — smoke
+- [x] Report moderation: queue renders (`/admin/reports`) — smoke (actions **gap**)
+- [x] Marketplace statistics (`/admin/statistics`) — smoke
+- [x] Verification review (`/admin/verifications`) — smoke (*T21, queue stubbed to empty*)
+- [x] Admin account settings (`/admin/account`) — smoke
+- [ ] Admin sees seller surface (can create/edit listings) — **gap**
 
 ## Spec mapping
 
 | Spec | Covers | Status |
 |---|---|---|
-| `auth.spec.ts` | login/sign-out round-trip (no reload), password toggle | existing |
-| `guest.spec.ts` | guest browsing, search, listing detail, CTA→login redirects | new |
-| `buyer.spec.ts` | favorites, offer, counter response, review, contact, report, profile | new |
-| `seller.spec.ts` | create/edit/archive listing, incoming-offer actions, dashboard | new |
-| `admin.spec.ts` | admin KPI, users, listings, reports, statistics | new |
+| `guest.spec.ts` | home, search URL, listing detail + CTA→login, seller profile, static pages | passing |
+| `buyer.spec.ts` | favorites, offer, report, profile, notifications, dashboard CTA | passing |
+| `seller.spec.ts` | create/edit/dashboard, incoming-offers render, ownership guard, /sell authz | passing |
+| `admin.spec.ts` | overview, users, listings, reports, statistics, verifications, account | passing |
+| `auth.spec.ts` | login/sign-out round-trip (no reload), password toggle | existing (pre-suite) |
 
 ## Known gates
 
@@ -86,6 +93,15 @@ data). Framework: `@playwright/test` (devDependency).
 - Verification seams (`fetchMyVerifications`, `fetchAdminVerifications`,
   `promoteToSeller`) are T21 stubs; verification E2E assertions are limited to
   "renders / not verified yet / all caught up" until the real RPCs land.
-- Full suite requires the local Supabase stack up with seed data
-  (`npx supabase start` from `web/`, then `npx supabase db reset`). Run:
-  `cd web && npx playwright test`.
+- The suite targets the **remote** Supabase project (see `web/.env.local`;
+  `SUPABASE_SERVICE_ROLE_KEY` is required for the idempotency cleanup). Run:
+  `cd web && npx playwright test` (dev server on `localhost:3000`).
+
+## Gaps (intentionally not covered)
+
+- Counter-offer accept/decline and review-an-accepted-transaction need multi-user
+  state (seller counters → buyer accepts) — deferred as high-flake.
+- Contact-seller submission and notifications mark-read are render-tested only.
+- Profile save / phone-public toggle, archive click, admin moderation actions,
+  and the admin seller surface are smoke-tested.
+- Pagination and search sort are not asserted on the listing surfaces.
