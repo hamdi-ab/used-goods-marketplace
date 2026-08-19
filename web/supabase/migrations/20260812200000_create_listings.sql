@@ -197,13 +197,13 @@ create policy "Listing photos are writable by the listing owner"
   to authenticated
   using (
     bucket_id = 'listing-images'
-    and (storage.foldername(name))[0]::uuid in (
+    and (storage.foldername(name))[1]::uuid in (
       select l.id from public.listings l where l.seller_id = (select auth.uid())
     )
   )
   with check (
     bucket_id = 'listing-images'
-    and (storage.foldername(name))[0]::uuid in (
+    and (storage.foldername(name))[1]::uuid in (
       select l.id from public.listings l where l.seller_id = (select auth.uid())
     )
   );

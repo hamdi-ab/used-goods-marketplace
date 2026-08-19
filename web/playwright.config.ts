@@ -10,8 +10,13 @@ import { defineConfig } from "@playwright/test"
 // it); the Supabase local stack must be up with seed data.
 export default defineConfig({
   testDir: "./tests/e2e",
+  // One worker: the 5 spec files share a single dev server, and parallel
+  // cold compiles outrun the per-test timeout. globalSetup warms every route
+  // so the suite itself stays fast.
   fullyParallel: false,
+  workers: 1,
   timeout: 60_000,
+  globalSetup: "./tests/e2e/warmup",
   reporter: [["list"]],
   use: {
     baseURL: "http://localhost:3000",
