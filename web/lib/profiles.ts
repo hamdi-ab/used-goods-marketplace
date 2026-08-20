@@ -40,6 +40,9 @@ export interface PublicProfileRow {
 const OWN_PROFILE_COLUMNS =
   "avatar_url, full_name, phone, telegram_username, city, sub_city, bio, trust_score, profile_completion, role, tier, phone_public"
 
+// Must match the profiles_public view projection
+// (web/supabase/migrations/20260816000000_profiles_public_view.sql) — that view
+// is the enforced public column set at the DB boundary (fix #70).
 const PUBLIC_PROFILE_COLUMNS =
   "full_name, avatar_url, city, sub_city, bio, telegram_username, trust_score, role, phone_public, phone_verified, fayda_verified"
 
@@ -68,7 +71,9 @@ export const fetchOwnProfile = cache(
  * and the page body share one round trip. Phone is fetched separately and only
  * when the owner has opted in (Security spec §19: phone is private by default).
  * Trust-badge flags (phone_verified, fayda_verified) are public by T12 RLS
- * design. */
+ * design. The public read comes from the profiles_public view (fix #70): the
+ * base table no longer grants anon a wholesale SELECT, and the view is the
+ * canonical public column set enforced at the DB boundary. */
 export const fetchPublicProfile = cache(
   async (
     userId: string,
@@ -77,7 +82,7 @@ export const fetchPublicProfile = cache(
     const supabase = client ?? (await createClient())
 
     const { data: profile, error } = await supabase
-      .from("profiles")
+      .from("profiles_public")
       .select(PUBLIC_PROFILE_COLUMNS)
       .eq("id", userId)
       .maybeSingle()
@@ -108,7 +113,6 @@ interface ProfileFields {
   phone?: string | null
   telegram_username?: string | null
   bio?: string | null
-  profile_completion?: number | null
   phone_public?: boolean | null
 }
 
@@ -126,10 +130,10 @@ export async function updateProfileRow(
   return { ok: true, error: null }
 }
 
-/** Onboarding completion: persists the profile's initial fields and marks the
- * profile complete (profile_completion: 100 is the domain rule that flips the
- * "complete your profile" gate). Telegram handles are normalized here so the
- * rule lives next to the write, not in the action. */
+/** Onboarding completion: persists the profile's initial fields. Telegram
+ * handles are normalized here so the rule lives next to the write, not in the
+ * action. profile_completion is a generated column (fix #82) computed from the
+ * populated fields — it is never written directly. */
 export async function completeOwnProfile(
   userId: string,
   values: {
@@ -150,7 +154,6 @@ export async function completeOwnProfile(
       ? values.telegramUsername.replace(/^@/, "")
       : null,
     bio: values.bio || null,
-    profile_completion: 100,
   })
 }
 
@@ -174,4 +177,24 @@ export async function updateOwnProfile(
     bio: values.bio || null,
     phone_public: values.phonePublic ?? false,
   })
+}
+
+/** Become-a-seller (fix #71): promote the signed-in buyer via the RPC, which
+ * derives identity from auth.uid() and is idempotent — a re-promotion is a
+ * no-op success. Doubles as the restore path for an admin-suspended seller
+ * (audit #19), since the demotion to buyer is the same role transition. */
+export async function promoteToSellerRow(): Promise<{
+  ok: boolean
+  error: string | null
+}> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc("promote_to_seller")
+  if (error) return { ok: false, error: error.message }
+  if (!data?.ok) {
+    return {
+      ok: false,
+      error: (data?.error as string | null) ?? "Could not start selling",
+    }
+  }
+  return { ok: true, error: null }
 }

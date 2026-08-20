@@ -197,6 +197,7 @@ export interface BrowseListing {
   price: number
   condition: Condition
   city: string | null
+  status: ListingStatus
   published_at: string
   /** T29: null when not boosted. */
   boosted_until: string | null

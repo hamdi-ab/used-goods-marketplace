@@ -24,6 +24,7 @@ beforeEach(() => {
     id: "00000000-0000-0000-0000-000000000002",
     email: "amira@test.local",
     role: "seller",
+    tier: "free",
     fullName: "Amira",
     profileCompleted: true,
   })

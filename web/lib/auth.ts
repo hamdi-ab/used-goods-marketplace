@@ -45,12 +45,18 @@ export async function requireUser(): Promise<SessionUser> {
   return user
 }
 
-// T04: only sellers (and admins) may create or edit listings.
+// T04: only sellers may create or edit listings. Admins are moderation-only
+// (ADR-020): they no longer pass the seller gate, so /sell and listing
+// edit/delete redirect an admin to the console (buyers go to /profile).
 export async function requireSeller(): Promise<SessionUser> {
   const user = await requireUser()
-  if (user.role !== "seller" && user.role !== "admin") {
-    // Not a seller yet — surface the profile page where this gate can be
-    // surfaced as a future "become a seller" prompt.
+  if (user.role === "admin") {
+    redirect("/admin")
+  }
+  if (user.role !== "seller") {
+    // Not a seller yet — land on /profile, where the "Start selling" nudge
+    // (fix #71) promotes a buyer to seller; the redirected page re-renders
+    // with the seller tools once the role flips.
     redirect("/profile")
   }
   return user
@@ -65,10 +71,13 @@ export async function requireAdmin(): Promise<SessionUser> {
   return user
 }
 
-// T21/FS-014: a logged-in trader may request a phone/Fayda verification. The
-// request_verification RPC re-authorizes the caller from auth.uid() server-side;
-// this client-side pre-gate currently requires any session. Narrow to a
-// trader-role check once the role model (T04/T11) is finalized.
+// ADR-020: admins are moderation-only and do not trade (no selling, offering,
+// favoriting, reviewing, contacting sellers, or filing community reports).
+// Trader actions gate on this so an admin's writes are blocked server-side.
 export async function requireTrader(): Promise<SessionUser> {
-  return requireUser()
+  const user = await requireUser()
+  if (user.role === "admin") {
+    redirect("/admin")
+  }
+  return user
 }
