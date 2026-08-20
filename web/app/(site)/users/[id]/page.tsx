@@ -9,6 +9,7 @@ import { initials, formatShortDate } from "@/lib/utils"
 import { fetchSellerReviews, summarizeRating } from "@/lib/reviews"
 import { fetchSellerContactInfo } from "@/lib/contact"
 import { SellerTrustBadges } from "@/components/verification/seller-trust-badges"
+import { PrototypeSellerProfilePage } from "@/components/users/prototype-seller-profile-page"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -39,10 +40,21 @@ export async function generateMetadata({
 
 export default async function UserProfilePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ variant?: string }>
 }) {
   const { id } = await params
+  const { variant } = await searchParams
+  const key = variant === "A" || variant === "B" ? (variant as "A" | "B") : null
+
+  // PROTOTYPE — the redesign variant renders before the production page and is
+  // view-only (?variant=A|B, dev only; this route is public, no auth guard).
+  if (key) {
+    return <PrototypeSellerProfilePage variant={key} id={id} />
+  }
+
   const profile = await fetchPublicProfile(id)
   if (!profile) notFound()
 

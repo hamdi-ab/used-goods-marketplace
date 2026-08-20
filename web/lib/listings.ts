@@ -224,6 +224,38 @@ export async function fetchListings(
   return { listings, count, hasMore, error: null }
 }
 
+// Public "listings by a seller" feed for the seller-profile page (anon-readable
+// via the same published-listings RLS as fetchListings). Shows only live
+// published rows, newest first, capped to a small showcase grid. Reuses the
+// nested browse shape + mapper so the seller/image contract stays single-sourced.
+export async function fetchSellerPublicListings(
+  sellerId: string,
+  limit: number = 6,
+  client?: Supabase
+): Promise<BrowseListing[]> {
+  const supabase = client ?? (await createClient())
+  const safeLimit = Math.min(Math.max(limit, 1), BROWSE_LIMIT_MAX)
+
+  const { data, error } = await supabase
+    .from("listings")
+    .select(
+      `id, title, price, condition, city, status, published_at,
+        seller:profiles!listings_seller_id_fkey(id, full_name, avatar_url, role, trust_score, phone_verified, fayda_verified),
+        images:listing_images(id, image_url, display_order)`
+    )
+    .eq("seller_id", sellerId)
+    .eq("status", "published")
+    .order("published_at", { ascending: false })
+    .limit(safeLimit)
+
+  if (error) {
+    console.error("fetchSellerPublicListings:", error.message)
+    return []
+  }
+
+  return (data as NestedBrowseRow[] | null ?? []).map(mapNestedBrowseListing)
+}
+
 export interface SearchOptions {
   q?: string
   categorySlug?: string
