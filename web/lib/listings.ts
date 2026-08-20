@@ -25,7 +25,12 @@ import type {
   ListingWithRelations,
 } from "./listings/constants"
 import type { SearchSort } from "@/lib/search"
-import { MAX_PAGING_OFFSET } from "@/lib/pagination"
+import {
+  MAX_PAGING_OFFSET,
+  pagedHasMore,
+  resolveWindow,
+  type PagingArgs,
+} from "@/lib/pagination"
 import {
   mapFlatSearchListing,
   mapNestedBrowseListing,
@@ -131,24 +136,35 @@ type RawSellerListingRow = Omit<Listing, "price"> & {
   images: { image_url: string; display_order: number }[] | null
 }
 
+export interface SellerListingsPage {
+  listings: SellerListingRow[]
+  count: number | null
+  hasMore: boolean
+  error: string | null
+}
+
 export async function fetchSellerListings(
   sellerId: string,
+  args: PagingArgs = {},
   client?: Supabase
-): Promise<SellerListingRow[]> {
+): Promise<SellerListingsPage> {
   const supabase = client ?? (await createClient())
-  const { data, error } = await supabase
+  const { limit, offset } = resolveWindow(args)
+  const { data, error, count } = await supabase
     .from("listings")
     .select(
       `${LISTING_COLUMNS},
-       images:listing_images(image_url, display_order)`
+       images:listing_images(image_url, display_order)`,
+      { count: "exact" }
     )
     .eq("seller_id", sellerId)
     .is("deleted_at", null)
     .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1)
 
   if (error) {
     console.error("fetchSellerListings:", error.message)
-    return []
+    return { listings: [], count, hasMore: false, error: error.message }
   }
 
   const rows = data as unknown as RawSellerListingRow[] | null ?? []
@@ -175,7 +191,7 @@ export async function fetchSellerListings(
     )
   }
 
-  return rows.map((row) => {
+  const listings = rows.map((row) => {
     const { images, ...rest } = row
     return {
       ...rest,
@@ -184,6 +200,12 @@ export async function fetchSellerListings(
       boosted_until: boosts[row.id] ?? null,
     }
   })
+  return {
+    listings,
+    count,
+    hasMore: pagedHasMore(offset, listings.length, count),
+    error: null,
+  }
 }
 
 // Public, paginated browse of published listings (anon-readable via RLS).

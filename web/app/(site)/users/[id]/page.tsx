@@ -6,8 +6,9 @@ import { MapPinIcon, PhoneIcon, SendIcon } from "lucide-react"
 import { ROLE_LABELS, type UserRole, getCurrentUser } from "@/lib/auth"
 import { fetchPublicProfile } from "@/lib/profiles"
 import { initials, formatShortDate } from "@/lib/utils"
-import { fetchSellerReviews, summarizeRating } from "@/lib/reviews"
+import { fetchSellerRatingSummary, fetchSellerReviews } from "@/lib/reviews"
 import { fetchSellerContactInfo } from "@/lib/contact"
+import { nextOffset, parseOffset } from "@/lib/pagination"
 import { SellerTrustBadges } from "@/components/verification/seller-trust-badges"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -39,8 +40,10 @@ export async function generateMetadata({
 
 export default async function UserProfilePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const { id } = await params
   const profile = await fetchPublicProfile(id)
@@ -48,8 +51,11 @@ export default async function UserProfilePage({
 
   const role = (profile.role ?? "buyer") as UserRole
   const roleLabel = ROLE_LABELS[role] ?? "Buyer"
-  const reviews = await fetchSellerReviews(id)
-  const rating = summarizeRating(reviews)
+  const offset = parseOffset((await searchParams).offset)
+  const [reviews, rating] = await Promise.all([
+    fetchSellerReviews(id, { offset }),
+    fetchSellerRatingSummary(id),
+  ])
   const user = await getCurrentUser()
   const contactInfo = user ? await fetchSellerContactInfo(id) : null
 
@@ -168,7 +174,18 @@ export default async function UserProfilePage({
         </CardContent>
        </Card>
 
-      {reviews.length > 0 ? (
+      {reviews.error ? (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle>Reviews</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Could not load reviews. Try again.
+            </p>
+          </CardContent>
+        </Card>
+      ) : reviews.reviews.length > 0 ? (
         <Card className="mt-6">
           <CardHeader>
             <CardTitle>Reviews</CardTitle>
@@ -184,7 +201,7 @@ export default async function UserProfilePage({
             </div>
 
             <ul className="mt-4 flex flex-col gap-4">
-              {reviews.map((review) => (
+              {reviews.reviews.map((review) => (
                 <li key={review.id} className="flex items-start gap-3 text-sm">
                   <Avatar className="size-8">
                     {review.buyer?.avatar_url ? (
@@ -213,6 +230,16 @@ export default async function UserProfilePage({
                 </li>
               ))}
             </ul>
+            {reviews.hasMore ? (
+              <div className="mt-6 flex justify-center">
+                <Link
+                  href={`/users/${id}?offset=${nextOffset(offset)}`}
+                  className="text-sm font-medium underline"
+                >
+                  Load more
+                </Link>
+              </div>
+            ) : null}
           </CardContent>
         </Card>
       ) : (
