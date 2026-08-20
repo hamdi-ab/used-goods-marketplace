@@ -100,7 +100,7 @@ export function PrototypeFooter({
         <p
           className={cn(
             "mt-10 border-t pt-4 text-xs",
-            blue ? "border-white/20 text-white/80" : "border-border text-foreground/70"
+            blue ? "border-white/20 text-white/90" : "border-border text-foreground/70"
           )}
         >
           © {new Date().getFullYear()} {siteName}. All rights reserved.

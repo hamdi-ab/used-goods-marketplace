@@ -7,7 +7,9 @@ import type { LucideIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { siteName } from "@/lib/nav"
+import { withVariant } from "@/components/search/prototype-utils"
 import { useAuth } from "@/components/auth/auth-provider"
+import { NotificationBell } from "@/components/notifications/notification-bell"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { MobileNav } from "@/components/mobile-nav"
@@ -116,6 +118,10 @@ export function PrototypeHeader({ variant }: { variant: "A" | "B" }) {
 
           {user ? (
             <>
+              <NotificationBell
+                tone={blue ? "blue" : "light"}
+                href={withVariant("/notifications", variant)}
+              />
               <Button
                 asChild
                 className={cn(

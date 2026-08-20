@@ -29,17 +29,18 @@ export const NOTIFICATION_MAX_ITEMS = 50
 export const NOTIFICATION_POLL_MS = 15000
 
 /** Deep-link target for a notification, from its metadata, or null for types
- * with no page to jump to. Offer/review events land on the offers surfaces;
- * offer_received jumps straight to the listing so the seller can review it. */
+ * with no page to jump to. Offer/review events land on the surfaces where the
+ * user can act: offer_received goes to the seller's incoming-offers queue
+ * (accept/decline/counter live there, not on the listing page); accepted
+ * offers and reviews land on the buyer's offers surface. */
 export function notificationHref(
   type: NotificationType,
   metadata: Record<string, string | number | null>
 ): string | null {
+  void metadata
   switch (type) {
-    case "offer_received": {
-      const listingId = metadata.listing_id
-      return typeof listingId === "string" ? `/listings/${listingId}` : null
-    }
+    case "offer_received":
+      return "/offers/seller"
     case "offer_accepted":
       return "/offers"
     case "review_received":

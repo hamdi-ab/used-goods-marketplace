@@ -106,6 +106,14 @@ export async function PrototypeDashboardPage({
           sub: openOffers === 0 ? "You're all caught up" : "Awaiting your reply",
         },
         {
+          label: "Notifications",
+          value: unread,
+          href: "/notifications",
+          icon: BellIcon,
+          accent: "text-[#2563EB]",
+          sub: unread === 0 ? "You're all caught up" : "New activity to review",
+        },
+        {
           label: "Trust score",
           value: `${trustScore} / 100`,
           word: trustWord,
