@@ -21,6 +21,11 @@ export type RpcName =
   | "current_ai_generation_count"
   | "record_ai_generation"
   | "boost_listing"
+  | "begin_payment"
+  | "complete_payment"
+  | "fail_payment"
+  | "confirm_payment_receipt"
+  | "abandon_sale"
 
 export type RpcArgs = Record<string, string | number | boolean | null | string[]>
 

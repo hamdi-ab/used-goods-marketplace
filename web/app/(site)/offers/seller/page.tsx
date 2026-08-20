@@ -11,6 +11,7 @@ import { formatShortDate, initials } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { OfferStatusBadge } from "@/components/offers/offer-status-badge"
 import { SellerOfferActions } from "@/components/offers/seller-offer-actions"
+import { SellerPaymentBadge } from "@/components/offers/seller-payment-badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
@@ -117,6 +118,7 @@ export default async function SellerOffersPage({
                   </div>
 
                   <div className="mt-4 border-t pt-3">
+                    <SellerPaymentBadge offer={offer} />
                     <SellerOfferActions offer={offer} />
                   </div>
                 </CardContent>
