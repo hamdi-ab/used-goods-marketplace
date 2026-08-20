@@ -1,17 +1,18 @@
 import type { Metadata } from "next"
-import Image from "next/image"
 import Link from "next/link"
 import { MapPinIcon, TagIcon } from "lucide-react"
 
 import type { VariantKey } from "@/components/search/prototype-utils"
 import { withVariant } from "@/components/search/prototype-utils"
-import { fetchListing, formatCondition, formatPrice } from "@/lib/listings"
-import type { Condition, ListingWithRelations } from "@/lib/listings/constants"
+import { fetchListing, formatPrice } from "@/lib/listings"
+import type { ListingWithRelations } from "@/lib/listings/constants"
 import { fetchFavoriteIds } from "@/lib/favorites"
 import { getCurrentUser } from "@/lib/auth"
 import { fetchSellerContactInfo, type SellerContactInfo } from "@/lib/contact"
 import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
 import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
+import { PrototypeGallery } from "@/components/listings/prototype-gallery"
+import { ConditionChip } from "@/components/listings/condition-chip"
 import { MakeOfferButton } from "@/components/offers/make-offer-button"
 import { ContactButton } from "@/components/contact/contact-button"
 import { FavoriteButton } from "@/components/favorites/favorite-button"
@@ -44,8 +45,17 @@ export async function PrototypeDetailPage({
     return (
       <>
         <PrototypeHeader variant={variant} />
-        <main className="mx-auto flex w-full max-w-3xl flex-1 px-4 py-16 text-center">
+        <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center px-4 py-16 text-center">
           <h1 className="font-heading text-xl font-semibold">Listing not found</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            It may have been sold or removed.
+          </p>
+          <Link
+            href={withVariant("/search", variant)}
+            className="mt-6 inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
+          >
+            Browse listings
+          </Link>
         </main>
         <PrototypeFooter variant={variant} />
       </>
@@ -62,7 +72,6 @@ export async function PrototypeDetailPage({
     : null
 
   const { listing: l, images, category, seller } = data
-  const cover = images[0]?.image_url
   const isOwner = Boolean(user && user.id === l.seller_id)
 
   return (
@@ -85,42 +94,7 @@ export async function PrototypeDetailPage({
           {/* LEFT (7 cols): Image Gallery Card — image flexes to fill row height */}
           <div className="order-2 lg:order-1 lg:col-span-7">
             <div className="flex h-full flex-col rounded-2xl border bg-card p-5 shadow-sm">
-              <div className="relative min-h-[300px] flex-1 overflow-hidden rounded-xl border bg-muted">
-                {cover ? (
-                  <Image
-                    src={cover}
-                    alt={l.title}
-                    fill
-                    priority
-                    sizes="(max-width: 1024px) 100vw, 60vw"
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                    No photo available
-                  </div>
-                )}
-              </div>
-
-              {/* Thumbnail Strip */}
-              {images.length > 1 ? (
-                <div className="mt-4 grid grid-cols-5 gap-3">
-                  {images.slice(0, 5).map((img, i) => (
-                    <div
-                      key={img.id ?? i}
-                      className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border bg-muted ring-offset-2 transition hover:ring-2 hover:ring-[#2563EB]"
-                    >
-                      <Image
-                        src={img.image_url}
-                        alt={img.alt_text ?? l.title}
-                        fill
-                        sizes="120px"
-                        className="object-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
-              ) : null}
+              <PrototypeGallery images={images} title={l.title} />
             </div>
           </div>
 
@@ -129,7 +103,7 @@ export async function PrototypeDetailPage({
             {/* Offer / Purchase Card */}
             <div className="flex flex-col gap-5 rounded-2xl border bg-card p-6 shadow-sm">
               {/* Category & Location */}
-              <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+              <div className="flex flex-wrap items-center gap-2 text-xs text-foreground/70">
                 {category ? (
                   <span className="inline-flex items-center gap-1 font-medium text-foreground">
                     <TagIcon className="size-3.5" />
@@ -148,7 +122,7 @@ export async function PrototypeDetailPage({
               {/* Condition & Title */}
               <div>
                 <div className="mb-2">
-                  <ConditionPill condition={l.condition as Condition} />
+                  <ConditionChip condition={l.condition} />
                 </div>
                 <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                   {l.title}
@@ -164,7 +138,7 @@ export async function PrototypeDetailPage({
                   {formatPrice(l.price, { maxFractionDigits: 2 })}
                 </span>
                 {l.negotiable ? (
-                  <span className="mt-1 block text-xs font-medium text-muted-foreground">
+                  <span className="mt-1 block text-xs font-medium text-foreground/70">
                     Negotiable (or best offer)
                   </span>
                 ) : null}
@@ -195,7 +169,7 @@ export async function PrototypeDetailPage({
                       {seller?.full_name ?? "Verified Seller"}
                     </Link>
                   </h3>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-foreground/70">
                     {seller?.trust_score != null
                       ? `Trust score: ${seller.trust_score}/100`
                       : "Community seller"}
@@ -241,7 +215,7 @@ export async function PrototypeDetailPage({
                       isOwner={isOwner}
                     />
                   </div>
-                  <div className="-mx-1 mt-3 flex items-center justify-end gap-1 border-t pt-3 text-xs text-muted-foreground">
+                  <div className="-mx-1 mt-3 flex items-center justify-end gap-1 border-t pt-3 text-xs text-foreground/70">
                     <FavoriteButton
                       listingId={l.id}
                       initial={favorited}
@@ -283,20 +257,6 @@ export async function PrototypeDetailPage({
 
       <PrototypeFooter variant={variant} />
     </>
-  )
-}
-
-function ConditionPill({ condition }: { condition: Condition }) {
-  const map: Record<Condition, string> = {
-    "Brand New": "bg-emerald-100 text-emerald-800 border-emerald-200",
-    "Lightly Used": "bg-amber-100 text-amber-800 border-amber-200",
-    Fair: "bg-orange-100 text-orange-800 border-orange-200",
-  }
-  const cls = map[condition] ?? "bg-muted text-muted-foreground"
-  return (
-    <Badge variant="outline" className={`font-medium ${cls}`}>
-      {formatCondition(condition)}
-    </Badge>
   )
 }
 
