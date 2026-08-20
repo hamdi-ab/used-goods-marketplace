@@ -146,7 +146,7 @@ export default function PricingPage() {
 
       <p className="mt-8 max-w-xl text-center text-xs text-muted-foreground">
         No subscription is required to sell. Paid features only unlock more
-        capacity and tools; creating and selling stays free. We'll email you
+        capacity and tools; creating and selling stays free. We&apos;ll email you
         when billing opens — no charges until then.
       </p>
     </main>

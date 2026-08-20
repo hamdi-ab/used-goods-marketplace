@@ -86,7 +86,7 @@ export function AccountUsageCard({ usage }: { usage: AccountUsage }) {
 
         {overCap ? (
           <p className="mt-3 text-sm text-destructive">
-            You've reached your free listing limit. Mark an item sold or archive
+            You&apos;ve reached your free listing limit. Mark an item sold or archive
             an old one to free a slot, or upgrade to Pro.
           </p>
         ) : (

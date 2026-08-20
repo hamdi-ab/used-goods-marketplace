@@ -158,7 +158,7 @@ export async function fetchSellerListings(
   // the boost UI degrades to "not boosted" instead of crashing the page. The
   // base LISTING_COLUMNS select deliberately omits the column for the same
   // reason (buyer browse never depends on it).
-  let boosts: Record<string, string | null> = {}
+  const boosts: Record<string, string | null> = {}
   try {
     const ids = rows.map((r) => r.id)
     if (ids.length > 0) {
