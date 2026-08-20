@@ -1,8 +1,19 @@
+"use client"
+
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
+import { Suspense } from "react"
 
 import { footerNav, siteName } from "@/lib/nav"
 
-export function SiteFooter() {
+function SiteFooterInner() {
+  const searchParams = useSearchParams()
+
+  // PROTOTYPE — the home-page redesign renders its own PrototypeFooter
+  // (components/home/prototype/prototype-footer.tsx); stand down here so the
+  // two footers do not stack. Removed with the prototype machinery.
+  if (searchParams.get("variant")) return null
+
   return (
     <footer className="border-t border-border bg-muted/30">
       <div className="mx-auto w-full max-w-[1280px] px-4 py-8 sm:px-6 lg:px-8">
@@ -35,5 +46,15 @@ export function SiteFooter() {
         </p>
       </div>
     </footer>
+  )
+}
+
+export function SiteFooter() {
+  // useSearchParams needs a Suspense boundary during prerendering; the inner
+  // component reads the variant param to stand down on prototype pages.
+  return (
+    <Suspense fallback={null}>
+      <SiteFooterInner />
+    </Suspense>
   )
 }

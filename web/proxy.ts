@@ -24,7 +24,10 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.nextUrl))
   }
 
-  if (matches(pathname, PROTECTED_PREFIXES) && !user) {
+  // PROTOTYPE — the ?variant= redesign routes are view-only during review and
+  // bypass the auth guard so reviewers can see the frame without signing in.
+  // Removed with the prototype machinery.
+  if (matches(pathname, PROTECTED_PREFIXES) && !user && !request.nextUrl.searchParams.has("variant")) {
     const url = new URL("/login", request.nextUrl)
     url.searchParams.set("next", pathname)
     return NextResponse.redirect(url)
