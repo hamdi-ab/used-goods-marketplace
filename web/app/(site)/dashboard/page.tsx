@@ -6,6 +6,7 @@ import { requireUser, ROLE_LABELS } from "@/lib/auth"
 import { fetchSellerListings } from "@/lib/listings"
 import { fetchAccountUsage } from "@/lib/usage"
 import { countIncomingOffers } from "@/lib/offers"
+import { nextOffset, parseOffset } from "@/lib/pagination"
 import { promoteToSeller } from "@/app/actions/profile"
 import { ListingManager } from "@/components/dashboard/listing-manager"
 import { AccountUsageCard } from "@/components/dashboard/account-usage-card"
@@ -18,17 +19,25 @@ export const metadata: Metadata = {
   description: "Your VinTech Marketplace dashboard.",
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
   const user = await requireUser()
   // The seller home only makes sense for users who can sell; buyers land on the
   // profile gate instead of a dead-end /sell redirect (issue #13 AC5).
   const canSell = user.role === "seller" || user.role === "admin"
+  const offset = parseOffset((await searchParams).offset)
 
-  const [listings, openOfferCount, sellerUsage] = await Promise.all([
-    canSell ? fetchSellerListings(user.id) : Promise.resolve([]),
+  const [openOfferCount, sellerUsage, sellerListings] = await Promise.all([
     countIncomingOffers(user.id),
     canSell ? fetchAccountUsage(user.id) : Promise.resolve(null),
+    canSell
+      ? fetchSellerListings(user.id, { offset })
+      : Promise.resolve(null),
   ])
+  const listings = sellerListings?.listings ?? []
 
   const firstName = user.fullName?.split(" ")[0] ?? "there"
 
@@ -65,6 +74,17 @@ export default async function DashboardPage() {
           {sellerUsage ? <AccountUsageCard usage={sellerUsage} /> : null}
 
           <ListingManager listings={listings} />
+
+          {sellerListings?.hasMore ? (
+            <div className="mt-6 flex justify-center">
+              <Link
+                href={`/dashboard?offset=${nextOffset(offset)}`}
+                className="text-sm font-medium underline"
+              >
+                Load more
+              </Link>
+            </div>
+          ) : null}
         </section>
       ) : (
         <Card className="mb-10">

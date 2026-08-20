@@ -2,6 +2,11 @@ import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
 import type { Supabase } from "@/lib/supabase/types"
+import {
+  pagedHasMore,
+  resolveWindow,
+  type PagingArgs,
+} from "@/lib/pagination"
 
 // ---- Admin module (T11 surface): users, listings, marketplace stats ----
 // All reads run as the signed-in admin; RLS grants admins full read access on
@@ -65,48 +70,90 @@ export interface StatsBreakdown {
 
 // ---- Reads ----
 
+export interface AdminUsersPage {
+  users: AdminUserRow[]
+  count: number | null
+  hasMore: boolean
+  error: string | null
+}
+
 export async function fetchAdminUsers(
+  args: PagingArgs = {},
   client?: Supabase
-): Promise<AdminUserRow[]> {
+): Promise<AdminUsersPage> {
   const supabase = client ?? (await createClient())
-  const { data, error } = await supabase
+  const { limit, offset } = resolveWindow(args)
+  const { data, error, count } = await supabase
     .from("profiles")
-    .select(ADMIN_USER_COLUMNS)
+    .select(ADMIN_USER_COLUMNS, { count: "exact" })
     .is("deleted_at", null)
     .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1)
 
   if (error) {
     console.error("fetchAdminUsers:", error.message)
-    return []
+    return { users: [], count, hasMore: false, error: error.message }
   }
 
-  return (data ?? []) as unknown as AdminUserRow[]
+  const users = (data ?? []) as unknown as AdminUserRow[]
+  return {
+    users,
+    count,
+    hasMore: pagedHasMore(offset, users.length, count),
+    error: null,
+  }
+}
+
+export interface AdminListingsPage {
+  listings: AdminListingRow[]
+  count: number | null
+  hasMore: boolean
+  error: string | null
 }
 
 export async function fetchAdminListings(
+  args: PagingArgs = {},
   client?: Supabase
-): Promise<AdminListingRow[]> {
+): Promise<AdminListingsPage> {
   const supabase = client ?? (await createClient())
-  const { data, error } = await supabase
+  const { limit, offset } = resolveWindow(args)
+  const { data, error, count } = await supabase
     .from("listings")
     .select(
       `id, title, price, condition, status, city, view_count, favorite_count,
        sold_to_buyer_id, created_at, published_at,
-       seller:profiles!listings_seller_id_fkey(id, full_name)`
+       seller:profiles!listings_seller_id_fkey(id, full_name)`,
+      { count: "exact" }
     )
     .is("deleted_at", null)
     .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1)
 
   if (error) {
     console.error("fetchAdminListings:", error.message)
-    return []
+    return { listings: [], count, hasMore: false, error: error.message }
   }
 
-  type RawAdminListingRow = Omit<AdminListingRow, "price"> & { price: string }
-  return ((data ?? []) as unknown as RawAdminListingRow[]).map((row) => ({
-    ...row,
-    price: Number(row.price),
-  }))
+  // PostgREST returns every embedded relation as an array, even a to-one join,
+  // so `seller:profiles!listings_seller_id_fkey` arrives as `{...}[] | null`;
+  // flatten to a single row like the review buyer join does.
+  type RawAdminListingRow = Omit<AdminListingRow, "price" | "seller"> & {
+    price: string
+    seller: { id: string; full_name: string | null }[] | null
+  }
+  const listings = ((data ?? []) as unknown as RawAdminListingRow[]).map(
+    (row) => ({
+      ...row,
+      price: Number(row.price),
+      seller: row.seller?.[0] ?? null,
+    })
+  )
+  return {
+    listings,
+    count,
+    hasMore: pagedHasMore(offset, listings.length, count),
+    error: null,
+  }
 }
 
 export async function fetchMarketplaceStats(
