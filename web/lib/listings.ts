@@ -2,7 +2,7 @@ import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
 import type { Supabase } from "@/lib/supabase/types"
-import { callRpc } from "@/lib/supabase/rpc"
+import { callRpc, callOutcomeRpc } from "@/lib/supabase/rpc"
 import { uploadObjects } from "@/lib/media"
 import { listingImageAdapter } from "@/lib/media/listing-adapter"
 
@@ -151,12 +151,37 @@ export async function fetchSellerListings(
     return []
   }
 
-  return (data as unknown as RawSellerListingRow[] | null ?? []).map((row) => {
+  const rows = data as unknown as RawSellerListingRow[] | null ?? []
+
+  // Best-effort boost state (T29): read `boosted_until` in a separate query so
+  // the dashboard still renders when the boost migration hasn't been applied —
+  // the boost UI degrades to "not boosted" instead of crashing the page. The
+  // base LISTING_COLUMNS select deliberately omits the column for the same
+  // reason (buyer browse never depends on it).
+  const boosts: Record<string, string | null> = {}
+  try {
+    const ids = rows.map((r) => r.id)
+    if (ids.length > 0) {
+      const { data: b } = await supabase
+        .from("listings")
+        .select("id, boosted_until")
+        .in("id", ids)
+      for (const row of b ?? []) boosts[row.id] = row.boosted_until
+    }
+  } catch (e) {
+    console.error(
+      "fetchSellerListings: boost read failed (boost migration pending?)",
+      e
+    )
+  }
+
+  return rows.map((row) => {
     const { images, ...rest } = row
     return {
       ...rest,
       price: Number(rest.price),
       cover_image_url: pickCoverImage(images),
+      boosted_until: boosts[row.id] ?? null,
     }
   })
 }
@@ -438,6 +463,30 @@ export async function softDeleteListing(
   return { ok: true, error: null }
 }
 
+/** T29: boost a seller's own published listing (payment handled off-platform,
+ * see ADR-021). Ownership + published guards live in the SECURITY DEFINER
+ * `boost_listing` RPC so they cannot be bypassed client-side. The DB owns the
+ * authoritative boost window — the client must not compute its own expiry —
+ * so the seam returns ok/error only; the refreshed `boosted_until` arrives on
+ * the next listing read. */
+export async function boostListing(
+  listingId: string,
+  preset: "standard" | "premium"
+): Promise<{ ok: boolean; error: string | null }> {
+  const supabase = await createClient()
+  const result = await callOutcomeRpc(supabase, "boost_listing", {
+    p_listing_id: listingId,
+    p_preset: preset,
+  }, "boost_listing")
+  const msg = result.error ?? null
+  if (msg) {
+    return { ok: false, error: msg }
+  }
+  return { ok: true, error: null }
+}
+
+/** Upload listing photos for a given listing (T29 image seam). Delegates to the
+ * shared Media upload seam so the listing domain never touches storage. */
 export async function uploadListingPhotos(
   supabase: Supabase,
   listingId: string,

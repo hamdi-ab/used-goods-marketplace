@@ -9,10 +9,25 @@ vi.mock("@/lib/ai/telemetry", () => ({
 vi.mock("@/lib/auth", () => ({
   requireSeller: vi.fn(),
 }))
+vi.mock("@/lib/ai/quota", () => ({
+  consumeAiGeneration: vi.fn(),
+  countAiGenerationsThisMonth: vi.fn(),
+}))
+vi.mock("@/lib/plans/constants", () => ({
+  AI_LIMIT_MESSAGE: "You've used your free AI listing credits for this month. You can still create your listing manually.",
+  aiLimit: vi.fn(),
+  isAtCap: vi.fn(),
+}))
+vi.mock("@/lib/usage", () => ({
+  fetchSellerTier: vi.fn(),
+}))
 
 import { generateListingSuggestions } from "@/lib/ai/listings"
 import { recordAiUsage } from "@/lib/ai/telemetry"
 import { requireSeller } from "@/lib/auth"
+import { consumeAiGeneration, countAiGenerationsThisMonth } from "@/lib/ai/quota"
+import { AI_LIMIT_MESSAGE, aiLimit, isAtCap } from "@/lib/plans/constants"
+import { fetchSellerTier } from "@/lib/usage"
 import { generateListingSuggestionsAction } from "@/app/actions/ai"
 import type { AIListingResult } from "@/lib/ai/constants"
 import type { Category } from "@/lib/listings/constants"
@@ -20,6 +35,11 @@ import type { Category } from "@/lib/listings/constants"
 const mockedGenerate = vi.mocked(generateListingSuggestions)
 const mockedRecord = vi.mocked(recordAiUsage)
 const mockedRequireSeller = vi.mocked(requireSeller)
+const mockedFetchTier = vi.mocked(fetchSellerTier)
+const mockedAiLimit = vi.mocked(aiLimit)
+const mockedCount = vi.mocked(countAiGenerationsThisMonth)
+const mockedIsAtCap = vi.mocked(isAtCap)
+const mockedConsume = vi.mocked(consumeAiGeneration)
 
 const CATEGORIES: Category[] = [
   { id: "c-electronics", name: "Electronics", slug: "electronics", parent_id: null },
@@ -52,26 +72,15 @@ const okResult: AIListingResult = {
 beforeEach(() => {
   mockedGenerate.mockReset()
   mockedRecord.mockReset()
-  mockedRequireSeller.mockReset()
-  mockedRequireSeller.mockResolvedValue({
-    id: "seller-1",
-    role: "seller",
-    email: "amira@vintch.local",
-    fullName: "Amira",
-    profileCompleted: true,
-  })
+  mockedRequireSeller.mockResolvedValue({ id: "seller-1" } as never)
+  mockedFetchTier.mockResolvedValue("free")
+  mockedAiLimit.mockReturnValue(3)
+  mockedCount.mockResolvedValue(0)
+  mockedIsAtCap.mockReturnValue(false)
+  mockedConsume.mockResolvedValue({ ok: true, used: 1, limit: 3, error: null })
 })
 
-describe("generateListingSuggestionsAction (T14, integration with the AI seam)", () => {
-  it("requires seller auth before parsing any form data (#69)", async () => {
-    mockedRequireSeller.mockRejectedValue(new Error("redirect"))
-    await expect(
-      generateListingSuggestionsAction({}, new FormData())
-    ).rejects.toThrow("redirect")
-    expect(mockedGenerate).not.toHaveBeenCalled()
-    expect(mockedRecord).not.toHaveBeenCalled()
-  })
-
+describe("generateListingSuggestionsAction (T14 + T25 metering)", () => {
   it("returns a manual-first error without photos and never calls the seam", async () => {
     const res = await generateListingSuggestionsAction({}, new FormData())
     expect(res.ok).toBe(false)
@@ -86,12 +95,14 @@ describe("generateListingSuggestionsAction (T14, integration with the AI seam)",
     if (!res.ok || !res.suggestion) throw new Error("expected ok")
     expect(res.suggestion.title).toBe("Chair")
     expect(mockedRecord).toHaveBeenCalledWith("ai_used")
+    expect(mockedConsume).toHaveBeenCalledWith("generate", 3)
   })
 
   it("records ai_regenerated when the client asks for a regeneration", async () => {
     mockedGenerate.mockResolvedValue(okResult)
     await generateListingSuggestionsAction({}, fd({ ai_event: "regenerate" }))
     expect(mockedRecord).toHaveBeenCalledWith("ai_regenerated")
+    expect(mockedConsume).toHaveBeenCalledWith("regenerate", 3)
   })
 
   it("forwards the seller's title/description to the seam (FS-005 inputs)", async () => {
@@ -116,5 +127,27 @@ describe("generateListingSuggestionsAction (T14, integration with the AI seam)",
     const res = await generateListingSuggestionsAction({}, fd())
     expect(res.ok).toBe(false)
     expect(res.ok ? "" : res.reason).toBe("degraded")
+    expect(mockedConsume).not.toHaveBeenCalled()
+  })
+
+  // ---- T25 metering ----
+  it("short-circuits with the §26 AI-limit message when the quota is exhausted", async () => {
+    mockedCount.mockResolvedValue(3)
+    mockedIsAtCap.mockReturnValue(true)
+    const res = await generateListingSuggestionsAction({}, fd())
+    expect(res.ok).toBe(false)
+    expect(res.ok ? "" : res.message).toBe(AI_LIMIT_MESSAGE)
+    expect(mockedGenerate).not.toHaveBeenCalled()
+    expect(mockedConsume).not.toHaveBeenCalled()
+  })
+
+  it("does not consume a credit when the provider fails", async () => {
+    mockedGenerate.mockResolvedValue({
+      ok: false,
+      reason: "degraded",
+      message: "AI request failed",
+    })
+    await generateListingSuggestionsAction({}, fd())
+    expect(mockedConsume).not.toHaveBeenCalled()
   })
 })

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation"
 
 import { createClient } from "@/lib/supabase/server"
 import type { SessionUser, UserRole } from "./auth/types"
+import { resolveTier } from "./plans/constants"
 
 export type { SessionUser, UserRole }
 export { ROLE_LABELS } from "./auth/types"
@@ -20,7 +21,7 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, role, profile_completion")
+    .select("full_name, role, tier, profile_completion")
     .eq("id", authUser.id)
     .maybeSingle()
 
@@ -32,6 +33,7 @@ export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
     id: authUser.id,
     email: authUser.email ?? "",
     role,
+    tier: resolveTier(profile?.tier ?? null),
     fullName: profile?.full_name ?? null,
     profileCompleted: (profile?.profile_completion ?? 0) >= 100,
   }

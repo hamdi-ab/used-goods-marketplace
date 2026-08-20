@@ -4,9 +4,11 @@ import { HeartIcon, InboxIcon, HandshakeIcon, LayoutDashboardIcon, PlusIcon, Shi
 
 import { requireUser, ROLE_LABELS } from "@/lib/auth"
 import { fetchSellerListings } from "@/lib/listings"
+import { fetchAccountUsage } from "@/lib/usage"
 import { countIncomingOffers } from "@/lib/offers"
 import { promoteToSeller } from "@/app/actions/profile"
 import { ListingManager } from "@/components/dashboard/listing-manager"
+import { AccountUsageCard } from "@/components/dashboard/account-usage-card"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -22,9 +24,10 @@ export default async function DashboardPage() {
   // profile gate instead of a dead-end /sell redirect (issue #13 AC5).
   const canSell = user.role === "seller" || user.role === "admin"
 
-  const [listings, openOfferCount] = await Promise.all([
+  const [listings, openOfferCount, sellerUsage] = await Promise.all([
     canSell ? fetchSellerListings(user.id) : Promise.resolve([]),
     countIncomingOffers(user.id),
+    canSell ? fetchAccountUsage(user.id) : Promise.resolve(null),
   ])
 
   const firstName = user.fullName?.split(" ")[0] ?? "there"
@@ -58,6 +61,9 @@ export default async function DashboardPage() {
               </Link>
             </Button>
           </div>
+
+          {sellerUsage ? <AccountUsageCard usage={sellerUsage} /> : null}
+
           <ListingManager listings={listings} />
         </section>
       ) : (

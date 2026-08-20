@@ -116,6 +116,11 @@ export interface Listing {
   view_count: number
   favorite_count: number
   published_at: string
+  /** T29: when the listing's boost expires (null = not boosted). Monetization
+   * state that lives OFF the shared LISTING_COLUMNS select — the dashboard
+   * seller query opts in via an explicit `boosted_until` column, so buyer
+   * browse never depends on the migration being applied. */
+  boosted_until?: string | null
   created_at: string
   updated_at: string
   /** T14: true when the listing's fields were applied from AI suggestions. */
@@ -194,6 +199,8 @@ export interface BrowseListing {
   city: string | null
   status: ListingStatus
   published_at: string
+  /** T29: null when not boosted. */
+  boosted_until: string | null
   image_url: string | null
   image_count: number
   seller: BrowseSeller | null

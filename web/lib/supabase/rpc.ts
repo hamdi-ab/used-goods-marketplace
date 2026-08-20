@@ -17,6 +17,9 @@ export type RpcName =
   | "decline_offer"
   | "counter_offer"
   | "record_contact_attempt"
+  | "current_ai_generation_count"
+  | "record_ai_generation"
+  | "boost_listing"
 
 export type RpcArgs = Record<string, string | number | boolean | null | string[]>
 

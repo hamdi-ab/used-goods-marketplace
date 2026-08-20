@@ -4,12 +4,15 @@
 // server-only auth module graph into the browser bundle.
 // Server-only helpers (getCurrentUser, requireUser) live in ../auth.
 
+import type { Tier } from "@/lib/plans/constants"
+
 export type UserRole = "buyer" | "seller" | "admin"
 
 export type SessionUser = {
   id: string
   email: string
   role: UserRole
+  tier: Tier
   fullName: string | null
   profileCompleted: boolean
 }

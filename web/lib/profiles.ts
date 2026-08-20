@@ -18,6 +18,7 @@ export interface OwnProfileRow {
   trust_score: number | null
   profile_completion: number | null
   role: "buyer" | "seller" | "admin" | null
+  tier: "free" | "pro" | "business" | null
   phone_public: boolean | null
 }
 
@@ -37,7 +38,7 @@ export interface PublicProfileRow {
 }
 
 const OWN_PROFILE_COLUMNS =
-  "avatar_url, full_name, phone, telegram_username, city, sub_city, bio, trust_score, profile_completion, role, phone_public"
+  "avatar_url, full_name, phone, telegram_username, city, sub_city, bio, trust_score, profile_completion, role, tier, phone_public"
 
 // Must match the profiles_public view projection
 // (web/supabase/migrations/20260816000000_profiles_public_view.sql) — that view

@@ -1,16 +1,16 @@
 import {
-  BarChart3Icon,
-  BadgeCheckIcon,
-  FlagIcon,
-  HandshakeIcon,
-  HeartIcon,
   HomeIcon,
-  LayoutDashboardIcon,
-  ListIcon,
-  PlusIcon,
   SearchIcon,
-  SettingsIcon,
+  PlusIcon,
+  HeartIcon,
+  HandshakeIcon,
+  LayoutDashboardIcon,
   UsersIcon,
+  PackageIcon,
+  FlagIcon,
+  BarChart3Icon,
+  ShieldCheckIcon,
+  UserCogIcon,
   type LucideIcon,
 } from "lucide-react"
 
@@ -49,30 +49,29 @@ export const mobileNav: NavItem[] = [
   { title: "Favorites", href: "/favorites", icon: HeartIcon },
 ]
 
-// Admins are moderation-only (ADR-020): the top header shows no nav (it would
-// be a lone Home link), so Home leads the console nav itself — a view-site
-// door on top of the /admin sidebar sections.
-export const adminNav: NavItem[] = [
-  { title: "Home", href: "/", icon: HomeIcon },
-  { title: "Dashboard", href: "/admin", icon: LayoutDashboardIcon },
-  { title: "Users", href: "/admin/users", icon: UsersIcon },
-  { title: "Listings", href: "/admin/listings", icon: ListIcon },
-  { title: "Reports", href: "/admin/reports", icon: FlagIcon },
-  { title: "Verifications", href: "/admin/verifications", icon: BadgeCheckIcon },
-  { title: "Statistics", href: "/admin/statistics", icon: BarChart3Icon },
-]
-
-// Utility section pinned below the primary nav (component standards: settings
-// and account live at the sidebar bottom, styled quietly and set apart).
-export const adminAccountNav: NavItem[] = [
-  { title: "Account", href: "/admin/account", icon: SettingsIcon },
-]
-
 export const footerNav: NavItem[] = [
   { title: "About", href: "/about" },
   { title: "Help Center", href: "/help" },
+  { title: "Pricing", href: "/pricing" },
   { title: "Safety Tips", href: "/safety" },
   { title: "Terms of Service", href: "/terms" },
   { title: "Privacy Policy", href: "/privacy" },
   { title: "Contact", href: "/contact" },
+]
+
+// Admin shell navigation (components/admin/admin-nav.tsx). The first item
+// href "/" renders as "View Site" with a divider; everything else maps to an
+// admin route. adminAccountNav is the bottom account section.
+export const adminNav: NavItem[] = [
+  { title: "View Site", href: "/" },
+  { title: "Overview", href: "/admin", icon: LayoutDashboardIcon },
+  { title: "Users", href: "/admin/users", icon: UsersIcon },
+  { title: "Listings", href: "/admin/listings", icon: PackageIcon },
+  { title: "Reports", href: "/admin/reports", icon: FlagIcon },
+  { title: "Statistics", href: "/admin/statistics", icon: BarChart3Icon },
+  { title: "Verifications", href: "/admin/verifications", icon: ShieldCheckIcon },
+]
+
+export const adminAccountNav: NavItem[] = [
+  { title: "Account", href: "/admin/account", icon: UserCogIcon },
 ]

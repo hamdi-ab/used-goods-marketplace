@@ -7,6 +7,7 @@ import {
   formatPrice,
   LISTING_STATUS_LABELS,
 } from "@/lib/listings/constants"
+import { isBoostActive } from "@/lib/boost"
 import { ConditionChip } from "@/components/listings/condition-chip"
 import { SellerBadge } from "@/components/listings/seller-badge"
 import { Badge } from "@/components/ui/badge"
@@ -46,6 +47,14 @@ export function ListingCard({
             className="absolute left-2 top-2 backdrop-blur"
           >
             {LISTING_STATUS_LABELS.sold}
+          </Badge>
+        ) : null}
+        {isBoostActive(listing.boosted_until) ? (
+          <Badge
+            variant="default"
+            className="absolute left-2 top-2 bg-amber-400 text-amber-950"
+          >
+            Boosted
           </Badge>
         ) : null}
         {favoriteButton ? (
