@@ -6,6 +6,9 @@ import { fetchCategories, searchListings } from "@/lib/listings"
 import { buildSearchUrl, nextOffset, parseSearchParams } from "@/lib/search"
 import { ListingCard } from "@/components/listings/listing-card"
 import { SearchFilters } from "@/components/search/search-filters"
+// PROTOTYPE — browse-page redesign variants, gated by ?variant= (dev only).
+import { PrototypeBrowsePage } from "@/components/search/prototype-browse-page"
+import type { VariantKey } from "@/components/search/prototype-utils"
 
 export const metadata: Metadata = {
   title: "Search listings",
@@ -49,6 +52,9 @@ export default async function SearchPage({
   const sp = await searchParams
   const filters = parseSearchParams(sp)
 
+  const variant =
+    sp.variant === "A" || sp.variant === "B" ? (sp.variant as VariantKey) : null
+
   const categoriesPromise = fetchCategories()
   const { listings, count, hasMore, error } = await searchListings({
     q: filters.q || undefined,
@@ -62,6 +68,22 @@ export default async function SearchPage({
     offset: filters.offset,
   })
   const categories = await categoriesPromise
+
+  // PROTOTYPE — when a variant is requested, render the redesigned browse page
+  // with the same data. The default (no ?variant=) keeps the current page.
+  if (variant) {
+    return (
+      <PrototypeBrowsePage
+        variant={variant}
+        categories={categories}
+        filters={filters}
+        listings={listings}
+        count={count}
+        hasMore={hasMore}
+        error={Boolean(error)}
+      />
+    )
+  }
 
   return (
     <main className="mx-auto w-full max-w-[1280px] px-4 py-10 sm:px-6 lg:py-12">
