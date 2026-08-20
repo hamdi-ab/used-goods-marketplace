@@ -41,7 +41,7 @@ export function PrototypeFooter({
               </span>
               {siteName}
             </p>
-            <p className={cn("mt-3 text-sm", blue ? "text-white/80" : "text-muted-foreground")}>
+            <p className={cn("mt-3 text-sm", blue ? "text-white/90" : "text-foreground/70")}>
               A trusted marketplace for buying and selling used goods across
               Addis Ababa — verified sellers, real reviews, safe meetups.
             </p>
@@ -52,21 +52,21 @@ export function PrototypeFooter({
               <p
                 className={cn(
                   "mb-3 font-heading text-xs font-semibold uppercase tracking-wider",
-                  blue ? "text-white/60" : "text-muted-foreground"
+                  blue ? "text-white/80" : "text-foreground/70"
                 )}
               >
                 {i === 0 ? "Marketplace" : "Company"}
               </p>
-              <ul className="space-y-2">
+              <ul className="space-y-1">
                 {col.map((item) => (
                   <li key={item.href}>
                     <Link
                       href={item.href}
                       className={cn(
-                        "transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                        "inline-block py-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2",
                         blue
-                          ? "text-white/85 hover:text-white"
-                          : "text-muted-foreground hover:text-foreground"
+                          ? "text-white/90 hover:text-white focus-visible:ring-white"
+                          : "text-foreground/70 hover:text-foreground focus-visible:ring-primary"
                       )}
                     >
                       {item.title}
@@ -81,12 +81,11 @@ export function PrototypeFooter({
             <p className="font-heading text-base font-semibold">
               Got something to sell?
             </p>
-            <p className={cn("text-sm", blue ? "text-white/80" : "text-muted-foreground")}>
+            <p className={cn("text-sm", blue ? "text-white/90" : "text-foreground/70")}>
               List an item in minutes and reach verified local buyers today.
             </p>
             <Button
               asChild
-              size="sm"
               className={cn(
                 blue
                   ? "bg-white text-[#2563EB] hover:bg-white/90"
@@ -101,7 +100,7 @@ export function PrototypeFooter({
         <p
           className={cn(
             "mt-10 border-t pt-4 text-xs",
-            blue ? "border-white/20 text-white/60" : "border-border text-muted-foreground"
+            blue ? "border-white/20 text-white/80" : "border-border text-foreground/70"
           )}
         >
           © {new Date().getFullYear()} {siteName}. All rights reserved.

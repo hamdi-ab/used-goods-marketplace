@@ -43,8 +43,10 @@ export function PrototypeHeader({ variant }: { variant: "A" | "B" }) {
         <Link
           href="/"
           className={cn(
-            "flex shrink-0 items-center gap-2 font-heading text-lg font-semibold",
-            blue ? "text-white" : "text-foreground"
+            "flex shrink-0 items-center gap-2 rounded-md font-heading text-lg font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+            blue
+              ? "text-white focus-visible:ring-white/60"
+              : "text-foreground focus-visible:ring-primary/60"
           )}
         >
           <span
@@ -71,13 +73,16 @@ export function PrototypeHeader({ variant }: { variant: "A" | "B" }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "group relative flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
+                  "group relative flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2",
+                  blue
+                    ? "focus-visible:ring-white/60"
+                    : "focus-visible:ring-primary/60",
                   active
                     ? blue
                       ? "text-white"
                       : "text-primary"
                     : blue
-                      ? "text-white/80 hover:bg-white/10 hover:text-white"
+                      ? "text-white/90 hover:bg-white/10 hover:text-white"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                 )}
               >
@@ -101,8 +106,8 @@ export function PrototypeHeader({ variant }: { variant: "A" | "B" }) {
             className={cn(
               "hidden w-56 items-center gap-2 rounded-full px-3.5 py-2 text-sm transition-colors md:flex",
               blue
-                ? "bg-white/15 text-white/80 hover:bg-white/25"
-                : "bg-muted text-muted-foreground hover:bg-muted/70"
+                ? "bg-white/15 text-white/90 hover:bg-white/25"
+                : "bg-muted text-foreground/70 hover:bg-muted/70"
             )}
           >
             <SearchIcon className="size-4 shrink-0" />
@@ -113,7 +118,6 @@ export function PrototypeHeader({ variant }: { variant: "A" | "B" }) {
             <>
               <Button
                 asChild
-                size="sm"
                 className={cn(
                   "hidden sm:inline-flex",
                   blue
@@ -130,7 +134,6 @@ export function PrototypeHeader({ variant }: { variant: "A" | "B" }) {
               <Button
                 asChild
                 variant="ghost"
-                size="sm"
                 className={cn(
                   "hidden sm:inline-flex",
                   blue && "text-white hover:bg-white/10"
@@ -141,7 +144,6 @@ export function PrototypeHeader({ variant }: { variant: "A" | "B" }) {
               <Button
                 asChild
                 variant="outline"
-                size="sm"
                 className={cn(
                   "hidden sm:inline-flex",
                   blue && "border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
@@ -151,7 +153,6 @@ export function PrototypeHeader({ variant }: { variant: "A" | "B" }) {
               </Button>
               <Button
                 asChild
-                size="sm"
                 className={cn(
                   blue
                     ? "bg-white text-[#2563EB] hover:bg-white/90"

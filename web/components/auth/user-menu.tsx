@@ -29,7 +29,7 @@ export function UserMenu() {
   const signOut = useSignOut()
 
   if (loading) {
-    return <div className="size-8 animate-pulse rounded-full bg-muted" aria-hidden />
+    return <div className="size-9 animate-pulse rounded-full bg-muted" aria-hidden />
   }
 
   if (!user) {
@@ -53,8 +53,10 @@ export function UserMenu() {
         asChild
         className="rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
       >
-        <Avatar className="size-8">
-          <AvatarFallback>{initials(name)}</AvatarFallback>
+        <Avatar className="size-9">
+          <AvatarFallback className="bg-muted text-foreground">
+            {initials(name)}
+          </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">

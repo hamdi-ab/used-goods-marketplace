@@ -2,7 +2,7 @@ import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
 import type { Supabase } from "@/lib/supabase/types"
-import { isValidUuid } from "@/lib/uuid"
+import { isValidUuid } from "@/lib/listings/constants"
 import type { BrowseListing } from "@/lib/listings/constants"
 import { mapNestedBrowseListing } from "@/lib/listings/browse-mapper"
 import type { NestedBrowseRow } from "@/lib/listings/browse-mapper"
@@ -34,7 +34,7 @@ export async function fetchFavoriteIds(
 export async function fetchFavoriteListings(
   userId: string,
   client?: Supabase
-): Promise<BrowseListing[]> {
+): Promise<{ listings: BrowseListing[]; error: string | null }> {
   const supabase = client ?? (await createClient())
   const { data, error } = await supabase
     .from("favorites")
@@ -49,7 +49,7 @@ export async function fetchFavoriteListings(
 
   if (error) {
     console.error("fetchFavoriteListings:", error.message)
-    return []
+    return { listings: [], error: error.message }
   }
 
   // supabase-js without generated types types embedded resources as arrays,
@@ -59,10 +59,12 @@ export async function fetchFavoriteListings(
     listing: NestedBrowseRow | null
   }[]
 
-  return rows
+  const listings = rows
     .map((row) => row.listing)
     .filter((listing): listing is NestedBrowseRow => listing !== null)
     .map(mapNestedBrowseListing)
+
+  return { listings, error: null }
 }
 
 // ---- Writes (called by the toggle server action) ----
