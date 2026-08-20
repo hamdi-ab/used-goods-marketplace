@@ -208,7 +208,7 @@ export function PrototypeNotificationsInbox({
           <Button
             type="button"
             variant="outline"
-            className="h-10"
+            className="h-11"
             onClick={handleMarkAll}
           >
             <CheckIcon className="mr-1.5 size-4" />
@@ -322,7 +322,7 @@ export function PrototypeNotificationsInbox({
                             <Link
                               href={withVariant(href, variant)}
                               onClick={() => handleView(n)}
-                              className="inline-flex h-9 min-w-16 items-center justify-center rounded-lg px-3 text-sm font-medium text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
+                              className="inline-flex h-11 min-w-16 items-center justify-center rounded-lg px-3 text-sm font-medium text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
                             >
                               View
                             </Link>
@@ -331,7 +331,7 @@ export function PrototypeNotificationsInbox({
                             <Button
                               type="button"
                               variant="ghost"
-                              className="h-9 text-sm"
+                              className="h-11 text-sm"
                               onClick={() => handleMarkRead(n.id)}
                             >
                               Mark read
