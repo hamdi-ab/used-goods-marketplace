@@ -8,9 +8,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 
 import { createClient } from "@/lib/supabase/client"
-import { resolveLoginDestination } from "@/lib/auth/landing"
-import { fetchClientRole } from "@/lib/auth/client-role"
+import { isInternalPath } from "@/lib/utils"
 import { AuthCard } from "@/components/auth/auth-card"
+import { PrototypeAuthLayout } from "@/components/home/prototype/prototype-auth-layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -23,7 +23,7 @@ const loginSchema = z.object({
 
 type LoginValues = z.infer<typeof loginSchema>
 
-export function LoginForm({ next }: { next?: string }) {
+export function LoginForm({ next, variant }: { next?: string; variant?: "A" | "B" }) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
 
@@ -39,82 +39,91 @@ export function LoginForm({ next }: { next?: string }) {
   async function onSubmit(values: LoginValues) {
     setError(null)
     const supabase = createClient()
-    const { data, error } = await supabase.auth.signInWithPassword(values)
+    const { error } = await supabase.auth.signInWithPassword(values)
 
     if (error) {
       setError("Invalid email or password.")
       return
     }
 
-    const userId = data.user?.id
-    if (!userId) {
-      router.push("/")
-      return
-    }
-
-    // Admins are moderation-only (ADR-020): resolve the landing from the role,
-    // honoring a ?next target only when it is read-safe for an admin.
-    const role = await fetchClientRole(supabase, userId)
-
     router.refresh()
-    router.push(resolveLoginDestination(role, next))
+    router.push(isInternalPath(next) ? next : "/")
+  }
+
+  const form = (
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          type="email"
+          autoComplete="email"
+          aria-invalid={!!errors.email}
+          {...register("email")}
+        />
+        {errors.email ? (
+          <p className="text-sm text-destructive">{errors.email.message}</p>
+        ) : null}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">Password</Label>
+          <Link
+            href="/forgot-password"
+            className="text-sm text-primary hover:underline"
+          >
+            Forgot password?
+          </Link>
+        </div>
+        <PasswordInput
+          id="password"
+          autoComplete="current-password"
+          aria-invalid={!!errors.password}
+          {...register("password")}
+        />
+        {errors.password ? (
+          <p className="text-sm text-destructive">{errors.password.message}</p>
+        ) : null}
+      </div>
+
+      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+
+      <Button type="submit" disabled={isSubmitting} className="mt-2">
+        {isSubmitting ? "Logging in…" : "Log in"}
+      </Button>
+    </form>
+  )
+
+  const footer = (
+    <>
+      Don&apos;t have an account?{" "}
+      <Link href="/register" className="font-medium text-primary hover:underline">
+        Sign up
+      </Link>
+    </>
+  )
+
+  if (variant) {
+    return (
+      <PrototypeAuthLayout
+        variant={variant}
+        title="Welcome back"
+        description="Log in to your VinTech Marketplace account."
+        footer={footer}
+      >
+        {form}
+      </PrototypeAuthLayout>
+    )
   }
 
   return (
     <AuthCard
       title="Log in"
       description="Welcome back. Sign in to your VinTech Marketplace account."
-      footer={
-        <>
-          Don&apos;t have an account?{" "}
-          <Link href="/register" className="font-medium text-primary hover:underline">
-            Sign up
-          </Link>
-        </>
-      }
+      footer={footer}
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            autoComplete="email"
-            aria-invalid={!!errors.email}
-            {...register("email")}
-          />
-          {errors.email ? (
-            <p className="text-sm text-destructive">{errors.email.message}</p>
-          ) : null}
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="password">Password</Label>
-            <Link
-              href="/forgot-password"
-              className="text-sm text-primary hover:underline"
-            >
-              Forgot password?
-            </Link>
-          </div>
-          <PasswordInput
-            id="password"
-            autoComplete="current-password"
-            aria-invalid={!!errors.password}
-            {...register("password")}
-          />
-          {errors.password ? (
-            <p className="text-sm text-destructive">{errors.password.message}</p>
-          ) : null}
-        </div>
-
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
-
-        <Button type="submit" disabled={isSubmitting} className="mt-2">
-          {isSubmitting ? "Logging in…" : "Log in"}
-        </Button>
-      </form>
+      {form}
     </AuthCard>
   )
 }
