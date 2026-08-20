@@ -303,3 +303,19 @@ export async function counterOfferRow(
   )
   return { ok: result.ok === true, error: result.error ?? null }
 }
+
+// The seller's recovery path after an accepted offer never gets paid: fails any
+// pending payment attempts, declines the offer, and reopens the listing to the
+// market (RPC-guarded on no paid payment having landed). This is what keeps the
+// "listing sold at accept" state machine from stranding a listing forever when
+// the buyer abandons the checkout (#97 / payment recovery migration).
+export async function abandonSaleRow(offerId: string): Promise<OfferResult> {
+  const supabase = await createClient()
+  const result = await callOutcomeRpc(
+    supabase,
+    "abandon_sale",
+    { p_offer_id: offerId },
+    "abandonSaleRow"
+  )
+  return { ok: result.ok === true, error: result.error ?? null }
+}

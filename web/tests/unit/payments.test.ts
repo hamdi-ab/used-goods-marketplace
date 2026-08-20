@@ -5,6 +5,7 @@ import {
   PAYMENT_STATUSES,
   paymentPhase,
   pickPayment,
+  etb,
   type OfferPayment,
   type PaymentPhase,
 } from "@/lib/payments/constants"
@@ -30,6 +31,11 @@ describe("payments status surface", () => {
 
   it("only ever moves ETB (mirrors the payments_currency_etb check)", () => {
     expect(PAYMENT_CURRENCY).toBe("ETB")
+  })
+
+  it("builds Money pairs through the single etb() site", () => {
+    expect(etb(500)).toEqual({ amount: 500, currency: "ETB" })
+    expect(etb(0.01).currency).toBe(PAYMENT_CURRENCY)
   })
 })
 

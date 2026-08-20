@@ -25,6 +25,7 @@ export type RpcName =
   | "complete_payment"
   | "fail_payment"
   | "confirm_payment_receipt"
+  | "abandon_sale"
 
 export type RpcArgs = Record<string, string | number | boolean | null | string[]>
 

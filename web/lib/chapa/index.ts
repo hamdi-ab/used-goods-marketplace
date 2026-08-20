@@ -12,6 +12,11 @@ import "server-only"
 // the full state machine can be shown to judges with no network or account.
 // Simulation is gated on the env flag too: a `demo_` tx_ref only simulates
 // while the fallback is on, and never hits the real API either way.
+//
+// This module is the provider adapter: it knows the Chapa protocol (endpoints,
+// payloads, the success/test-mode gate) and the demo simulation policy. It does
+// NOT know the marketplace's brand or its deals — those come in through the
+// call params, so the adapter never hardcodes app policy.
 
 const CHAPA_BASE_URL = "https://api.chapa.co/v1"
 const CHAPA_TIMEOUT_MS = 15_000
@@ -25,6 +30,10 @@ export type ChapaInitializeParams = {
   firstName?: string | null
   lastName?: string | null
   returnUrl: string
+  // Checkout page branding — supplied by the caller (the payments seam owns the
+  // app's voice; the adapter only forwards it to Chapa).
+  title?: string
+  description?: string
 }
 
 export type ChapaInitializeResult =
@@ -34,8 +43,8 @@ export type ChapaInitializeResult =
 export type ChapaVerifyResult =
   | {
       ok: true
-      status: string
-      mode: string
+      status: "success"
+      mode: "test"
       amount: number
       currency: string
       demo: boolean
@@ -98,8 +107,8 @@ export async function initializeChapaTransaction(
         tx_ref: params.txRef,
         return_url: params.returnUrl,
         customization: {
-          title: "VinTech Marketplace",
-          description: "Payment for your marketplace purchase",
+          title: params.title ?? "Payment",
+          description: params.description ?? "",
         },
       }),
       cache: "no-store",
@@ -126,12 +135,16 @@ export async function initializeChapaTransaction(
 }
 
 /**
- * Verify a transaction after the buyer returns from the hosted checkout. A
- * `demo_` tx_ref is simulated (with the expected amount/currency so the
- * complete_payment RPC's server-side match still holds) — but only while the
- * demo fallback env flag is on, and never against the real API. A real tx_ref
- * is checked against Chapa. The caller gates fulfillment on status ===
- * "success" AND mode === "test" (AC: test-mode only).
+ * Verify a transaction after the buyer returns from the hosted checkout (or,
+ * in demo fallback mode, immediately). A `demo_` tx_ref is simulated (with the
+ * expected amount/currency so the complete_payment RPC's server-side match
+ * still holds) — but only while the demo fallback env flag is on, and never
+ * against the real API. A real tx_ref is checked against Chapa.
+ *
+ * The fulfillment gate lives HERE, in the adapter: a payment only counts as
+ * confirmed when Chapa reports status "success" AND mode "test" (AC: test-mode
+ * only). The caller can no longer forget this check — if the adapter returns
+ * ok, the payment is fulfillable.
  */
 export async function verifyChapaTransaction(
   txRef: string,
@@ -179,12 +192,23 @@ export async function verifyChapaTransaction(
       return { ok: false, error: "Chapa could not verify the payment" }
     }
 
+    const status = String(data.status)
+    const mode = String(data.mode ?? "")
+    const amount = Number(data.amount ?? 0)
+    const currency = String(data.currency ?? "")
+
+    // Fulfillment gate: only Chapa test-mode success counts. Anything else is
+    // a failed attempt the caller can mark failed and retry.
+    if (status !== "success" || mode !== "test") {
+      return { ok: false, error: "Payment was not completed in test mode" }
+    }
+
     return {
       ok: true,
-      status: String(data.status),
-      mode: String(data.mode ?? ""),
-      amount: Number(data.amount ?? 0),
-      currency: String(data.currency ?? ""),
+      status,
+      mode,
+      amount,
+      currency,
       demo: false,
     }
   } catch {

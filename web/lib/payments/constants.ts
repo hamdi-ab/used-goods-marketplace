@@ -12,7 +12,22 @@ export const PAYMENT_STATUSES = ["pending", "paid", "failed"] as const
 export type PaymentStatus = (typeof PAYMENT_STATUSES)[number]
 
 // The demo only ever moves ETB (mirrors the payments_currency_etb check).
-export const PAYMENT_CURRENCY = "ETB"
+export const PAYMENT_CURRENCY = "ETB" as const
+
+// The domain's Money value object (domain model §11): a non-negative amount in
+// the marketplace's single supported currency. The currency literal is the TS
+// mirror of the DB's payments_currency_etb check — the DB stays the authority;
+// this is the one place TS names the rule.
+export interface Money {
+  amount: number
+  currency: typeof PAYMENT_CURRENCY
+}
+
+// The one construction site for the money pair, so callers never assemble
+// { amount, currency } by hand and drift the currency.
+export function etb(amount: number): Money {
+  return { amount, currency: PAYMENT_CURRENCY }
+}
 
 // The payment row embedded on an offer. Buyer and seller both read it via RLS;
 // the offer fetch embeds the raw rows and maps them with pickPayment.

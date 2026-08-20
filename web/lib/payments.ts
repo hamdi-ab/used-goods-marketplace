@@ -13,9 +13,7 @@ import {
   initializeChapaTransaction,
   verifyChapaTransaction,
 } from "@/lib/chapa"
-import { PAYMENT_CURRENCY } from "@/lib/payments/constants"
-
-export * from "@/lib/payments/constants"
+import { etb } from "@/lib/payments/constants"
 
 export type PayOfferResult =
   | { ok: true; checkoutUrl: string; amount: number; demo: boolean }
@@ -29,15 +27,17 @@ export type VerifyOfferPaymentResult =
 export type PaymentResult = OfferResult
 
 // The buyer returns here after Chapa's hosted checkout (or, in demo fallback
-// mode, immediately). The tx_ref in the query drives the verify on the /offers
-// page, so a refresh of the return URL just re-verifies idempotently.
+// mode, immediately). The tx_ref in the query drives the verify on the
+// /payments/callback route, so a refresh of the return URL just re-verifies
+// idempotently (and the /offers page keeps the same verify-on-render as a
+// resume fallback for the case where the callback was skipped).
 async function paymentReturnUrl(offerId: string, txRef: string): Promise<string> {
   const h = await headers()
   const host = h.get("host")
   const proto =
     h.get("x-forwarded-proto") ?? (host?.startsWith("localhost") ? "http" : "https")
   const base = host ? `${proto}://${host}` : SITE_URL
-  return `${base}/offers?tx_ref=${encodeURIComponent(txRef)}&offer=${encodeURIComponent(offerId)}`
+  return `${base}/payments/callback?tx_ref=${encodeURIComponent(txRef)}&offer=${encodeURIComponent(offerId)}`
 }
 
 // The buyer starts payment for an accepted offer. Pins the agreed amount in a
@@ -67,11 +67,12 @@ export async function payOffer(offerId: string): Promise<PayOfferResult> {
   }
 
   const txRef = chapaTxRef()
+  const money = etb(offer.amount)
   const begin = await callOutcomeRpc(supabase, "begin_payment", {
     p_offer_id: offerId,
     p_tx_ref: txRef,
-    p_amount: offer.amount,
-    p_currency: PAYMENT_CURRENCY,
+    p_amount: money.amount,
+    p_currency: money.currency,
   }, "payOffer")
   if (!begin.ok) {
     return { ok: false, error: begin.error ?? "Could not start the payment" }
@@ -79,11 +80,13 @@ export async function payOffer(offerId: string): Promise<PayOfferResult> {
 
   const init = await initializeChapaTransaction({
     txRef,
-    amount: offer.amount,
-    currency: PAYMENT_CURRENCY,
+    amount: money.amount,
+    currency: money.currency,
     email: user.email,
     firstName: user.fullName,
     returnUrl: await paymentReturnUrl(offerId, txRef),
+    title: "VinTech Marketplace",
+    description: "Payment for your marketplace purchase",
   })
 
   if (!init.ok) {
@@ -100,9 +103,11 @@ export async function payOffer(offerId: string): Promise<PayOfferResult> {
 }
 
 // Server-side verify after the buyer returns from checkout. Fulfillment is
-// gated on Chapa reporting success in test mode, and the complete_payment RPC
-// re-checks the reported mode/amount/currency against the row pinned at begin
-// time. Idempotent — re-verifying an already-paid tx_ref stays successful.
+// gated inside the Chapa adapter (status === "success" AND mode === "test");
+// the complete_payment RPC re-checks the reported mode/amount/currency against
+// the row pinned at begin time. Idempotent — re-verifying an already-paid
+// tx_ref stays successful. A failed verify marks the attempt failed so
+// begin_payment allows a retry.
 export async function verifyOfferPayment(params: {
   offerId: string
   txRef: string
@@ -137,13 +142,10 @@ export async function verifyOfferPayment(params: {
   })
   if (!verified.ok) {
     // The buyer came back without a completed payment (abandoned checkout,
-    // failed card). Mark the attempt failed so begin_payment allows a retry.
+    // failed card, or a live tx not in Chapa test mode). Mark the attempt
+    // failed so begin_payment allows a retry.
     await callOutcomeRpc(supabase, "fail_payment", { p_tx_ref: params.txRef }, "verifyOfferPayment")
     return { ok: false, error: verified.error }
-  }
-  if (verified.status !== "success" || verified.mode !== "test") {
-    await callOutcomeRpc(supabase, "fail_payment", { p_tx_ref: params.txRef }, "verifyOfferPayment")
-    return { ok: false, error: "Payment was not completed in test mode" }
   }
 
   const complete = await callOutcomeRpc(supabase, "complete_payment", {

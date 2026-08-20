@@ -9,6 +9,7 @@ import {
   counterOfferRow,
   declineOfferRow,
   submitOfferRow,
+  abandonSaleRow,
   OFFER_AMOUNT_MAX,
   OFFER_MESSAGE_MAX,
 } from "@/lib/offers"
@@ -118,6 +119,44 @@ export async function offerAction(
 
   if (!result.ok) {
     return { message: result.error ?? "Could not update the offer" }
+  }
+
+  revalidatePath(`/listings/${parsed.data.listingId}`)
+  revalidatePath("/offers")
+  revalidatePath("/offers/seller")
+  return { ok: true }
+}
+
+const abandonSaleSchema = z.object({
+  offerId: z.string().uuid(),
+  listingId: z.string().uuid(),
+})
+
+export type AbandonSaleState = {
+  message?: string
+  ok?: boolean
+}
+
+// The seller's recovery path: cancel an accepted sale that never got paid,
+// reopening the listing to the market (RPC-guarded on no paid payment having
+// landed). Shown on accepted offers with no paid payment once the buyer has
+// had time to complete the checkout.
+export async function abandonSaleAction(
+  _prevState: AbandonSaleState,
+  formData: FormData
+): Promise<AbandonSaleState> {
+  const parsed = abandonSaleSchema.safeParse({
+    offerId: formValue(formData, "offerId"),
+    listingId: formValue(formData, "listingId"),
+  })
+  if (!parsed.success) {
+    return { message: "Invalid request" }
+  }
+
+  await requireUser()
+  const result = await abandonSaleRow(parsed.data.offerId)
+  if (!result.ok) {
+    return { message: result.error ?? "Could not cancel the sale" }
   }
 
   revalidatePath(`/listings/${parsed.data.listingId}`)
