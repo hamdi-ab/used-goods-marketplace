@@ -106,7 +106,7 @@ export function PrototypeFavoritesGrid({
             Tap the heart on any listing to save it here and find it again
             later.
           </p>
-          <Button asChild size="lg" className="mt-4">
+          <Button asChild size="lg" className="mt-4 h-11">
             <Link href={withVariant("/search", variant)}>Browse listings</Link>
           </Button>
         </div>
@@ -152,7 +152,7 @@ export function PrototypeFavoritesGrid({
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-6 left-1/2 z-50 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-center justify-between gap-3 rounded-xl border bg-foreground px-4 py-3 text-background shadow-lg"
+          className="fixed bottom-6 left-1/2 z-50 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 animate-in items-center justify-between gap-3 rounded-xl border bg-foreground px-4 py-3 text-background shadow-lg fade-in-0 slide-in-from-bottom-2 motion-reduce:animate-none"
         >
           <p className="text-sm font-medium">
             Removed from favorites
@@ -161,7 +161,7 @@ export function PrototypeFavoritesGrid({
             <Button
               type="button"
               variant="outline"
-              className="border-background/30 bg-transparent text-background hover:bg-background/10 hover:text-background"
+              className="h-10 border-background/30 bg-transparent text-background hover:bg-background/10 hover:text-background"
               onClick={handleUndo}
             >
               Undo

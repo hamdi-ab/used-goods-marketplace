@@ -81,7 +81,7 @@ export function PrototypeListingCard({
       </div>
 
       <Link href={href} className="block space-y-1.5 px-3.5 pb-4 pt-3">
-        <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-foreground">
+        <p className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">
           {listing.title}
         </p>
         <p className="text-[15px] font-extrabold text-primary">
