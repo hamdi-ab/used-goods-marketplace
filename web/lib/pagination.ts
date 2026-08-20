@@ -11,9 +11,14 @@ export const MAX_PAGING_OFFSET = BROWSE_LIMIT_MAX - PAGE_SIZE
  * Shared by `lib/browse` and `lib/search` so the two read seams can never
  * drift apart on what a valid offset looks like. The clamp guarantees
  * `offset + PAGE_SIZE <= BROWSE_LIMIT_MAX`, which is what makes "Load more"
- * terminate instead of re-clamping to the same page forever. (§15.) */
-export function parseOffset(raw: string | undefined): number {
-  const parsed = Number(raw ?? "")
+ * terminate instead of re-clamping to the same page forever. (§15.)
+ *
+ * Accepts the raw searchParams value (`string | string[] | undefined`): a
+ * repeated `?offset=1&offset=2` degrades to the first value, exactly like
+ * `lib/search`'s `single` coercion. */
+export function parseOffset(raw: string | string[] | undefined): number {
+  const value = Array.isArray(raw) ? raw[0] : raw
+  const parsed = Number(value ?? "")
   return Number.isFinite(parsed) && parsed > 0
     ? Math.min(parsed, MAX_PAGING_OFFSET)
     : 0

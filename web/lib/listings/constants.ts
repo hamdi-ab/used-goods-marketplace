@@ -192,6 +192,7 @@ export interface BrowseListing {
   price: number
   condition: Condition
   city: string | null
+  status: ListingStatus
   published_at: string
   image_url: string | null
   image_count: number
