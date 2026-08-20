@@ -8,13 +8,16 @@ import { buildSearchUrl, type SearchQuery } from "@/lib/search"
 
 export type VariantKey = "A" | "B"
 
-/** Append the variant param to any internal URL, preserving existing params. */
+/** Append the variant param to any internal URL, preserving existing params
+ * and hash fragments (e.g. `/dashboard#listings` keeps its anchor). */
 export function withVariant(url: string, variant: VariantKey): string {
-  const [path, qs] = url.split("?")
+  const [path, hashPart] = url.split("#")
+  const [pathname, qs] = path.split("?")
   const params = new URLSearchParams(qs ?? "")
   params.set("variant", variant)
   const next = params.toString()
-  return next ? `${path}?${next}` : path
+  const withQuery = next ? `${pathname}?${next}` : pathname
+  return hashPart ? `${withQuery}#${hashPart}` : withQuery
 }
 
 export const SORT_LABELS: Record<SearchSort, string> = {

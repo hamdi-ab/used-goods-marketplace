@@ -84,7 +84,10 @@ export async function PrototypeDashboardPage({
           href: "/dashboard#listings",
           icon: LayoutGridIcon,
           accent: "text-[#2563EB]",
-          sub: "Published & live",
+          sub:
+            liveListings === 0
+              ? "Nothing live yet"
+              : "Published & live",
         },
         {
           label: "Total views",
@@ -100,7 +103,7 @@ export async function PrototypeDashboardPage({
           href: "/offers/seller",
           icon: InboxIcon,
           accent: "text-[#2563EB]",
-          sub: "Awaiting your reply",
+          sub: openOffers === 0 ? "You're all caught up" : "Awaiting your reply",
         },
         {
           label: "Trust score",
@@ -250,54 +253,54 @@ export async function PrototypeDashboardPage({
 
         {/* Metric tiles above the fold */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((s) => (
-            <div
-              key={s.label}
-              className={cn(
-                "flex flex-col gap-2 rounded-2xl p-5 shadow-sm",
-                tileClass
-              )}
-            >
-              <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-foreground/70">
-                  {s.label}
-                </span>
-                <s.icon className={cn("size-5", s.accent)} />
-              </div>
-              <div className="flex items-baseline gap-2">
-                {s.href ? (
-                  <Link
-                    href={withVariant(s.href, variant)}
-                    className="transition-opacity hover:opacity-80"
-                  >
-                    <span
-                      className={cn(
-                        "font-heading text-3xl font-extrabold",
-                        s.accent
-                      )}
-                    >
-                      {s.value}
-                    </span>
-                  </Link>
-                ) : (
+          {stats.map((s) => {
+            const inner = (
+              <>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-foreground/70">
+                    {s.label}
+                  </span>
+                  <s.icon className={cn("size-5", s.accent)} />
+                </div>
+                <div className="flex items-baseline gap-2">
                   <span
                     className={cn(
-                      "font-heading text-3xl font-extrabold",
-                      s.accent
+                      "font-heading text-3xl font-extrabold tabular-nums tracking-tight",
+                      s.href ? "text-foreground" : s.accent
                     )}
                   >
                     {s.value}
                   </span>
+                  {s.word ? (
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-foreground">
+                      {s.word}
+                    </span>
+                  ) : null}
+                </div>
+                <span className="text-xs text-foreground/70">{s.sub}</span>
+              </>
+            )
+            const cardClass = cn(
+              "flex flex-col gap-2 rounded-2xl p-5 shadow-sm",
+              tileClass
+            )
+            return s.href ? (
+              <Link
+                key={s.label}
+                href={withVariant(s.href, variant)}
+                className={cn(
+                  cardClass,
+                  "transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none"
                 )}
-                {s.word ? (
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-foreground">
-                    {s.word}
-                  </span>
-                ) : null}
+              >
+                {inner}
+              </Link>
+            ) : (
+              <div key={s.label} className={cardClass}>
+                {inner}
               </div>
-              <span className="text-xs text-foreground/70">{s.sub}</span>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* Buyer → seller CTA */}
@@ -308,7 +311,7 @@ export async function PrototypeDashboardPage({
                 <h2 className="font-heading text-lg font-semibold">
                   Sell on the marketplace
                 </h2>
-                <p className="mt-1 text-sm text-muted-foreground">
+                <p className="mt-1 text-sm text-foreground/70">
                   When you start selling, your listings, their stats, and
                   incoming offers will live here.
                 </p>
@@ -333,7 +336,7 @@ export async function PrototypeDashboardPage({
                 key={a.title}
                 href={withVariant(a.href, variant)}
                 className={cn(
-                  "group flex flex-col gap-2 rounded-2xl p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  "group flex flex-col gap-2 rounded-2xl p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none",
                   tileClass
                 )}
               >

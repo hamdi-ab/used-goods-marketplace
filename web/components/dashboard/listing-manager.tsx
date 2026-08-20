@@ -42,7 +42,7 @@ function ListingRow({ listing }: { listing: SellerListingRow }) {
                 onError={() => setImgError(true)}
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+              <div className="flex h-full w-full items-center justify-center text-xs text-foreground/70">
                 No photo
               </div>
             )}
@@ -73,7 +73,7 @@ function ListingRow({ listing }: { listing: SellerListingRow }) {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Button asChild variant="outline">
               <Link href={`/listings/${listing.id}/edit`}>
                 <PencilIcon className="mr-1.5 size-3.5" />
@@ -83,24 +83,26 @@ function ListingRow({ listing }: { listing: SellerListingRow }) {
             <form action={action} aria-busy={pending}>
               <input type="hidden" name="id" value={listing.id} readOnly />
               {confirming ? (
-                <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+                <div className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
                   <span className="text-xs font-medium text-amber-800">
                     Archive this listing? Buyers will no longer see it.
                   </span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setConfirming(false)}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    variant="destructive"
-                    disabled={pending}
-                  >
-                    {pending ? "Archiving…" : "Archive"}
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setConfirming(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      type="submit"
+                      variant="destructive"
+                      disabled={pending}
+                    >
+                      {pending ? "Archiving…" : "Archive"}
+                    </Button>
+                  </div>
                 </div>
               ) : (
                 <Button
@@ -187,7 +189,10 @@ export function ListingManager({
               key={f.key}
               type="button"
               variant={active ? "default" : "outline"}
-              className={cn("h-8 rounded-full px-3.5 text-xs", active && "text-primary-foreground")}
+              className={cn(
+                "h-9 rounded-full px-3.5 text-xs transition-colors",
+                active && "text-primary-foreground"
+              )}
               onClick={() => {
                 setFilter(f.key)
                 setExpanded(false)
