@@ -34,19 +34,33 @@ export default async function OffersPage({
   const params = await searchParams
   const offset = parseOffset(params.offset)
 
-  // #97 — the buyer returns here from Chapa's hosted checkout with the tx_ref
-  // in the URL. Verify server-side FIRST (fulfillment gated on test-mode
-  // success) so the offer list below — fetched after — reads the payment row
-  // as paid and shows the confirm-receipt step on the very first return. The
-  // banner reinforces the result. Idempotent on refresh.
-  const verifyResult =
-    typeof params.tx_ref === "string" && typeof params.offer === "string"
-      ? await verifyOfferPayment({ offerId: params.offer, txRef: params.tx_ref })
-      : null
-
   const { offers, hasMore, error } = await fetchBuyerOffers(user.id, {
     offset,
   })
+
+  // #97 — the buyer returns here from Chapa's hosted checkout with the tx_ref
+  // in the URL. The /payments/callback route already verified server-side, so
+  // by the time we render the row is terminal (paid/failed): banner from the
+  // embedded row, no second Chapa call (coding standard §20). The verify below
+  // only runs as the resume fallback when the callback was skipped (direct hit
+  // on a return URL with a still-pending payment).
+  let verifyResult: { ok: true; amount: number } | { ok: false; error: string } | null = null
+  if (typeof params.tx_ref === "string" && typeof params.offer === "string") {
+    const row = offers.find((o) => o.id === params.offer)?.payment
+    if (!row || row.status === "pending") {
+      const result = await verifyOfferPayment({
+        offerId: params.offer,
+        txRef: params.tx_ref,
+      })
+      verifyResult = result.ok
+        ? { ok: true, amount: result.amount }
+        : { ok: false, error: result.error }
+    } else if (row.status === "paid") {
+      verifyResult = { ok: true, amount: row.amount }
+    } else {
+      verifyResult = { ok: false, error: "Payment not completed" }
+    }
+  }
 
   let body: ReactNode
   if (error) {

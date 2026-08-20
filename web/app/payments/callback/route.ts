@@ -23,7 +23,13 @@ export async function GET(request: Request): Promise<Response> {
 
   // Verify, then bounce to the offer list with the same params the page's own
   // verify-on-render reads — the banner is rendered there (idempotent refresh).
-  await verifyOfferPayment({ offerId, txRef })
+  const result = await verifyOfferPayment({ offerId, txRef })
+
+  if (!result.ok) {
+    // §11: the page banners the failure via the terminal row; the technical
+    // detail belongs in the server log, never in the redirect URL.
+    console.error("[payments] callback verify failed:", result.error)
+  }
 
   const dest = new URL("/offers", url.origin)
   dest.searchParams.set("offer", offerId)

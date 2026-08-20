@@ -16,7 +16,7 @@ import {
 import { etb } from "@/lib/payments/constants"
 
 export type PayOfferResult =
-  | { ok: true; checkoutUrl: string; amount: number; demo: boolean }
+  | { ok: true; checkoutUrl: string }
   | { ok: false; error: string }
 
 export type VerifyOfferPaymentResult =
@@ -97,8 +97,6 @@ export async function payOffer(offerId: string): Promise<PayOfferResult> {
   return {
     ok: true,
     checkoutUrl: init.checkoutUrl,
-    amount: offer.amount,
-    demo: init.demo,
   }
 }
 

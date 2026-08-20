@@ -22,13 +22,19 @@ export function SellerOfferActions({ offer }: { offer: SellerOfferRow }) {
   // sale can be walked back. If the buyer never completes the checkout, the
   // seller can cancel the sale and reopen the listing to the market.
   if (offer.status === "accepted") {
-    const unpaid = paymentPhase(offer.payment) === "unpaid"
+    const phase = paymentPhase(offer.payment)
+    const canCancel = phase === "unpaid" && offer.payment?.status !== "pending"
     return (
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground">
           Accepted — the listing is now sold.
         </p>
-        {unpaid ? (
+        {phase === "unpaid" && offer.payment?.status === "pending" ? (
+          <p className="text-sm text-muted-foreground">
+            The buyer is completing their payment.
+          </p>
+        ) : null}
+        {canCancel ? (
           <form action={abandonFormAction} className="flex flex-wrap items-center gap-2">
             <input type="hidden" name="offerId" value={offer.id} />
             <input type="hidden" name="listingId" value={offer.listing_id} />

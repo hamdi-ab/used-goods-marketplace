@@ -85,7 +85,7 @@ export function BuyerPayment({ offer }: { offer: BuyerOfferRow }) {
           <input type="hidden" name="offerId" value={offer.id} />
           <Button type="submit" disabled={payPending}>
             <CreditCardIcon className="size-4" />
-            {offer.payment?.status === "pending" ? "Retry payment" : "Pay"}{" "}
+            {offer.payment?.status === "failed" ? "Retry payment" : "Pay"}{" "}
             {formatPrice(amount, { maxFractionDigits: 2 })} with Chapa
           </Button>
           <p className="text-xs text-muted-foreground">

@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest"
+import { describe, it, expect, afterEach } from "vitest"
 
 import {
   PAYMENT_CURRENCY,
@@ -9,6 +9,10 @@ import {
   type OfferPayment,
   type PaymentPhase,
 } from "@/lib/payments/constants"
+import {
+  verifyChapaTransaction,
+  isDemoTxRef,
+} from "@/lib/chapa"
 
 function payment(overrides: Partial<OfferPayment> = {}): OfferPayment {
   return {
@@ -91,5 +95,40 @@ describe("payments.paymentPhase", () => {
       ...PAYMENT_STATUSES.map((s) => paymentPhase(payment({ status: s }))),
     ])
     expect(phases).toEqual(new Set(["unpaid", "paid"]))
+  })
+})
+
+describe("chapa.verifyChapaTransaction (demo fallback)", () => {
+  afterEach(() => {
+    delete process.env.CHAPA_DEMO_FALLBACK
+  })
+
+  it("simulates test-mode success for a demo_ tx_ref while the fallback is on", async () => {
+    process.env.CHAPA_DEMO_FALLBACK = "true"
+    const result = await verifyChapaTransaction("demo_abc", {
+      amount: 500,
+      currency: "ETB",
+    })
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      expect(result.status).toBe("success")
+      expect(result.mode).toBe("test")
+      expect(result.amount).toBe(500)
+      expect(result.currency).toBe("ETB")
+      expect(result.demo).toBe(true)
+    }
+  })
+
+  it("refuses a simulated tx_ref when the fallback is off", async () => {
+    const result = await verifyChapaTransaction("demo_abc", {
+      amount: 500,
+      currency: "ETB",
+    })
+    expect(result.ok).toBe(false)
+  })
+
+  it("never simulates a non-demo tx_ref", () => {
+    expect(isDemoTxRef("demo_1")).toBe(true)
+    expect(isDemoTxRef("fm_1")).toBe(false)
   })
 })

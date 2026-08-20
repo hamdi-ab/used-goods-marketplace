@@ -450,7 +450,9 @@ direct-payment ledger for accepted offers (test-mode only, out of MVP billing
 scope). See `web/supabase/migrations/20260817000000_create_payments.sql`; it
 adds the `payments` table and `begin/complete/fail_payment` +
 `confirm_payment_receipt` RPCs without touching the existing tables listed
-above.
+above. A follow-up `20260818000000_payment_recovery.sql` adds the
+seller-initiated `abandon_sale` RPC and stale-pending expiry so a stuck sale
+can be reopened.
 
 # 25. Summary
 
