@@ -16,6 +16,7 @@ describe("browse-mapper.mapNestedBrowseListing (nested browse rows)", () => {
     price: 100,
     condition,
     city: "Bole",
+    status: "published" as const,
     published_at: "2026-01-01",
     seller: [
       {
@@ -57,6 +58,11 @@ describe("browse-mapper.mapNestedBrowseListing (nested browse rows)", () => {
     expect(listing.image_url).toBeNull()
     expect(listing.image_count).toBe(0)
   })
+
+  it("preserves a sold listing's status (#76)", () => {
+    const listing = mapNestedBrowseListing({ ...nested, status: "sold" })
+    expect(listing.status).toBe("sold")
+  })
 })
 
 describe("browse-mapper.mapFlatSearchListing (search RPC rows)", () => {
@@ -83,6 +89,7 @@ describe("browse-mapper.mapFlatSearchListing (search RPC rows)", () => {
       price: 100,
       condition,
       city: "Bole",
+      status: "published",
       published_at: "2026-01-01",
       image_url: "/cover.jpg",
       image_count: 3,

@@ -9,6 +9,7 @@ import {
   fetchOwnProfile,
   fetchPublicProfile,
   completeOwnProfile,
+  promoteToSellerRow,
   updateOwnProfile,
 } from "@/lib/profiles"
 
@@ -114,10 +115,24 @@ describe("profile reads", () => {
     const result = await fetchPublicProfile("user-public")
     expect(result?.phone).toBe("+251 911 999 999")
   })
+
+  it("fetchPublicProfile reads the public surface from profiles_public (#70)", async () => {
+    const tables: string[] = []
+    const q = queue([{ data: { ...ownRow, phone_public: false, phone: null }, error: null }])
+    mockCreateClient.mockResolvedValue(
+      db((t) => {
+        tables.push(t)
+        return q
+      })
+    )
+    const result = await fetchPublicProfile("user-surface")
+    expect(tables[0]).toBe("profiles_public")
+    expect(result).not.toBeNull()
+  })
 })
 
 describe("profile writes", () => {
-  it("completeOwnProfile strips the @ from telegram and marks completion 100", async () => {
+  it("completeOwnProfile strips the @ from telegram (completion is generated, #82)", async () => {
     const { b, updates } = captureBuilder({ data: null, error: null })
     mockCreateClient.mockResolvedValue(db(() => b))
 
@@ -131,9 +146,10 @@ describe("profile writes", () => {
     expect(result).toEqual({ ok: true, error: null })
     expect(updates[0]).toMatchObject({
       telegram_username: "alem",
-      profile_completion: 100,
       full_name: "Alem",
     })
+    // The generated column (fix #82) is recomputed by the DB; never written.
+    expect(updates[0]).not.toHaveProperty("profile_completion")
   })
 
   it("completeOwnProfile surfaces a database error", async () => {
@@ -155,5 +171,46 @@ describe("profile writes", () => {
 
     expect(result).toEqual({ ok: true, error: null })
     expect(updates[0]).toMatchObject({ city: "Bole", phone_public: true })
+  })
+})
+
+describe("promoteToSellerRow (#71)", () => {
+  const rpcClient = (rpc: (fn: string) => Promise<{ data: unknown; error: unknown }>) =>
+    ({ rpc } as never)
+
+  it("returns ok when the RPC promotes the buyer", async () => {
+    mockCreateClient.mockResolvedValue(
+      rpcClient(async () => ({ data: { ok: true, error: null }, error: null }))
+    )
+    expect(await promoteToSellerRow()).toEqual({ ok: true, error: null })
+  })
+
+  it("surfaces the RPC denial (e.g. an admin trying to sell)", async () => {
+    mockCreateClient.mockResolvedValue(
+      rpcClient(async () => ({
+        data: { ok: false, error: "admins cannot sell" },
+        error: null,
+      }))
+    )
+    expect(await promoteToSellerRow()).toEqual({
+      ok: false,
+      error: "admins cannot sell",
+    })
+  })
+
+  it("collapses a transport error into the envelope", async () => {
+    mockCreateClient.mockResolvedValue(
+      rpcClient(async () => ({ data: null, error: { message: "db down" } }))
+    )
+    expect(await promoteToSellerRow()).toEqual({ ok: false, error: "db down" })
+  })
+
+  it("falls back to a generic message when the RPC payload is missing", async () => {
+    mockCreateClient.mockResolvedValue(
+      rpcClient(async () => ({ data: null, error: null }))
+    )
+    const result = await promoteToSellerRow()
+    expect(result.ok).toBe(false)
+    expect(result.error).toMatch(/Could not start selling/)
   })
 })

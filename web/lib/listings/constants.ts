@@ -12,6 +12,47 @@ export const CONDITIONS = ["Brand New", "Lightly Used", "Fair"] as const
 export const STATUSES = ["draft", "published", "sold"] as const // "archived" is delete-only
 export const MAX_IMAGES = 10
 
+/** Canonical city list for search/browse facets. Keeps listing city data
+ * consistent (industry-audit #12) so free-text city variation never fragments
+ * discovery. Addis Ababa sub-cities first (most common marketplace source),
+ * then major regional centers. (PRD Filters §City, P1.10 / #79.) */
+export const KNOWN_CITIES = [
+  "Addis Ababa",
+  "Addis Ababa — Bole",
+  "Addis Ababa — Kirkos",
+  "Addis Ababa — Lideta",
+  "Addis Ababa — Gullele",
+  "Addis Ababa — Arada",
+  "Addis Ababa — Akaky Kaliti",
+  "Addis Ababa — Nifas Silk Lafto",
+  "Addis Ababa — Sekire",
+  "Addis Ababa — Yaedenichil",
+  "Dire Dawa",
+  "Mekelle",
+  "Adigrat",
+  "Bahir Dar",
+  "Dessie",
+  "Gondar",
+  "Debre Berhan",
+  "Harar",
+  "Jimma",
+  "Bonga",
+  "Hosaena",
+  "Wolkait",
+  "Adama",
+  "Batu",
+  "Butajira",
+  "Wolisso",
+  "Nekemte",
+  "Gambela",
+  "Semera",
+  "Awasa",
+  "Dila",
+  "Hawassa",
+  "Jijiga",
+] as const
+export const KNOWN_CITY_LABELS = KNOWN_CITIES
+
 export type Condition = (typeof CONDITIONS)[number]
 export type ListingStatus = (typeof STATUSES)[number] | "archived"
 
@@ -151,6 +192,7 @@ export interface BrowseListing {
   price: number
   condition: Condition
   city: string | null
+  status: ListingStatus
   published_at: string
   image_url: string | null
   image_count: number

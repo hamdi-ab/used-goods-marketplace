@@ -35,6 +35,34 @@ export const VERIFICATION_BADGE_LABELS: Record<VerificationBadge, string> = {
 
 export const VERIFICATION_BADGE_NOTE = "Not verified yet"
 
+/** Full DB enum mirrors. */
+export type SelfServeType = "phone" | "fayda"
+export const VERIFICATION_TYPES: [VerificationType, ...VerificationType[]] = [
+  "email",
+  "phone",
+  "telegram",
+  "fayda",
+]
+export const SELF_SERVE_TYPES: [SelfServeType, ...SelfServeType[]] = [
+  "phone",
+  "fayda",
+]
+
+export const VERIFICATION_TYPE_LABELS: Record<VerificationType, string> = {
+  email: "Email",
+  phone: "Phone",
+  telegram: "Telegram",
+  fayda: "Fayda ID",
+}
+
+export const VERIFICATION_STATUS_LABELS: Record<VerificationStatus, string> = {
+  pending: "Pending",
+  verified: "Verified",
+  rejected: "Rejected",
+}
+
+export const VERIFICATION_NOTES_MAX = 500
+
 export interface SellerVerification {
   role: string | null
   phone_verified?: boolean | null

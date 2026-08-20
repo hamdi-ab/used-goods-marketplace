@@ -5,17 +5,20 @@ import type { Supabase } from "@/lib/supabase/types"
  * magic-string typo. */
 export type RpcName =
   | "search_listings"
+  | "listings_similar"
   | "submit_review"
   | "submit_report"
   | "resolve_report"
   | "record_verification"
+  | "request_verification"
+  | "record_listing_view"
   | "submit_offer"
   | "accept_offer"
   | "decline_offer"
   | "counter_offer"
   | "record_contact_attempt"
 
-export type RpcArgs = Record<string, string | number | null>
+export type RpcArgs = Record<string, string | number | boolean | null | string[]>
 
 export interface RpcResult<T> {
   data: T | null

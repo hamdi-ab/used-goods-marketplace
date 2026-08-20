@@ -3,9 +3,13 @@ import Link from "next/link"
 import type { ReactNode } from "react"
 
 import type { BrowseListing } from "@/lib/listings"
-import { formatPrice } from "@/lib/listings/constants"
+import {
+  formatPrice,
+  LISTING_STATUS_LABELS,
+} from "@/lib/listings/constants"
 import { ConditionChip } from "@/components/listings/condition-chip"
 import { SellerBadge } from "@/components/listings/seller-badge"
+import { Badge } from "@/components/ui/badge"
 
 export function ListingCard({
   listing,
@@ -18,7 +22,7 @@ export function ListingCard({
   const href = `/listings/${listing.id}`
   return (
     <div className="group w-full">
-      <div className="relative">
+      <div className="relative"      >
         <Link href={href} aria-label={listing.title}>
           <div className="aspect-[4/3] w-full overflow-hidden rounded-lg border bg-muted">
             {listing.image_url ? (
@@ -36,6 +40,14 @@ export function ListingCard({
             )}
           </div>
         </Link>
+        {listing.status === "sold" ? (
+          <Badge
+            variant="secondary"
+            className="absolute left-2 top-2 backdrop-blur"
+          >
+            {LISTING_STATUS_LABELS.sold}
+          </Badge>
+        ) : null}
         {favoriteButton ? (
           <div className="absolute right-2 top-2">{favoriteButton}</div>
         ) : null}

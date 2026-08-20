@@ -12,6 +12,7 @@ describe("search.parseSearchParams", () => {
       maxPrice: undefined,
       condition: undefined,
       city: "",
+      sellerVerified: false,
       sort: "newest",
       offset: 0,
     })
@@ -73,6 +74,14 @@ describe("search.parseSearchParams", () => {
     expect(parseSearchParams({ offset: "-3" }).offset).toBe(0)
     expect(parseSearchParams({ offset: "nope" }).offset).toBe(0)
   })
+
+  it("parses the verified-seller facet (verified=1)", () => {
+    expect(parseSearchParams({ verified: "1" }).sellerVerified).toBe(true)
+    expect(parseSearchParams({ verified: "true" }).sellerVerified).toBe(true)
+    expect(parseSearchParams({ verified: "0" }).sellerVerified).toBe(false)
+    expect(parseSearchParams({ verified: "false" }).sellerVerified).toBe(false)
+    expect(parseSearchParams({}).sellerVerified).toBe(false)
+  })
 })
 
 describe("search.buildSearchUrl", () => {
@@ -83,6 +92,7 @@ describe("search.buildSearchUrl", () => {
     maxPrice: undefined,
     condition: undefined,
     city: "",
+    sellerVerified: false,
     sort: "newest" as const,
     offset: 0,
   }
@@ -104,12 +114,19 @@ describe("search.buildSearchUrl", () => {
         maxPrice: 5000,
         condition: "Lightly Used",
         city: "Bole",
+        sellerVerified: true,
         sort: "price_desc",
         offset: PAGE_SIZE,
       })
     ).toBe(
-      "/search?q=table&category=furniture&min=500&max=5000&condition=Lightly+Used&city=Bole&sort=price_desc&offset=12"
+      "/search?q=table&category=furniture&min=500&max=5000&condition=Lightly+Used&city=Bole&verified=1&sort=price_desc&offset=12"
     )
+  })
+
+  it("omits the verified facet when unset", () => {
+    expect(
+      buildSearchUrl({ ...base, q: "phone", sellerVerified: false })
+    ).toBe("/search?q=phone")
   })
 })
 

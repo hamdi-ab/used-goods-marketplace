@@ -7,7 +7,7 @@ import { requireAdmin, requireUser } from "@/lib/auth"
 import {
   createReport as createReportRow,
   resolveReport as resolveReportRow,
-  REPORT_REASONS,
+  submitReportSchema,
   REPORT_NOTE_MAX,
 } from "@/lib/reports"
 
@@ -15,23 +15,6 @@ function formValue(formData: FormData, key: string): string | undefined {
   const v = formData.get(key)
   return typeof v === "string" && v.length > 0 ? v : undefined
 }
-
-const submitReportSchema = z.object({
-  listingId: z.string().uuid().optional(),
-  sellerId: z.string().uuid().optional(),
-  reason: z.enum(REPORT_REASONS),
-  note: z
-    .string()
-    .max(REPORT_NOTE_MAX, `Keep the note under ${REPORT_NOTE_MAX} characters`)
-    .optional(),
-}).refine(
-  (data) => {
-    const hasListing = data.listingId !== undefined && data.listingId !== null
-    const hasSeller = data.sellerId !== undefined && data.sellerId !== null
-    return hasListing || hasSeller
-  },
-  { message: "A report must target a listing or a seller" }
-)
 
 export type SubmitReportState = {
   errors?: Record<string, string[] | undefined>

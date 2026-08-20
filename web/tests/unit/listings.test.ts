@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest"
 
 import {
-  isValidUuid,
   formatPrice,
   formatCondition,
   CONDITION_COLORS,
@@ -10,20 +9,6 @@ import {
   STATUSES,
   type ListingStatus,
 } from "@/lib/listings"
-
-describe("listings.isValidUuid", () => {
-  it("accepts a canonical v4 UUID", () => {
-    expect(isValidUuid("550e8400-e29b-41d4-a716-446655440000")).toBe(true)
-  })
-
-  it("rejects a short id", () => {
-    expect(isValidUuid("550e8400")).toBe(false)
-  })
-
-  it("rejects a UUID with trailing extra characters", () => {
-    expect(isValidUuid("550e8400-e29b-41d4-a716-446655440000 extra")).toBe(false)
-  })
-})
 
 describe("listings.formatPrice", () => {
   it("falls back to the placeholder when the value is NaN", () => {

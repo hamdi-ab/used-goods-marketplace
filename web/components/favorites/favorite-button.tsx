@@ -24,13 +24,19 @@ function heartClasses(active: boolean): string {
 export function FavoriteButton({
   listingId,
   initial,
+  isOwner,
 }: {
   listingId: string
   /** Server truth: true = favorited, false = not, null = signed out. */
   initial: boolean | null
+  /** The listing's owner shouldn't favorite their own listing. */
+  isOwner?: boolean
 }) {
   const [favorite, setFavorite] = useOptimistic(initial === true)
   const pathname = usePathname()
+
+  // T15: a seller never favorites their own listing.
+  if (isOwner) return null
 
   // Signed-out visitors get a heart that routes through login (with a ?next=
   // back to this listing) instead of a form that would just redirect.

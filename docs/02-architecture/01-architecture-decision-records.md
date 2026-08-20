@@ -545,6 +545,41 @@ Assumptions: 1 photo ≈ 0.3k–1.6k input tokens (post-resize), prompt + schema
 
 **Cons:** Free-tier rate limits cap concurrent listing generation; auto-tiling is provider-controlled, so actual token counts vary slightly and must be checked with `countTokens` at T14
 
+# ADR-020
+## Admin Role: Moderation-Only, Not a Trader
+
+### Status
+
+Accepted
+
+### Dependencies
+
+- ADR-006 (Row Level Security)
+- ADR-014 (No Payments in MVP)
+
+### Why this ADR exists
+
+Admin is a moderation role, not a trading role. A signed-in admin must not be able to sell, offer, favorite, review, or file community reports — those are consumer activities. Admins may inspect (read) anything and may write only moderation actions (resolve reports, suspend users, remove listings). This follows separation of duties and least privilege: the moderator who decides whether a listing stays must never be the seller who benefits.
+
+### Decision
+
+1. **Read-only inspection:** admins may browse the marketplace and open any listing or profile (the console links out to public pages for this).
+2. **Moderation writes only:** admins may `resolveReport`, `suspendUserRow`, `removeListingRow`. No other writes.
+3. **Blocked writes:** admins are blocked from creating/editing/deleting listings (`requireSeller` no longer admits admin), from `toggleFavorite`, from all offer actions, from `submitReview`, from `createReport`, and from `recordContactAttempt`.
+4. **Role-aware shell:** admin routes (`/admin/**`) render inside a dedicated dashboard shell — a fixed sidebar (brand, View Site, Dashboard, Users, Listings, Reports, Statistics, user card + sign out) with the public site header/footer excluded via a `(site)` route group. Admins browsing public pages get the normal storefront header with no primary nav (their user menu carries the "Admin console" door).
+5. **Role-aware login landing:** an admin logs in to `/admin`. A `?next` target is honored only if it is a read-safe page; trader destinations (`/sell`, `/offers`, `/favorites`, listing edit) fall back to `/admin`.
+6. **`/dashboard` untouched:** it stays buyer/seller territory; the admin's account menu "Dashboard" item becomes "Admin console" → `/admin`. Visiting `/dashboard` directly as admin renders harmlessly.
+
+### Rationale
+
+Separation of duties (the judge must not be the complainant or the beneficiary) and least privilege (grant only what the job needs). The Admin persona's "monitor marketplace activity" is served inside the console — the listings and users pages expose every record with read-only links — so admins do not need a trading shell to do their job.
+
+### Trade-offs
+
+**Pros:** clean governance story, no admin conflict-of-interest vector, demo admin is purely a moderator
+
+**Cons:** admins who also want to trade need a separate consumer account; slightly more server-action guards to maintain
+
 # ADR Summary
 
 | ADR | Decision |
@@ -568,6 +603,7 @@ Assumptions: 1 photo ≈ 0.3k–1.6k input tokens (post-resize), prompt + schema
 | ADR-017 | Vercel Deployment |
 | ADR-018 | RESTful API Design |
 | ADR-019 | Gemini Vision: Image Input Budget & Cost |
+| ADR-020 | Admin Role: Moderation-Only, Not a Trader |
 
 # Conclusion
 

@@ -2,7 +2,7 @@ import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
 import type { Supabase } from "@/lib/supabase/types"
-import { isValidUuid } from "@/lib/listings/constants"
+import { isValidUuid } from "@/lib/uuid"
 import type { BrowseListing } from "@/lib/listings/constants"
 import { mapNestedBrowseListing } from "@/lib/listings/browse-mapper"
 import type { NestedBrowseRow } from "@/lib/listings/browse-mapper"

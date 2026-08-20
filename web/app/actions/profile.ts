@@ -149,3 +149,10 @@ export async function uploadAvatar(
   revalidatePath(`/users/${user.id}`)
   return { url: result.publicUrls[0], error: null }
 }
+
+// T21/FS-014: one-click buyer→seller promotion (fix #71). Stub no-ops so the
+// dashboard compiles; wire to the idempotent role-flip RPC once the
+// verification / trust-score gate is implemented.
+export async function promoteToSeller(_formData: FormData): Promise<void> {
+  return
+}

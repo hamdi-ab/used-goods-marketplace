@@ -6,15 +6,20 @@ vi.mock("@/lib/ai/listings", () => ({
 vi.mock("@/lib/ai/telemetry", () => ({
   recordAiUsage: vi.fn(),
 }))
+vi.mock("@/lib/auth", () => ({
+  requireSeller: vi.fn(),
+}))
 
 import { generateListingSuggestions } from "@/lib/ai/listings"
 import { recordAiUsage } from "@/lib/ai/telemetry"
+import { requireSeller } from "@/lib/auth"
 import { generateListingSuggestionsAction } from "@/app/actions/ai"
 import type { AIListingResult } from "@/lib/ai/constants"
 import type { Category } from "@/lib/listings/constants"
 
 const mockedGenerate = vi.mocked(generateListingSuggestions)
 const mockedRecord = vi.mocked(recordAiUsage)
+const mockedRequireSeller = vi.mocked(requireSeller)
 
 const CATEGORIES: Category[] = [
   { id: "c-electronics", name: "Electronics", slug: "electronics", parent_id: null },
@@ -47,9 +52,26 @@ const okResult: AIListingResult = {
 beforeEach(() => {
   mockedGenerate.mockReset()
   mockedRecord.mockReset()
+  mockedRequireSeller.mockReset()
+  mockedRequireSeller.mockResolvedValue({
+    id: "seller-1",
+    role: "seller",
+    email: "amira@vintch.local",
+    fullName: "Amira",
+    profileCompleted: true,
+  })
 })
 
 describe("generateListingSuggestionsAction (T14, integration with the AI seam)", () => {
+  it("requires seller auth before parsing any form data (#69)", async () => {
+    mockedRequireSeller.mockRejectedValue(new Error("redirect"))
+    await expect(
+      generateListingSuggestionsAction({}, new FormData())
+    ).rejects.toThrow("redirect")
+    expect(mockedGenerate).not.toHaveBeenCalled()
+    expect(mockedRecord).not.toHaveBeenCalled()
+  })
+
   it("returns a manual-first error without photos and never calls the seam", async () => {
     const res = await generateListingSuggestionsAction({}, new FormData())
     expect(res.ok).toBe(false)

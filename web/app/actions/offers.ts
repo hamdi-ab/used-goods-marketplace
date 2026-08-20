@@ -3,7 +3,7 @@
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
 
-import { requireUser } from "@/lib/auth"
+import { requireTrader } from "@/lib/auth"
 import {
   acceptOfferRow,
   counterOfferRow,
@@ -12,6 +12,7 @@ import {
   OFFER_AMOUNT_MAX,
   OFFER_MESSAGE_MAX,
 } from "@/lib/offers"
+import { uuidSchema } from "@/lib/uuid"
 
 function formValue(formData: FormData, key: string): string | undefined {
   const v = formData.get(key)
@@ -26,7 +27,7 @@ const amountSchema = z.coerce
   .max(OFFER_AMOUNT_MAX, "Amount is too large")
 
 const submitOfferSchema = z.object({
-  listingId: z.string().uuid(),
+  listingId: uuidSchema,
   amount: amountSchema,
   message: z.string().max(OFFER_MESSAGE_MAX, "Keep the message under 500 characters").optional(),
 })
@@ -51,7 +52,7 @@ export async function submitOffer(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  await requireUser()
+  await requireTrader()
   const result = await submitOfferRow({
     listingId: parsed.data.listingId,
     amount: parsed.data.amount,
@@ -71,8 +72,8 @@ export async function submitOffer(
 
 const offerActionSchema = z.object({
   action: z.enum(["accept", "decline", "counter"]),
-  offerId: z.string().uuid(),
-  listingId: z.string().uuid(),
+  offerId: uuidSchema,
+  listingId: uuidSchema,
   amount: amountSchema.optional(),
 })
 
@@ -104,9 +105,9 @@ export async function offerAction(
     return { message: "Enter a counter amount" }
   }
 
-  // Gate on a signed-in session before reaching the RPC; the RPC itself
+  // Gate on a signed-in trader session before reaching the RPC; the RPC itself
   // re-checks that the caller owns the offer's listing.
-  await requireUser()
+  await requireTrader()
 
   const result =
     parsed.data.action === "accept"

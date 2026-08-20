@@ -1,10 +1,9 @@
 import { randomUUID } from "node:crypto"
 
 import {
-  ALLOWED_IMAGE_MIME,
-  detectImageMime,
   EXT_BY_MIME,
-  MAX_IMAGE_BYTES,
+  detectImageMime,
+  validateImageFile,
 } from "./primitives"
 import type { Supabase, UploadAdapter } from "@/lib/media"
 
@@ -20,16 +19,7 @@ export function listingImageAdapter(ctx: {
   return {
     bucket: "listing-images",
     upsert: false,
-    validate: async (file) => {
-      const detected = await detectImageMime(file)
-      if (!detected || !ALLOWED_IMAGE_MIME.includes(detected)) {
-        return `${file.name || "Photo"} is not a valid JPG, PNG or WebP image`
-      }
-      if (file.size > MAX_IMAGE_BYTES) {
-        return "Each photo must be 5 MB or smaller"
-      }
-      return null
-    },
+    validate: (file) => validateImageFile(file),
     path: async (file, i) => {
       const ext = EXT_BY_MIME[(await detectImageMime(file)) ?? ""] ?? "jpg"
       return `${ctx.listingId}/${randomUUID()}-${i}.${ext}`

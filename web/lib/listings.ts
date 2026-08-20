@@ -196,12 +196,12 @@ export async function fetchListings(
   let query = supabase
     .from("listings")
     .select(
-      `id, title, price, condition, city, published_at,
-       seller:profiles!listings_seller_id_fkey(id, full_name, avatar_url, role, trust_score, phone_verified, fayda_verified),
-       images:listing_images(id, image_url, display_order)`,
+      `id, title, price, condition, city, status, published_at,
+        seller:profiles!listings_seller_id_fkey(id, full_name, avatar_url, role, trust_score, phone_verified, fayda_verified),
+        images:listing_images(id, image_url, display_order)`,
       { count: "exact" }
     )
-    .eq("status", "published")
+    .in("status", ["published", "sold"])
   if (categoryId) query = query.eq("category_id", categoryId)
 
   const { data, error, count } = await query
@@ -231,6 +231,7 @@ export interface SearchOptions {
   maxPrice?: number
   condition?: Condition
   city?: string
+  sellerVerified?: boolean
   sort?: SearchSort
   offset?: number
 }
@@ -266,12 +267,13 @@ export async function searchListings(
       p_category_slug: opts.categorySlug || null,
       p_min_price: opts.minPrice ?? null,
       p_max_price: opts.maxPrice ?? null,
-      p_condition: opts.condition ?? null,
-      p_city: opts.city || null,
-      p_sort: opts.sort ?? "newest",
-      p_limit: PAGE_SIZE,
-      p_offset: offset,
-    }
+       p_condition: opts.condition ?? null,
+       p_city: opts.city || null,
+       p_verified_seller: opts.sellerVerified ?? null,
+       p_sort: opts.sort ?? "newest",
+       p_limit: PAGE_SIZE,
+       p_offset: offset,
+     }
   )
 
   if (error) {
@@ -290,6 +292,51 @@ export async function searchListings(
       offset + listings.length < count && offset + listings.length < BROWSE_LIMIT_MAX,
     error: null,
   }
+}
+
+// ---- Similar listings (#78, P1.10) ----
+//
+// `listings_similar` returns published listings in the same category as the
+// source, within +/-50% price band (PRD US-010 AC: same category + similar
+// price range), newest first. Reuses the flat browse shape + mapper so the
+// seller/image contract stays single-sourced, and the same SECURITY DEFINER
+// posture as search_listings.
+
+export interface SimilarResult {
+  listings: BrowseListing[]
+  count: number
+  error: string | null
+}
+
+const SIMILAR_LIMIT_DEFAULT = 6
+const SIMILAR_LIMIT_MAX = 12
+
+export async function fetchSimilarListings(
+  listingId: string,
+  limit: number = SIMILAR_LIMIT_DEFAULT,
+  client?: Supabase
+): Promise<SimilarResult> {
+  const supabase = client ?? (await createClient())
+  const safeLimit = Math.min(Math.max(limit, 1), SIMILAR_LIMIT_MAX)
+
+  const { data, error } = await callRpc<FlatSearchRow & { total_count: number }[]>(
+    supabase,
+    "listings_similar",
+    {
+      p_listing_id: listingId,
+      p_limit: safeLimit,
+      p_offset: 0,
+    }
+  )
+
+  if (error) {
+    console.error("fetchSimilarListings:", error)
+    return { listings: [], count: 0, error }
+  }
+
+  const rows = (data ?? []) as (FlatSearchRow & { total_count: number })[]
+  const listings = rows.map(mapFlatSearchListing)
+  return { listings, count: rows.length, error: null }
 }
 
 // ---- Writes (called by server actions; DB access centralized here, §17) ----

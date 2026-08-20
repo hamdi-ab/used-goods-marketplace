@@ -497,10 +497,12 @@ Recent Activity
 | Search | ✅ | ✅ | ✅ | ✅ |
 | Product Page | ✅ | ✅ | ✅ | ✅ |
 | Seller Profile | ✅ | ✅ | ✅ | ✅ |
-| Favorites | ❌ | ✅ | ✅ | ✅ |
-| Dashboard | ❌ | ✅ | ✅ | ✅ |
-| Create Listing | ❌ | ❌ | ✅ | ✅ |
+| Favorites | ❌ | ✅ | ✅ | ❌ |
+| Dashboard | ❌ | ✅ | ✅ | ❌ |
+| Create Listing | ❌ | ❌ | ✅ | ❌ |
 | Admin | ❌ | ❌ | ❌ | ✅ |
+
+*Admin is moderation-only (ADR-020). Reads: admins can inspect any marketplace page (listing, profile, search) and the console pages render harmlessly. Writes: all trading writes are blocked (no selling, offering, favoriting, reviewing, contacting, reporting), and `/admin` is the admin's home — reached from the account menu and post-login landing. Favorites/Dashboard/Create Listing are not part of the admin's navigation or landing.*
 
 # 15. URL Design Guidelines
 

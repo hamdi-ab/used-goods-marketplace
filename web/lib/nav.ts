@@ -1,9 +1,16 @@
 import {
-  HomeIcon,
-  SearchIcon,
-  PlusIcon,
-  HeartIcon,
+  BarChart3Icon,
+  BadgeCheckIcon,
+  FlagIcon,
   HandshakeIcon,
+  HeartIcon,
+  HomeIcon,
+  LayoutDashboardIcon,
+  ListIcon,
+  PlusIcon,
+  SearchIcon,
+  SettingsIcon,
+  UsersIcon,
   type LucideIcon,
 } from "lucide-react"
 
@@ -40,6 +47,25 @@ export const mobileNav: NavItem[] = [
   { title: "Sell", href: "/sell", icon: PlusIcon },
   { title: "Offers", href: "/offers", icon: HandshakeIcon },
   { title: "Favorites", href: "/favorites", icon: HeartIcon },
+]
+
+// Admins are moderation-only (ADR-020): the top header shows no nav (it would
+// be a lone Home link), so Home leads the console nav itself — a view-site
+// door on top of the /admin sidebar sections.
+export const adminNav: NavItem[] = [
+  { title: "Home", href: "/", icon: HomeIcon },
+  { title: "Dashboard", href: "/admin", icon: LayoutDashboardIcon },
+  { title: "Users", href: "/admin/users", icon: UsersIcon },
+  { title: "Listings", href: "/admin/listings", icon: ListIcon },
+  { title: "Reports", href: "/admin/reports", icon: FlagIcon },
+  { title: "Verifications", href: "/admin/verifications", icon: BadgeCheckIcon },
+  { title: "Statistics", href: "/admin/statistics", icon: BarChart3Icon },
+]
+
+// Utility section pinned below the primary nav (component standards: settings
+// and account live at the sidebar bottom, styled quietly and set apart).
+export const adminAccountNav: NavItem[] = [
+  { title: "Account", href: "/admin/account", icon: SettingsIcon },
 ]
 
 export const footerNav: NavItem[] = [

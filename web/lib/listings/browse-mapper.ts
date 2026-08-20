@@ -3,6 +3,7 @@ import type {
   BrowseSeller,
   Condition,
   ListingImage,
+  ListingStatus,
 } from "./constants"
 
 // ---- The two shapes the browse feed can arrive in ----
@@ -20,6 +21,7 @@ export interface NestedBrowseRow {
   price: number
   condition: Condition
   city: string | null
+  status: ListingStatus
   published_at: string
   seller: BrowseSeller[] | null
   images: ListingImage[] | null
@@ -89,9 +91,10 @@ export function mapNestedBrowseListing(row: NestedBrowseRow): BrowseListing {
     title: row.title,
     price: row.price,
     condition: row.condition,
-    city: row.city,
-    published_at: row.published_at,
-    image_url: pickCoverImage(row.images),
+     city: row.city,
+     status: row.status,
+     published_at: row.published_at,
+     image_url: pickCoverImage(row.images),
     image_count: (row.images ?? []).length,
     seller: seller
       ? buildSeller({
@@ -115,6 +118,7 @@ export function mapFlatSearchListing(row: FlatSearchRow): BrowseListing {
     price: row.price,
     condition: row.condition,
     city: row.city,
+    status: "published",
     published_at: row.published_at,
     image_url: row.image_url,
     image_count: row.image_count,

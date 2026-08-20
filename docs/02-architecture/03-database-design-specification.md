@@ -350,7 +350,7 @@ GIN index for PostgreSQL full-text search on listing title and description.
 
 ## Listings
 
-- Public can read published listings.
+- Public can read published listings, plus sold listings (kept readable so they stay browsable with a Sold ribbon; offers are still write-gated to `published` only).
 - Sellers can create listings.
 - Sellers can update/delete only their own listings.
 

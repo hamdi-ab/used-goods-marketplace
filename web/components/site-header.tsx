@@ -2,10 +2,12 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { MenuIcon } from "lucide-react"
+import { MenuIcon, PlusIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { primaryNav, siteName } from "@/lib/nav"
+import { useAuth } from "@/components/auth/auth-provider"
+import { NotificationBell } from "@/components/notifications/notification-bell"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { MobileNav } from "@/components/mobile-nav"
@@ -13,6 +15,9 @@ import { UserMenu } from "@/components/auth/user-menu"
 
 export function SiteHeader() {
   const pathname = usePathname()
+  const { role } = useAuth()
+
+  const isAdmin = role === "admin"
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:backdrop-blur">
@@ -27,31 +32,42 @@ export function SiteHeader() {
           <span className="hidden sm:inline">{siteName}</span>
         </Link>
 
-        <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
-          {primaryNav.map((item) => {
-            const active = pathname === item.href
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
-                  active
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-              >
-                {item.title}
-              </Link>
-            )
-          })}
-        </nav>
+        {/* Admins (ADR-020) navigate from the console sidebar; the header
+            stays clean instead of showing a lone Home link. */}
+        {!isAdmin ? (
+          <nav className="hidden items-center gap-1 lg:flex" aria-label="Primary">
+            {primaryNav.map((item) => {
+              const active = pathname === item.href
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                    active
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  {item.title}
+                </Link>
+              )
+            })}
+          </nav>
+        ) : null}
 
-        <div className="flex items-center gap-2">
-          <Button asChild variant="default" size="sm" className="hidden sm:inline-flex">
-            <Link href="/sell">Sell</Link>
-          </Button>
+        <div className="flex items-center gap-2 sm:gap-3">
+          {!isAdmin ? (
+            <Button asChild variant="outline" size="sm" className="hidden gap-1.5 shadow-xs sm:inline-flex">
+              <Link href="/sell">
+                <PlusIcon className="size-4" />
+                <span>Sell</span>
+              </Link>
+            </Button>
+          ) : null}
+          <div className="hidden h-5 w-px bg-border sm:block" aria-hidden="true" />
+          <NotificationBell />
           <UserMenu />
           <Sheet>
             <SheetTrigger asChild>

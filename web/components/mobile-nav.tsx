@@ -4,14 +4,20 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { cn } from "@/lib/utils"
-import { mobileNav } from "@/lib/nav"
+import { adminNav, mobileNav } from "@/lib/nav"
+import { useAuth } from "@/components/auth/auth-provider"
 
 export function MobileNav() {
   const pathname = usePathname()
+  const { role } = useAuth()
+
+  // Admins are moderation-only (ADR-020): the sidebar is hidden on mobile, so
+  // the sheet surfaces the full console nav (View Site + sections) instead.
+  const nav = role === "admin" ? adminNav : mobileNav
 
   return (
     <nav className="flex flex-col gap-1 p-4" aria-label="Mobile">
-      {mobileNav.map((item) => {
+      {nav.map((item) => {
         const active = pathname === item.href
         const Icon = item.icon
         return (

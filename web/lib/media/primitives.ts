@@ -35,3 +35,18 @@ export async function detectImageMime(file: File): Promise<string | null> {
   }
   return null
 }
+
+/** Shared upload rule: returns an end-user error message when the file is not
+ * an acceptable image (magic bytes + allowed mime + size), else null. Used by
+ * the listing upload adapter and the AI assist seam so image rules live in one
+ * place. */
+export async function validateImageFile(file: File): Promise<string | null> {
+  const detected = await detectImageMime(file)
+  if (!detected || !ALLOWED_IMAGE_MIME.includes(detected)) {
+    return `${file.name || "Photo"} is not a valid JPG, PNG or WebP image`
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    return "Each photo must be 5 MB or smaller"
+  }
+  return null
+}

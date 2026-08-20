@@ -2,7 +2,7 @@
 
 import { z } from "zod"
 
-import { requireUser } from "@/lib/auth"
+import { requireTrader } from "@/lib/auth"
 import {
   recordContactAttempt,
   fetchSellerContactInfo,
@@ -10,6 +10,7 @@ import {
   buildContactUrl,
 } from "@/lib/contact"
 import { CONTACT_METHODS } from "@/lib/contact/constants"
+import { uuidSchema } from "@/lib/uuid"
 import type { ContactMethod } from "@/lib/contact/constants"
 
 function formValue(formData: FormData, key: string): string | undefined {
@@ -18,8 +19,8 @@ function formValue(formData: FormData, key: string): string | undefined {
 }
 
 const recordContactSchema = z.object({
-  listingId: z.string().uuid().optional(),
-  sellerId: z.string().uuid(),
+  listingId: uuidSchema.optional(),
+  sellerId: uuidSchema,
   contactMethod: z.enum(CONTACT_METHODS),
 })
 
@@ -44,9 +45,11 @@ export async function recordContact(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  // Require a signed-in session before recording (Privacy, AC4). The RPC
-  // itself resolves the reporter from auth.uid().
-  await requireUser()
+  // Require a signed-in trader session before recording (Privacy, AC4). The RPC
+  // itself resolves the reporter from auth.uid(). The contact *read* is served
+  // to admins server-side on the listing/user pages (ADR-020 §1); only this
+  // write is trader-gated.
+  await requireTrader()
 
   // Fetch the contact info so we can build the right URL and enforce the
   // phone opt-in guard server-side (Privacy, AC4).

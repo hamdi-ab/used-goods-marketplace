@@ -20,6 +20,7 @@ interface ContactButtonProps {
   sellerId: string
   signedIn: boolean
   contactInfo: SellerContactInfo | null
+  isOwner?: boolean
 }
 
 export function ContactButton({
@@ -27,11 +28,9 @@ export function ContactButton({
   sellerId,
   signedIn,
   contactInfo,
+  isOwner = false,
 }: ContactButtonProps) {
   const [open, setOpen] = useState(false)
-  // Incrementing the key on each open forces ContactDialog to remount,
-  // resetting its useActionState. Without this, a previously-opened contact
-  // method's URL would fire again on reopen via the useEffect.
   const [openKey, setOpenKey] = useState(0)
 
   const handleOpenChange = (nextOpen: boolean) => {
@@ -40,6 +39,9 @@ export function ContactButton({
   }
 
   const href = listingId ? `/listings/${listingId}` : `/users/${sellerId}`
+
+  // T15: don't surface "Contact seller" to the seller themselves.
+  if (isOwner) return null
 
   // Signed-out visitors route through login (with a ?next= back to the page).
   if (!signedIn) {

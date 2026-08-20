@@ -3,13 +3,15 @@
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
 
-import { requireUser } from "@/lib/auth"
+import { requireTrader } from "@/lib/auth"
+import { consumeRateBudget } from "@/lib/rate-limit"
 import { submitReviewRow } from "@/lib/reviews"
 import {
   RATING_MAX,
   RATING_MIN,
   REVIEW_COMMENT_MAX,
 } from "@/lib/reviews/constants"
+import { uuidSchema } from "@/lib/uuid"
 
 function formValue(formData: FormData, key: string): string | undefined {
   const v = formData.get(key)
@@ -17,7 +19,7 @@ function formValue(formData: FormData, key: string): string | undefined {
 }
 
 const reviewSchema = z.object({
-  offerId: z.string().uuid(),
+  offerId: uuidSchema,
   rating: z.coerce
     .number({ message: "Pick a rating" })
     .int()
@@ -52,9 +54,14 @@ export async function submitReview(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  // Require a session so the RPC's auth.uid() resolves; the RPC itself re-checks
-  // that the caller is the accepted-offer buyer. (Mirrors offers/offerAction.)
-  await requireUser()
+  // Require a trader session so the RPC's auth.uid() resolves; the RPC itself
+  // re-checks that the caller is the accepted-offer buyer. (Mirrors offers/offerAction.)
+  await requireTrader()
+
+  const budget = await consumeRateBudget()
+  if (!budget.ok) {
+    return { message: budget.message }
+  }
 
   const result = await submitReviewRow({
     offerId: parsed.data.offerId,

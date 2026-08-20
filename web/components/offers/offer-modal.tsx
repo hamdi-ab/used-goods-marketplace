@@ -50,6 +50,7 @@ export function OfferModal({
 
       <form action={formAction} className="flex flex-col gap-4 px-4">
         <input type="hidden" name="listingId" value={listingId} />
+        <FieldError message={state.errors?.listingId?.[0]} />
 
         <div className="grid gap-2">
           <Label htmlFor="offer-amount">

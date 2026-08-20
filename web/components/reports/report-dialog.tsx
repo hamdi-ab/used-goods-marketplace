@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import { useActionState } from "react"
 import { CheckCircleIcon } from "lucide-react"
 
@@ -38,7 +39,8 @@ export function ReportDialog({
   >(submitReport, {})
 
   // T11 AC4: show a "report received" acknowledgement instead of silently
-  // closing — the reporter must see that their report was accepted.
+  // closing — the reporter must see that their report was accepted, and can
+  // follow through to /reports to track its status (#80).
   if (state.ok) {
     return (
       <>
@@ -55,7 +57,10 @@ export function ReportDialog({
           </p>
         </div>
         <DialogFooter>
-          <Button type="button" size="sm" onClick={onClose}>
+          <Button type="button" size="sm" asChild>
+            <Link href="/reports">View your reports</Link>
+          </Button>
+          <Button type="button" size="sm" variant="ghost" onClick={onClose}>
             Close
           </Button>
         </DialogFooter>
@@ -63,12 +68,18 @@ export function ReportDialog({
     )
   }
 
+  // #84 enforces XOR(target): a report targets exactly one of listing or
+  // seller. The reason vocabulary is shared (listing/seller both reuse the
+  // same REPORT_REASONS set post-schema), with the label scoped per target.
+  const reasons = REPORT_REASONS
+  const targetLabel = sellerId ? "seller" : "item"
+
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Report item</DialogTitle>
+        <DialogTitle>Report {targetLabel}</DialogTitle>
         <DialogDescription>
-          Let us know why this item or seller should be reviewed. A moderator
+          Let us know why this {targetLabel} should be reviewed. A moderator
           will look at your report shortly.
         </DialogDescription>
       </DialogHeader>
@@ -80,7 +91,7 @@ export function ReportDialog({
         <div className="mt-4 flex flex-col gap-3">
           <fieldset className="flex flex-col gap-2">
             <legend className="text-sm font-medium">Reason</legend>
-            {REPORT_REASONS.map((r) => (
+            {reasons.map((r) => (
               <label
                 key={r}
                 className="flex items-center gap-2 text-sm"

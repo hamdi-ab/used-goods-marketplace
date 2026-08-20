@@ -11,8 +11,10 @@ import { UploadIcon } from "lucide-react"
 import Link from "next/link"
 
 import { ROLE_LABELS, type SessionUser } from "@/lib/auth/types"
+import type { MyVerificationRow } from "@/lib/verifications"
 import { initials } from "@/lib/utils"
 import { updateProfile, uploadAvatar } from "@/app/actions/profile"
+import { VerificationCard } from "./verification-card"
 
 type ProfileRow = {
   avatar_url: string | null
@@ -35,9 +37,11 @@ function FieldError({ message }: { message: string | undefined }) {
 export function ProfileForm({
   user,
   profile,
+  verifications,
 }: {
   user: SessionUser
   profile: ProfileRow
+  verifications: MyVerificationRow[]
 }) {
   const [state, formAction, pending] = useActionState(updateProfile, {})
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? null)
@@ -107,12 +111,14 @@ export function ProfileForm({
           <p className="text-xs text-muted-foreground">
             JPG, PNG or WebP. Max 5 MB.
           </p>
-        </CardContent>
-      </Card>
+      </CardContent>
+    </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>About you</CardTitle>
+    <VerificationCard verifications={verifications} />
+
+    <Card>
+      <CardHeader>
+        <CardTitle>About you</CardTitle>
         </CardHeader>
         <CardContent>
           <form action={formAction} className="flex flex-col gap-4">

@@ -9,6 +9,7 @@ import { submitOfferRow } from "@/lib/offers"
 import {
   buildLoginUrl,
   OFFER_AMOUNT_MAX,
+  OFFER_EXPIRY_MS,
   OFFER_MESSAGE_MAX,
   OFFER_STATUS_COLORS,
   OFFER_STATUSES,
@@ -20,8 +21,14 @@ import {
 const mockCreateClient = vi.mocked(createClient)
 
 describe("offers status machine", () => {
-  it("declares the four AC statuses", () => {
-    expect(OFFER_STATUSES).toEqual(["pending", "countered", "accepted", "declined"])
+  it("declares the AC statuses incl. expired (#75)", () => {
+    expect(OFFER_STATUSES).toEqual([
+      "pending",
+      "countered",
+      "accepted",
+      "declined",
+      "expired",
+    ])
   })
 
   it("labels and colors cover every declared status", () => {
@@ -53,6 +60,12 @@ describe("offers.open statuses", () => {
   it("every open status is a declared status", () => {
     const declared = new Set<string>(OFFER_STATUSES)
     expect(OPEN_OFFER_STATUSES.every((s) => declared.has(s))).toBe(true)
+  })
+})
+
+describe("offers expiry policy", () => {
+  it("exposes a 7-day expiry window in ms (#75)", () => {
+    expect(OFFER_EXPIRY_MS).toBe(7 * 24 * 3600 * 1000)
   })
 })
 

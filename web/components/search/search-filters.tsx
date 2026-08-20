@@ -1,15 +1,31 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import {
+  useState,
+  useTransition,
+  useEffect,
+  useMemo,
+  type FormEvent,
+} from "react"
 import { useRouter } from "next/navigation"
-import { SearchIcon } from "lucide-react"
+import { SearchIcon, Loader2Icon } from "lucide-react"
 
+import { useDebounce } from "@/hooks/use-debounce"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { FIELD_CLASS } from "@/lib/form-fields"
-import { CONDITIONS, type Category, type Condition } from "@/lib/listings/constants"
-import { buildSearchUrl, SEARCH_SORTS, type SearchQuery } from "@/lib/search"
+import {
+  CONDITIONS,
+  KNOWN_CITY_LABELS,
+  type Category,
+  type Condition,
+} from "@/lib/listings/constants"
+import {
+  buildSearchUrl,
+  SEARCH_SORTS,
+  type SearchQuery,
+} from "@/lib/search"
 
 const SELECT_SORT_LABELS: Record<(typeof SEARCH_SORTS)[number], string> = {
   newest: "Newest first",
@@ -17,6 +33,8 @@ const SELECT_SORT_LABELS: Record<(typeof SEARCH_SORTS)[number], string> = {
   price_asc: "Price: low to high",
   price_desc: "Price: high to low",
 }
+
+const DEBOUNCE_MS = 300
 
 export function SearchFilters({
   categories,
@@ -28,35 +46,79 @@ export function SearchFilters({
   const router = useRouter()
   const [q, setQ] = useState(filters.q)
   const [categorySlug, setCategorySlug] = useState(filters.categorySlug ?? "")
-  const [condition, setCondition] = useState<Condition | "">(
-    filters.condition ?? ""
-  )
+  const [condition, setCondition] = useState<Condition | "">(filters.condition ?? "")
   const [minPrice, setMinPrice] = useState(filters.minPrice?.toString() ?? "")
   const [maxPrice, setMaxPrice] = useState(filters.maxPrice?.toString() ?? "")
   const [city, setCity] = useState(filters.city)
+  const [sellerVerified, setSellerVerified] = useState(filters.sellerVerified)
   const [sort, setSort] = useState(filters.sort)
+
+  // Build the next URL from the *live* form state, then debounce it so edits
+  // batch into a single push. (#79, industry-audit #12: debounce + known-city.)
+  const pendingQuery = buildSearchUrl({
+    ...filters,
+    q,
+    categorySlug: categorySlug || undefined,
+    minPrice: minPrice ? Number(minPrice) : undefined,
+    maxPrice: maxPrice ? Number(maxPrice) : undefined,
+    condition: condition || undefined,
+    city,
+    sellerVerified,
+    sort,
+    offset: 0,
+  })
+  const debouncedQuery = useDebounce(pendingQuery, DEBOUNCE_MS)
+  const [isNavigating, startTransition] = useTransition()
+
+  const activeQuery = useMemo(
+    () =>
+      buildSearchUrl({
+        q: filters.q,
+        categorySlug: filters.categorySlug,
+        minPrice: filters.minPrice,
+        maxPrice: filters.maxPrice,
+        condition: filters.condition,
+        city: filters.city,
+        sellerVerified: filters.sellerVerified,
+        sort: filters.sort,
+        offset: filters.offset,
+      }),
+    [filters]
+  )
+
+  // Fire when the debounced value has settled on something new.
+  useEffect(() => {
+    if (debouncedQuery === activeQuery) return
+    startTransition(() => {
+      router.push(debouncedQuery)
+    })
+  }, [debouncedQuery, activeQuery, router])
+
+  const isPending = isNavigating || debouncedQuery !== activeQuery
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    router.push(
-      buildSearchUrl({
-        q,
-        categorySlug: categorySlug || undefined,
-        minPrice: minPrice ? Number(minPrice) : undefined,
-        maxPrice: maxPrice ? Number(maxPrice) : undefined,
-        condition: condition || undefined,
-        city,
-        sort,
-        offset: 0,
-      })
-    )
+    startTransition(() => {
+      router.push(debouncedQuery)
+    })
   }
 
   return (
-    <form onSubmit={handleSubmit} aria-label="Search and filter listings">
+    <form
+      onSubmit={handleSubmit}
+      aria-label="Search and filter listings"
+      className="relative"
+    >
+      {isPending ? (
+        <div
+          aria-label="Updating results"
+          className="pointer-events-none absolute inset-0 -top-1 -z-10 bg-background/60"
+        />
+      ) : null}
+
       <div className="flex flex-col gap-4 rounded-lg border bg-card p-4">
         <div className="relative">
-          <SearchIcon className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <SearchIcon className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Label htmlFor="search-keyword" className="sr-only">
             Search by keyword
           </Label>
@@ -91,20 +153,18 @@ export function SearchFilters({
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="search-condition">Condition</Label>
-            <select
-              id="search-condition"
-              value={condition}
-              onChange={(e) =>
-                setCondition(e.target.value as Condition | "")
-              }
-              className={FIELD_CLASS}
-            >
-              <option value="">Any condition</option>
-              {CONDITIONS.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
+          <select
+            id="search-condition"
+            value={condition}
+            onChange={(e) => setCondition(e.target.value as Condition | "")}
+            className={FIELD_CLASS}
+          >
+            <option value="">Any condition</option>
+            {CONDITIONS.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
             </select>
           </div>
 
@@ -134,38 +194,76 @@ export function SearchFilters({
 
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="search-city">City</Label>
-            <Input
+            <select
               id="search-city"
-              type="text"
               value={city}
               onChange={(e) => setCity(e.target.value)}
-              placeholder="e.g. Addis Ababa"
-            />
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="search-sort">Sort by</Label>
-            <select
-              id="search-sort"
-              value={sort}
-              onChange={(e) => setSort(e.target.value as SearchQuery["sort"])}
               className={FIELD_CLASS}
             >
-              {SEARCH_SORTS.map((s) => (
-                <option key={s} value={s}>
-                  {SELECT_SORT_LABELS[s]}
+              <option value="">Any city</option>
+              {KNOWN_CITY_LABELS.map((c) => (
+                <option key={c} value={c}>
+                  {c}
                 </option>
               ))}
             </select>
           </div>
+        </div>
 
-          <div className="flex gap-2">
-            <Button type="button" variant="outline" onClick={() => router.push("/search")}>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-start gap-2">
+            <input
+              id="search-verified"
+              type="checkbox"
+              checked={sellerVerified}
+              onChange={(e) => setSellerVerified(e.target.checked)}
+              className="mt-0.5 size-4 cursor-pointer rounded border-input align-middle text-primary focus:ring-2 focus:ring-ring"
+            />
+            <Label htmlFor="search-verified" className="font-medium">
+              Verified seller only
+            </Label>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="search-sort">Sort by</Label>
+              <select
+                id="search-sort"
+                value={sort}
+                onChange={(e) => setSort(e.target.value as SearchQuery["sort"])}
+                className={FIELD_CLASS}
+              >
+                {SEARCH_SORTS.map((s) => (
+                  <option key={s} value={s}>
+                    {SELECT_SORT_LABELS[s]}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setQ("")
+                setCategorySlug("")
+                setCondition("")
+                setMinPrice("")
+                setMaxPrice("")
+                setCity("")
+                setSellerVerified(false)
+                setSort("newest")
+              }}
+            >
               Clear
             </Button>
-            <Button type="submit">Search</Button>
+            <Button type="submit" size="sm" disabled={isPending}>
+              Search
+            </Button>
+            {isPending ? (
+              <Loader2Icon className="size-4 animate-spin text-muted-foreground" />
+            ) : null}
           </div>
         </div>
       </div>

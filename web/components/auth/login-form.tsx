@@ -8,7 +8,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 
 import { createClient } from "@/lib/supabase/client"
-import { isInternalPath } from "@/lib/utils"
+import { resolveLoginDestination } from "@/lib/auth/landing"
+import { fetchClientRole } from "@/lib/auth/client-role"
 import { AuthCard } from "@/components/auth/auth-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -38,15 +39,25 @@ export function LoginForm({ next }: { next?: string }) {
   async function onSubmit(values: LoginValues) {
     setError(null)
     const supabase = createClient()
-    const { error } = await supabase.auth.signInWithPassword(values)
+    const { data, error } = await supabase.auth.signInWithPassword(values)
 
     if (error) {
       setError("Invalid email or password.")
       return
     }
 
+    const userId = data.user?.id
+    if (!userId) {
+      router.push("/")
+      return
+    }
+
+    // Admins are moderation-only (ADR-020): resolve the landing from the role,
+    // honoring a ?next target only when it is read-safe for an admin.
+    const role = await fetchClientRole(supabase, userId)
+
     router.refresh()
-    router.push(isInternalPath(next) ? next : "/")
+    router.push(resolveLoginDestination(role, next))
   }
 
   return (

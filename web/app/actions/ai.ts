@@ -2,6 +2,7 @@
 
 import { generateListingSuggestions } from "@/lib/ai/listings"
 import { recordAiUsage } from "@/lib/ai/telemetry"
+import { requireSeller } from "@/lib/auth"
 import type { AIListingResult, AIListingSuggestion } from "@/lib/ai/constants"
 import type { Category } from "@/lib/listings/constants"
 
@@ -22,11 +23,17 @@ export interface AiSuggestionsState {
  * FS-005 analytics: the seller's already-typed title/description (optional
  * inputs) are forwarded to the prompt, and the interaction is recorded as
  * ai_used (first assist) or ai_regenerated (Regenerate).
+ *
+ * Auth + uploads (fix #69): the action requires seller auth before parsing
+ * anything, so anonymous callers cannot consume Gemini quota; photo type /
+ * magic bytes / size are validated in the AI seam before forwarding.
  */
 export async function generateListingSuggestionsAction(
   _prevState: AiSuggestionsState,
   formData: FormData
 ): Promise<AiSuggestionsState> {
+  await requireSeller()
+
   const files = (formData.getAll("photos") as File[]).filter(
     (f): f is File => f instanceof File
   )
