@@ -1,25 +1,30 @@
 import Link from "next/link"
 import {
+  BellIcon,
+  EyeIcon,
   HandshakeIcon,
   HeartIcon,
   InboxIcon,
   LayoutGridIcon,
   PlusIcon,
-  ShieldIcon,
+  SearchIcon,
   ShieldCheckIcon,
+  ShieldIcon,
   UserRoundIcon,
 } from "lucide-react"
 
 import { ROLE_LABELS } from "@/lib/auth/types"
 import { getCurrentUser } from "@/lib/auth"
 import { fetchSellerListings } from "@/lib/listings"
-import { countIncomingOffers } from "@/lib/offers"
+import { countIncomingOffers, fetchBuyerOffers } from "@/lib/offers"
 import { fetchFavoriteIds } from "@/lib/favorites"
+import { fetchUnreadNotificationsCount } from "@/lib/notifications"
 import { fetchOwnProfile } from "@/lib/profiles"
 import { promoteToSeller } from "@/app/actions/profile"
 import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
 import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
 import type { VariantKey } from "@/components/search/prototype-utils"
+import { withVariant } from "@/components/search/prototype-utils"
 import { ListingManager } from "@/components/dashboard/listing-manager"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -54,73 +59,159 @@ export async function PrototypeDashboardPage({
   }
 
   const canSell = user.role === "seller" || user.role === "admin"
-  const [listings, openOffers, favorites, profile] = await Promise.all([
-    canSell ? fetchSellerListings(user.id) : Promise.resolve([]),
-    countIncomingOffers(user.id),
-    fetchFavoriteIds(user.id),
-    fetchOwnProfile(user.id),
-  ])
+  const [listings, openOffers, favorites, profile, buyerOffers, unread] =
+    await Promise.all([
+      canSell ? fetchSellerListings(user.id) : Promise.resolve([]),
+      countIncomingOffers(user.id),
+      fetchFavoriteIds(user.id),
+      fetchOwnProfile(user.id),
+      canSell ? Promise.resolve(null) : fetchBuyerOffers(user.id),
+      fetchUnreadNotificationsCount(user.id),
+    ])
 
   const firstName = user.fullName?.split(" ")[0] ?? "there"
   const liveListings = listings.filter((l) => l.status === "published").length
+  const totalViews = listings.reduce((sum, l) => sum + (l.view_count ?? 0), 0)
   const trustScore = profile?.trust_score ?? 50
+  const trustWord = trustScore >= 70 ? "High" : trustScore >= 40 ? "Fair" : "Low"
+  const myOffersCount = buyerOffers?.count ?? 0
 
-  const stats = [
-    {
-      label: "Live listings",
-      value: liveListings,
-      icon: LayoutGridIcon,
-      accent: "text-[#2563EB]",
-      sub: canSell ? "Published & live" : "Start selling to unlock",
-    },
-    {
-      label: "Open offers",
-      value: openOffers,
-      icon: InboxIcon,
-      accent: "text-[#2563EB]",
-      sub: "Awaiting your reply",
-    },
-    {
-      label: "Favorites",
-      value: favorites.length,
-      icon: HeartIcon,
-      accent: "text-rose-500",
-      sub: "Saved listings",
-    },
-    {
-      label: "Trust score",
-      value: trustScore,
-      icon: ShieldCheckIcon,
-      accent: trustScore >= 70 ? "text-emerald-600" : trustScore >= 40 ? "text-amber-600" : "text-slate-500",
-      sub: "Driven by verifications & reviews",
-    },
-  ]
+  const stats = canSell
+    ? [
+        {
+          label: "Live listings",
+          value: liveListings,
+          href: "/dashboard#listings",
+          icon: LayoutGridIcon,
+          accent: "text-[#2563EB]",
+          sub: "Published & live",
+        },
+        {
+          label: "Total views",
+          value: totalViews,
+          href: "/dashboard#listings",
+          icon: EyeIcon,
+          accent: "text-[#2563EB]",
+          sub: "Across your listings",
+        },
+        {
+          label: "Open offers",
+          value: openOffers,
+          href: "/offers/seller",
+          icon: InboxIcon,
+          accent: "text-[#2563EB]",
+          sub: "Awaiting your reply",
+        },
+        {
+          label: "Trust score",
+          value: `${trustScore} / 100`,
+          word: trustWord,
+          icon: ShieldCheckIcon,
+          accent:
+            trustScore >= 70
+              ? "text-emerald-600"
+              : trustScore >= 40
+                ? "text-amber-600"
+                : "text-slate-500",
+          sub: "Driven by verifications & reviews",
+        },
+      ]
+    : [
+        {
+          label: "Favorites",
+          value: favorites.length,
+          href: "/favorites",
+          icon: HeartIcon,
+          accent: "text-rose-500",
+          sub: "Saved listings",
+        },
+        {
+          label: "My offers",
+          value: myOffersCount,
+          href: "/offers",
+          icon: HandshakeIcon,
+          accent: "text-[#2563EB]",
+          sub: "Track the offers you've made",
+        },
+        {
+          label: "Trust score",
+          value: `${trustScore} / 100`,
+          word: trustWord,
+          icon: ShieldCheckIcon,
+          accent:
+            trustScore >= 70
+              ? "text-emerald-600"
+              : trustScore >= 40
+                ? "text-amber-600"
+                : "text-slate-500",
+          sub: "Driven by verifications & reviews",
+        },
+        {
+          label: "Notifications",
+          value: unread,
+          href: "/notifications",
+          icon: BellIcon,
+          accent: "text-[#2563EB]",
+          sub: unread === 0 ? "You're all caught up" : "New activity to review",
+        },
+      ]
 
-  const quickActions = [
-    {
-      title: "Incoming offers",
-      href: "/offers/seller",
-      icon: InboxIcon,
-      desc: "Accept, decline or counter offers",
-    },
-    {
-      title: "My offers",
-      href: "/offers",
-      icon: HandshakeIcon,
-      desc: "Track the offers you've made",
-    },
-    {
-      title: "Favorites",
-      href: "/favorites",
-      icon: HeartIcon,
-      desc: "Listings you saved for later",
-    },
-    {
-      title: "Your profile",
-      href: "/profile",
-      icon: UserRoundIcon,
-      desc: "Identity, trust and contact details",
-    },
+  const quickActions = canSell
+    ? [
+        {
+          title: "Incoming offers",
+          href: "/offers/seller",
+          icon: InboxIcon,
+          desc: "Accept, decline or counter offers",
+        },
+        {
+          title: "Create a listing",
+          href: "/sell",
+          icon: PlusIcon,
+          desc: "List an item with photos and a price",
+        },
+        {
+          title: "Your listings",
+          href: "/dashboard#listings",
+          icon: LayoutGridIcon,
+          desc: "Edit, archive, and track your listings",
+        },
+        {
+          title: "Your profile",
+          href: "/profile",
+          icon: UserRoundIcon,
+          desc: "Identity, trust and contact details",
+        },
+      ]
+    : [
+        {
+          title: "Browse listings",
+          href: "/search",
+          icon: SearchIcon,
+          desc: "Find your next purchase",
+        },
+        {
+          title: "My offers",
+          href: "/offers",
+          icon: HandshakeIcon,
+          desc: "Track the offers you've made",
+        },
+        {
+          title: "Favorites",
+          href: "/favorites",
+          icon: HeartIcon,
+          desc: "Listings you saved for later",
+        },
+        {
+          title: "Your profile",
+          href: "/profile",
+          icon: UserRoundIcon,
+          desc: "Identity, trust and contact details",
+        },
+      ]
+
+  const quickActionList = [
+    ...quickActions,
     ...(user.role === "admin"
       ? [
           {
@@ -151,7 +242,7 @@ export async function PrototypeDashboardPage({
           <h1 className="font-heading mt-3 text-3xl font-semibold tracking-tight text-foreground">
             Welcome back, {firstName}
           </h1>
-          <p className="mt-2 max-w-xl text-muted-foreground">
+          <p className="mt-2 max-w-xl text-foreground/70">
             Manage your marketplace activity from here — track offers and
             favorites, and keep on top of your listings.
           </p>
@@ -168,15 +259,43 @@ export async function PrototypeDashboardPage({
               )}
             >
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-muted-foreground">
+                <span className="text-sm font-medium text-foreground/70">
                   {s.label}
                 </span>
-                <s.icon className={cn("size-4.5", s.accent)} />
+                <s.icon className={cn("size-5", s.accent)} />
               </div>
-              <span className={cn("font-heading text-3xl font-extrabold", s.accent)}>
-                {s.value}
-              </span>
-              <span className="text-xs text-muted-foreground">{s.sub}</span>
+              <div className="flex items-baseline gap-2">
+                {s.href ? (
+                  <Link
+                    href={withVariant(s.href, variant)}
+                    className="transition-opacity hover:opacity-80"
+                  >
+                    <span
+                      className={cn(
+                        "font-heading text-3xl font-extrabold",
+                        s.accent
+                      )}
+                    >
+                      {s.value}
+                    </span>
+                  </Link>
+                ) : (
+                  <span
+                    className={cn(
+                      "font-heading text-3xl font-extrabold",
+                      s.accent
+                    )}
+                  >
+                    {s.value}
+                  </span>
+                )}
+                {s.word ? (
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-foreground">
+                    {s.word}
+                  </span>
+                ) : null}
+              </div>
+              <span className="text-xs text-foreground/70">{s.sub}</span>
             </div>
           ))}
         </div>
@@ -209,18 +328,18 @@ export async function PrototypeDashboardPage({
             Quick actions
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {quickActions.map((a) => (
+            {quickActionList.map((a) => (
               <Link
                 key={a.title}
-                href={a.href}
+                href={withVariant(a.href, variant)}
                 className={cn(
-                  "group flex flex-col gap-2 rounded-2xl p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md",
+                  "group flex flex-col gap-2 rounded-2xl p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
                   tileClass
                 )}
               >
                 <a.icon className="size-5 text-[#2563EB]" />
                 <span className="font-semibold text-foreground">{a.title}</span>
-                <span className="text-xs text-muted-foreground">{a.desc}</span>
+                <span className="text-xs text-foreground/70">{a.desc}</span>
               </Link>
             ))}
           </div>
@@ -228,18 +347,18 @@ export async function PrototypeDashboardPage({
 
         {/* Listings manager */}
         {canSell ? (
-          <section className="mt-10">
+          <section id="listings" className="mt-10">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="font-heading text-xl font-semibold">
                   Your listings
                 </h2>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-foreground/70">
                   Edit, archive, or track views and favorites on your listings.
                 </p>
               </div>
-              <Button asChild size="sm">
-                <Link href="/sell">
+              <Button asChild>
+                <Link href={withVariant("/sell", variant)}>
                   <PlusIcon className="mr-1.5 size-4" />
                   Create a listing
                 </Link>

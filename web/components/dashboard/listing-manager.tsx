@@ -7,14 +7,25 @@ import { EyeIcon, HeartIcon, PackageOpenIcon, PencilIcon, PlusIcon, XIcon } from
 
 import { deleteListing } from "@/app/actions/listings"
 import type { SellerListingRow } from "@/lib/listings"
-import { formatPrice } from "@/lib/listings/constants"
+import { formatPrice, LISTING_STATUS_LABELS } from "@/lib/listings/constants"
 import { ListingStatusBadge } from "@/components/dashboard/listing-status-badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { cn } from "@/lib/utils"
+
+const FILTERS = [
+  { key: "all", label: "All" },
+  { key: "published", label: LISTING_STATUS_LABELS.published },
+  { key: "draft", label: LISTING_STATUS_LABELS.draft },
+  { key: "sold", label: LISTING_STATUS_LABELS.sold },
+] as const
+
+type FilterKey = (typeof FILTERS)[number]["key"]
 
 function ListingRow({ listing }: { listing: SellerListingRow }) {
   const [state, action, pending] = useActionState(deleteListing, {})
   const [imgError, setImgError] = useState(false)
+  const [confirming, setConfirming] = useState(false)
 
   return (
     <li>
@@ -50,7 +61,7 @@ function ListingRow({ listing }: { listing: SellerListingRow }) {
                 {formatPrice(listing.price)}
               </span>
             </div>
-            <div className="mt-1 flex items-center gap-4 text-xs text-muted-foreground">
+            <div className="mt-1 flex items-center gap-4 text-xs text-foreground/70">
               <span className="inline-flex items-center gap-1">
                 <EyeIcon className="size-3.5" />
                 {listing.view_count} views
@@ -63,28 +74,55 @@ function ListingRow({ listing }: { listing: SellerListingRow }) {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button asChild variant="outline" size="sm">
+            <Button asChild variant="outline">
               <Link href={`/listings/${listing.id}/edit`}>
                 <PencilIcon className="mr-1.5 size-3.5" />
                 Edit
               </Link>
             </Button>
-            <form
-              action={action}
-              onSubmit={(e) => {
-                if (!confirm("Archive this listing? It will no longer be visible."))
-                  e.preventDefault()
-              }}
-            >
+            <form action={action} aria-busy={pending}>
               <input type="hidden" name="id" value={listing.id} readOnly />
-              <Button type="submit" variant="ghost" size="sm" disabled={pending}>
-                <XIcon className="mr-1.5 size-3.5" />
-                {pending ? "Archiving…" : "Archive"}
-              </Button>
+              {confirming ? (
+                <div className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2">
+                  <span className="text-xs font-medium text-amber-800">
+                    Archive this listing? Buyers will no longer see it.
+                  </span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setConfirming(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="destructive"
+                    disabled={pending}
+                  >
+                    {pending ? "Archiving…" : "Archive"}
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setConfirming(true)}
+                >
+                  <XIcon className="mr-1.5 size-3.5" />
+                  Archive
+                </Button>
+              )}
             </form>
           </div>
 
-          {state.message ? (
+          {state.ok ? (
+            <p
+              role="status"
+              className="w-full text-sm font-medium text-emerald-700"
+            >
+              Listing archived.
+            </p>
+          ) : state.message ? (
             <p role="alert" className="w-full text-sm text-destructive">
               {state.message}
             </p>
@@ -103,6 +141,7 @@ export function ListingManager({
   initialLimit?: number
 }) {
   const [expanded, setExpanded] = useState(false)
+  const [filter, setFilter] = useState<FilterKey>("all")
 
   if (listings.length === 0) {
     return (
@@ -114,11 +153,11 @@ export function ListingManager({
           <h3 className="font-heading text-lg font-semibold">
             You have no listings yet
           </h3>
-          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+          <p className="mt-1 max-w-sm text-sm text-foreground/70">
             Add your first item with a few photos and a price — buyers can start
             finding it right away.
           </p>
-          <Button asChild size="sm" className="mt-4">
+          <Button asChild className="mt-4">
             <Link href="/sell">
               <PlusIcon className="mr-1.5 size-4" />
               Create a listing
@@ -129,26 +168,68 @@ export function ListingManager({
     )
   }
 
-  const visible = expanded ? listings : listings.slice(0, initialLimit)
-  const hiddenCount = listings.length - visible.length
+  const filtered =
+    filter === "all" ? listings : listings.filter((l) => l.status === filter)
+  const visible = expanded ? filtered : filtered.slice(0, initialLimit)
+  const hiddenCount = filtered.length - visible.length
 
   return (
     <div className="flex flex-col gap-3">
-      <ul className="flex flex-col gap-3">
-        {visible.map((listing) => (
-          <ListingRow key={listing.id} listing={listing} />
-        ))}
-      </ul>
-      {hiddenCount > 0 ? (
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          onClick={() => setExpanded(true)}
-        >
-          Show all {listings.length} listings
-        </Button>
-      ) : null}
+      <div
+        className="flex flex-wrap gap-2"
+        role="group"
+        aria-label="Filter listings by status"
+      >
+        {FILTERS.map((f) => {
+          const active = filter === f.key
+          return (
+            <Button
+              key={f.key}
+              type="button"
+              variant={active ? "default" : "outline"}
+              className={cn("h-8 rounded-full px-3.5 text-xs", active && "text-primary-foreground")}
+              onClick={() => {
+                setFilter(f.key)
+                setExpanded(false)
+              }}
+              aria-pressed={active}
+            >
+              {f.label}
+            </Button>
+          )
+        })}
+      </div>
+
+      {filtered.length === 0 ? (
+        <Card>
+          <CardContent className="flex flex-col items-center py-10 text-center">
+            <h3 className="font-heading text-base font-semibold">
+              No {filter === "all" ? "" : LISTING_STATUS_LABELS[filter].toLowerCase()} listings
+            </h3>
+            <p className="mt-1 text-sm text-foreground/70">
+              Try a different status filter.
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <ul className="flex flex-col gap-3">
+            {visible.map((listing) => (
+              <ListingRow key={listing.id} listing={listing} />
+            ))}
+          </ul>
+          {hiddenCount > 0 ? (
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full"
+              onClick={() => setExpanded(true)}
+            >
+              Show all {filtered.length} listings
+            </Button>
+          ) : null}
+        </>
+      )}
     </div>
   )
 }
