@@ -297,12 +297,52 @@ describe("fayda.mock", () => {
       clientAssertion: assertion,
       clientPublicKeyPem: clientKeys.publicKeyPem,
       tokenEndpoint: "https://esignet.ida.et/v1/esignet/oauth/token",
+      issuer: "https://esignet.ida.et",
       providerKeys: provider,
     })
     expect(result.ok).toBe(true)
     if (result.ok) {
       expect(result.accessToken).toBeTruthy()
       expect(result.idToken).toBeTruthy()
+    }
+  })
+
+  it("signs the id_token under the issuer base (consistent with discovery/userinfo)", async () => {
+    const codes = store()
+    const challenge = derivePkceChallenge("verifier-1")
+    issueAuthorizationCode(codes, {
+      clientId: "client-1",
+      redirectUri: "http://localhost:3000/verify-fayda/callback",
+      state: "s1",
+      codeChallenge: challenge,
+      codeChallengeMethod: "S256",
+    })
+    const code = codes.keys().next().value as string
+    const assertion = signJwt(
+      {
+        iss: "client-1",
+        sub: "client-1",
+        aud: "https://esignet.ida.et/v1/esignet/oauth/token",
+      },
+      clientKeys.privateKeyPem,
+      {}
+    )
+    const result = await exchangeAuthorizationCode(codes, {
+      code,
+      redirectUri: "http://localhost:3000/verify-fayda/callback",
+      codeVerifier: "verifier-1",
+      clientAssertion: assertion,
+      clientPublicKeyPem: clientKeys.publicKeyPem,
+      tokenEndpoint: "https://esignet.ida.et/v1/esignet/oauth/token",
+      issuer: "https://esignet.ida.et",
+      providerKeys: provider,
+    })
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      const claims = parseJwt(result.idToken)
+      expect(claims?.claims.iss).toBe("https://esignet.ida.et")
+      expect(claims?.claims.sub).toBe(FAYDA_TEST_SUB)
+      expect(claims?.claims.aud).toBe("client-1")
     }
   })
 
@@ -329,6 +369,7 @@ describe("fayda.mock", () => {
       clientAssertion: assertion,
       clientPublicKeyPem: clientKeys.publicKeyPem,
       tokenEndpoint: "https://esignet.ida.et/v1/esignet/oauth/token",
+      issuer: "https://esignet.ida.et",
       providerKeys: provider,
     })
     expect(result.ok).toBe(false)

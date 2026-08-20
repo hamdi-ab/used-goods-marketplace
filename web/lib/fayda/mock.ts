@@ -3,6 +3,7 @@ import { randomBytes } from "node:crypto"
 import { signJwt, verifyJwt } from "@/lib/fayda/jwt"
 import { derivePkceChallenge } from "@/lib/fayda/constants"
 import { FAYDA_SCOPE, FAYDA_TEST_SUB, FAYDA_MOCK_KID } from "@/lib/fayda/constants"
+import type { FaydaKeyPair } from "@/lib/fayda/keys"
 
 /**
  * The mock eSignet provider core (#25 / ADR-020). Pure logic — no Next.js
@@ -44,10 +45,7 @@ export interface MockCodeRecord {
 
 export type MockCodeStore = Map<string, MockCodeRecord>
 
-export interface MockKeys {
-  privateKeyPem: string
-  publicKeyPem: string
-}
+export type MockKeys = Pick<FaydaKeyPair, "privateKeyPem" | "publicKeyPem">
 
 export interface IssueCodeParams {
   clientId: string
@@ -64,6 +62,7 @@ export interface ExchangeParams {
   clientAssertion: string
   clientPublicKeyPem: string
   tokenEndpoint: string
+  issuer: string
   providerKeys: MockKeys
 }
 
@@ -142,7 +141,7 @@ export async function exchangeAuthorizationCode(
     ok: true,
     accessToken: signJwt({ sub: FAYDA_TEST_SUB }, params.providerKeys.privateKeyPem, { kid: FAYDA_MOCK_KID }),
     idToken: signJwt(
-      { iss: "fayda-mock", sub: FAYDA_TEST_SUB, aud: record.client_id },
+      { iss: params.issuer, sub: FAYDA_TEST_SUB, aud: record.client_id },
       params.providerKeys.privateKeyPem,
       { kid: FAYDA_MOCK_KID }
     ),

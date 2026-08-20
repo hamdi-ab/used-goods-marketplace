@@ -1,3 +1,5 @@
+import "server-only"
+
 import { createPublicKey, generateKeyPairSync } from "node:crypto"
 
 /**

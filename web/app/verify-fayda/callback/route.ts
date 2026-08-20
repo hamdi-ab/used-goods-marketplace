@@ -64,6 +64,12 @@ export async function GET(request: Request): Promise<Response> {
     transport,
   })
 
+  if (!result.ok) {
+    // §11: the outcome is surfaced to the user via the redirect below; the
+    // technical detail belongs in the server log, never in the URL.
+    console.error("[verify-fayda] callback failed:", result.error)
+  }
+
   const dest = result.ok
     ? "/profile?verified=fayda"
     : `/profile?verified=fayda&error=${encodeURIComponent(result.error ?? "verification_failed")}`

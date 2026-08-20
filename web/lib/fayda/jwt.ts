@@ -1,3 +1,5 @@
+import "server-only"
+
 import { createSign, createVerify, randomBytes } from "node:crypto"
 
 import { importPublicKey } from "@/lib/fayda/keys"

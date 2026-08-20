@@ -29,12 +29,14 @@ export const FAYDA_MOCK_KID = "fayda-mock-key-1"
 
 // Env-config seam (research §3): pointing FAYDA_ISSUER_URL at the real
 // esignet.ida.et plus real credentials is the whole "swap" story.
+// The JWKS is always resolved from the issuer's discovery document, never from
+// a separate env value — FAYDA_JWKS_URL was a dead config and is deliberately
+// absent (a second, unvetted key source would only weaken signature checks).
 export const FAYDA_ENV = {
   ISSUER_URL: "FAYDA_ISSUER_URL",
   CLIENT_ID: "FAYDA_CLIENT_ID",
   CLIENT_PRIVATE_JWK: "FAYDA_CLIENT_PRIVATE_JWK",
   REDIRECT_URI: "FAYDA_REDIRECT_URI",
-  JWKS_URL: "FAYDA_JWKS_URL",
   MOCK: "FAYDA_MOCK",
 } as const
 

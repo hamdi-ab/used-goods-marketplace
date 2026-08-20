@@ -5,14 +5,13 @@ import { NextResponse } from "next/server"
 import { faydaMockMode } from "@/lib/fayda/verification"
 import { getProviderKeys, getDevClientKeys, toJwks } from "@/lib/fayda/keys"
 import type { FaydaKeyPair } from "@/lib/fayda/keys"
-import { FAYDA_MOCK_KID, FAYDA_TEST_SUB } from "@/lib/fayda/constants"
+import { FAYDA_MOCK_KID, FAYDA_TEST_SUB, FAYDA_ENV } from "@/lib/fayda/constants"
 import {
   validateAuthorizeRequest,
   issueAuthorizationCode,
   exchangeAuthorizationCode,
   issueUserinfo,
   type MockCodeStore,
-  type MockKeys,
 } from "@/lib/fayda/mock"
 
 // In-memory store of issued auth codes (dev-only mock, single process).
@@ -24,14 +23,13 @@ const codes: MockCodeStore = new Map()
 
 // The provider signing key that backs the mock's jwks.json. Re-used across
 // requests (same process) so the client's kid-matched verification holds.
-// A FaydaKeyPair is also a valid MockKeys (extra publicJwk field is ignored).
-function providerKeys(): FaydaKeyPair & MockKeys {
-  return getProviderKeys() as FaydaKeyPair & MockKeys
+function providerKeys(): FaydaKeyPair {
+  return getProviderKeys()
 }
 
 function registeredRedirectUri(): string {
   // In dev the registered callback is the app's (research §3 seam).
-  return process.env.FAYDA_REDIRECT_URI ?? ""
+  return process.env[FAYDA_ENV.REDIRECT_URI] ?? ""
 }
 
 function issuerBase(request: Request): string {
@@ -110,7 +108,7 @@ export async function GET(request: Request): Promise<Response> {
     const token = issueUserinfo(
       providerKeys(),
       base,
-      process.env.FAYDA_CLIENT_ID ?? "",
+      process.env[FAYDA_ENV.CLIENT_ID] ?? "",
       FAYDA_TEST_SUB
     )
     return new NextResponse(token, {
@@ -146,6 +144,7 @@ export async function POST(request: Request): Promise<Response> {
   const url = new URL(request.url)
   const segments = url.pathname.split("/").filter(Boolean)
   const path = segments.slice(1)
+  const base = issuerBase(request)
 
   if (path[0] === "authorize") {
     const form = await request.formData()
@@ -192,6 +191,7 @@ export async function POST(request: Request): Promise<Response> {
       clientAssertion: toStr("client_assertion"),
       clientPublicKeyPem: getDevClientKeys().publicKeyPem,
       tokenEndpoint: `${url.origin}${url.pathname}`,
+      issuer: base,
       providerKeys: providerKeys(),
     })
     if (!result.ok) {
