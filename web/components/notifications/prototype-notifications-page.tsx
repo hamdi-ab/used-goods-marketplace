@@ -19,6 +19,7 @@ import {
   type NotificationType,
 } from "@/lib/notifications/constants"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
 import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
 import { withVariant, type VariantKey } from "@/components/search/prototype-utils"
@@ -144,14 +145,16 @@ export async function PrototypeNotificationsPage({
             ) : null}
           </div>
           {unreadCount > 0 ? (
-            <button
+            <Button
               type="button"
+              variant="outline"
+              size="sm"
+              disabled
               title="Prototype preview — nothing is marked read yet"
-              className="cursor-not-allowed rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-muted-foreground opacity-70"
             >
-              <CheckIcon className="mr-1.5 inline size-3.5" />
+              <CheckIcon className="mr-1.5 size-3.5" />
               Mark all read
-            </button>
+            </Button>
           ) : null}
         </div>
 
@@ -180,9 +183,12 @@ export async function PrototypeNotificationsPage({
                         )}
                       >
                         {!n.is_read ? (
-                          <span className="absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-[#2563EB]" />
+                          <span
+                            className="absolute right-3.5 top-3.5 size-2 rounded-full bg-[#2563EB]"
+                            aria-hidden="true"
+                          />
                         ) : null}
-                        <div className="flex items-start gap-4 pl-1">
+                        <div className="flex items-start gap-4">
                           <span
                             className={cn(
                               "flex size-10 shrink-0 items-center justify-center rounded-full",

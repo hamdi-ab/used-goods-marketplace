@@ -123,7 +123,9 @@ export async function PrototypeSellerOffersPage({
                 className={cn(
                   "rounded-2xl border bg-card shadow-sm transition",
                   open
-                    ? "border-l-4 border-l-[#2563EB]"
+                    ? variant === "B"
+                      ? "border-[#2563EB]/40 bg-[#EEF4FF]/50"
+                      : "border-primary/30 bg-primary/5"
                     : "opacity-70"
                 )}
               >
@@ -162,7 +164,15 @@ export async function PrototypeSellerOffersPage({
                             {offer.buyer?.full_name ?? "Anonymous buyer"}
                           </p>
                         </div>
-                        <OfferStatusBadge status={offer.status} />
+                        <div className="flex shrink-0 items-center gap-2">
+                          {open ? (
+                            <span
+                              className="size-2 rounded-full bg-[#2563EB]"
+                              aria-hidden="true"
+                            />
+                          ) : null}
+                          <OfferStatusBadge status={offer.status} />
+                        </div>
                       </div>
 
                       <p className="mt-2 text-2xl font-extrabold text-[#2563EB]">

@@ -5,6 +5,7 @@ import Link from "next/link"
 import { getCurrentUser } from "@/lib/auth"
 import { FIELD_CLASS } from "@/lib/form-fields"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
 import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
 import { withVariant, type VariantKey } from "@/components/search/prototype-utils"
@@ -70,7 +71,7 @@ export async function PrototypeOnboardingPage({
               <h1 className="font-heading text-2xl font-semibold leading-tight">
                 You&apos;re one step from trading.
               </h1>
-              <p className="mt-3 max-w-sm text-sm text-white/70">
+              <p className="mt-3 max-w-sm text-sm text-white/80">
                 Finish your profile so buyers and sellers know who they&apos;re
                 dealing with. You can change these details any time from your
                 profile.
@@ -85,7 +86,7 @@ export async function PrototypeOnboardingPage({
                   </span>
                   <span>
                     <p className="text-sm font-medium">{t.title}</p>
-                    <p className="text-xs text-white/60">{t.body}</p>
+                    <p className="text-xs text-white/75">{t.body}</p>
                   </span>
                 </li>
               ))}
@@ -169,13 +170,13 @@ export async function PrototypeOnboardingPage({
               )}
 
               <div className="flex flex-col gap-3 border-t pt-5">
-                <button
+                <Button
                   type="button"
+                  disabled
                   title="Prototype preview — nothing is saved yet"
-                  className="cursor-not-allowed rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground opacity-70"
                 >
                   Save profile
-                </button>
+                </Button>
                 <Link
                   href={withVariant("/profile", variant)}
                   className="text-center text-sm text-muted-foreground hover:text-foreground"

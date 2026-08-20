@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation"
 import type { Metadata } from "next"
+import Image from "next/image"
 import Link from "next/link"
 
 import { fetchCategories, fetchListing } from "@/lib/listings"
@@ -7,6 +8,7 @@ import { CONDITIONS, STATUSES_FOR_DISPLAY } from "@/lib/listings/constants"
 import { formatPrice } from "@/lib/listings"
 import { FIELD_CLASS, TEXTAREA_CLASS } from "@/lib/form-fields"
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
 import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
 import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
 import { withVariant, type VariantKey } from "@/components/search/prototype-utils"
@@ -190,12 +192,15 @@ export async function PrototypeEditPage({
           <div className="flex flex-col gap-4 p-5">
             <div className="overflow-hidden rounded-xl border border-border bg-card">
               {sortedImages[0] ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={sortedImages[0].image_url}
-                  alt={listing.title}
-                  className="aspect-[16/9] w-full object-cover"
-                />
+                <div className="relative aspect-[16/9] w-full bg-muted">
+                  <Image
+                    src={sortedImages[0].image_url}
+                    alt={listing.title}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 340px"
+                    className="object-cover"
+                  />
+                </div>
               ) : (
                 <div className="flex aspect-[16/9] w-full items-center justify-center bg-muted text-sm text-muted-foreground">
                   No photo
@@ -234,13 +239,18 @@ export async function PrototypeEditPage({
                 </p>
                 <div className="flex gap-2 overflow-x-auto pb-1">
                   {sortedImages.map((img) => (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <div
                       key={img.id}
-                      src={img.image_url}
-                      alt={img.alt_text ?? listing.title}
-                      className="h-14 w-14 shrink-0 rounded-md border border-border object-cover"
-                    />
+                      className="relative h-14 w-14 shrink-0 overflow-hidden rounded-md border border-border bg-muted"
+                    >
+                      <Image
+                        src={img.image_url}
+                        alt={img.alt_text ?? listing.title}
+                        fill
+                        sizes="56px"
+                        className="object-cover"
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
@@ -265,20 +275,21 @@ export async function PrototypeEditPage({
             </div>
 
             <div className="flex flex-col gap-2 border-t pt-4">
-              <button
+              <Button
                 type="button"
+                disabled
                 title="Prototype preview — edits aren't saved yet"
-                className="cursor-not-allowed rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground opacity-70"
               >
                 Save changes
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
+                variant="destructive"
+                disabled
                 title="Prototype preview — edits aren't saved yet"
-                className="cursor-not-allowed rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-700 opacity-70"
               >
                 Archive listing
-              </button>
+              </Button>
               <p className="text-center text-xs text-muted-foreground">
                 Preview mode — nothing is saved
               </p>
