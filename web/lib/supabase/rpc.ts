@@ -12,6 +12,7 @@ export type RpcName =
   | "record_verification"
   | "request_verification"
   | "record_listing_view"
+  | "record_fayda_verification"
   | "submit_offer"
   | "accept_offer"
   | "decline_offer"
