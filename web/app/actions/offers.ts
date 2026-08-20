@@ -153,7 +153,7 @@ export async function abandonSaleAction(
     return { message: "Invalid request" }
   }
 
-  await requireUser()
+  await requireTrader()
   const result = await abandonSaleRow(parsed.data.offerId)
   if (!result.ok) {
     return { message: result.error ?? "Could not cancel the sale" }

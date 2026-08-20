@@ -63,11 +63,9 @@ export function SellerOfferActions({ offer }: { offer: SellerOfferRow }) {
       <p className="text-sm text-muted-foreground">
         {offer.status === "countered"
           ? "Countered — waiting for the buyer to respond."
-          : offer.status === "accepted"
-            ? "Accepted — the listing is now sold."
-            : offer.status === "expired"
-              ? "Expired — the offer lapsed and is no longer open."
-              : "Declined."}
+          : offer.status === "expired"
+            ? "Expired — the offer lapsed and is no longer open."
+            : "Declined."}
       </p>
     )
   }
