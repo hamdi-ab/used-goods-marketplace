@@ -530,7 +530,8 @@ describe("fayda.dev key singletons", () => {
 })
 
 describe("fayda.completeFaydaAuthorization", () => {
-  // Provider keypair that signs the userinfo JWT (verify-only: sub only).
+  // Provider keypair that signs the userinfo JWT and the id_token (verify-only:
+  // sub only) and backs the JWKS the transport serves.
   const provider = generateKeyPair()
   const issuer = "https://esignet.ida.et"
   const clientId = "marketplace-test-client"
@@ -539,7 +540,7 @@ describe("fayda.completeFaydaAuthorization", () => {
   function userinfoJws(): string {
     return signJwt({ iss: issuer, sub, aud: clientId }, provider.privateKeyPem, { kid: "prov" })
   }
-  function transport(jws: string) {
+  function transport(jws: string, keys: FaydaKeyPair = provider) {
     return {
       fetchDiscovery: () =>
         Promise.resolve(
@@ -551,7 +552,12 @@ describe("fayda.completeFaydaAuthorization", () => {
             jwks_uri: `${issuer}/.well-known/jwks.json`,
           })
         ),
-      fetchToken: () => Promise.resolve({ accessToken: "at", idToken: "" }),
+      fetchJwks: () => Promise.resolve(toJwks(keys, "prov")),
+      exchangeCode: () =>
+        Promise.resolve({
+          accessToken: "at",
+          idToken: signJwt({ iss: issuer, sub, aud: clientId }, keys.privateKeyPem, { kid: "prov" }),
+        }),
       fetchUserinfo: () => Promise.resolve(jws),
     }
   }
@@ -570,8 +576,6 @@ describe("fayda.completeFaydaAuthorization", () => {
       state: "s1",
       cookieState: "s1",
       codeVerifier: "verifier",
-      cookieCodeChallenge: derivePkceChallenge("verifier"),
-      providerPublicKeyPem: provider.publicKeyPem,
       clientId,
       transport: transport(userinfoJws()),
     })
@@ -594,8 +598,6 @@ describe("fayda.completeFaydaAuthorization", () => {
       state: "s1",
       cookieState: "s2",
       codeVerifier: "verifier",
-      cookieCodeChallenge: derivePkceChallenge("verifier"),
-      providerPublicKeyPem: provider.publicKeyPem,
       clientId,
       transport: transport(userinfoJws()),
     })
@@ -603,7 +605,7 @@ describe("fayda.completeFaydaAuthorization", () => {
     expect(called).toBe(false)
   })
 
-  it("rejects a PKCE verifier that does not match the stored challenge", async () => {
+  it("rejects a missing PKCE verifier without calling the RPC", async () => {
     let called = false
     const supabase = {
       rpc: async () => {
@@ -615,13 +617,11 @@ describe("fayda.completeFaydaAuthorization", () => {
       code: "c",
       state: "s1",
       cookieState: "s1",
-      codeVerifier: "verifier",
-      cookieCodeChallenge: derivePkceChallenge("different-verifier"),
-      providerPublicKeyPem: provider.publicKeyPem,
+      codeVerifier: "",
       clientId,
       transport: transport(userinfoJws()),
     })
-    expect(result).toEqual({ ok: false, error: "invalid_grant" })
+    expect(result).toEqual({ ok: false, error: "invalid_request" })
     expect(called).toBe(false)
   })
 
@@ -630,15 +630,15 @@ describe("fayda.completeFaydaAuthorization", () => {
     const supabase = {
       rpc: async () => ({ data: { ok: true }, error: null }),
     } as never
+    // The transport's JWKS is keyed by `other` but the userinfo JWS was signed
+    // by the provider key — the kid matches "prov" yet the signature fails.
     const result = await completeFaydaAuthorization(supabase, "user-1", {
       code: "c",
       state: "s1",
       cookieState: "s1",
       codeVerifier: "verifier",
-      cookieCodeChallenge: derivePkceChallenge("verifier"),
-      providerPublicKeyPem: other.publicKeyPem,
       clientId,
-      transport: transport(userinfoJws()),
+      transport: transport(userinfoJws(), other),
     })
     expect(result).toEqual({ ok: false, error: "token_invalid" })
   })

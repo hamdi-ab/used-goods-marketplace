@@ -11,6 +11,11 @@ import { faydaConfigured, startFaydaAuthorization } from "@/lib/fayda/verificati
 // (CSRF/nonces never hit the client graph), and redirect to the IdP. The mock
 // provider renders a one-click "Approve" page; the real esignet.ida.et renders
 // the national-ID login. Same code, config-driven issuer (ADR-020 D7).
+//
+// Only the verifier is stored, not its S256 challenge: the challenge is derived
+// from the verifier at start time and again implicitly at the token exchange,
+// so a redundant challenge cookie would be the only thing standing between a
+// presence check and a real RFC 7636 check.
 export async function GET(): Promise<Response> {
   if (!faydaConfigured()) {
     return new NextResponse("Fayda verification is not configured.", { status: 503 })
@@ -33,7 +38,6 @@ export async function GET(): Promise<Response> {
   const oneMinute = { httpOnly: true, sameSite: "lax" as const, path: "/", maxAge: 60 }
   cookieStore.set("fayda_state", start.state, oneMinute)
   cookieStore.set("fayda_verifier", start.codeVerifier, oneMinute)
-  cookieStore.set("fayda_challenge", start.codeChallenge, oneMinute)
 
   return NextResponse.redirect(start.authorizeUrl)
 }

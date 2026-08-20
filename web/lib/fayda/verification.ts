@@ -5,16 +5,23 @@ import {
   FAYDA_ENV,
   derivePkceChallenge,
   buildAuthorizeUrl,
+  buildClientAssertion,
+  buildTokenRequestBody,
+  parseDiscovery,
+  parseTokenResponse,
+  selectJwkByKid,
+  type DiscoveryDocument,
+  type JwksDocument,
+  type TokenResponse,
 } from "@/lib/fayda/constants"
-import type {
-  DiscoveryDocument,
-  TokenResponse,
-} from "@/lib/fayda/constants"
+import { callOutcomeRpc } from "@/lib/supabase/rpc"
 import {
   verifyJwt,
+  parseJwt,
   randomState,
   randomVerifier,
 } from "@/lib/fayda/jwt"
+import { jwkToPublicKeyPem } from "@/lib/fayda/keys"
 
 /**
  * Fayda verification server seam (#25 / ADR-020). Server-only.
@@ -22,7 +29,7 @@ import {
  * Owns the *app side* of the Fayda OIDC flow: config detection, the authorize
  * redirect, and — after a verified exchange — recording the verification. The
  * mock provider lives in `fayda/mock.ts` + the `mock-fayda/` route; the network
- * glue lives here.
+ * glue lives here behind `OAuthTransport`, the one seam that reaches the IdP.
  */
 
 export interface RecordFaydaVerificationResult {
@@ -32,30 +39,20 @@ export interface RecordFaydaVerificationResult {
 
 // The app side never touches the admin-gated `record_verification` RPC. This
 // self-issued RPC (ADR-020 D3) is the only path that flips the fayda flag from
-// a user's own successful exchange — it takes the verified `sub` as proof.
-//
-// NOTE (binding phase): the `record_fayda_verification` name is intentionally
-// not added to `RpcName` in `lib/supabase/rpc.ts` yet, because that file is
-// being edited by another in-flight ticket (#73); the union promotion lands in
-// the binding phase once #73 merges. For now we call the RPC by string literal,
-// exactly as record_verification is reached via callOutcomeRpc elsewhere.
+// a user's own successful exchange — it takes the verified `sub` as proof. It
+// is part of the typed RPC union in `lib/supabase/rpc.ts`, so a renamed or
+// dropped RPC fails to compile instead of surfacing as a runtime magic-string
+// typo (the same seam `record_verification` reaches via callOutcomeRpc).
 export async function recordFaydaVerification(
   supabase: Supabase,
   params: { userId: string; sub: string }
 ): Promise<RecordFaydaVerificationResult> {
-  const { data, error } = await supabase.rpc(
+  return callOutcomeRpc(
+    supabase,
     "record_fayda_verification",
-    { p_user_id: params.userId, p_sub: params.sub }
+    { p_user_id: params.userId, p_sub: params.sub },
+    "recordFaydaVerification"
   )
-
-  if (error) {
-    return { ok: false, error: error.message }
-  }
-  const outcome = (data ?? {}) as { ok?: boolean; error?: string | null }
-  return {
-    ok: outcome.ok === true,
-    error: outcome.error ?? null,
-  }
 }
 
 // Dev-only detection. In demo mode the issuer is the in-app mock provider and
@@ -71,7 +68,9 @@ export function faydaMockMode(): boolean {
 // Start the OIDC flow: generate a fresh PKCE pair + CSRF state, build the
 // authorize URL (verify-only: scope=openid, no claims) and hand back what the
 // caller must stash in a cookie to validate the callback. The URL builder itself
-// is pure and tested in the constants suite.
+// is pure and tested in the constants suite. Only the verifier (and state) are
+// stored server-side; the S256 challenge is derived from the verifier, so
+// storing it too would be redundant state that could silently weaken the check.
 export function startFaydaAuthorization(): StartResult {
   const codeVerifier = randomVerifier()
   const codeChallenge = derivePkceChallenge(codeVerifier)
@@ -101,10 +100,8 @@ export interface StartResult {
 
 // Verify the signed Userinfo JWT (the IdP's `sub` is the only claim we request
 // in verify-only mode) and, on success, record the self-issued verification.
-// Public-key resolution (kid → PEM) is done by the caller; the route fetches
-// the discovery doc + JWKS and passes the matched provider public key in. This
-// keeps signature/claim validation + the RPC call testable without network: the
-// route is thin glue, this is the seam.
+// Signature/claim validation + the RPC call are testable without network; the
+// network lives in the OAuthTransport behind the same seam.
 export interface VerifyFaydaOptions {
   jws: string
   providerPublicKeyPem: string
@@ -134,26 +131,93 @@ export async function verifyAndRecord(
   return recordFaydaVerification(supabase, { userId, sub })
 }
 
-// Injectable OAuth transport: the network-bound pieces the route performs.
-// Defaults (used in production) do real fetches against FAYDA_ISSUER_URL; tests
-// inject fakes so the happy-path / failure-path orchestration is verifiable
+// The OAuth transport: the network-bound pieces of the flow. The default
+// implementation (createFaydaTransport) does real fetches against the configured
+// issuer — the in-app mock provider and the real esignet.ida.et both speak this
+// same OIDC surface, so the network path exercises the exact seam the tests
+// exercise. Tests inject fakes so orchestration + failure paths are verifiable
 // without a network or a running IdP.
 export interface OAuthTransport {
   fetchDiscovery: () => Promise<DiscoveryDocument>
-  fetchToken: () => Promise<TokenResponse>
+  fetchJwks: () => Promise<JwksDocument>
+  exchangeCode: (params: { code: string; codeVerifier: string }) => Promise<TokenResponse>
   fetchUserinfo: (accessToken: string) => Promise<string>
+}
+
+export interface FaydaTransportConfig {
+  issuerUrl: string
+  clientId: string
+  redirectUri: string
+  clientKey: { privateKeyPem: string }
+}
+
+// The default transport: real network against the configured issuer. Discovery
+// is fetched once and memoised, so the token exchange and userinfo calls ride
+// on a single discovery fetch. Token auth is the RS256 `client_assertion`
+// (private_key_jwt — the only client-auth method eSignet supports).
+export function createFaydaTransport(config: FaydaTransportConfig): OAuthTransport {
+  let discoveryPromise: Promise<DiscoveryDocument> | null = null
+  const discovery = (): Promise<DiscoveryDocument> => {
+    discoveryPromise ??= fetch(`${config.issuerUrl}/.well-known/openid-configuration`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`discovery failed: ${res.status}`)
+        return res.json() as Promise<Record<string, unknown>>
+      })
+      .then(parseDiscovery)
+    return discoveryPromise
+  }
+
+  return {
+    fetchDiscovery: discovery,
+    async fetchJwks() {
+      const doc = await discovery()
+      const res = await fetch(doc.jwks_uri)
+      if (!res.ok) throw new Error(`jwks fetch failed: ${res.status}`)
+      return res.json() as Promise<JwksDocument>
+    },
+    async exchangeCode({ code, codeVerifier }) {
+      const doc = await discovery()
+      const assertion = buildClientAssertion({
+        clientId: config.clientId,
+        tokenEndpoint: doc.token_endpoint,
+        privateKeyPem: config.clientKey.privateKeyPem,
+      })
+      const body = buildTokenRequestBody({
+        tokenEndpoint: doc.token_endpoint,
+        clientId: config.clientId,
+        code,
+        redirectUri: config.redirectUri,
+        codeVerifier,
+        clientAssertion: assertion.assertion,
+      })
+      const res = await fetch(doc.token_endpoint, {
+        method: "POST",
+        headers: { "content-type": "application/x-www-form-urlencoded" },
+        body,
+      })
+      if (!res.ok) throw new Error(`token exchange failed: ${res.status}`)
+      return parseTokenResponse(await res.json())
+    },
+    async fetchUserinfo(accessToken) {
+      const doc = await discovery()
+      const res = await fetch(doc.userinfo_endpoint, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      if (!res.ok) throw new Error(`userinfo fetch failed: ${res.status}`)
+      return res.text()
+    },
+  }
 }
 
 export interface CompleteFaydaParams {
   // PKCE + CSRF state, echoed back from the IdP. Validated in order: state
-  // first (CSRF), then the PKCE verifier against the stored challenge.
+  // first (CSRF), then the PKCE verifier (its S256 challenge was derived at
+  // start and validated by the IdP at the token endpoint — no separate stored
+  // challenge to compare against).
   code: string
   state: string
   cookieState: string
   codeVerifier: string
-  cookieCodeChallenge: string
-  // Resolved by the caller from the provider's JWKS (kid-matched).
-  providerPublicKeyPem: string
   clientId: string
   transport: OAuthTransport
 }
@@ -175,12 +239,12 @@ export async function completeFaydaAuthorization(
   if (!params.state || params.state !== params.cookieState) {
     return { ok: false, error: "invalid_state" }
   }
-  if (
-    params.codeVerifier &&
-    params.cookieCodeChallenge &&
-    derivePkceChallenge(params.codeVerifier) !== params.cookieCodeChallenge
-  ) {
-    return { ok: false, error: "invalid_grant" }
+  // PKCE is unconditional: the verifier must be present. It can only have come
+  // from our own httpOnly cookie, set at start — there is no way for the IdP's
+  // callback to conjure it. The S256 challenge is derived from this verifier
+  // and the IdP validates the code against it at the token endpoint.
+  if (!params.codeVerifier) {
+    return { ok: false, error: "invalid_request" }
   }
 
   let discovery: DiscoveryDocument
@@ -190,13 +254,12 @@ export async function completeFaydaAuthorization(
     return { ok: false, error: "discovery_failed" }
   }
 
-  // Assemble the token request (PKCE verifier + client_assertion RS256). The
-  // client_assertion itself is built by the caller (it needs the client private
-  // key) and threaded through the transport; the body here is what the real
-  // route POSTs and what the fake returns from.
   let tokens: TokenResponse
   try {
-    tokens = await params.transport.fetchToken()
+    tokens = await params.transport.exchangeCode({
+      code: params.code,
+      codeVerifier: params.codeVerifier,
+    })
   } catch {
     return { ok: false, error: "token_exchange_failed" }
   }
@@ -208,9 +271,26 @@ export async function completeFaydaAuthorization(
     return { ok: false, error: "userinfo_failed" }
   }
 
+  // Resolve the provider's signing key from its JWKS, kid-matched to the
+  // userinfo JWS header. OIDC Core §5.3.2 does not guarantee the id_token and
+  // userinfo are signed under the same key, so we match the token we are
+  // actually validating (the mock signs both under FAYDA_MOCK_KID).
+  let jwks: JwksDocument
+  try {
+    jwks = await params.transport.fetchJwks()
+  } catch {
+    return { ok: false, error: "discovery_failed" }
+  }
+  const userinfoHeader = parseJwt(userinfoJws)?.header
+  const providerKey = selectJwkByKid(jwks, userinfoHeader?.kid)
+  if (!providerKey) {
+    return { ok: false, error: "token_invalid" }
+  }
+  const providerPublicKeyPem = jwkToPublicKeyPem(providerKey)
+
   return verifyAndRecord(supabase, userId, {
     jws: userinfoJws,
-    providerPublicKeyPem: params.providerPublicKeyPem,
+    providerPublicKeyPem,
     issuer: discovery.issuer,
     audience: params.clientId,
   })

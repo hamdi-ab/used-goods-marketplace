@@ -83,15 +83,15 @@ export interface JwksDocument {
   keys: Array<{ kid?: string } & Record<string, unknown>>
 }
 
-// Pick the JWK matching a JWT's `kid` (JWT "none"→first-key fallback for the
-// demo mock, which signs everything under FAYDA_MOCK_KID).
+// Pick the JWK matching a JWT's `kid`. When the JWT names a kid, an exact match
+// is required — a mismatched key must fail, not silently fall back to the first
+// key. The no-kid fallback to `keys[0]` is the demo-mock tolerance only (the
+// mock signs everything under FAYDA_MOCK_KID and serves a single-key JWKS).
 export function selectJwkByKid(jwks: JwksDocument, kid?: string): JwksDocument["keys"][number] | null {
-  const keys = jwks.keys
   if (kid) {
-    const match = keys.find((k) => k.kid === kid)
-    if (match) return match
+    return jwks.keys.find((k) => k.kid === kid) ?? null
   }
-  return keys[0] ?? null
+  return jwks.keys[0] ?? null
 }
 
 export interface AuthorizeUrlParams {
