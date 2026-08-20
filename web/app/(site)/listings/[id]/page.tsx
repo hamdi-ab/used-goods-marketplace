@@ -21,6 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { PrototypeDetailPage } from "@/components/listings/prototype-detail-page"
 
 export const dynamic = "force-dynamic"
 
@@ -46,10 +47,24 @@ export async function generateMetadata({
 
 export default async function ListingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const { id } = await params
+  const { variant } = await searchParams
+  const key =
+    variant === "A" || variant === "B" ? (variant as "A" | "B") : null;
+
+  // PROTOTYPE — the redesign variants are view-only during review and bypass the
+  // normal detail page so reviewers can see the frame without signing in. The
+  // default page keeps production behavior (see fetchListing + require auth for
+  // contact info below).
+  if (key) {
+    return <PrototypeDetailPage variant={key} id={id} />;
+  }
+
   const data = await fetchListing(id)
   if (!data) notFound()
 
