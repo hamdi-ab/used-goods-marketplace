@@ -15,6 +15,8 @@ import { ReviewForm } from "@/components/reviews/review-form"
 import { ReviewStars } from "@/components/reviews/review-stars"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
+import { PrototypeOffersPage } from "@/components/offers/prototype-offers-page"
+import type { VariantKey } from "@/components/search/prototype-utils"
 
 export const dynamic = "force-dynamic"
 
@@ -23,13 +25,28 @@ export const metadata: Metadata = {
   description: "Offers you have made on the VinTech Marketplace.",
 }
 
+const VARIANT_KEYS = ["A", "B"] as const
+type VariantKeyList = (typeof VARIANT_KEYS)[number]
+
 export default async function OffersPage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
+  const { variant } = await searchParams
+  const key = VARIANT_KEYS.includes(variant as VariantKeyList)
+    ? (variant as VariantKey)
+    : null
+
+  if (key) {
+    return <PrototypeOffersPage variant={key} searchParams={searchParams} />
+  }
+
   const user = await requireUser()
-  const offset = parseOffset((await searchParams).offset)
+  const { offset: rawOffset } = await searchParams
+  const offset = parseOffset(
+    Array.isArray(rawOffset) ? rawOffset[0] : rawOffset,
+  )
   const { offers, hasMore, error } = await fetchBuyerOffers(user.id, {
     offset,
   })
