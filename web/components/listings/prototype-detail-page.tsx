@@ -83,7 +83,7 @@ export async function PrototypeDetailPage({
         {/* Symmetrical Bento Top Row — left gallery height == right (offer + seller) height */}
         <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-12">
           {/* LEFT (7 cols): Image Gallery Card — image flexes to fill row height */}
-          <div className="lg:col-span-7">
+          <div className="order-2 lg:order-1 lg:col-span-7">
             <div className="flex h-full flex-col rounded-2xl border bg-card p-5 shadow-sm">
               <div className="relative min-h-[300px] flex-1 overflow-hidden rounded-xl border bg-muted">
                 {cover ? (
@@ -125,7 +125,7 @@ export async function PrototypeDetailPage({
           </div>
 
           {/* RIGHT (5 cols): Offer Card + Seller Profile Card stacked, defines the row height */}
-          <div className="flex flex-col justify-between gap-6 lg:col-span-5">
+          <div className="order-1 flex flex-col justify-between gap-6 lg:order-2 lg:col-span-5">
             {/* Offer / Purchase Card */}
             <div className="flex flex-col gap-5 rounded-2xl border bg-card p-6 shadow-sm">
               {/* Category & Location */}
@@ -157,7 +157,10 @@ export async function PrototypeDetailPage({
 
               {/* Price Box */}
               <div className="rounded-xl border border-[#2563EB]/20 bg-[#2563EB]/5 p-4">
-                <span className="font-heading block text-3xl font-extrabold text-[#2563EB] sm:text-4xl">
+                <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                  Price
+                </span>
+                <span className="font-heading mt-0.5 block text-3xl font-extrabold text-[#2563EB] sm:text-4xl">
                   {formatPrice(l.price, { maxFractionDigits: 2 })}
                 </span>
                 {l.negotiable ? (
@@ -165,38 +168,6 @@ export async function PrototypeDetailPage({
                     Negotiable (or best offer)
                   </span>
                 ) : null}
-              </div>
-
-              {/* Primary Action Buttons */}
-              <div className="flex flex-col gap-3 pt-1">
-                <MakeOfferButton
-                  listingId={l.id}
-                  listingPrice={l.price}
-                  isOwner={isOwner}
-                  available={l.status === "published"}
-                  signedIn={Boolean(user)}
-                />
-                <ContactButton
-                  listingId={l.id}
-                  sellerId={l.seller_id}
-                  signedIn={Boolean(user)}
-                  contactInfo={contactInfo}
-                  isOwner={isOwner}
-                />
-              </div>
-
-              {/* Secondary actions */}
-              <div className="-mx-1 flex items-center justify-end gap-1 border-t pt-3 text-xs text-muted-foreground">
-                <FavoriteButton
-                  listingId={l.id}
-                  initial={favorited}
-                  isOwner={isOwner}
-                />
-                <ReportButton
-                  target={{ type: "listing", listingId: l.id }}
-                  signedIn={Boolean(user)}
-                  isOwner={isOwner}
-                />
               </div>
             </div>
 
@@ -226,12 +197,64 @@ export async function PrototypeDetailPage({
                   </h3>
                   <p className="text-xs text-muted-foreground">
                     {seller?.trust_score != null
-                      ? `Trust score: ${seller.trust_score}`
+                      ? `Trust score: ${seller.trust_score}/100`
                       : "Community seller"}
                   </p>
                 </div>
               </div>
               <SellerTrustRow seller={seller} />
+            </div>
+
+            {/* Actions Card — trust evidence comes before the ask */}
+            <div className="rounded-2xl border bg-card p-6 shadow-sm">
+              {l.status === "sold" ? (
+                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                  <p className="text-sm font-semibold text-amber-800">
+                    This item has been sold
+                  </p>
+                  <p className="mt-1 text-xs text-amber-700">
+                    It&apos;s no longer available.{" "}
+                    <Link
+                      href="#similar"
+                      className="font-medium underline underline-offset-2"
+                    >
+                      See similar listings
+                    </Link>{" "}
+                    instead.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="flex flex-col gap-3">
+                    <MakeOfferButton
+                      listingId={l.id}
+                      listingPrice={l.price}
+                      isOwner={isOwner}
+                      available={l.status === "published"}
+                      signedIn={Boolean(user)}
+                    />
+                    <ContactButton
+                      listingId={l.id}
+                      sellerId={l.seller_id}
+                      signedIn={Boolean(user)}
+                      contactInfo={contactInfo}
+                      isOwner={isOwner}
+                    />
+                  </div>
+                  <div className="-mx-1 mt-3 flex items-center justify-end gap-1 border-t pt-3 text-xs text-muted-foreground">
+                    <FavoriteButton
+                      listingId={l.id}
+                      initial={favorited}
+                      isOwner={isOwner}
+                    />
+                    <ReportButton
+                      target={{ type: "listing", listingId: l.id }}
+                      signedIn={Boolean(user)}
+                      isOwner={isOwner}
+                    />
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -253,7 +276,7 @@ export async function PrototypeDetailPage({
         </div>
 
         {/* Similar Listings Section */}
-        <div className="mt-12">
+        <div id="similar" className="mt-12">
           <SimilarListings listingId={l.id} variant={variant} />
         </div>
       </main>

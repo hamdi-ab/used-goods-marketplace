@@ -49,7 +49,7 @@ export function PrototypeListingCard({
     <div className="group w-full overflow-hidden rounded-xl border bg-card transition-shadow duration-200 hover:shadow-lg">
       <div className="relative">
         <Link href={href} aria-label={listing.title}>
-          <div className="aspect-[4/3] w-full overflow-hidden bg-muted">
+          <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
             {listing.image_url ? (
               <Image
                 src={listing.image_url}
