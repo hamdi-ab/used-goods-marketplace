@@ -95,7 +95,15 @@ function ListingRow({ listing }: { listing: SellerListingRow }) {
   )
 }
 
-export function ListingManager({ listings }: { listings: SellerListingRow[] }) {
+export function ListingManager({
+  listings,
+  initialLimit = 6,
+}: {
+  listings: SellerListingRow[]
+  initialLimit?: number
+}) {
+  const [expanded, setExpanded] = useState(false)
+
   if (listings.length === 0) {
     return (
       <Card>
@@ -121,11 +129,26 @@ export function ListingManager({ listings }: { listings: SellerListingRow[] }) {
     )
   }
 
+  const visible = expanded ? listings : listings.slice(0, initialLimit)
+  const hiddenCount = listings.length - visible.length
+
   return (
-    <ul className="flex flex-col gap-3">
-      {listings.map((listing) => (
-        <ListingRow key={listing.id} listing={listing} />
-      ))}
-    </ul>
+    <div className="flex flex-col gap-3">
+      <ul className="flex flex-col gap-3">
+        {visible.map((listing) => (
+          <ListingRow key={listing.id} listing={listing} />
+        ))}
+      </ul>
+      {hiddenCount > 0 ? (
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={() => setExpanded(true)}
+        >
+          Show all {listings.length} listings
+        </Button>
+      ) : null}
+    </div>
   )
 }

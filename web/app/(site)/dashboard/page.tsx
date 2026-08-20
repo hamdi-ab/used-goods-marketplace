@@ -7,6 +7,7 @@ import { fetchSellerListings } from "@/lib/listings"
 import { countIncomingOffers } from "@/lib/offers"
 import { promoteToSeller } from "@/app/actions/profile"
 import { ListingManager } from "@/components/dashboard/listing-manager"
+import { PrototypeDashboardPage } from "@/components/dashboard/prototype-dashboard-page"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -16,7 +17,20 @@ export const metadata: Metadata = {
   description: "Your VinTech Marketplace dashboard.",
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ variant?: string }>
+}) {
+  const { variant } = await searchParams
+  const key = variant === "A" || variant === "B" ? (variant as "A" | "B") : null
+
+  // PROTOTYPE — the redesign variant is view-only during review and bypasses
+  // the auth redirect (see proxy.ts) so ?variant=A|B renders without a session.
+  if (key) {
+    return <PrototypeDashboardPage variant={key} />
+  }
+
   const user = await requireUser()
   // The seller home only makes sense for users who can sell; buyers land on the
   // profile gate instead of a dead-end /sell redirect (issue #13 AC5).
