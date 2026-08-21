@@ -32,8 +32,9 @@ import { cn } from "@/lib/utils"
 
 // PROTOTYPE — dashboard redesign variants (?variant=A|B, dev only). Option A
 // "Metrics First" (moodboard #1): stat tiles above the fold, quick-action grid,
-// then the listings manager. View-only during review: signed-out visitors see
-// an empty state instead of a redirect. Variant B tints the metric tiles blue.
+// then the listings manager. Authenticated sellers see live stats and actions
+// (incl. the buyer→seller promoteToSeller form); signed-out visitors see an
+// empty state. Variant B tints the metric tiles blue.
 export async function PrototypeDashboardPage({
   variant,
 }: {
@@ -325,7 +326,7 @@ export async function PrototypeDashboardPage({
                 </p>
               </div>
               <form action={promoteToSeller}>
-                <Button type="submit" variant="outline">
+                <Button type="submit" variant="outline" className="h-11">
                   Start selling
                 </Button>
               </form>
@@ -368,7 +369,7 @@ export async function PrototypeDashboardPage({
                   Edit, archive, or track views and favorites on your listings.
                 </p>
               </div>
-              <Button asChild>
+              <Button asChild className="h-11">
                 <Link href={withVariant("/sell", variant)}>
                   <PlusIcon className="mr-1.5 size-4" />
                   Create a listing
