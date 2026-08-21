@@ -173,6 +173,7 @@ export async function PrototypeOnboardingPage({
                 <Button
                   type="button"
                   disabled
+                  className="h-11"
                   title="Prototype preview — nothing is saved yet"
                 >
                   Save profile
