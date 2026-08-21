@@ -1,9 +1,10 @@
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, BadgeCheck, Quote, ShieldCheck, Star } from "lucide-react"
+import { ArrowRight, BadgeCheck, Quote, Search } from "lucide-react"
 
 import type { Category, BrowseListing } from "@/lib/listings"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { CategoryPills } from "@/components/home/prototype/category-pills"
 import { ListingsBento } from "@/components/home/prototype/listings-bento"
 
@@ -13,15 +14,9 @@ interface VariantBProps {
   favoriteIds: Set<string> | null
 }
 
-const METRICS = [
-  { icon: Star, value: "4.8 / 5", label: "average seller rating" },
-  { icon: BadgeCheck, value: "100%", label: "of sellers identity-checked" },
-  { icon: ShieldCheck, value: "24h", label: "moderator response on reports" },
-]
-
 // PROTOTYPE — Variant B "dark editorial" (luxury / premium editorial landing).
-// Dark split hero over a lifestyle photo, metric strip, editorial copy blocks,
-// category rail, listings, and a testimonial. Throwaway for design comparison.
+// Dark split hero over a lifestyle photo, editorial copy blocks, category rail,
+// listings, and a testimonial. Throwaway for design comparison.
 export function VariantB({ categories, listings, favoriteIds }: VariantBProps) {
 
   return (
@@ -41,39 +36,49 @@ export function VariantB({ categories, listings, favoriteIds }: VariantBProps) {
           <p className="text-xs font-semibold uppercase tracking-widest text-white/90">
             Addis Ababa &middot; second-hand, reimagined
           </p>
-          <h1 className="mt-4 font-heading text-4xl font-bold leading-tight tracking-tight sm:text-6xl">
+          <h1 className="mt-4 font-heading text-3xl font-bold leading-tight tracking-tight text-balance text-white sm:text-6xl">
             Beautiful second-hand. Total peace of mind.
           </h1>
-          <p className="mt-5 max-w-xl text-lg text-white/80">
+          <p className="mt-5 max-w-xl text-lg text-white/80 text-balance">
             A curated marketplace where every seller is verified, every
             transaction is local, and every item has a story worth keeping.
           </p>
           <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg">
+            <Button
+              asChild
+              size="lg"
+              className="h-11 min-h-11 w-full bg-white text-primary hover:bg-white/90"
+            >
               <Link href="/search">Explore listings</Link>
             </Button>
             <Button
               asChild
               size="lg"
               variant="outline"
-              className="border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
+              className="h-11 min-h-11 w-full border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
             >
               <Link href="/sell">Start selling</Link>
             </Button>
           </div>
-        </div>
-      </section>
-
-      <section aria-label="Marketplace metrics" className="grid gap-4 border-b pb-10 pt-8 sm:grid-cols-3">
-        {METRICS.map((m) => (
-          <div key={m.label} className="flex items-start gap-3">
-            <m.icon className="mt-1 size-5 text-primary" />
-            <div>
-              <p className="font-heading text-2xl font-bold">{m.value}</p>
-              <p className="text-sm text-muted-foreground">{m.label}</p>
+          <form action="/search" method="get" className="mt-8 max-w-md">
+            <label htmlFor="hero-search-b" className="sr-only">
+              Search listings
+            </label>
+            <div className="relative">
+              <Search
+                className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-white/60"
+                aria-hidden="true"
+              />
+              <Input
+                id="hero-search-b"
+                name="q"
+                type="search"
+                placeholder="Search sofas, laptops, books…"
+                className="h-11 min-h-11 rounded-full border-white/30 bg-white/10 ps-10 text-white placeholder:text-white/60 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-0"
+              />
             </div>
-          </div>
-        ))}
+          </form>
+        </div>
       </section>
 
       <section className="grid gap-10 py-12 lg:grid-cols-2 lg:items-center">
@@ -102,14 +107,14 @@ export function VariantB({ categories, listings, favoriteIds }: VariantBProps) {
               </li>
             ))}
           </ul>
-          <div className="mt-8">
-            <Button asChild variant="outline">
-              <Link href="/search">
-                Browse the marketplace
-                <ArrowRight className="ml-2 size-4" />
-              </Link>
-            </Button>
-          </div>
+            <div className="mt-8">
+              <Button asChild size="lg" variant="outline" className="h-11 min-h-11">
+                <Link href="/search">
+                  Browse the marketplace
+                  <ArrowRight className="ml-2 size-4" />
+                </Link>
+              </Button>
+            </div>
         </div>
         <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border shadow-sm">
           <Image
@@ -194,14 +199,18 @@ export function VariantB({ categories, listings, favoriteIds }: VariantBProps) {
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90">
+            <Button
+              asChild
+              size="lg"
+              className="h-11 min-h-11 w-full bg-white text-primary hover:bg-white/90"
+            >
               <Link href="/sell">Start selling</Link>
             </Button>
             <Button
               asChild
               size="lg"
               variant="outline"
-              className="border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
+              className="h-11 min-h-11 w-full border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
             >
               <Link href="/search">Browse listings</Link>
             </Button>

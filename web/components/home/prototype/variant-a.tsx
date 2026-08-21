@@ -1,9 +1,10 @@
 import Image from "next/image"
 import Link from "next/link"
-import { BadgeCheck, Handshake, Sparkles } from "lucide-react"
+import { BadgeCheck, Handshake, Search, Sparkles } from "lucide-react"
 
 import type { Category, BrowseListing } from "@/lib/listings"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { CategoryPills } from "@/components/home/prototype/category-pills"
 import { ListingsBento } from "@/components/home/prototype/listings-bento"
 
@@ -49,12 +50,6 @@ const STEPS = [
   },
 ]
 
-const HERO_STATS = [
-  { value: "1–5★", label: "seller reviews" },
-  { value: "Live", label: "favorite & offer tracking" },
-  { value: "Free", label: "to list and browse" },
-]
-
 // PROTOTYPE — Variant A "classic hero" (eBay-premium landing). Full-bleed
 // gradient hero with the signature illustration, trust cards, how-it-works,
 // categories, fresh listings, and a closing CTA band. Throwaway for design
@@ -71,35 +66,49 @@ export function VariantA({ categories, listings, favoriteIds }: VariantAProps) {
               <Sparkles className="size-3.5" />
               Ethiopia&apos;s trusted second-hand marketplace
             </div>
-            <h1 className="mt-5 font-heading text-4xl font-bold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
-              Buy and sell used goods with total confidence
+            <h1 className="mt-5 font-heading text-3xl font-bold leading-tight tracking-tight text-balance text-white sm:text-5xl lg:text-6xl">
+              Your neighborhood's trusted second-hand market.
             </h1>
-            <p className="mt-4 max-w-xl text-base text-white/80 sm:text-lg">
+            <p className="mt-4 max-w-xl text-base text-white/80 text-balance sm:text-lg">
               Discover verified local sellers, inspect quality items, and
               transact securely across Addis Ababa — with reviews, trust
               scores, and reports keeping every deal honest.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90">
+              <Button
+                asChild
+                size="lg"
+                className="h-11 min-h-11 w-full bg-white text-primary hover:bg-white/90"
+              >
                 <Link href="/search">Browse listings</Link>
               </Button>
               <Button
                 asChild
                 size="lg"
                 variant="outline"
-                className="border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                className="h-11 min-h-11 w-full border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
               >
                 <Link href="/sell">Start selling</Link>
               </Button>
             </div>
-            <dl className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-white/15 pt-6">
-              {HERO_STATS.map((s) => (
-                <div key={s.label}>
-                  <dt className="font-heading text-xl font-semibold">{s.value}</dt>
-                  <dd className="mt-0.5 text-xs text-white/70">{s.label}</dd>
-                </div>
-              ))}
-            </dl>
+            <form action="/search" method="get" className="mt-8 max-w-md">
+              <label htmlFor="hero-search-a" className="sr-only">
+                Search listings
+              </label>
+              <div className="relative">
+                <Search
+                  className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-white/60"
+                  aria-hidden="true"
+                />
+                <Input
+                  id="hero-search-a"
+                  name="q"
+                  type="search"
+                  placeholder="Search sofas, laptops, books…"
+                  className="h-11 min-h-11 rounded-full border-white/30 bg-white/10 ps-10 text-white placeholder:text-white/60 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-0"
+                />
+              </div>
+            </form>
           </div>
 
           <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
@@ -246,7 +255,11 @@ export function VariantA({ categories, listings, favoriteIds }: VariantAProps) {
               verified local buyers, and get offers the same day.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-              <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90">
+              <Button
+                asChild
+                size="lg"
+                className="h-11 min-h-11 w-full bg-white text-primary hover:bg-white/90"
+              >
                 <Link href="/sell">
                   <Handshake className="mr-2 size-4" />
                   Start selling
@@ -256,7 +269,7 @@ export function VariantA({ categories, listings, favoriteIds }: VariantAProps) {
                 asChild
                 size="lg"
                 variant="outline"
-                className="border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
+                className="h-11 min-h-11 w-full border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
               >
                 <Link href="/search">Browse listings</Link>
               </Button>
