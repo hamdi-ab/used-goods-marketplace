@@ -43,24 +43,7 @@ export function VariantB({ categories, listings, favoriteIds }: VariantBProps) {
             A curated marketplace where every seller is verified, every
             transaction is local, and every item has a story worth keeping.
           </p>
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Button
-              asChild
-              size="lg"
-              className="h-11 min-h-11 w-full bg-white text-primary hover:bg-white/90"
-            >
-              <Link href="/search">Explore listings</Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="h-11 min-h-11 w-full border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
-            >
-              <Link href="/sell">Start selling</Link>
-            </Button>
-          </div>
-          <form action="/search" method="get" className="mt-8 max-w-md">
+          <form action="/search" method="get" className="mt-9 max-w-md">
             <label htmlFor="hero-search-b" className="sr-only">
               Search listings
             </label>
@@ -74,10 +57,34 @@ export function VariantB({ categories, listings, favoriteIds }: VariantBProps) {
                 name="q"
                 type="search"
                 placeholder="Search sofas, laptops, books…"
-                className="h-11 min-h-11 rounded-full border-white/30 bg-white/10 ps-10 text-white placeholder:text-white/60 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-0"
+                className="h-11 min-h-11 w-full rounded-full border-white/30 bg-white/10 ps-10 pe-14 text-white placeholder:text-white/60 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-0"
               />
+              <Button
+                type="submit"
+                aria-label="Search"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-11 min-h-11 w-11 min-w-11 shrink-0 rounded-full border border-white/20 bg-white/10 text-white hover:bg-white/15"
+              >
+                <Search className="size-4" />
+              </Button>
             </div>
           </form>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Button
+              asChild
+              size="lg"
+              className="h-11 min-h-11 w-full bg-white text-primary hover:bg-white/90 hover:shadow-lg"
+            >
+              <Link href="/search">Explore listings</Link>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="h-11 min-h-11 w-full border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
+            >
+              <Link href="/sell">Start selling</Link>
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -122,7 +129,7 @@ export function VariantB({ categories, listings, favoriteIds }: VariantBProps) {
             alt="A seller photographing an item for their listing"
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
-            className="object-cover"
+            className="object-cover transition-transform duration-500 ease-out hover:scale-105"
           />
         </div>
       </section>
@@ -202,7 +209,7 @@ export function VariantB({ categories, listings, favoriteIds }: VariantBProps) {
             <Button
               asChild
               size="lg"
-              className="h-11 min-h-11 w-full bg-white text-primary hover:bg-white/90"
+              className="h-11 min-h-11 w-full bg-white text-primary hover:bg-white/90 hover:shadow-lg"
             >
               <Link href="/sell">Start selling</Link>
             </Button>
