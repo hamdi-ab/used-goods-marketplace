@@ -17,7 +17,13 @@ export function BuyerOfferActions({ offer }: { offer: BuyerOfferRow }) {
     <form action={formAction} className="flex flex-wrap items-center gap-2">
       <input type="hidden" name="offerId" value={offer.id} />
       <input type="hidden" name="listingId" value={offer.listing_id} />
-      <Button type="submit" name="action" value="accept" disabled={pending}>
+      <Button
+        type="submit"
+        name="action"
+        value="accept"
+        disabled={pending}
+        className="h-11"
+      >
         Accept counter
       </Button>
       <Button
@@ -26,6 +32,7 @@ export function BuyerOfferActions({ offer }: { offer: BuyerOfferRow }) {
         value="decline"
         variant="ghost"
         disabled={pending}
+        className="h-11"
       >
         Decline counter
       </Button>

@@ -124,6 +124,14 @@ export async function fetchSellerRatingSummary(
   }
 }
 
+// Aggregate rating from a list of review rows (pure helper used by the
+// prototype seller-profile variants to derive the header summary).
+export function summarizeRating(reviews: SellerReviewRow[]): SellerRatingSummary {
+  if (reviews.length === 0) return { average: null, count: 0 }
+  const total = reviews.reduce((sum, r) => sum + r.rating, 0)
+  return { average: total / reviews.length, count: reviews.length }
+}
+
 // ---- Writes ----
 
 export interface ReviewResult {

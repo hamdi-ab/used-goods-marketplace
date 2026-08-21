@@ -3,14 +3,26 @@ import { notFound } from "next/navigation"
 import { requireSeller } from "@/lib/auth"
 import { fetchCategories, fetchListing } from "@/lib/listings"
 import { EditListingForm } from "@/components/listings/edit-listing-form"
+import { PrototypeEditPage } from "@/components/listings/prototype-edit-page"
 
 export const dynamic = "force-dynamic"
 
 export default async function EditListingPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ variant?: string }>
 }) {
+  const { variant } = await searchParams
+  const key = variant === "A" || variant === "B" ? (variant as "A" | "B") : null
+
+  // PROTOTYPE — the redesign variant is view-only during review and bypasses
+  // the seller-owner check so ?variant=A|B renders for any reviewer.
+  if (key) {
+    return <PrototypeEditPage variant={key} params={params} />
+  }
+
   const user = await requireSeller()
   const { id } = await params
   const data = await fetchListing(id, { includeSeller: false })

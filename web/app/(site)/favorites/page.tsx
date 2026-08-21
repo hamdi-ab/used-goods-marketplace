@@ -7,6 +7,7 @@ import { nextOffset, parseOffset } from "@/lib/pagination"
 import { Button } from "@/components/ui/button"
 import { ListingCard } from "@/components/listings/listing-card"
 import { FavoriteButton } from "@/components/favorites/favorite-button"
+import { PrototypeFavoritesPage } from "@/components/favorites/prototype-favorites-page"
 
 export const dynamic = "force-dynamic"
 
@@ -15,6 +16,15 @@ export default async function FavoritesPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
+  const { variant } = await searchParams
+  const key = variant === "A" || variant === "B" ? (variant as "A" | "B") : null
+
+  // PROTOTYPE - the redesign variant is view-only during review and bypasses
+  // the auth redirect (see proxy.ts) so ?variant=A|B renders without a session.
+  if (key) {
+    return <PrototypeFavoritesPage variant={key} />
+  }
+
   const user = await requireUser()
   const offset = parseOffset((await searchParams).offset)
   const { listings, hasMore, error } = await fetchFavoriteListings(user.id, {

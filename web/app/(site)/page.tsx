@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
+import { Suspense } from "react"
 
 import { Button } from "@/components/ui/button"
 import { getCurrentUser } from "@/lib/auth"
@@ -9,6 +10,15 @@ import { buildBrowseUrl, nextOffset, parseBrowseParams } from "@/lib/browse"
 import { CategoryCard } from "@/components/categories/category-card"
 import { ListingCard } from "@/components/listings/listing-card"
 import { FavoriteButton } from "@/components/favorites/favorite-button"
+// PROTOTYPE — home-page redesign variants, gated by ?variant= (dev only).
+import {
+  PrototypeSwitcher,
+} from "@/components/home/prototype/switcher"
+import { PROTOTYPE_VARIANTS } from "@/components/home/prototype/variants"
+import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
+import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
+import { VariantA } from "@/components/home/prototype/variant-a"
+import { VariantB } from "@/components/home/prototype/variant-b"
 
 export const metadata: Metadata = {
   title: "Marketplace for trusted second-hand goods",
@@ -66,6 +76,37 @@ export default async function HomePage({
   const favoriteIds = user ? new Set(await fetchFavoriteIds(user.id)) : null
   const { listings, hasMore, error } = await browsePromise
   const categories = await categoriesPromise
+
+  // PROTOTYPE — when a variant is requested, render that home layout with the
+  // same data. The default (no ?variant=) keeps the current production page.
+  if (sp.variant) {
+    const key = PROTOTYPE_VARIANTS.some((v) => v.key === sp.variant)
+      ? (sp.variant as "A" | "B")
+      : "A"
+    return (
+      <>
+        <PrototypeHeader variant={key} />
+        {key === "A" && (
+          <VariantA
+            categories={categories}
+            listings={listings}
+            favoriteIds={favoriteIds}
+          />
+        )}
+        {key === "B" && (
+          <VariantB
+            categories={categories}
+            listings={listings}
+            favoriteIds={favoriteIds}
+          />
+        )}
+        <Suspense>
+          <PrototypeSwitcher />
+        </Suspense>
+        <PrototypeFooter variant={key} />
+      </>
+    )
+  }
 
   return (
     <main className="mx-auto w-full max-w-[1280px] px-4 py-10 sm:px-6 lg:py-14">

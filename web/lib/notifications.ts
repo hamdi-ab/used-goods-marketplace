@@ -30,7 +30,7 @@ const NOTIFICATION_COLUMNS = "id, type, title, body, is_read, metadata, created_
 export async function fetchMyNotifications(
   userId: string,
   client?: Supabase
-): Promise<NotificationRow[]> {
+): Promise<{ notifications: NotificationRow[]; error: string | null }> {
   const supabase = client ?? (await createClient())
 
   const { data, error } = await supabase
@@ -42,10 +42,10 @@ export async function fetchMyNotifications(
 
   if (error) {
     console.error("fetchMyNotifications:", error.message)
-    return []
+    return { notifications: [], error: error.message }
   }
 
-  return (data ?? []) as unknown as NotificationRow[]
+  return { notifications: (data ?? []) as unknown as NotificationRow[], error: null }
 }
 
 /** Unread count for the header badge (head-only COUNT query). */

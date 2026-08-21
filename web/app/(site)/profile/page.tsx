@@ -6,6 +6,7 @@ import { fetchOwnProfile, type OwnProfileRow } from "@/lib/profiles"
 import { fetchMyVerifications } from "@/lib/verifications"
 import { faydaConfigured } from "@/lib/fayda/verification"
 import { ProfileForm } from "@/components/profile/profile-form"
+import { PrototypeProfilePage } from "@/components/profile/prototype-profile-page"
 
 export const metadata: Metadata = {
   title: "Your profile",
@@ -15,12 +16,22 @@ export const metadata: Metadata = {
 export default async function ProfilePage({
   searchParams,
 }: {
-  searchParams: Promise<{ verified?: string; error?: string }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
+  const params = await searchParams
+  const variant = params.variant
+  const key =
+    variant === "A" || variant === "B" ? (variant as "A" | "B") : null
+
+  // PROTOTYPE - the redesign variant is view-only during review and bypasses
+  // the auth redirect (see proxy.ts) so ?variant=A|B renders without a session.
+  if (key) {
+    return <PrototypeProfilePage variant={key} />
+  }
+
   const user = await getCurrentUser()
   if (!user) redirect("/login")
 
-const params = await searchParams
   const [profile, verifications] = await Promise.all([
     fetchOwnProfile(user.id),
     fetchMyVerifications(user.id),
@@ -34,7 +45,7 @@ const params = await searchParams
       faydaAvailable={faydaConfigured()}
       faydaOutcome={
         params.verified === "fayda"
-          ? { ok: !params.error, error: params.error }
+          ? { ok: !params.error, error: typeof params.error === "string" ? params.error : undefined }
           : null
       }
     />

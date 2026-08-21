@@ -86,32 +86,37 @@ const REPORT_JOINS = `${REPORT_COLUMNS},
  seller:profiles!reports_reported_seller_id_fkey(id, full_name, avatar_url, role, trust_score),
  reporter:profiles!reports_reporter_id_fkey(id, full_name, avatar_url)`
 
-/**
- * The reporter's own reports, newest first. Each row carries a denormalised
- * target label so the client can render a compact "you reported X" line
- * without a second round-trip.
- */
-export async function fetchMyReports(
-  userId: string,
-  client?: Supabase
-): Promise<MyReportRow[]> {
-  const supabase = client ?? (await createClient())
+   /**
+   * The reporter's own reports, newest first. Each row carries a denormalised
+   * target label so the client can render a compact "you reported X" line
+   * without a second round-trip. Errors are surfaced (not masked to [])
+   * so callers can show a real error state instead of a lying empty list
+   * (see notifications P1 — fetchMyNotifications set the precedent).
+   */
+  export async function fetchMyReports(
+    userId: string,
+    client?: Supabase
+  ): Promise<{ reports: MyReportRow[]; error: string | null }> {
+    const supabase = client ?? (await createClient())
 
-  const { data, error } = await supabase
-    .from("reports")
-    .select(REPORT_JOINS)
-    .eq("reporter_id", userId)
-    .order("created_at", { ascending: false })
+    const { data, error } = await supabase
+      .from("reports")
+      .select(REPORT_JOINS)
+      .eq("reporter_id", userId)
+      .order("created_at", { ascending: false })
 
-  if (error) {
-    console.error("fetchMyReports:", error.message)
-    return []
+    if (error) {
+      console.error("fetchMyReports:", error.message)
+      return { reports: [], error: error.message }
+    }
+
+    return {
+      reports: ((data ?? []) as unknown as RawReportRow[]).map(
+        normalizeMyReport
+      ),
+      error: null,
+    }
   }
-
-  return (
-    (data ?? []) as unknown as RawReportRow[]
-  ).map(normalizeMyReport)
-}
 
 /**
  * The admin moderation queue: all open reports with the reported item's

@@ -11,6 +11,7 @@ import { formatShortDate, initials } from "@/lib/utils"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { OfferStatusBadge } from "@/components/offers/offer-status-badge"
 import { SellerOfferActions } from "@/components/offers/seller-offer-actions"
+import { PrototypeSellerOffersPage } from "@/components/offers/prototype-seller-offers-page"
 import { SellerPaymentBadge } from "@/components/offers/seller-payment-badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -27,8 +28,25 @@ export default async function SellerOffersPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
+  const sp = await searchParams
+  const { variant } = sp
+  const key = variant === "A" || variant === "B" ? (variant as "A" | "B") : null
+
+  // PROTOTYPE — the redesign variant is view-only during review and bypasses
+  // the auth redirect (see proxy.ts) so ?variant=A|B renders without a session.
+  if (key) {
+    return (
+      <PrototypeSellerOffersPage
+        variant={key}
+        searchParams={Promise.resolve({
+          offset: typeof sp.offset === "string" ? sp.offset : undefined,
+        })}
+      />
+    )
+  }
+
   const user = await requireUser()
-  const offset = parseOffset((await searchParams).offset)
+  const offset = parseOffset(typeof sp.offset === "string" ? sp.offset : undefined)
   const { offers, hasMore, error } = await fetchSellerOffers(user.id, {
     offset,
   })

@@ -65,7 +65,7 @@ describe("notifications constants (#72)", () => {
   it("maps offer/review events to a deep link and report_resolved to none", () => {
     expect(
       notificationHref("offer_received", { listing_id: "listing-1" })
-    ).toBe("/listings/listing-1")
+    ).toBe("/offers/seller")
     expect(notificationHref("offer_accepted", {})).toBe("/offers")
     expect(notificationHref("review_received", {})).toBe("/offers")
     expect(notificationHref("report_resolved", {})).toBeNull()
@@ -92,16 +92,19 @@ describe("notifications lib (#72)", () => {
     ])
     mockCreateClient.mockResolvedValue(s as never)
 
-    const rows = await fetchMyNotifications("user-1")
-    expect(rows).toHaveLength(1)
-    expect(rows[0].title).toBe("New offer received")
-    expect(rows[0].metadata).toEqual({ listing_id: "l1" })
+    const { notifications } = await fetchMyNotifications("user-1")
+    expect(notifications).toHaveLength(1)
+    expect(notifications[0].title).toBe("New offer received")
+    expect(notifications[0].metadata).toEqual({ listing_id: "l1" })
   })
 
-  it("fetchMyNotifications returns [] on a read error", async () => {
+  it("fetchMyNotifications surfaces a read error instead of masking it", async () => {
     const s = script([{ data: null, error: { message: "db down" } }])
     mockCreateClient.mockResolvedValue(s as never)
-    expect(await fetchMyNotifications("user-1")).toEqual([])
+    expect(await fetchMyNotifications("user-1")).toEqual({
+      notifications: [],
+      error: "db down",
+    })
   })
 
   it("fetchUnreadNotificationsCount returns the exact head count", async () => {

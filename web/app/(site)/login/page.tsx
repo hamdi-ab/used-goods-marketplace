@@ -7,11 +7,17 @@ export const metadata: Metadata = {
   description: "Log in to your VinTech Marketplace account.",
 }
 
+const VARIANT_KEYS = ["A", "B"] as const
+type VariantKey = (typeof VARIANT_KEYS)[number]
+
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string }>
+  searchParams: Promise<{ next?: string; variant?: string }>
 }) {
-  const { next } = await searchParams
-  return <LoginForm next={next} />
+  const { next, variant } = await searchParams
+  const key = VARIANT_KEYS.includes(variant as VariantKey)
+    ? (variant as VariantKey)
+    : undefined
+  return <LoginForm next={next} variant={key} />
 }

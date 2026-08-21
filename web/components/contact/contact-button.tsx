@@ -46,7 +46,7 @@ export function ContactButton({
   // Signed-out visitors route through login (with a ?next= back to the page).
   if (!signedIn) {
     return (
-      <Button asChild size="lg">
+      <Button asChild className="h-11">
         <Link href={buildLoginUrl(href)}>
           <MessageCircleIcon className="mr-1.5 size-4" />
           Contact seller
@@ -58,7 +58,7 @@ export function ContactButton({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button size="lg">
+        <Button className="h-11">
           <MessageCircleIcon className="mr-1.5 size-4" />
           Contact seller
         </Button>
