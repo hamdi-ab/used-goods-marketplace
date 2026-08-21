@@ -1,17 +1,14 @@
 import type { Metadata } from "next"
-import type { ReactNode } from "react"
 import Link from "next/link"
 import { FlagIcon, ImageIcon, UserIcon } from "lucide-react"
 
 import { getCurrentUser } from "@/lib/auth"
-import { fetchMyReports } from "@/lib/reports"
-import { REPORT_REASON_LABELS } from "@/lib/reports"
-import type { MyReportRow } from "@/lib/reports"
-import type { ReportStatus } from "@/lib/reports"
+import { fetchMyReports, REPORT_REASON_LABELS, type MyReportRow } from "@/lib/reports"
 import { formatShortDate, cn } from "@/lib/utils"
 import { ReportStatusBadge } from "@/components/reports/report-status-badge"
 import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
 import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
+import { Button } from "@/components/ui/button"
 import { withVariant, type VariantKey } from "@/components/search/prototype-utils"
 
 export const dynamic = "force-dynamic"
@@ -21,74 +18,44 @@ export const metadata: Metadata = {
   description: "Reports you have submitted and their moderation status.",
 }
 
-const SUMMARY: { status: ReportStatus; label: string; tile: string }[] = [
-  { status: "open", label: "Open", tile: "bg-amber-100 text-amber-800" },
-  { status: "resolved", label: "Resolved", tile: "bg-emerald-100 text-emerald-700" },
-  { status: "rejected", label: "Rejected", tile: "bg-red-100 text-red-700" },
+const SUMMARY: {
+  status: "open" | "resolved" | "rejected"
+  label: string
+}[] = [
+  { status: "open", label: "Open" },
+  { status: "resolved", label: "Resolved" },
+  { status: "rejected", label: "Rejected" },
 ]
 
+// Tinted backgrounds keyed by status so the summary strip is glanceable while
+// the count itself stays `text-foreground` for a safe foreground-on-tint ratio.
+const STATUS_TILE_BG: Record<(typeof SUMMARY)[number]["status"], string> = {
+  open: "bg-amber-100",
+  resolved: "bg-emerald-100",
+  rejected: "bg-red-100",
+}
+
+function targetHref(row: MyReportRow, variant: VariantKey): string | null {
+  if (row.target_type === "listing") {
+    return withVariant(`/listings/${row.target_id}`, variant)
+  }
+  return withVariant(`/users/${row.target_id}`, variant)
+}
+
 // PROTOTYPE — reports redesign: the reporter's queue with a real status
-// summary strip and target-type icons so open flags stand out. View-only
-// during review: signed-out reviewers see the empty state.
+// summary strip and target-type icons so open flags stand out. Fetch surfaces a
+// real error so a DB blip shows a recovery action instead of a lying empty
+// state (mirrors the notifications inbox). Signed-out reviewers see the empty
+// state; signed-in reviewers get the full summary strip + target links.
 export async function PrototypeReportsPage({
   variant,
 }: {
   variant: VariantKey
 }) {
   const user = await getCurrentUser()
-  const reports = user ? await fetchMyReports(user.id) : []
-
-  const summary = (row: MyReportRow): ReactNode => {
-    const isListing = row.target_type === "listing"
-    return (
-      <li
-        key={row.id}
-        className={cn(
-          "relative rounded-2xl border bg-card p-4 shadow-sm",
-          row.status === "open" &&
-            (variant === "B"
-              ? "border-[#2563EB]/40 bg-[#EEF4FF]/60"
-              : "border-amber-300/60 bg-amber-50/50")
-        )}
-      >
-        <div className="flex items-start gap-4">
-          <span
-            className={cn(
-              "flex size-10 shrink-0 items-center justify-center rounded-full",
-              isListing
-                ? "bg-[#2563EB]/10 text-[#2563EB]"
-                : "bg-violet-100 text-violet-700"
-            )}
-          >
-            {isListing ? (
-              <ImageIcon className="size-5" />
-            ) : (
-              <UserIcon className="size-5" />
-            )}
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate font-medium text-foreground">
-              {row.target_type === "listing"
-                ? `Listing: ${row.target_title ?? "Untitled"}`
-                : `Seller: ${row.target_title ?? "Anonymous"}`}
-            </p>
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              {REPORT_REASON_LABELS[row.reason]}
-              {row.note ? (
-                <span className="ml-1.5 text-xs text-muted-foreground/80">
-                  — {row.note}
-                </span>
-              ) : null}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Submitted {formatShortDate(row.created_at)}
-            </p>
-          </div>
-          <ReportStatusBadge status={row.status} />
-        </div>
-      </li>
-    )
-  }
+  const { reports, error } = user
+    ? await fetchMyReports(user.id)
+    : { reports: [], error: null }
 
   return (
     <>
@@ -104,8 +71,8 @@ export async function PrototypeReportsPage({
                 className={cn(
                   "rounded-full px-2.5 py-1 text-xs font-semibold",
                   variant === "B"
-                    ? "bg-[#2563EB]/10 text-[#2563EB]"
-                    : "bg-muted text-muted-foreground"
+                    ? "bg-[#2563EB]/10 text-[#1D4ED8]"
+                    : "bg-muted text-foreground"
                 )}
               >
                 {reports.filter((r) => r.status === "open").length} open
@@ -120,7 +87,20 @@ export async function PrototypeReportsPage({
           </Link>
         </div>
 
-        {reports.length === 0 ? (
+        {error ? (
+          <div className="flex flex-col items-center rounded-2xl border border-border bg-muted/30 px-4 py-16 text-center">
+            <FlagIcon className="mb-4 size-8 text-muted-foreground/70" />
+            <h2 className="font-heading text-lg font-semibold">
+              Couldn&apos;t load your reports
+            </h2>
+            <p className="mt-1 max-w-sm text-sm text-foreground/70">
+              Something went wrong on our end. Please try again.
+            </p>
+            <Button asChild className="mt-4 h-11">
+              <Link href={withVariant("/reports", variant)}>Try again</Link>
+            </Button>
+          </div>
+        ) : reports.length === 0 ? (
           <div
             className={cn(
               "flex flex-col items-center rounded-2xl border px-4 py-20 text-center",
@@ -139,38 +119,108 @@ export async function PrototypeReportsPage({
               Use the Report button on a listing or seller profile to flag
               content that violates the community guidelines.
             </p>
-            <Link
-              href={withVariant("/browse", variant)}
-              className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-            >
-              Browse listings
-            </Link>
+            <Button asChild size="lg" className="mt-4 h-11">
+              <Link href={withVariant("/search", variant)}>Browse listings</Link>
+            </Button>
           </div>
         ) : (
           <>
-            <div className="mb-6 grid grid-cols-3 gap-3">
+            <ul
+              className="mb-6 grid grid-cols-3 gap-3"
+              aria-label="Report status summary"
+            >
               {SUMMARY.map((s) => {
                 const count = reports.filter((r) => r.status === s.status).length
                 return (
-                  <div
+                  <li
                     key={s.status}
                     className={cn(
-                      "rounded-2xl border border-border bg-card px-4 py-3 shadow-sm",
-                      variant === "B" && s.status === "open" && "border-[#2563EB]/30"
+                      "rounded-2xl border border-border px-4 py-3 text-center shadow-sm",
+                      STATUS_TILE_BG[s.status]
                     )}
                   >
-                    <p className={cn("text-2xl font-extrabold", s.tile, "rounded-full px-2 py-0.5 text-sm")}>
+                    <p className="text-2xl font-extrabold text-foreground">
                       {count}
                     </p>
-                    <p className="mt-1 text-sm font-medium text-muted-foreground">
+                    <p className="mt-0.5 text-sm font-medium text-muted-foreground">
                       {s.label}
                     </p>
-                  </div>
+                  </li>
                 )
               })}
-            </div>
+            </ul>
 
-            <ul className="flex flex-col gap-3">{reports.map(summary)}</ul>
+            <ul className="flex flex-col gap-3">
+              {reports.map((row) => {
+                const targetHref_ = targetHref(row, variant)
+                const isListing = row.target_type === "listing"
+                return (
+                  <li
+                    key={row.id}
+                    className={cn(
+                      "relative rounded-2xl border bg-card p-4 shadow-sm transition",
+                      row.status === "open" &&
+                        (variant === "B"
+                          ? "border-[#2563EB]/40 bg-[#EEF4FF]/60"
+                          : "border-amber-300/60 bg-amber-50/50")
+                    )}
+                  >
+                    <div className="flex items-start gap-4">
+                      <span
+                        className={cn(
+                          "flex size-10 shrink-0 items-center justify-center rounded-full",
+                            isListing
+                            ? "bg-[#2563EB]/10 text-[#2563EB]"
+                            : "bg-amber-100 text-amber-800"
+                        )}
+                      >
+                        {isListing ? (
+                          <ImageIcon className="size-5" />
+                        ) : (
+                          <UserIcon className="size-5" />
+                        )}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p
+                          className={cn(
+                            "truncate text-sm",
+                            row.status === "open"
+                              ? "font-semibold text-foreground"
+                              : "font-medium text-foreground"
+                          )}
+                        >
+                          {row.target_type === "listing"
+                            ? `Listing: ${row.target_title ?? "Untitled"}`
+                            : `Seller: ${row.target_title ?? "Anonymous"}`}
+                        </p>
+                        <p className="mt-0.5 text-sm text-muted-foreground">
+                          {REPORT_REASON_LABELS[row.reason]}
+                          {row.note ? (
+                            <span className="ml-1.5 text-xs text-muted-foreground/80">
+                              — {row.note}
+                            </span>
+                          ) : null}
+                        </p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          Submitted {formatShortDate(row.created_at)}
+                        </p>
+                      </div>
+                      <div className="flex shrink-0 items-center gap-2">
+                        {targetHref_ ? (
+                          <Link
+                            href={targetHref_}
+                            className="inline-flex h-9 min-w-16 items-center justify-center rounded-lg px-3 text-sm font-medium text-[#2563EB] hover:bg-[#2563EB]/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB]/60"
+                          >
+                            View
+                          </Link>
+                        ) : null}
+                        <ReportStatusBadge status={row.status} />
+                      </div>
+                    </div>
+                  </li>
+                )
+              })}
+            </ul>
           </>
         )}
       </main>
