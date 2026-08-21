@@ -39,7 +39,7 @@ export function MakeOfferButton({
   // back to this listing) instead of a form that would just redirect.
   if (!signedIn) {
     return (
-      <Button asChild size="lg">
+      <Button asChild className="h-11">
         <Link href={buildLoginUrl(pathname)}>Make an offer</Link>
       </Button>
     )
@@ -48,7 +48,7 @@ export function MakeOfferButton({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="lg">Make an offer</Button>
+        <Button className="h-11">Make an offer</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <OfferModal
