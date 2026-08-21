@@ -7,9 +7,10 @@ import { fetchMyVerifications } from "@/lib/verifications"
 
 import { PrototypeProfileContent } from "./prototype-profile-content"
 
-// PROTOTYPE — profile-page redesign (?variant=A|B, dev only). View-only during
-// review: signed-out visitors see an empty state instead of being redirected,
-// so the proxy's ?variant bypass is enough to preview the layout.
+// PROTOTYPE — profile-page redesign (?variant=A|B, dev only). Authenticated users
+// get the live edit form (updateProfile + uploadAvatar via useActionState); signed-out
+// visitors see an empty state so the proxy's ?variant bypass is enough to preview
+// the layout. Option A = full-width Profile Hero; Option B = Identity Sidebar + form.
 export async function PrototypeProfilePage({ variant }: { variant: VariantKey }) {
   const user = await getCurrentUser()
 

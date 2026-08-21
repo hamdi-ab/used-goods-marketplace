@@ -113,7 +113,7 @@ export function PrototypeProfileContent({
       <Button
         type="button"
         variant="outline"
-        size="sm"
+        className="h-11"
         onClick={() => fileRef.current?.click()}
         disabled={avatarUploading || pending}
       >
@@ -334,7 +334,7 @@ export function PrototypeProfileContent({
                   <p className="text-sm text-green-600">Profile updated.</p>
                 ) : null}
 
-                <Button type="submit" disabled={pending} className="w-fit">
+                <Button type="submit" disabled={pending} className="w-fit h-11">
                   {pending ? "Saving…" : "Save changes"}
                 </Button>
               </form>
@@ -520,7 +520,7 @@ export function PrototypeProfileContent({
                 <p className="text-sm text-green-600">Profile updated.</p>
               ) : null}
 
-              <Button type="submit" disabled={pending} className="w-fit">
+              <Button type="submit" disabled={pending} className="w-fit h-11">
                 {pending ? "Saving…" : "Save changes"}
               </Button>
             </form>
