@@ -119,9 +119,12 @@ export async function PrototypeReportsPage({
               Use the Report button on a listing or seller profile to flag
               content that violates the community guidelines.
             </p>
-            <Button asChild size="lg" className="mt-4 h-11">
-              <Link href={withVariant("/search", variant)}>Browse listings</Link>
-            </Button>
+            <Link
+              href={withVariant("/search", variant)}
+              className="mt-4 inline-flex h-11 items-center justify-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              Browse listings
+            </Link>
           </div>
         ) : (
           <>

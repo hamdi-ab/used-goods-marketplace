@@ -71,12 +71,12 @@ export function PrototypeBrowsePage({
               <p className="mt-1 max-w-sm text-sm text-muted-foreground">
                 Try a different keyword, or widen your filters.
               </p>
-              <Link
-                href={withVariant("/search", variant)}
-                className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
-              >
-                Clear all filters
-              </Link>
+            <Link
+              href={withVariant("/search", variant)}
+              className="mt-4 inline-flex h-11 items-center justify-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              Clear all filters
+            </Link>
             </div>
           ) : (
             <>
