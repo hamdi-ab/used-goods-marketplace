@@ -21,9 +21,7 @@ export function SellerOfferActions({ offer }: { offer: SellerOfferRow }) {
           ? "Countered — waiting for the buyer to respond."
           : offer.status === "accepted"
             ? "Accepted — the listing is now sold."
-            : offer.status === "expired"
-              ? "Expired — the offer lapsed and is no longer open."
-              : "Declined."}
+            : "Declined."}
       </p>
     )
   }
@@ -53,26 +51,40 @@ export function SellerOfferActions({ offer }: { offer: SellerOfferRow }) {
               required
             />
           </div>
-          <Button type="submit" name="action" value="counter" disabled={pending}>
+          <Button
+            type="submit"
+            name="action"
+            value="counter"
+            disabled={pending}
+            className="h-11"
+          >
             Send counter
           </Button>
           <Button
             type="button"
             variant="ghost"
             onClick={() => setCountering(false)}
+            className="h-11"
           >
             Cancel
           </Button>
         </div>
       ) : (
         <div className="flex flex-wrap gap-2">
-          <Button type="submit" name="action" value="accept" disabled={pending}>
+          <Button
+            type="submit"
+            name="action"
+            value="accept"
+            disabled={pending}
+            className="h-11"
+          >
             Accept
           </Button>
           <Button
             type="button"
             variant="outline"
             onClick={() => setCountering(true)}
+            className="h-11"
           >
             Counter
           </Button>
@@ -82,6 +94,7 @@ export function SellerOfferActions({ offer }: { offer: SellerOfferRow }) {
             value="decline"
             variant="ghost"
             disabled={pending}
+            className="h-11"
           >
             Decline
           </Button>
