@@ -50,12 +50,12 @@ export async function PrototypeDetailPage({
           <p className="mt-2 text-sm text-muted-foreground">
             It may have been sold or removed.
           </p>
-          <Link
-            href={withVariant("/search", variant)}
-            className="mt-6 inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80"
-          >
-            Browse listings
-          </Link>
+            <Link
+              href={withVariant("/search", variant)}
+              className="mt-6 inline-flex h-11 items-center justify-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              Browse listings
+            </Link>
         </main>
         <PrototypeFooter variant={variant} />
       </>
