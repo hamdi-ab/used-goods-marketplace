@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { BadgeCheck, Handshake, Sparkles } from "lucide-react"
+import { BadgeCheck, Handshake, ShieldCheck, Sparkles, Star } from "lucide-react"
 
 import type { Category, BrowseListing } from "@/lib/listings"
 import { Button } from "@/components/ui/button"
@@ -50,9 +50,9 @@ const STEPS = [
 ]
 
 const HERO_STATS = [
-  { value: "1–5★", label: "seller reviews" },
-  { value: "Live", label: "favorite & offer tracking" },
-  { value: "Free", label: "to list and browse" },
+  { icon: Star, text: "1–5★ seller reviews on every trusted seller" },
+  { icon: BadgeCheck, text: "Live favorite & offer tracking" },
+  { icon: ShieldCheck, text: "Free to list and browse" },
 ]
 
 // PROTOTYPE — Variant A "classic hero" (eBay-premium landing). Full-bleed
@@ -92,14 +92,14 @@ export function VariantA({ categories, listings, favoriteIds }: VariantAProps) {
                 <Link href="/sell">Start selling</Link>
               </Button>
             </div>
-            <dl className="mt-10 grid max-w-md grid-cols-3 gap-4 border-t border-white/15 pt-6">
+            <ul className="mt-10 max-w-md space-y-2.5 border-t border-white/15 pt-6">
               {HERO_STATS.map((s) => (
-                <div key={s.label}>
-                  <dt className="font-heading text-xl font-semibold">{s.value}</dt>
-                  <dd className="mt-0.5 text-xs text-white/70">{s.label}</dd>
-                </div>
+                <li key={s.text} className="flex items-center gap-2 text-sm text-white/85">
+                  <s.icon className="size-4 shrink-0 text-white/70" />
+                  {s.text}
+                </li>
               ))}
-            </dl>
+            </ul>
           </div>
 
           <div className="relative mx-auto w-full max-w-lg lg:max-w-none">
