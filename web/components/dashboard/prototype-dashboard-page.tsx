@@ -60,15 +60,16 @@ export async function PrototypeDashboardPage({
   }
 
   const canSell = user.role === "seller" || user.role === "admin"
-  const [listings, openOffers, favorites, profile, buyerOffers, unread] =
+  const [listingsPage, openOffers, favorites, profile, buyerOffers, unread] =
     await Promise.all([
-      canSell ? fetchSellerListings(user.id) : Promise.resolve([]),
+      canSell ? fetchSellerListings(user.id) : Promise.resolve({ listings: [] }),
       countIncomingOffers(user.id),
       fetchFavoriteIds(user.id),
       fetchOwnProfile(user.id),
       canSell ? Promise.resolve(null) : fetchBuyerOffers(user.id),
       fetchUnreadNotificationsCount(user.id),
     ])
+  const listings = listingsPage?.listings ?? []
 
   const firstName = user.fullName?.split(" ")[0] ?? "there"
   const liveListings = listings.filter((l) => l.status === "published").length

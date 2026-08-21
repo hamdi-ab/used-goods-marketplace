@@ -5,7 +5,12 @@ vi.mock("@/lib/supabase/server", () => ({
 }))
 
 import { createClient } from "@/lib/supabase/server"
-import { restoreUserRow, suspendUserRow } from "@/lib/admin"
+import {
+  fetchAdminListings,
+  fetchAdminUsers,
+  restoreUserRow,
+  suspendUserRow,
+} from "@/lib/admin"
 
 const mockCreateClient = vi.mocked(createClient)
 
@@ -106,6 +111,112 @@ describe("admin suspend / restore (#86)", () => {
     expect(await restoreUserRow("user-1")).toEqual({
       ok: false,
       error: "db down",
+    })
+  })
+})
+
+describe("admin read pages (P1.14 #81)", () => {
+  // The list fetchers accept an optional client as their last argument (the
+  // same injection the listings-reads tests use), so paging logic runs against
+  // a lightweight fake without touching the module mock above.
+  const builder = (result: unknown): Record<string, unknown> => {
+    const b: Record<string, unknown> = {
+      select: () => b,
+      is: () => b,
+      order: () => b,
+      range: () => b,
+      then: (resolve: (value: unknown) => unknown) =>
+        Promise.resolve(result).then(resolve),
+    }
+    return b
+  }
+  const db = (from: (table: string) => unknown) => ({ from } as never)
+
+  describe("fetchAdminUsers", () => {
+    it("maps rows and derives hasMore from the server count", async () => {
+      const client = db(() =>
+        builder({
+          data: [
+            {
+              id: "u1",
+              full_name: "Alem",
+              role: "seller",
+              city: null,
+              phone: null,
+              telegram_username: null,
+              trust_score: 80,
+              profile_completion: 60,
+              phone_verified: true,
+              fayda_verified: false,
+              suspended_at: null,
+              created_at: "2026-01-01",
+            },
+          ],
+          error: null,
+          count: 30,
+        })
+      )
+      const result = await fetchAdminUsers({}, client)
+      expect(result.users[0].full_name).toBe("Alem")
+      expect(result.count).toBe(30)
+      expect(result.hasMore).toBe(true)
+    })
+
+    it("returns an empty page when the query fails", async () => {
+      const client = db(() =>
+        builder({ data: null, error: { message: "db down" }, count: null })
+      )
+      const result = await fetchAdminUsers({}, client)
+      expect(result).toMatchObject({
+        users: [],
+        hasMore: false,
+        error: "db down",
+      })
+    })
+  })
+
+  describe("fetchAdminListings", () => {
+    it("maps rows with the seller join and numeric price", async () => {
+      const client = db(() =>
+        builder({
+          data: [
+            {
+              id: "l1",
+              title: "Chair",
+              price: "100",
+              condition: "Fair",
+              status: "published",
+              city: "Bole",
+              view_count: 3,
+              favorite_count: 1,
+              sold_to_buyer_id: null,
+              created_at: "2026-01-01",
+              published_at: "2026-01-01",
+              seller: [{ id: "s1", full_name: "Alem" }],
+            },
+          ],
+          error: null,
+          count: 1,
+        })
+      )
+      const result = await fetchAdminListings({}, client)
+      expect(result.listings[0].title).toBe("Chair")
+      expect(result.listings[0].price).toBe(100)
+      expect(result.listings[0].seller?.full_name).toBe("Alem")
+      expect(result.count).toBe(1)
+      expect(result.hasMore).toBe(false)
+    })
+
+    it("returns an empty page when the query fails", async () => {
+      const client = db(() =>
+        builder({ data: null, error: { message: "db down" }, count: null })
+      )
+      const result = await fetchAdminListings({}, client)
+      expect(result).toMatchObject({
+        listings: [],
+        hasMore: false,
+        error: "db down",
+      })
     })
   })
 })

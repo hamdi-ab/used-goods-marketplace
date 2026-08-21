@@ -264,27 +264,48 @@ describe("fetchSimilarListings (#78)", () => {
   })
 })
 
-describe("fetchSellerListings", () => {
-  it("maps the cover (lowest display_order) and numeric price", async () => {
-    const row = {
-      ...listingRow,
-      price: "100",
-      images: [
-        { image_url: "b.jpg", display_order: 1 },
-        { image_url: "a.jpg", display_order: 0 },
-      ],
-    }
-    const client = db(() => builder({ data: [row], error: null }))
-    const result = await fetchSellerListings("seller-1", client)
-    expect(result[0].price).toBe(100)
-    expect(result[0].cover_image_url).toBe("a.jpg")
+describe("fetchSellerListings (P1.14 #81)", () => {
+  const sellerRow = (overrides: Record<string, unknown> = {}) => ({
+    ...listingRow,
+    price: "100",
+    images: [
+      { image_url: "b.jpg", display_order: 1 },
+      { image_url: "a.jpg", display_order: 0 },
+    ],
+    ...overrides,
   })
 
-  it("returns an empty list when the query fails", async () => {
+  it("maps the cover (lowest display_order), numeric price, and the count", async () => {
     const client = db(() =>
-      builder({ data: null, error: { message: "db down" } })
+      builder({ data: [sellerRow()], error: null, count: 1 })
     )
-    expect(await fetchSellerListings("seller-1", client)).toEqual([])
+    const result = await fetchSellerListings("seller-1", {}, client)
+    expect(result.listings[0].price).toBe(100)
+    expect(result.listings[0].cover_image_url).toBe("a.jpg")
+    expect(result.count).toBe(1)
+    expect(result.hasMore).toBe(false)
+  })
+
+  it("derives hasMore from the server count", async () => {
+    const client = db(() =>
+      builder({ data: [sellerRow()], error: null, count: 25 })
+    )
+    const result = await fetchSellerListings("seller-1", {}, client)
+    expect(result.listings.length).toBe(1)
+    expect(result.hasMore).toBe(true)
+  })
+
+  it("returns an empty page when the query fails", async () => {
+    const client = db(() =>
+      builder({ data: null, error: { message: "db down" }, count: null })
+    )
+    const result = await fetchSellerListings("seller-1", {}, client)
+    expect(result).toMatchObject({
+      listings: [],
+      count: null,
+      hasMore: false,
+      error: "db down",
+    })
   })
 })
 

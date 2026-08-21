@@ -6,6 +6,8 @@ import { SparklesIcon, XIcon } from "lucide-react"
 import type { Category } from "@/lib/listings/constants"
 import type { AIListingSuggestion } from "@/lib/ai/constants"
 import { generateListingSuggestionsAction } from "@/app/actions/ai"
+import { isAtCap } from "@/lib/plans/constants"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
@@ -19,6 +21,8 @@ export interface AiAssistProps {
   description?: string
   /** Apply the accepted suggestion to the form's controlled fields. */
   onApply: (suggestion: AIListingSuggestion) => void
+  /** Live n/3 AI-credit count rendered as a chip beside the AI-assist button (T28). */
+  credits?: { used: number; limit: number | null }
 }
 
 type AiState =
@@ -85,6 +89,7 @@ export function AiAssist({
   title,
   description,
   onApply,
+  credits,
 }: AiAssistProps) {
   const [state, setState] = useState<AiState>({ phase: "idle" })
   const canRun = photos.length > 0 && state.phase !== "loading"
@@ -110,16 +115,26 @@ export function AiAssist({
 
   return (
     <div className="mt-4">
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={() => run()}
-        disabled={!canRun}
-      >
-        <SparklesIcon className="mr-2 size-4" />
-        {state.phase === "loading" ? "Generating…" : "AI Assist"}
-      </Button>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => run()}
+          disabled={!canRun}
+        >
+          <SparklesIcon className="mr-2 size-4" />
+          {state.phase === "loading" ? "Generating…" : "AI Assist"}
+        </Button>
+
+        {credits ? (
+          <Badge
+            variant={isAtCap(credits.used, credits.limit) ? "default" : "secondary"}
+          >
+            {credits.used}/{credits.limit ?? "∞"} credits
+          </Badge>
+        ) : null}
+      </div>
 
       {state.phase === "unavailable" ? (
         <p className="mt-2 text-sm text-muted-foreground">{state.message}</p>

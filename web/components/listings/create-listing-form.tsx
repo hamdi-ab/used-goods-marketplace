@@ -20,8 +20,11 @@ function FieldError({ message }: { message: string | undefined }) {
 
 export function CreateListingForm({
   categories,
+  aiCredits,
 }: {
   categories: Category[]
+  /** Live n/3 AI-credit count for the chip (T28). Resets on the 1st of the month. */
+  aiCredits?: { used: number; limit: number | null }
 }) {
   const router = useRouter()
   const [state, formAction, pending] = useActionState(createListing, {})
@@ -116,24 +119,25 @@ export function CreateListingForm({
               ))}
             </div>
           ) : null}
-
-          {photoFiles.length > 0 ? (
-            <AiAssist
-              categories={categories}
-              photos={photoFiles}
-              title={title}
-              description={description}
-              onApply={(s) => {
-                setTitle(s.title)
-                setDescription(s.description)
-                if (s.categoryId) setCategoryId(s.categoryId)
-                if (s.condition) setCondition(s.condition)
-                setAiAssisted(true)
-              }}
-            />
-          ) : null}
         </CardContent>
       </Card>
+
+      {photoFiles.length > 0 ? (
+        <AiAssist
+          categories={categories}
+          photos={photoFiles}
+          title={title}
+          description={description}
+          credits={aiCredits}
+          onApply={(s) => {
+            setTitle(s.title)
+            setDescription(s.description)
+            if (s.categoryId) setCategoryId(s.categoryId)
+            if (s.condition) setCondition(s.condition)
+            setAiAssisted(true)
+          }}
+        />
+      ) : null}
 
       <Card className="mb-6">
         <CardHeader>

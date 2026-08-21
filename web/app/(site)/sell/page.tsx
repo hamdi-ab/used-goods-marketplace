@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 
 import { requireSeller } from "@/lib/auth"
 import { fetchCategories } from "@/lib/listings"
+import { fetchAccountUsage } from "@/lib/usage"
 import { CreateListingForm } from "@/components/listings/create-listing-form"
 
 export const metadata: Metadata = {
@@ -10,8 +11,11 @@ export const metadata: Metadata = {
 }
 
 export default async function SellPage() {
-  await requireSeller()
+  const seller = await requireSeller()
+
   const categories = await fetchCategories()
+
+  const usage = await fetchAccountUsage(seller.id)
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
@@ -22,7 +26,13 @@ export default async function SellPage() {
         List your item once, reach buyers across Addis Ababa.
       </p>
 
-      <CreateListingForm categories={categories} />
+      <CreateListingForm
+        categories={categories}
+        aiCredits={{
+          used: usage.aiGenerations.used,
+          limit: usage.aiGenerations.limit,
+        }}
+      />
     </main>
   )
 }

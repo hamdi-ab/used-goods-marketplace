@@ -48,7 +48,8 @@ export async function PrototypeSellerProfilePage({
 
   const role = (profile.role ?? "buyer") as UserRole
   const roleLabel = ROLE_LABELS[role] ?? "Buyer"
-  const reviews = await fetchSellerReviews(id)
+  const reviewsPage = await fetchSellerReviews(id)
+  const reviews = reviewsPage.reviews
   const rating = summarizeRating(reviews)
   const user = await getCurrentUser()
   const contactInfo = user ? await fetchSellerContactInfo(id) : null

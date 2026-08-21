@@ -2,11 +2,16 @@ import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
 import type { Supabase } from "@/lib/supabase/types"
-import { isValidUuid } from "@/lib/listings/constants"
+import { isValidUuid } from "@/lib/uuid"
 import type { BrowseListing } from "@/lib/listings/constants"
 import { mapNestedBrowseListing } from "@/lib/listings/browse-mapper"
 import type { NestedBrowseRow } from "@/lib/listings/browse-mapper"
 import { toggleFavoriteState } from "@/lib/favorites/constants"
+import {
+  pagedHasMore,
+  resolveWindow,
+  type PagingArgs,
+} from "@/lib/pagination"
 
 export * from "@/lib/favorites/constants"
 
@@ -30,26 +35,39 @@ export async function fetchFavoriteIds(
 
 // The favorites feed: rows are joined against listings, so RLS already drops
 // listings that are no longer readable (unpublished, deleted, sold). Only
-// still-available favorites are returned, most recently favorited first.
+// still-available favorites are returned, most recently favorited first, one
+// PAGE_SIZE window at a time (P1.14, #81). `hasMore` is derived from the
+// server count so the UI can stop rendering "Load more" without guessing.
+export interface FavoritesPage {
+  listings: BrowseListing[]
+  count: number | null
+  hasMore: boolean
+  error: string | null
+}
+
 export async function fetchFavoriteListings(
   userId: string,
+  args: PagingArgs = {},
   client?: Supabase
-): Promise<{ listings: BrowseListing[]; error: string | null }> {
+): Promise<FavoritesPage> {
   const supabase = client ?? (await createClient())
-  const { data, error } = await supabase
+  const { limit, offset } = resolveWindow(args)
+  const { data, error, count } = await supabase
     .from("favorites")
     .select(
       `created_at,
         listing:listings(id, title, price, condition, city, published_at,
           seller:profiles!listings_seller_id_fkey(id, full_name, avatar_url, role, trust_score, phone_verified, fayda_verified),
-          images:listing_images(id, image_url, display_order))`
+          images:listing_images(id, image_url, display_order))`,
+      { count: "exact" }
     )
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1)
 
   if (error) {
     console.error("fetchFavoriteListings:", error.message)
-    return { listings: [], error: error.message }
+    return { listings: [], count, hasMore: false, error: error.message }
   }
 
   // supabase-js without generated types types embedded resources as arrays,
@@ -64,7 +82,12 @@ export async function fetchFavoriteListings(
     .filter((listing): listing is NestedBrowseRow => listing !== null)
     .map(mapNestedBrowseListing)
 
-  return { listings, error: null }
+  return {
+    listings,
+    count,
+    hasMore: pagedHasMore(offset, listings.length, count),
+    error: null,
+  }
 }
 
 // ---- Writes (called by the toggle server action) ----
