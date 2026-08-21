@@ -278,6 +278,7 @@ export async function PrototypeEditPage({
               <Button
                 type="button"
                 disabled
+                className="h-11"
                 title="Prototype preview — edits aren't saved yet"
               >
                 Save changes
@@ -286,6 +287,7 @@ export async function PrototypeEditPage({
                 type="button"
                 variant="destructive"
                 disabled
+                className="h-11"
                 title="Prototype preview — edits aren't saved yet"
               >
                 Archive listing
