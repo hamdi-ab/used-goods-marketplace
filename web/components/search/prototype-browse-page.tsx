@@ -58,7 +58,7 @@ export function PrototypeBrowsePage({
               </p>
               <Link
                 href={withVariant(buildSearchUrl(filters), variant)}
-                className="mt-2 inline-block text-sm font-medium text-primary underline"
+                className="mt-2 inline-flex h-11 items-center justify-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 Retry
               </Link>

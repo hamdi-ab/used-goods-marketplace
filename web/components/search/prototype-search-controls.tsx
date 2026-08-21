@@ -317,6 +317,7 @@ export function PrototypeSearchControls({
                   type="button"
                   variant="outline"
                   size="sm"
+                  className="h-10"
                   onClick={() => {
                     setCondition("")
                     setMinPrice("")
@@ -330,8 +331,8 @@ export function PrototypeSearchControls({
                 <Button
                   type="submit"
                   size="sm"
+                  className="h-11"
                   disabled={isPending}
-                  className="flex-1"
                 >
                   Apply
                 </Button>
@@ -384,6 +385,7 @@ export function PrototypeSearchControls({
             type="button"
             variant="ghost"
             size="sm"
+            className="h-10"
             onClick={() => {
               setQ("")
               setCondition("")
