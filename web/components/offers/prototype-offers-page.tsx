@@ -34,9 +34,10 @@ export async function PrototypeOffersPage({
   variant: VariantKey;
   searchParams: Promise<{ offset?: string }>;
 }) {
-  // PROTOTYPE — the redesign variant is view-only during review, so it bypasses
-  // the seller/user gate: an unauthenticated reviewer simply sees the empty
-  // state. Authenticated reviewers see their own offers on the same path.
+  // PROTOTYPE — the redesign variant (?variant=A|B, dev only). Authenticated
+  // buyers see their own offers with the live Accept/Decline counter actions;
+  // an unauthenticated reviewer simply sees the empty state (getCurrentUser
+  // is used in place of requireUser so the variant renders without a session).
   const user = await getCurrentUser();
   const { offset: raw } = await searchParams;
   const offset = parseOffset(raw);
@@ -76,7 +77,7 @@ export async function PrototypeOffersPage({
         </p>
         <Link
           href={withVariant("/", variant)}
-          className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+          className="mt-4 inline-flex h-11 items-center justify-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           Retry
         </Link>
@@ -114,7 +115,7 @@ export async function PrototypeOffersPage({
         </p>
         <Link
           href={withVariant("/", variant)}
-          className="mt-4 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
+          className="mt-4 inline-flex h-11 items-center justify-center rounded-lg bg-primary px-5 text-sm font-medium text-primary-foreground hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           Browse listings
         </Link>
