@@ -25,9 +25,7 @@ type FilterKey = (typeof FILTERS)[number]["key"]
 
 function ListingRow({ listing }: { listing: SellerListingRow }) {
   const [state, action, pending] = useActionState(deleteListing, {})
-  const [boostState, boostAction, boostPending] = useActionState(boostListing, {
-    ok: true,
-  })
+  const [boostState, boostAction, boostPending] = useActionState(boostListing, {})
   const [imgError, setImgError] = useState(false)
   const [confirming, setConfirming] = useState(false)
 
@@ -168,6 +166,15 @@ function ListingRow({ listing }: { listing: SellerListingRow }) {
           ) : state.message ? (
             <p role="alert" className="w-full text-sm text-destructive">
               {state.message}
+            </p>
+          ) : null}
+          {boostState.ok && !boostState.message ? (
+            <p
+              role="status"
+              className="w-full text-sm font-medium text-emerald-700"
+            >
+              Listing boosted — it will float to the top of search for the
+              boost window.
             </p>
           ) : null}
           {boostState.message && !boostState.ok ? (

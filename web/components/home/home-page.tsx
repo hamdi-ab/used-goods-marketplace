@@ -1,6 +1,6 @@
 import Image from "next/image"
 import Link from "next/link"
-import { ArrowRight, BadgeCheck, Quote, ShieldCheck, Star } from "lucide-react"
+import { ArrowRight, BadgeCheck, Quote, ShieldCheck, Sparkles, Star, TrendingUp, Zap } from "lucide-react"
 
 import type { Category, BrowseListing } from "@/lib/listings"
 import { Button } from "@/components/ui/button"
@@ -182,6 +182,75 @@ export function HomePage({ categories, listings, favoriteIds }: HomePageProps) {
           <p className="mt-3 text-sm text-muted-foreground">
             Dawit M. &middot; Buyer, Piassa
           </p>
+        </div>
+      </section>
+
+      <section className="mt-16">
+        <div className="mb-8 text-center">
+          <p className="text-xs font-semibold uppercase tracking-wider text-primary">
+            Earn more, sell more
+          </p>
+          <h2 className="mt-2 font-heading text-3xl font-bold tracking-tight">
+            Free to start. Grow when you are ready.
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+            Three levers grow with you — AI credits, listing boosts, and Pro
+            capacity. The core marketplace stays free.
+          </p>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="rounded-xl border bg-card p-6">
+            <div className="mb-4 flex size-10 items-center justify-center rounded-lg bg-primary/10">
+              <Sparkles className="size-5 text-primary" />
+            </div>
+            <p className="font-semibold">AI credits</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Auto-write titles, descriptions, and price insights. 3 / month on
+              free.
+            </p>
+            <p className="mt-3 text-sm font-semibold text-primary">
+              Pro: 30 / month
+            </p>
+          </div>
+          <div className="rounded-xl border bg-card p-6">
+            <div className="mb-4 flex size-10 items-center justify-center rounded-lg bg-primary/10">
+              <Zap className="size-5 text-primary" />
+            </div>
+            <p className="font-semibold">Listing boost</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Pin your listing to the top of search for 3 days or 7 days — paid
+              off-platform.
+            </p>
+            <p className="mt-3 text-sm font-semibold text-primary">
+              49 – 99 ETB
+            </p>
+          </div>
+          <div className="rounded-xl border border-primary/30 bg-primary/5 p-6">
+            <div className="mb-4 flex size-10 items-center justify-center rounded-lg bg-primary/10">
+              <TrendingUp className="size-5 text-primary" />
+            </div>
+            <p className="font-semibold">Pro tier</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              25 listings, 30 AI credits, analytics, and price insights.
+            </p>
+            <p className="mt-3 text-sm font-semibold text-primary">
+              199 ETB / mo
+            </p>
+          </div>
+        </div>
+        <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <Button asChild size="lg">
+            <Link href="/pricing">
+              <TrendingUp className="mr-2 size-4" />
+              Upgrade to Pro
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg">
+            <Link href="/sell">
+              <Sparkles className="mr-2 size-4" />
+              Try AI assist
+            </Link>
+          </Button>
         </div>
       </section>
 
