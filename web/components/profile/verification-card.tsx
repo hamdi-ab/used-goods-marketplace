@@ -35,7 +35,7 @@ export function VerificationCard({
       <CardHeader>
         <CardTitle>Verification</CardTitle>
         <CardDescription>
-          Verify your phone or Fayda ID to earn trust badges on your public
+          Verify your phone to earn trust badges on your public
           profile. A marketplace admin reviews each request.
         </CardDescription>
       </CardHeader>
@@ -98,7 +98,7 @@ export function VerificationCard({
         ) : null}
         {state?.ok ? (
           <p className="text-sm text-green-600">
-            Verification requested — an admin will review it shortly.
+            Phone verification requested — an admin will review it shortly.
           </p>
         ) : null}
       </CardContent>

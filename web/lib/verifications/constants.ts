@@ -36,7 +36,11 @@ export const VERIFICATION_BADGE_LABELS: Record<VerificationBadge, string> = {
 export const VERIFICATION_BADGE_NOTE = "Not verified yet"
 
 /** Full DB enum mirrors. */
-export type SelfServeType = "phone" | "fayda"
+// Self-serve types that go through the admin-review request flow.
+// Fayda is intentionally excluded: it is verified via the OIDC self-serve
+// flow (/verify-fayda/start → IdP → /verify-fayda/callback) and recorded
+// directly by the record_fayda_verification RPC — no admin review needed.
+export type SelfServeType = "phone"
 export const VERIFICATION_TYPES: [VerificationType, ...VerificationType[]] = [
   "email",
   "phone",
@@ -45,7 +49,6 @@ export const VERIFICATION_TYPES: [VerificationType, ...VerificationType[]] = [
 ]
 export const SELF_SERVE_TYPES: [SelfServeType, ...SelfServeType[]] = [
   "phone",
-  "fayda",
 ]
 
 export const VERIFICATION_TYPE_LABELS: Record<VerificationType, string> = {

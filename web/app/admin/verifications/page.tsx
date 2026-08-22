@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   title: "Admin — Verification Review",
-  description: "Review phone and Fayda verification requests.",
+  description: "Review phone verification requests.",
 }
 
 export default async function AdminVerificationsPage() {
@@ -22,7 +22,7 @@ export default async function AdminVerificationsPage() {
           Verification review
         </h1>
         <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-          Approve or reject phone and Fayda verification requests. Approving
+          Approve or reject phone verification requests. Approving
           flips the applicant&apos;s trust badge and bumps their Trust Score;
           rejecting clears the request.
         </p>

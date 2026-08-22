@@ -14,8 +14,11 @@ create table if not exists public.ai_generations (
   created_at timestamptz not null default now()
 );
 
+-- NOTE: date_trunc on timestamptz is STABLE (not IMMUTABLE), so it cannot
+-- back a plain index. The monthly-count RPCs below scan a narrow
+-- user_id + created_at range, which the PK + a simple composite covers.
 create index if not exists ai_generations_user_month_idx
-  on public.ai_generations (user_id, date_trunc('month', created_at));
+  on public.ai_generations (user_id, created_at);
 
 alter table public.ai_generations enable row level security;
 
