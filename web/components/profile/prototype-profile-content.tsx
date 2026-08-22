@@ -216,14 +216,6 @@ export function PrototypeProfileContent({
                 >
                   View public profile →
                 </Link>
-                {!verifiedTypes.has("fayda") && faydaAvailable ? (
-                  <Link
-                    href="/verify-fayda/start"
-                    className="text-sm font-medium text-primary hover:underline"
-                  >
-                    Verify with Fayda →
-                  </Link>
-                ) : null}
               </div>
             </div>
           </div>
@@ -350,7 +342,7 @@ export function PrototypeProfileContent({
               </form>
 
               <div className="flex flex-col gap-6">
-                <VerificationCard verifications={verifications} />
+                <VerificationCard verifications={verifications} faydaAvailable={faydaAvailable} />
               </div>
             </div>
           </div>
@@ -414,14 +406,6 @@ export function PrototypeProfileContent({
                 >
                   View public profile →
                 </Link>
-                {!verifiedTypes.has("fayda") && faydaAvailable ? (
-                  <Link
-                    href="/verify-fayda/start"
-                    className="text-sm font-medium text-primary hover:underline"
-                  >
-                    Verify with Fayda →
-                  </Link>
-                ) : null}
               </div>
             </div>
           </div>
@@ -543,7 +527,7 @@ export function PrototypeProfileContent({
               </Button>
             </form>
 
-            <VerificationCard verifications={verifications} />
+            <VerificationCard verifications={verifications} faydaAvailable={faydaAvailable} />
           </div>
         </div>
       )}

@@ -1,7 +1,8 @@
 "use client"
 
 import { useActionState } from "react"
-import { BadgeCheckIcon, CircleDashedIcon } from "lucide-react"
+import Link from "next/link"
+import { BadgeCheckIcon, CircleDashedIcon, ShieldCheckIcon } from "lucide-react"
 
 import { requestVerification } from "@/app/actions/verifications"
 import type { MyVerificationRow } from "@/lib/verifications"
@@ -25,8 +26,10 @@ function statusFor(verifications: MyVerificationRow[], type: string) {
 
 export function VerificationCard({
   verifications,
+  faydaAvailable = false,
 }: {
   verifications: MyVerificationRow[]
+  faydaAvailable?: boolean
 }) {
   const [state, action, pending] = useActionState(requestVerification, {})
 
@@ -90,6 +93,40 @@ export function VerificationCard({
             </div>
           )
         })}
+
+        {/* Fayda: OIDC self-serve flow (not admin-reviewed) */}
+        {faydaAvailable ? (
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-muted/40 px-3 py-2">
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                {VERIFICATION_TYPE_LABELS["fayda"]}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {statusFor(verifications, "fayda") === "verified"
+                  ? "Verified — your trust badge shows on your profile"
+                  : "Verify your identity instantly with the national ID (OIDC)"}
+              </p>
+            </div>
+
+            {statusFor(verifications, "fayda") === "verified" ? (
+              <Badge variant="success">
+                <BadgeCheckIcon className="mr-1 size-3" />
+                Verified
+              </Badge>
+            ) : (
+              <Link href="/verify-fayda/start">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                >
+                  <ShieldCheckIcon className="mr-1 size-3" />
+                  Verify with Fayda
+                </Button>
+              </Link>
+            )}
+          </div>
+        ) : null}
 
         {state?.message && state.ok !== true ? (
           <p role="alert" className="text-sm text-destructive">
