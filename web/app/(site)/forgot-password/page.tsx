@@ -7,6 +7,17 @@ export const metadata: Metadata = {
   description: "Request a password reset for your VinTech Marketplace account.",
 }
 
-export default function ForgotPasswordPage() {
-  return <ForgotPasswordForm />
+const VARIANT_KEYS = ["A", "B"] as const
+type VariantKey = (typeof VARIANT_KEYS)[number]
+
+export default async function ForgotPasswordPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ variant?: string }>
+}) {
+  const { variant } = await searchParams
+  const key = VARIANT_KEYS.includes(variant as VariantKey)
+    ? (variant as VariantKey)
+    : undefined
+  return <ForgotPasswordForm variant={key} />
 }
