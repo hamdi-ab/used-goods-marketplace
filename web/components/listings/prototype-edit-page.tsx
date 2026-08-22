@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation"
+﻿import { notFound } from "next/navigation"
 import type { Metadata } from "next"
 import Image from "next/image"
 import Link from "next/link"
@@ -9,8 +9,8 @@ import { formatPrice } from "@/lib/listings"
 import { FIELD_CLASS, TEXTAREA_CLASS } from "@/lib/form-fields"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
-import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
+import { SiteHeader } from "@/components/home/header"
+import { SiteFooter } from "@/components/home/footer"
 import { withVariant, type VariantKey } from "@/components/search/prototype-utils"
 
 export const dynamic = "force-dynamic"
@@ -52,7 +52,7 @@ export async function PrototypeEditPage({
 
   return (
     <>
-      <PrototypeHeader variant={variant} />
+      <SiteHeader variant={variant} />
       <main className="mx-auto grid w-full max-w-5xl flex-1 grid-cols-1 gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_340px] lg:px-8">
         <div className="min-w-0">
           <div className="mb-2 flex flex-wrap items-end justify-between gap-3">
@@ -299,7 +299,7 @@ export async function PrototypeEditPage({
           </div>
         </aside>
       </main>
-      <PrototypeFooter variant={variant} />
+      <SiteFooter variant={variant} />
     </>
   )
 }

@@ -63,8 +63,8 @@ export default function PricingPage() {
         </h1>
         <p className="mt-3 max-w-2xl text-balance text-sm text-muted-foreground">
           The core marketplace is free for everyone. Pro adds capacity and
-          analytics for frequent sellers. Pricing is being validated — no
-          charges today.
+          analytics for frequent sellers. Pay securely with Chapa — cancel any
+          time.
         </p>
       </header>
 
@@ -146,8 +146,8 @@ export default function PricingPage() {
 
       <p className="mt-8 max-w-xl text-center text-xs text-muted-foreground">
         No subscription is required to sell. Paid features only unlock more
-        capacity and tools; creating and selling stays free. We&apos;ll email you
-        when billing opens — no charges until then.
+        capacity and tools; creating and selling stays free. Payments are
+        processed by Chapa.
       </p>
     </main>
   )

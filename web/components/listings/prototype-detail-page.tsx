@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 import Link from "next/link"
 import { MapPinIcon, TagIcon } from "lucide-react"
 
@@ -9,8 +9,8 @@ import type { ListingWithRelations } from "@/lib/listings/constants"
 import { fetchFavoriteIds } from "@/lib/favorites"
 import { getCurrentUser } from "@/lib/auth"
 import { fetchSellerContactInfo, type SellerContactInfo } from "@/lib/contact"
-import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
-import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
+import { SiteHeader } from "@/components/home/header"
+import { SiteFooter } from "@/components/home/footer"
 import { PrototypeGallery } from "@/components/listings/prototype-gallery"
 import { ConditionChip } from "@/components/listings/condition-chip"
 import { MakeOfferButton } from "@/components/offers/make-offer-button"
@@ -44,7 +44,7 @@ export async function PrototypeDetailPage({
   if (!data) {
     return (
       <>
-        <PrototypeHeader variant={variant} />
+        <SiteHeader variant={variant} />
         <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center px-4 py-16 text-center">
           <h1 className="font-heading text-xl font-semibold">Listing not found</h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -57,7 +57,7 @@ export async function PrototypeDetailPage({
               Browse listings
             </Link>
         </main>
-        <PrototypeFooter variant={variant} />
+        <SiteFooter variant={variant} />
       </>
     )
   }
@@ -76,7 +76,7 @@ export async function PrototypeDetailPage({
 
   return (
     <>
-      <PrototypeHeader variant={variant} />
+      <SiteHeader variant={variant} />
 
       <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6 lg:px-8 min-h-[60vh]">
         {/* Back navigation */}
@@ -255,7 +255,7 @@ export async function PrototypeDetailPage({
         </div>
       </main>
 
-      <PrototypeFooter variant={variant} />
+      <SiteFooter variant={variant} />
     </>
   )
 }

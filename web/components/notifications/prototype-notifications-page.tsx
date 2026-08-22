@@ -1,10 +1,10 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 import Link from "next/link"
 
 import { getCurrentUser } from "@/lib/auth"
 import { fetchMyNotifications } from "@/lib/notifications"
-import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
-import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
+import { SiteHeader } from "@/components/home/header"
+import { SiteFooter } from "@/components/home/footer"
 import { PrototypeNotificationsInbox } from "@/components/notifications/prototype-notifications-inbox"
 import { Button } from "@/components/ui/button"
 import { withVariant, type VariantKey } from "@/components/search/prototype-utils"
@@ -34,7 +34,7 @@ export async function PrototypeNotificationsPage({
 
   return (
     <>
-      <PrototypeHeader variant={variant} />
+      <SiteHeader variant={variant} />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
         {error ? (
           <div className="flex flex-col items-center rounded-2xl border border-border bg-muted/30 px-4 py-16 text-center">
@@ -57,7 +57,7 @@ export async function PrototypeNotificationsPage({
           />
         )}
       </main>
-      <PrototypeFooter variant={variant} />
+      <SiteFooter variant={variant} />
     </>
   )
 }

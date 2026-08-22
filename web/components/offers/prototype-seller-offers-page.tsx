@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 import type { ReactNode } from "react"
 import Image from "next/image"
 import Link from "next/link"
@@ -12,8 +12,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { OfferStatusBadge } from "@/components/offers/offer-status-badge"
 import { SellerOfferActions } from "@/components/offers/seller-offer-actions"
 import { Button } from "@/components/ui/button"
-import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
-import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
+import { SiteHeader } from "@/components/home/header"
+import { SiteFooter } from "@/components/home/footer"
 import { PrototypeLoadMore } from "@/components/search/prototype-load-more"
 import { withVariant, type VariantKey } from "@/components/search/prototype-utils"
 
@@ -235,7 +235,7 @@ export async function PrototypeSellerOffersPage({
 
   return (
     <>
-      <PrototypeHeader variant={variant} />
+      <SiteHeader variant={variant} />
       <main className="mx-auto w-full max-w-[960px] flex-1 px-4 py-8 sm:px-6 lg:px-8 min-h-[60vh]">
         <div className="mb-2 flex flex-wrap items-end justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -266,7 +266,7 @@ export async function PrototypeSellerOffersPage({
 
         {body}
       </main>
-      <PrototypeFooter variant={variant} />
+      <SiteFooter variant={variant} />
     </>
   )
 }

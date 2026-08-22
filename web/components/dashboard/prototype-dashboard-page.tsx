@@ -1,4 +1,4 @@
-import Link from "next/link"
+﻿import Link from "next/link"
 import {
   BellIcon,
   EyeIcon,
@@ -21,8 +21,8 @@ import { fetchFavoriteIds } from "@/lib/favorites"
 import { fetchUnreadNotificationsCount } from "@/lib/notifications"
 import { fetchOwnProfile } from "@/lib/profiles"
 import { promoteToSeller } from "@/app/actions/profile"
-import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
-import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
+import { SiteHeader } from "@/components/home/header"
+import { SiteFooter } from "@/components/home/footer"
 import type { VariantKey } from "@/components/search/prototype-utils"
 import { withVariant } from "@/components/search/prototype-utils"
 import { ListingManager } from "@/components/dashboard/listing-manager"
@@ -45,7 +45,7 @@ export async function PrototypeDashboardPage({
   if (!user) {
     return (
       <>
-        <PrototypeHeader variant={variant} />
+        <SiteHeader variant={variant} />
         <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-16 min-h-[60vh]">
           <h1 className="font-heading text-xl font-semibold text-foreground">
             Dashboard
@@ -54,7 +54,7 @@ export async function PrototypeDashboardPage({
             Sign in to view your dashboard.
           </p>
         </main>
-        <PrototypeFooter variant={variant} />
+        <SiteFooter variant={variant} />
       </>
     )
   }
@@ -244,7 +244,7 @@ export async function PrototypeDashboardPage({
 
   return (
     <>
-      <PrototypeHeader variant={variant} />
+      <SiteHeader variant={variant} />
 
       <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6 lg:px-8 min-h-[60vh]">
         {/* Compact welcome header */}
@@ -382,7 +382,7 @@ export async function PrototypeDashboardPage({
         ) : null}
       </main>
 
-      <PrototypeFooter variant={variant} />
+      <SiteFooter variant={variant} />
     </>
   )
 }

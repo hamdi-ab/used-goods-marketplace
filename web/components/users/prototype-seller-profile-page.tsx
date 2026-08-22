@@ -1,4 +1,4 @@
-import Link from "next/link"
+﻿import Link from "next/link"
 import { MapPinIcon, SendIcon } from "lucide-react"
 
 import { ROLE_LABELS, type UserRole, getCurrentUser } from "@/lib/auth"
@@ -7,8 +7,8 @@ import { fetchSellerReviews, summarizeRating } from "@/lib/reviews"
 import { fetchSellerContactInfo } from "@/lib/contact"
 import { fetchSellerPublicListings } from "@/lib/listings"
 import { initials, formatShortDate } from "@/lib/utils"
-import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
-import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
+import { SiteHeader } from "@/components/home/header"
+import { SiteFooter } from "@/components/home/footer"
 import { withVariant, type VariantKey } from "@/components/search/prototype-utils"
 import { SellerTrustBadges } from "@/components/verification/seller-trust-badges"
 import { PrototypeListingCard } from "@/components/listings/prototype-listing-card"
@@ -35,13 +35,13 @@ export async function PrototypeSellerProfilePage({
   if (!profile) {
     return (
       <>
-        <PrototypeHeader variant={variant} />
+        <SiteHeader variant={variant} />
         <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-16">
           <h1 className="font-heading text-xl font-semibold text-foreground">
             Profile not found
           </h1>
         </main>
-        <PrototypeFooter variant={variant} />
+        <SiteFooter variant={variant} />
       </>
     )
   }
@@ -62,7 +62,7 @@ export async function PrototypeSellerProfilePage({
 
   return (
     <>
-      <PrototypeHeader variant={variant} />
+      <SiteHeader variant={variant} />
 
       <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6 lg:px-8">
         <div className="mb-6">
@@ -271,7 +271,7 @@ export async function PrototypeSellerProfilePage({
         ) : null}
       </main>
 
-      <PrototypeFooter variant={variant} />
+      <SiteFooter variant={variant} />
     </>
   )
 }

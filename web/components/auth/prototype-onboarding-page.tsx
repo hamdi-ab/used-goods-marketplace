@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 import type { ReactNode } from "react"
 import Link from "next/link"
 
@@ -6,8 +6,8 @@ import { getCurrentUser } from "@/lib/auth"
 import { FIELD_CLASS } from "@/lib/form-fields"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
-import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
+import { SiteHeader } from "@/components/home/header"
+import { SiteFooter } from "@/components/home/footer"
 import { withVariant, type VariantKey } from "@/components/search/prototype-utils"
 
 export const dynamic = "force-dynamic"
@@ -52,7 +52,7 @@ export async function PrototypeOnboardingPage({
 
   return (
     <div className="flex min-h-screen flex-col">
-      <PrototypeHeader variant={variant} />
+      <SiteHeader variant={variant} />
       <main className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid w-full max-w-5xl grid-cols-1 gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
           {/* Brand panel */}
@@ -189,7 +189,7 @@ export async function PrototypeOnboardingPage({
           </div>
         </div>
       </main>
-      <PrototypeFooter variant={variant} flush />
+      <SiteFooter variant={variant} flush />
     </div>
   )
 }

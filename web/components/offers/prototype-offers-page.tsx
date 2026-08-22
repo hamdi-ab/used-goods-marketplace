@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,8 +16,8 @@ import { ReviewStars } from "@/components/reviews/review-stars";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { PrototypeHeader } from "@/components/home/prototype/prototype-header";
-import { PrototypeFooter } from "@/components/home/prototype/prototype-footer";
+import { SiteHeader } from "@/components/home/header";
+import { SiteFooter } from "@/components/home/footer";
 import { PrototypeLoadMore } from "@/components/search/prototype-load-more";
 import { withVariant, type VariantKey } from "@/components/search/prototype-utils";
 
@@ -224,7 +224,7 @@ export async function PrototypeOffersPage({
 
   return (
     <>
-      <PrototypeHeader variant={variant} />
+      <SiteHeader variant={variant} />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6 lg:px-8 min-h-[60vh]">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
           <h1 className="font-heading text-2xl font-semibold text-foreground">
@@ -236,7 +236,7 @@ export async function PrototypeOffersPage({
         </div>
         {body}
       </main>
-      <PrototypeFooter variant={variant} />
+      <SiteFooter variant={variant} />
     </>
   );
 }

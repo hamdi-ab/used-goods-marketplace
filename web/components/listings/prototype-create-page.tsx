@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 import Link from "next/link"
 import { PlusIcon, CameraIcon, SparklesIcon } from "lucide-react"
 
@@ -6,8 +6,8 @@ import { getCurrentUser } from "@/lib/auth"
 import { fetchCategories } from "@/lib/listings"
 import { fetchAccountUsage } from "@/lib/usage"
 import { cn } from "@/lib/utils"
-import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
-import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
+import { SiteHeader } from "@/components/home/header"
+import { SiteFooter } from "@/components/home/footer"
 import { CreateListingForm } from "@/components/listings/create-listing-form"
 import { Button } from "@/components/ui/button"
 import type { VariantKey } from "@/components/search/prototype-utils"
@@ -30,7 +30,7 @@ export async function PrototypeCreatePage({
   if (!user) {
     return (
       <>
-        <PrototypeHeader variant={variant} />
+        <SiteHeader variant={variant} />
         <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6 lg:px-8 min-h-[60vh]">
           <div
             className={cn(
@@ -69,7 +69,7 @@ export async function PrototypeCreatePage({
             </div>
           </div>
         </main>
-        <PrototypeFooter variant={variant} />
+        <SiteFooter variant={variant} />
       </>
     )
   }
@@ -79,7 +79,7 @@ export async function PrototypeCreatePage({
 
   return (
     <>
-      <PrototypeHeader variant={variant} />
+      <SiteHeader variant={variant} />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6 lg:px-8 min-h-[60vh]">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -114,7 +114,7 @@ export async function PrototypeCreatePage({
           />
         </div>
       </main>
-      <PrototypeFooter variant={variant} />
+      <SiteFooter variant={variant} />
     </>
   )
 }

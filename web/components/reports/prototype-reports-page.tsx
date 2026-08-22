@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+﻿import type { Metadata } from "next"
 import Link from "next/link"
 import { FlagIcon, ImageIcon, UserIcon } from "lucide-react"
 
@@ -6,8 +6,8 @@ import { getCurrentUser } from "@/lib/auth"
 import { fetchMyReports, REPORT_REASON_LABELS, type MyReportRow } from "@/lib/reports"
 import { formatShortDate, cn } from "@/lib/utils"
 import { ReportStatusBadge } from "@/components/reports/report-status-badge"
-import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
-import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
+import { SiteHeader } from "@/components/home/header"
+import { SiteFooter } from "@/components/home/footer"
 import { Button } from "@/components/ui/button"
 import { withVariant, type VariantKey } from "@/components/search/prototype-utils"
 
@@ -59,7 +59,7 @@ export async function PrototypeReportsPage({
 
   return (
     <>
-      <PrototypeHeader variant={variant} />
+      <SiteHeader variant={variant} />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8 sm:px-6 lg:px-8 min-h-[60vh]">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -227,7 +227,7 @@ export async function PrototypeReportsPage({
           </>
         )}
       </main>
-      <PrototypeFooter variant={variant} />
+      <SiteFooter variant={variant} />
     </>
   )
 }

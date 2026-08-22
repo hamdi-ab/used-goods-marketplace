@@ -28,7 +28,7 @@ const NAV: { title: string; href: string; icon: LucideIcon }[] = [
 // pill, then the action cluster (Sell always visible; Log in ghost + Sign up
 // outline when signed out). Variant A keeps the light bar; variant B uses a
 // lighter-blue bar (not the old dark navy).
-export function PrototypeHeader({ variant }: { variant: "A" | "B" }) {
+export function SiteHeader({ variant }: { variant: "A" | "B" }) {
   const pathname = usePathname()
   const router = useRouter()
   const { user } = useAuth()

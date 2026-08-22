@@ -1,10 +1,10 @@
-import Link from "next/link"
+﻿import Link from "next/link"
 
 import type { Category } from "@/lib/listings/constants"
 import type { BrowseListing } from "@/lib/listings"
 import { buildSearchUrl, nextOffset, type SearchQuery } from "@/lib/search"
-import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
-import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
+import { SiteHeader } from "@/components/home/header"
+import { SiteFooter } from "@/components/home/footer"
 import { PrototypeListingCard } from "@/components/listings/prototype-listing-card"
 import { PrototypeSearchControls } from "@/components/search/prototype-search-controls"
 import { PrototypeLoadMore } from "@/components/search/prototype-load-more"
@@ -34,7 +34,7 @@ export function PrototypeBrowsePage({
 
   return (
     <>
-      <PrototypeHeader variant={variant} />
+      <SiteHeader variant={variant} />
       <main className="mx-auto w-full max-w-[1280px] px-4 py-8 sm:px-6 lg:py-12">
         <h1 className="font-heading text-3xl font-semibold leading-tight tracking-tight text-foreground sm:text-4xl">
           {title}
@@ -104,7 +104,7 @@ export function PrototypeBrowsePage({
           )}
         </section>
       </main>
-      <PrototypeFooter variant={variant} flush />
+      <SiteFooter variant={variant} flush />
     </>
   )
 }

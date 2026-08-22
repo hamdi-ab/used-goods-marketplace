@@ -1,5 +1,5 @@
-import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
-import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
+﻿import { SiteHeader } from "@/components/home/header"
+import { SiteFooter } from "@/components/home/footer"
 import type { VariantKey } from "@/components/search/prototype-utils"
 import { getCurrentUser } from "@/lib/auth"
 import { fetchOwnProfile, type OwnProfileRow } from "@/lib/profiles"
@@ -18,7 +18,7 @@ export async function PrototypeProfilePage({ variant }: { variant: VariantKey })
   if (!user) {
     return (
       <>
-        <PrototypeHeader variant={variant} />
+        <SiteHeader variant={variant} />
         <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-16">
           <h1 className="font-heading text-xl font-semibold text-foreground">
             Your profile
@@ -27,7 +27,7 @@ export async function PrototypeProfilePage({ variant }: { variant: VariantKey })
             Sign in to view and edit your profile.
           </p>
         </main>
-        <PrototypeFooter variant={variant} />
+        <SiteFooter variant={variant} />
       </>
     )
   }
@@ -39,7 +39,7 @@ export async function PrototypeProfilePage({ variant }: { variant: VariantKey })
 
   return (
     <>
-      <PrototypeHeader variant={variant} />
+      <SiteHeader variant={variant} />
       <PrototypeProfileContent
         variant={variant}
         user={user}
@@ -47,7 +47,7 @@ export async function PrototypeProfilePage({ variant }: { variant: VariantKey })
         verifications={verifications}
         faydaAvailable={faydaConfigured()}
       />
-      <PrototypeFooter variant={variant} />
+      <SiteFooter variant={variant} />
     </>
   )
 }

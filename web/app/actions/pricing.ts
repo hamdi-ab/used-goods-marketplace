@@ -1,62 +1,68 @@
 "use server"
 
-import { z } from "zod"
 import { revalidatePath } from "next/cache"
 
 import { requireUser } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
-
-function formValue(formData: FormData, key: string): string | undefined {
-  const v = formData.get(key)
-  return typeof v === "string" && v.length > 0 ? v : undefined
-}
-
-// Demo-only intent capture. No billing and no tier mutation — strategy §32.
-// The plan is ALWAYS "pro" on the client, and the action ignores any tier the
-// client sends (upgraded plans are admin/assignment-only, never self-service):
-// a tampered tier field is silently dropped rather than stored.
-const intentSchema = z.object({
-  email: z.string().email("Enter a valid email").optional(),
-})
+import { chapaConfigured, chapaTxRef, initializeChapaTransaction } from "@/lib/chapa"
+import { etb } from "@/lib/payments/constants"
+import { SITE_URL } from "@/lib/site"
 
 export interface UpgradeIntentState {
   ok?: boolean
   message?: string
-  errors?: Record<string, string[] | undefined>
+  checkoutUrl?: string
 }
 
+// #97 — Pro upgrade via Chapa checkout. Pins the 199 ETB/mo price in a pending
+// upgrade_intents row, then redirects the seller to Chapa's hosted checkout.
+// Chapa not configured (no CHAPA_SECRET_KEY, no demo fallback)? Degrade with a
+// safe message instead of offering a broken button.
 export async function submitUpgradeIntent(
   _prevState: UpgradeIntentState,
-  formData: FormData
+  _formData: FormData
 ): Promise<UpgradeIntentState> {
-  const parsed = intentSchema.safeParse({
-    email: formValue(formData, "email"),
-  })
-
-  if (!parsed.success) {
-    return { errors: parsed.error.flatten().fieldErrors }
-  }
-
   const user = await requireUser()
-  const email = parsed.data.email ?? user.email
-
   const supabase = await createClient()
-  const { error } = await supabase.from("upgrade_intents").insert({
-    user_id: user.id,
-    email,
-    tier: "pro",
-  })
 
-  if (error) {
-    console.error("submitUpgradeIntent:", error.message)
+  if (!chapaConfigured()) {
     return {
-      message: "Could not record your request — please try again later.",
+      message: "Payments are not set up for this demo yet.",
     }
   }
 
-  revalidatePath("/pricing")
-  return {
-    ok: true,
-    message: "Noted — we'll notify you when billing opens. No charges today.",
+  const txRef = chapaTxRef()
+  const money = etb(199)
+
+  const { error: insertErr } = await supabase.from("upgrade_intents").insert({
+    user_id: user.id,
+    email: user.email,
+    tier: "pro",
+    tx_ref: txRef,
+    amount: money.amount,
+  })
+  if (insertErr) {
+    console.error("submitUpgradeIntent insert:", insertErr.message)
+    return { message: "Could not start the upgrade — please try again later." }
   }
+
+  const returnUrl = `${SITE_URL}/pricing?upgraded=true&tx_ref=${encodeURIComponent(txRef)}`
+  const init = await initializeChapaTransaction({
+    txRef,
+    amount: money.amount,
+    currency: money.currency,
+    email: user.email,
+    firstName: user.fullName,
+    returnUrl,
+    title: "VinTech Pro",
+    description: "Pro tier — 199 ETB/month",
+  })
+
+  if (!init.ok) {
+    console.error("submitUpgradeIntent chapa:", init.error)
+    return { message: "Could not start the upgrade — please try again later." }
+  }
+
+  revalidatePath("/pricing")
+  return { ok: true, checkoutUrl: init.checkoutUrl }
 }

@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import Link from "next/link"
@@ -8,7 +8,7 @@ import { z } from "zod"
 
 import { createClient } from "@/lib/supabase/client"
 import { AuthCard } from "@/components/auth/auth-card"
-import { PrototypeAuthLayout } from "@/components/home/prototype/prototype-auth-layout"
+import { PrototypeAuthLayout } from "@/components/home/auth-layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"

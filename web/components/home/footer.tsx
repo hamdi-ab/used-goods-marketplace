@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 // PROTOTYPE — footer for the home-page redesign variants. Matches the header:
 // light for variant A, light blue for variant B. Adds the logo mark, tagline,
 // link columns, and a closing CTA row so the page feels finished top to bottom.
-export function PrototypeFooter({
+export function SiteFooter({
   variant,
   flush = false,
 }: {
