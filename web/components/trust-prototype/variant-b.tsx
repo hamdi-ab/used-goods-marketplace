@@ -1,4 +1,4 @@
-import { TrendingUp } from "lucide-react"
+import { Sparkles, TrendingUp, Zap } from "lucide-react"
 
 import { MOCK } from "./variants"
 
@@ -111,6 +111,61 @@ export function VariantB() {
               </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section aria-label="Monetization" className="mx-auto mt-12 max-w-3xl">
+        <h2 className="mb-3 font-heading text-lg font-semibold">Earn more, sell more</h2>
+        <p className="mb-6 text-sm text-muted-foreground">
+          Free to list and sell. When you are ready for more capacity, three levers grow with you.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="rounded-xl border bg-card p-4">
+            <div className="mb-3 flex size-9 items-center justify-center rounded-lg bg-primary/10">
+              <Sparkles className="size-4 text-primary" />
+            </div>
+            <p className="font-medium">AI credits</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Auto-write titles, descriptions, and price insights. 3 / month on free.
+            </p>
+            <p className="mt-2 text-xs font-semibold text-primary">Pro: 30 / month</p>
+          </div>
+          <div className="rounded-xl border bg-card p-4">
+            <div className="mb-3 flex size-9 items-center justify-center rounded-lg bg-primary/10">
+              <Zap className="size-4 text-primary" />
+            </div>
+            <p className="font-medium">Listing boost</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Pin your listing to the top of search for 3 days or 7 days.
+            </p>
+            <p className="mt-2 text-xs font-semibold text-primary">49 – 99 ETB</p>
+          </div>
+          <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
+            <div className="mb-3 flex size-9 items-center justify-center rounded-lg bg-primary/10">
+              <TrendingUp className="size-4 text-primary" />
+            </div>
+            <p className="font-medium">Pro tier</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              25 listings, 30 AI credits, analytics, and price insights.
+            </p>
+            <p className="mt-2 text-xs font-semibold text-primary">199 ETB / mo</p>
+          </div>
+        </div>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <a
+            href="/pricing"
+            className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition hover:bg-primary/90"
+          >
+            <TrendingUp className="size-4" />
+            Upgrade to Pro
+          </a>
+          <a
+            href="/dashboard"
+            className="inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition hover:bg-accent"
+          >
+            <Sparkles className="size-4" />
+            Try AI assist
+          </a>
         </div>
       </section>
     </main>

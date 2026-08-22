@@ -4,8 +4,8 @@ import { ArrowRight, BadgeCheck, Quote, ShieldCheck, Star } from "lucide-react"
 
 import type { Category, BrowseListing } from "@/lib/listings"
 import { Button } from "@/components/ui/button"
-import { CategoryPills } from "@/components/home/prototype/category-pills"
-import { ListingsBento } from "@/components/home/prototype/listings-bento"
+import { CategoryPills } from "@/components/home/category-pills"
+import { ListingsBento } from "@/components/home/listings-bento"
 
 interface HomePageProps {
   categories: Category[]
@@ -19,7 +19,7 @@ const METRICS = [
   { icon: ShieldCheck, value: "24h", label: "moderator response on reports" },
 ]
 
-// PROTOTYPE — Variant B "trust-forward marketplace" (selected as final).
+// Home page — trust-forward marketplace design (Dagim Gebeya).
 // Blue hero over a lifestyle photo, metric strip, editorial copy blocks,
 // category rail, listings, and a testimonial.
 export function HomePage({ categories, listings, favoriteIds }: HomePageProps) {
