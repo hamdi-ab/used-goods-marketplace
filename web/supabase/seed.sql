@@ -363,7 +363,7 @@ begin
     insert into public.listings (id, seller_id, category_id, title, description, price,
                                  condition, negotiable, city, sub_city, status, published_at)
     values (
-      ('20000000-0000-0000-0000-' || lpad(rec.k::text, 12, '0'))::uuid,
+      ('20000000-0000-4000-8000-' || lpad(rec.k::text, 12, '0'))::uuid,
       rec.seller_id,
       (select id from public.categories where slug = rec.category_slug limit 1),
       rec.title, rec.description, rec.price, rec.condition::public.listing_condition, rec.negotiable,

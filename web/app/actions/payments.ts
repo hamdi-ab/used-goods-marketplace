@@ -2,8 +2,8 @@
 
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
-
 import { confirmOfferReceipt, payOffer } from "@/lib/payments"
+import { uuidSchema } from "@/lib/uuid"
 
 function formValue(formData: FormData, key: string): string | undefined {
   const v = formData.get(key)
@@ -11,7 +11,7 @@ function formValue(formData: FormData, key: string): string | undefined {
 }
 
 const offerIdSchema = z.object({
-  offerId: z.string().uuid(),
+  offerId: uuidSchema,
 })
 
 export type PayOfferState = {
