@@ -11,11 +11,7 @@ function formValue(formData: FormData, key: string): string | undefined {
 }
 
 const offerIdSchema = z.object({
-  // Lenient UUID format — the DB RPC (begin_payment) re-checks format
-  // and existence server-side, so we only need to ensure a UUID-like
-  // string is present here. Seed data uses deterministic IDs that may
-  // not have strict v4 version/variant bits.
-  offerId: z.string().regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "Invalid offer ID"),
+  offerId: z.string().uuid(),
 })
 
 export type PayOfferState = {
