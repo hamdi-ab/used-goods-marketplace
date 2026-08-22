@@ -4,8 +4,7 @@ export interface PrototypeVariant {
 }
 
 export const PROTOTYPE_VARIANTS: PrototypeVariant[] = [
-  { key: "A", name: "Classic hero" },
-  { key: "B", name: "Dark editorial" },
+  { key: "B", name: "Trust-forward marketplace" },
 ]
 
 export const PROTOTYPE_KEYS = PROTOTYPE_VARIANTS.map((v) => v.key)

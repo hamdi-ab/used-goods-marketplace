@@ -17,8 +17,7 @@ import {
 import { PROTOTYPE_VARIANTS } from "@/components/home/prototype/variants"
 import { PrototypeHeader } from "@/components/home/prototype/prototype-header"
 import { PrototypeFooter } from "@/components/home/prototype/prototype-footer"
-import { VariantA } from "@/components/home/prototype/variant-a"
-import { VariantB } from "@/components/home/prototype/variant-b"
+import { HomePage as PrototypeHomePage } from "@/components/home/prototype/home-page"
 
 export const metadata: Metadata = {
   title: "Marketplace for trusted second-hand goods",
@@ -80,30 +79,15 @@ export default async function HomePage({
   // PROTOTYPE — when a variant is requested, render that home layout with the
   // same data. The default (no ?variant=) keeps the current production page.
   if (sp.variant) {
-    const key = PROTOTYPE_VARIANTS.some((v) => v.key === sp.variant)
-      ? (sp.variant as "A" | "B")
-      : "A"
     return (
       <>
-        <PrototypeHeader variant={key} />
-        {key === "A" && (
-          <VariantA
-            categories={categories}
-            listings={listings}
-            favoriteIds={favoriteIds}
-          />
-        )}
-        {key === "B" && (
-          <VariantB
-            categories={categories}
-            listings={listings}
-            favoriteIds={favoriteIds}
-          />
-        )}
-        <Suspense>
-          <PrototypeSwitcher />
-        </Suspense>
-        <PrototypeFooter variant={key} />
+        <PrototypeHeader variant={sp.variant as "B"} />
+        <PrototypeHomePage
+          categories={categories}
+          listings={listings}
+          favoriteIds={favoriteIds}
+        />
+        <PrototypeFooter variant={sp.variant as "B"} />
       </>
     )
   }

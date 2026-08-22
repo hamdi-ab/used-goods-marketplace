@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { CategoryPills } from "@/components/home/prototype/category-pills"
 import { ListingsBento } from "@/components/home/prototype/listings-bento"
 
-interface VariantBProps {
+interface HomePageProps {
   categories: Category[]
   listings: BrowseListing[]
   favoriteIds: Set<string> | null
@@ -19,10 +19,10 @@ const METRICS = [
   { icon: ShieldCheck, value: "24h", label: "moderator response on reports" },
 ]
 
-// PROTOTYPE — Variant B "dark editorial" (luxury / premium editorial landing).
-// Dark split hero over a lifestyle photo, metric strip, editorial copy blocks,
-// category rail, listings, and a testimonial. Throwaway for design comparison.
-export function VariantB({ categories, listings, favoriteIds }: VariantBProps) {
+// PROTOTYPE — Variant B "trust-forward marketplace" (selected as final).
+// Blue hero over a lifestyle photo, metric strip, editorial copy blocks,
+// category rail, listings, and a testimonial.
+export function HomePage({ categories, listings, favoriteIds }: HomePageProps) {
 
   return (
     <main className="mx-auto w-full max-w-[1280px] px-4 pb-16 sm:px-6">
