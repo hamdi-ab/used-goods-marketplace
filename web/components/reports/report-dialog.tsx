@@ -1,8 +1,18 @@
 "use client"
 
 import Link from "next/link"
-import { useActionState } from "react"
-import { CheckCircleIcon } from "lucide-react"
+import { useActionState, useState } from "react"
+import {
+  CheckCircleIcon,
+  AlertTriangleIcon,
+  CopyIcon,
+  FlagIcon,
+  FolderTreeIcon,
+  MailWarningIcon,
+  MessageSquareIcon,
+  ShieldAlertIcon,
+} from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 
 import { submitReport } from "@/app/actions/reports"
 import type { SubmitReportState } from "@/app/actions/reports"
@@ -10,6 +20,7 @@ import {
   REPORT_REASONS,
   REPORT_REASON_LABELS,
   REPORT_NOTE_MAX,
+  type ReportReason,
 } from "@/lib/reports/constants"
 import { TEXTAREA_CLASS } from "@/lib/form-fields"
 import { Button } from "@/components/ui/button"
@@ -19,6 +30,15 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog"
+
+const REASON_ICONS: Record<ReportReason, LucideIcon> = {
+  spam: MailWarningIcon,
+  fraud: ShieldAlertIcon,
+  duplicate: CopyIcon,
+  wrong_category: FolderTreeIcon,
+  offensive_content: AlertTriangleIcon,
+  other: MessageSquareIcon,
+}
 
 function FieldError({ message }: { message: string | undefined }) {
   return message ? <p className="text-sm text-destructive">{message}</p> : null
@@ -37,6 +57,7 @@ export function ReportDialog({
     SubmitReportState,
     FormData
   >(submitReport, {})
+  const [selectedReason, setSelectedReason] = useState<string>("")
 
   // T11 AC4: show a "report received" acknowledgement instead of silently
   // closing — the reporter must see that their report was accepted, and can
@@ -68,16 +89,16 @@ export function ReportDialog({
     )
   }
 
-  // #84 enforces XOR(target): a report targets exactly one of listing or
-  // seller. The reason vocabulary is shared (listing/seller both reuse the
-  // same REPORT_REASONS set post-schema), with the label scoped per target.
   const reasons = REPORT_REASONS
   const targetLabel = sellerId ? "seller" : "item"
 
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Report {targetLabel}</DialogTitle>
+        <DialogTitle className="flex items-center gap-2">
+          <FlagIcon className="size-5 text-destructive" />
+          Report {targetLabel}
+        </DialogTitle>
         <DialogDescription>
           Let us know why this {targetLabel} should be reviewed. A moderator
           will look at your report shortly.
@@ -89,23 +110,48 @@ export function ReportDialog({
         <input type="hidden" name="sellerId" value={sellerId ?? ""} />
 
         <div className="mt-4 flex flex-col gap-3">
-          <fieldset className="flex flex-col gap-2">
-            <legend className="text-sm font-medium">Reason</legend>
-            {reasons.map((r) => (
-              <label
-                key={r}
-                className="flex items-center gap-2 text-sm"
-              >
-                <input type="radio" name="reason" value={r} required />
-                <span>{REPORT_REASON_LABELS[r]}</span>
-              </label>
-            ))}
+          <fieldset className="flex flex-col gap-1.5">
+            <legend className="sr-only">Reason</legend>
+            <p className="text-sm font-medium" id="reason-label">
+              Why are you reporting this {targetLabel}?
+            </p>
+            {reasons.map((r) => {
+              const Icon = REASON_ICONS[r]
+              const label = REPORT_REASON_LABELS[r]
+              return (
+                <label
+                  key={r}
+                  htmlFor={`report-reason-${r}`}
+                  className={`flex cursor-pointer items-center gap-3 rounded-xl border px-3 py-2.5 text-sm transition-colors ${
+                    selectedReason === r
+                      ? "border-primary bg-primary/5 text-foreground"
+                      : "border-input bg-background text-muted-foreground hover:border-primary/50 hover:bg-muted/50"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    id={`report-reason-${r}`}
+                    name="reason"
+                    value={r}
+                    required
+                    checked={selectedReason === r}
+                    onChange={() => setSelectedReason(r)}
+                    className="sr-only"
+                  />
+                  <Icon className="size-4 shrink-0" />
+                  <span>{label}</span>
+                </label>
+              )
+            })}
+            <FieldError message={state.errors?.reason?.[0]} />
           </fieldset>
-          <FieldError message={state.errors?.reason?.[0]} />
 
           <div className="flex flex-col gap-2">
             <label htmlFor="report-note" className="text-sm font-medium">
-              Details (optional)
+              Details{" "}
+              <span className="font-normal text-muted-foreground">
+                (optional)
+              </span>
             </label>
             <textarea
               id="report-note"
@@ -126,7 +172,10 @@ export function ReportDialog({
         </div>
 
         <DialogFooter>
-          <Button type="submit" disabled={pending}>
+          <Button type="button" size="sm" variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" size="sm" disabled={pending || !selectedReason}>
             {pending ? "Sending…" : "Submit report"}
           </Button>
         </DialogFooter>
