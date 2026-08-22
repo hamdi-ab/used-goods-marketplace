@@ -1,4 +1,4 @@
-import Image from "next/image"
+﻿import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, BadgeCheck, Quote, ShieldCheck, Sparkles, Star, TrendingUp, Zap } from "lucide-react"
 
@@ -81,13 +81,13 @@ export function HomePage({ categories, listings, favoriteIds }: HomePageProps) {
       <section className="grid gap-10 py-12 lg:grid-cols-2 lg:items-center">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-primary">
-            The VinTech difference
+            Why Dagim Gebeya
           </p>
           <h2 className="mt-2 font-heading text-3xl font-bold tracking-tight sm:text-4xl">
             Trade with people, not profiles.
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Every seller on VinTech has passed an identity check and carries a
+            Every seller on Dagim Gebeya has passed an identity check and carries a
             live trust score built from real reviews. When you message, when
             you meet, when you hand over the cash — you know exactly who you
             are dealing with.

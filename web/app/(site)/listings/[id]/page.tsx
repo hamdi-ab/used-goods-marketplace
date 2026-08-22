@@ -21,7 +21,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { PrototypeDetailPage } from "@/components/listings/prototype-detail-page"
 
 export const dynamic = "force-dynamic"
 
@@ -36,7 +35,7 @@ export async function generateMetadata({
   const l = data.listing
   return {
     title: l.title,
-    description: l.description ?? `${l.title} on VinTech Marketplace`,
+    description: l.description ?? `${l.title} on Dagim Gebeya`,
     openGraph: {
       title: l.title,
       description: l.description ?? undefined,
@@ -47,24 +46,10 @@ export async function generateMetadata({
 
 export default async function ListingPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const { id } = await params
-  const { variant } = await searchParams
-  const key =
-    variant === "A" || variant === "B" ? (variant as "A" | "B") : null;
-
-  // PROTOTYPE — the redesign variants are view-only during review and bypass the
-  // normal detail page so reviewers can see the frame without signing in. The
-  // default page keeps production behavior (see fetchListing + require auth for
-  // contact info below).
-  if (key) {
-    return <PrototypeDetailPage variant={key} id={id} />;
-  }
-
   const data = await fetchListing(id)
   if (!data) notFound()
 
@@ -73,9 +58,6 @@ export default async function ListingPage({
     ? (await fetchFavoriteIds(user.id)).includes(id)
     : null
 
-  // Fetch the seller's contact surface (telegram + phone opt-in) so the
-  // ContactSeller button can render the right options. Phone is only
-  // returned when the seller has opted in (Privacy, AC4).
   const contactInfo = user
     ? await fetchSellerContactInfo(data.listing.seller_id)
     : null
@@ -206,12 +188,12 @@ export default async function ListingPage({
               </Avatar>
               <div className="min-w-0">
                  <CardTitle className="text-base">
-                   <Link
-                     href={`/users/${seller?.id ?? l.seller_id}`}
-                     className="text-primary hover:underline"
-                   >
-                     {seller?.full_name ?? "View seller profile"}
-                   </Link>
+                    <Link
+                      href={`/users/${seller?.id ?? l.seller_id}`}
+                      className="text-primary hover:underline"
+                    >
+                      {seller?.full_name ?? "View seller profile"}
+                    </Link>
                  </CardTitle>
                  <p className="text-sm text-muted-foreground">
                    Trust score {seller?.trust_score ?? 50}
@@ -241,4 +223,3 @@ export default async function ListingPage({
     </main>
   )
 }
-

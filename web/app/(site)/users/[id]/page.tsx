@@ -10,7 +10,6 @@ import { fetchSellerRatingSummary, fetchSellerReviews } from "@/lib/reviews"
 import { fetchSellerContactInfo } from "@/lib/contact"
 import { nextOffset, parseOffset } from "@/lib/pagination"
 import { SellerTrustBadges } from "@/components/verification/seller-trust-badges"
-import { PrototypeSellerProfilePage } from "@/components/users/prototype-seller-profile-page"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -27,10 +26,10 @@ export async function generateMetadata({
   const { id } = await params
   const profile = await fetchPublicProfile(id)
   if (!profile) return { title: "Profile not found" }
-  const name = profile.full_name ?? "VinTech user"
+  const name = profile.full_name ?? "Dagim Gebeya user"
   return {
     title: name,
-    description: profile.bio ?? `${name}'s VinTech Marketplace profile.`,
+    description: profile.bio ?? `${name}'s Dagim Gebeya profile.`,
     openGraph: {
       title: name,
       description: profile.bio ?? undefined,
@@ -47,28 +46,19 @@ export default async function UserProfilePage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const { id } = await params
-  const { variant } = await searchParams
-  const key = variant === "A" || variant === "B" ? (variant as "A" | "B") : null
-
-  // PROTOTYPE — the redesign variant renders before the production page and is
-  // view-only (?variant=A|B, dev only; this route is public, no auth guard).
-  if (key) {
-    return <PrototypeSellerProfilePage variant={key} id={id} />
-  }
-
+  const sp = await searchParams
   const profile = await fetchPublicProfile(id)
   if (!profile) notFound()
 
   const role = (profile.role ?? "buyer") as UserRole
   const roleLabel = ROLE_LABELS[role] ?? "Buyer"
-  const offset = parseOffset((await searchParams).offset)
+  const offset = parseOffset(sp.offset)
   const [reviews, rating] = await Promise.all([
     fetchSellerReviews(id, { offset }),
     fetchSellerRatingSummary(id),
   ])
   const user = await getCurrentUser()
   const contactInfo = user ? await fetchSellerContactInfo(id) : null
-
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-10 sm:px-6 lg:px-8">
@@ -90,7 +80,7 @@ export default async function UserProfilePage({
             </Avatar>
             <div className="min-w-0">
               <h1 className="font-heading text-2xl font-semibold leading-tight text-foreground">
-                {profile.full_name ?? "VinTech user"}
+                {profile.full_name ?? "Dagim Gebeya user"}
               </h1>
               <p className="text-sm text-muted-foreground">{roleLabel}</p>
             </div>
@@ -101,10 +91,6 @@ export default async function UserProfilePage({
         </CardHeader>
 
         <CardContent className="flex flex-col gap-6">
-          {/* T12 trust badges (replaces the previous placeholder). Phone / Fayda
-              flags and role are the public verification surface per DB spec §15
-              and issue #16 AC; the empty state ("Not verified yet") renders for
-              profiles with no active badge. */}
           <div className="flex items-center gap-3">
             <SellerTrustBadges seller={profile} />
           </div>
@@ -264,7 +250,6 @@ export default async function UserProfilePage({
           </CardContent>
         </Card>
       )}
-
 
       <div className="mt-6 text-center">
         <Button asChild variant="link">

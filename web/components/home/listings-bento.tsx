@@ -1,4 +1,4 @@
-import Image from "next/image"
+﻿import Image from "next/image"
 import Link from "next/link"
 
 import type { BrowseListing } from "@/lib/listings"
@@ -10,13 +10,13 @@ interface ListingsBentoProps {
   favoriteIds: Set<string> | null
 }
 
-// PROTOTYPE — bento collage listings (moodboard V4, square tiles). Composition
+
 // over a 4-column grid with 210px rows so every tile is tall enough to read:
 //   row 1-2 col 1     tall spine (420px)
 //   row 1-2 col 2-3   feature tile (2x2, 420px)
 //   row 1-2 col 4     two smalls stacked (210px each)
 //   row 3    col 1-4  four smalls (210px each)
-// No full-width base tile — it was too squashed to read. Throwaway prototype.
+// No full-width base tile — it was too squashed to read. Throwaway 
 export function ListingsBento({ listings, favoriteIds }: ListingsBentoProps) {
   const tiles = listings.slice(0, 9)
   const [spine, feature, ...rest] = tiles

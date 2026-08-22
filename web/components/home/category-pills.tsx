@@ -1,8 +1,8 @@
-import Link from "next/link"
+﻿import Link from "next/link"
 
 import type { Category } from "@/lib/listings"
 
-// PROTOTYPE — category pill filter bar (moodboard C5). Compact horizontal
+
 // chips that mirror the search-page filter. Throwaway for design comparison.
 export function CategoryPills({ categories }: { categories: Category[] }) {
   return (

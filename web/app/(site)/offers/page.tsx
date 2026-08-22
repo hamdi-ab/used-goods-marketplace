@@ -17,33 +17,19 @@ import { ReviewForm } from "@/components/reviews/review-form"
 import { ReviewStars } from "@/components/reviews/review-stars"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { PrototypeOffersPage } from "@/components/offers/prototype-offers-page"
-import type { VariantKey } from "@/components/search/prototype-utils"
 
 export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   title: "My offers",
-  description: "Offers you have made on the VinTech Marketplace.",
+  description: "Offers you have made on Dagim Gebeya.",
 }
-
-const VARIANT_KEYS = ["A", "B"] as const
-type VariantKeyList = (typeof VARIANT_KEYS)[number]
 
 export default async function OffersPage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  const { variant } = await searchParams
-  const key = VARIANT_KEYS.includes(variant as VariantKeyList)
-    ? (variant as VariantKey)
-    : null
-
-  if (key) {
-    return <PrototypeOffersPage variant={key} searchParams={searchParams} />
-  }
-
   const user = await requireUser()
   const params = await searchParams
   const offset = parseOffset(params.offset)
@@ -52,12 +38,6 @@ export default async function OffersPage({
     offset,
   })
 
-  // #97 — the buyer returns here from Chapa's hosted checkout with the tx_ref
-  // in the URL. The /payments/callback route already verified server-side, so
-  // by the time we render the row is terminal (paid/failed): banner from the
-  // embedded row, no second Chapa call (coding standard §20). The verify below
-  // only runs as the resume fallback when the callback was skipped (direct hit
-  // on a return URL with a still-pending payment).
   let verifyResult: { ok: true; amount: number } | { ok: false; error: string } | null = null
   if (typeof params.tx_ref === "string" && typeof params.offer === "string") {
     const row = offers.find((o) => o.id === params.offer)?.payment

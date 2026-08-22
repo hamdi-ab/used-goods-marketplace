@@ -8,7 +8,6 @@ import type { LucideIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { siteName } from "@/lib/nav"
-import { withVariant } from "@/components/search/prototype-utils"
 import { useAuth } from "@/components/auth/auth-provider"
 import { NotificationBell } from "@/components/notifications/notification-bell"
 import { Button } from "@/components/ui/button"
@@ -23,16 +22,10 @@ const NAV: { title: string; href: string; icon: LucideIcon }[] = [
   { title: "Favorites", href: "/favorites", icon: HeartIcon },
 ]
 
-// PROTOTYPE — header for the home-page redesign variants. Full 5-slot bar:
-// logo, icon nav links with accent-underline active state, compact search
-// pill, then the action cluster (Sell always visible; Log in ghost + Sign up
-// outline when signed out). Variant A keeps the light bar; variant B uses a
-// lighter-blue bar (not the old dark navy).
-export function SiteHeader({ variant }: { variant: "A" | "B" }) {
+export function SiteHeader() {
   const pathname = usePathname()
   const router = useRouter()
   const { user } = useAuth()
-  const blue = variant === "B"
   const [searchTerm, setSearchTerm] = useState("")
 
   const handleSearch = (e: React.FormEvent) => {
@@ -43,33 +36,16 @@ export function SiteHeader({ variant }: { variant: "A" | "B" }) {
   }
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-40 w-full border-b",
-        blue
-          ? "border-[#2563EB] bg-[#2563EB] text-white"
-          : "border-border bg-background/95 backdrop-blur supports-backdrop-filter:backdrop-blur"
-      )}
-    >
+    <header className="sticky top-0 z-40 w-full border-b border-[#2563EB] bg-[#2563EB] text-white">
       <div className="mx-auto flex h-16 w-full max-w-[1280px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
         <Link
           href="/"
-          className={cn(
-            "flex shrink-0 items-center gap-2 rounded-md font-heading text-lg font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-            blue
-              ? "text-white focus-visible:ring-white/60"
-              : "text-foreground focus-visible:ring-primary/60"
-          )}
+          className="flex shrink-0 items-center gap-2 rounded-md font-heading text-lg font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/60"
         >
-          <span
-            className={cn(
-              "flex size-8 items-center justify-center rounded-lg",
-              blue ? "bg-white" : "bg-primary/10"
-            )}
-          >
+          <span className="flex size-8 items-center justify-center rounded-lg bg-white">
             <svg
               viewBox="0 0 24 24"
-              className={cn("size-5", blue ? "text-[#2563EB]" : "text-primary")}
+              className="size-5 text-[#2563EB]"
               fill="none"
               stroke="currentColor"
               strokeWidth="2.5"
@@ -84,10 +60,7 @@ export function SiteHeader({ variant }: { variant: "A" | "B" }) {
           <span className="hidden sm:inline">{siteName}</span>
         </Link>
 
-        <nav
-          className={cn("hidden items-center gap-0.5 lg:flex", blue && "text-white")}
-          aria-label="Primary"
-        >
+        <nav className="hidden items-center gap-0.5 lg:flex text-white" aria-label="Primary">
           {NAV.map((item) => {
             const active = pathname === item.href
             const Icon = item.icon
@@ -97,25 +70,17 @@ export function SiteHeader({ variant }: { variant: "A" | "B" }) {
                 href={item.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "group relative flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2",
-                  blue
-                    ? "focus-visible:ring-white/60"
-                    : "focus-visible:ring-primary/60",
+                  "group relative flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60",
                   active
-                    ? blue
-                      ? "text-white"
-                      : "text-primary"
-                    : blue
-                      ? "text-white/90 hover:bg-white/10 hover:text-white"
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    ? "text-white"
+                    : "text-white/90 hover:bg-white/10 hover:text-white"
                 )}
               >
                 <Icon className="size-4" />
                 {item.title}
                 <span
                   className={cn(
-                    "absolute inset-x-3 -bottom-px h-0.5 rounded-full transition-transform",
-                    blue ? "bg-white" : "bg-primary",
+                    "absolute inset-x-3 -bottom-px h-0.5 rounded-full bg-white transition-transform",
                     active ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
                   )}
                 />
@@ -127,12 +92,7 @@ export function SiteHeader({ variant }: { variant: "A" | "B" }) {
         <div className="flex flex-1 items-center justify-end gap-2">
           <form
             onSubmit={handleSearch}
-            className={cn(
-              "hidden w-56 items-center gap-2 rounded-full px-3.5 py-2 text-sm md:flex",
-              blue
-                ? "bg-white/15 text-white/90"
-                : "bg-muted text-foreground/70"
-            )}
+            className="hidden w-56 items-center gap-2 rounded-full bg-white/15 px-3.5 py-2 text-sm text-white/90 md:flex"
           >
             <SearchIcon className="size-4 shrink-0" />
             <input
@@ -140,61 +100,40 @@ export function SiteHeader({ variant }: { variant: "A" | "B" }) {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search listings..."
-              className={cn(
-                "w-full bg-transparent outline-none placeholder:text-current",
-                blue ? "text-white" : "text-foreground"
-              )}
+              className="w-full bg-transparent text-white outline-none placeholder:text-current"
             />
           </form>
 
           {user ? (
             <>
-              <NotificationBell
-                tone={blue ? "blue" : "light"}
-                href={withVariant("/notifications", variant)}
-              />
+              <NotificationBell tone="blue" href="/notifications" />
               <Button
                 asChild
-                className={cn(
-                  "hidden sm:inline-flex",
-                  blue
-                    ? "bg-white text-[#2563EB] hover:bg-white/90"
-                    : "bg-primary text-primary-foreground hover:bg-primary/90"
-                )}
+                className="hidden sm:inline-flex bg-white text-[#2563EB] hover:bg-white/90"
               >
                 <Link href="/sell">Sell</Link>
               </Button>
-              <UserMenu tone={blue ? "blue" : "light"} />
+              <UserMenu tone="blue" />
             </>
           ) : (
             <>
               <Button
                 asChild
                 variant="ghost"
-                className={cn(
-                  "hidden sm:inline-flex",
-                  blue && "text-white hover:bg-white/10"
-                )}
+                className="hidden sm:inline-flex text-white hover:bg-white/10"
               >
                 <Link href="/login">Log in</Link>
               </Button>
               <Button
                 asChild
                 variant="outline"
-                className={cn(
-                  "hidden sm:inline-flex",
-                  blue && "border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
-                )}
+                className="hidden sm:inline-flex border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
               >
                 <Link href="/register">Sign up</Link>
               </Button>
               <Button
                 asChild
-                className={cn(
-                  blue
-                    ? "bg-white text-[#2563EB] hover:bg-white/90"
-                    : "bg-primary text-primary-foreground hover:bg-primary/90"
-                )}
+                className="bg-white text-[#2563EB] hover:bg-white/90"
               >
                 <Link href="/sell">Sell</Link>
               </Button>
@@ -205,10 +144,7 @@ export function SiteHeader({ variant }: { variant: "A" | "B" }) {
               <Button
                 variant="outline"
                 size="icon"
-                className={cn(
-                  "lg:hidden",
-                  blue && "border-white/30 bg-transparent text-white hover:bg-white/10"
-                )}
+                className="lg:hidden border-white/30 bg-transparent text-white hover:bg-white/10"
                 aria-label="Open menu"
               >
                 <MenuIcon className="size-5" />

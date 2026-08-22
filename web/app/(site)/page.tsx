@@ -4,8 +4,6 @@ import { getCurrentUser } from "@/lib/auth"
 import { fetchCategories, fetchListings, PAGE_SIZE } from "@/lib/listings"
 import { fetchFavoriteIds } from "@/lib/favorites"
 import { parseBrowseParams } from "@/lib/browse"
-import { SiteHeader } from "@/components/home/header"
-import { SiteFooter } from "@/components/home/footer"
 import { HomePage } from "@/components/home/home-page"
 
 export const metadata: Metadata = {
@@ -35,14 +33,10 @@ export default async function Home({
   const categories = await categoriesPromise
 
   return (
-    <>
-      <SiteHeader variant="B" />
-      <HomePage
-        categories={categories}
-        listings={listings}
-        favoriteIds={favoriteIds}
-      />
-      <SiteFooter variant="B" />
-    </>
+    <HomePage
+      categories={categories}
+      listings={listings}
+      favoriteIds={favoriteIds}
+    />
   )
 }

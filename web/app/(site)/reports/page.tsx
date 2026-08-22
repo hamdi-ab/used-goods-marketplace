@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { ReportStatusBadge } from "@/components/reports/report-status-badge"
-import { PrototypeReportsPage } from "@/components/reports/prototype-reports-page"
 
 export const dynamic = "force-dynamic"
 
@@ -21,26 +20,11 @@ export const metadata: Metadata = {
   description: "Reports you have submitted and their moderation status.",
 }
 
-// Count of reports still awaiting moderation; shown as a lightweight summary
-// so a reporter can see at a glance whether anything is still open (P1.13, #80).
 function openCount(reports: { status: ReportStatus }[]): number {
   return reports.filter((r) => r.status === "open").length
 }
 
-export default async function MyReportsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ variant?: string }>
-}) {
-  const { variant } = await searchParams
-  const key = variant === "A" || variant === "B" ? (variant as "A" | "B") : null
-
-  // PROTOTYPE — the redesign variant is view-only during review and bypasses
-  // the auth redirect (see proxy.ts) so ?variant=A|B renders without a session.
-  if (key) {
-    return <PrototypeReportsPage variant={key} />
-  }
-
+export default async function MyReportsPage() {
   const user = await requireUser()
   const { reports } = await fetchMyReports(user.id)
 

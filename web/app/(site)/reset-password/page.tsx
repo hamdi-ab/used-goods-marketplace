@@ -4,20 +4,9 @@ import { ResetPasswordForm } from "@/components/auth/reset-password-form"
 
 export const metadata: Metadata = {
   title: "Reset password",
-  description: "Set a new password for your VinTech Marketplace account.",
+  description: "Set a new password for your Dagim Gebeya account.",
 }
 
-const VARIANT_KEYS = ["A", "B"] as const
-type VariantKey = (typeof VARIANT_KEYS)[number]
-
-export default async function ResetPasswordPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ variant?: string }>
-}) {
-  const { variant } = await searchParams
-  const key = VARIANT_KEYS.includes(variant as VariantKey)
-    ? (variant as VariantKey)
-    : undefined
-  return <ResetPasswordForm variant={key} />
+export default async function ResetPasswordPage() {
+  return <ResetPasswordForm />
 }

@@ -9,7 +9,6 @@ import { countIncomingOffers } from "@/lib/offers"
 import { nextOffset, parseOffset } from "@/lib/pagination"
 import { promoteToSeller } from "@/app/actions/profile"
 import { ListingManager } from "@/components/dashboard/listing-manager"
-import { PrototypeDashboardPage } from "@/components/dashboard/prototype-dashboard-page"
 import { AccountUsageCard } from "@/components/dashboard/account-usage-card"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,7 +16,7 @@ import { Badge } from "@/components/ui/badge"
 
 export const metadata: Metadata = {
   title: "Dashboard",
-  description: "Your VinTech Marketplace dashboard.",
+  description: "Your Dagim Gebeya dashboard.",
 }
 
 export default async function DashboardPage({
@@ -25,20 +24,10 @@ export default async function DashboardPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  const { variant } = await searchParams
-  const key = variant === "A" || variant === "B" ? (variant as "A" | "B") : null
-
-  // PROTOTYPE - the redesign variant is view-only during review and bypasses
-  // the auth redirect (see proxy.ts) so ?variant=A|B renders without a session.
-  if (key) {
-    return <PrototypeDashboardPage variant={key} />
-  }
-
+  const sp = await searchParams
   const user = await requireUser()
-  // The seller home only makes sense for users who can sell; buyers land on the
-  // profile gate instead of a dead-end /sell redirect (issue #13 AC5).
   const canSell = user.role === "seller" || user.role === "admin"
-  const offset = parseOffset((await searchParams).offset)
+  const offset = parseOffset(sp.offset)
 
   const [openOfferCount, sellerUsage, sellerListings] = await Promise.all([
     countIncomingOffers(user.id),
@@ -108,9 +97,6 @@ export default async function DashboardPage({
                 offers will live here.
               </p>
             </div>
-            {/* Become-a-seller CTA (fix #71): one click promotes the buyer to
-                seller via the idempotent RPC; the dashboard re-renders with the
-                seller view on success. */}
             <form action={promoteToSeller}>
               <Button type="submit" variant="outline">
                 Start selling
