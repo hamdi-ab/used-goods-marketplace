@@ -39,9 +39,14 @@ const nextConfig: NextConfig = {
   experimental: { serverActions: { bodySizeLimit: "50mb" } },
   ...(allowedDevOrigins ? { allowedDevOrigins } : {}),
   images: {
-    remotePatterns: imageHost
-      ? [{ protocol: imageHost.protocol, hostname: imageHost.hostname, pathname: "/**" }]
-      : [],
+    remotePatterns: [
+      // Supabase Storage (T15)
+      ...(imageHost
+        ? [{ protocol: imageHost.protocol as "http" | "https", hostname: imageHost.hostname, pathname: "/**" }]
+        : []),
+      // Demo stand-in images (seeded listings use Unsplash URLs)
+      { protocol: "https" as const, hostname: "images.unsplash.com", pathname: "/**" },
+    ],
     formats: ["image/avif", "image/webp"],
   },
 };
