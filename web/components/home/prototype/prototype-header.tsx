@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
+import { useState } from "react"
 import { HandshakeIcon, HeartIcon, HomeIcon, LayoutGridIcon, MenuIcon, SearchIcon } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
@@ -29,8 +30,17 @@ const NAV: { title: string; href: string; icon: LucideIcon }[] = [
 // lighter-blue bar (not the old dark navy).
 export function PrototypeHeader({ variant }: { variant: "A" | "B" }) {
   const pathname = usePathname()
+  const router = useRouter()
   const { user } = useAuth()
   const blue = variant === "B"
+  const [searchTerm, setSearchTerm] = useState("")
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchTerm.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchTerm.trim())}`)
+    }
+  }
 
   return (
     <header
@@ -103,18 +113,27 @@ export function PrototypeHeader({ variant }: { variant: "A" | "B" }) {
         </nav>
 
         <div className="flex flex-1 items-center justify-end gap-2">
-          <Link
-            href="/search"
+          <form
+            onSubmit={handleSearch}
             className={cn(
-              "hidden w-56 items-center gap-2 rounded-full px-3.5 py-2 text-sm transition-colors md:flex",
+              "hidden w-56 items-center gap-2 rounded-full px-3.5 py-2 text-sm md:flex",
               blue
-                ? "bg-white/15 text-white/90 hover:bg-white/25"
-                : "bg-muted text-foreground/70 hover:bg-muted/70"
+                ? "bg-white/15 text-white/90"
+                : "bg-muted text-foreground/70"
             )}
           >
             <SearchIcon className="size-4 shrink-0" />
-            <span className="truncate">Search listings&hellip;</span>
-          </Link>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Search listings..."
+              className={cn(
+                "w-full bg-transparent outline-none placeholder:text-current",
+                blue ? "text-white" : "text-foreground"
+              )}
+            />
+          </form>
 
           {user ? (
             <>
@@ -133,7 +152,7 @@ export function PrototypeHeader({ variant }: { variant: "A" | "B" }) {
               >
                 <Link href="/sell">Sell</Link>
               </Button>
-              <UserMenu />
+              <UserMenu tone={blue ? "blue" : "light"} />
             </>
           ) : (
             <>
