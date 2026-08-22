@@ -70,9 +70,13 @@ export async function GET(request: Request): Promise<Response> {
     console.error("[verify-fayda] callback failed:", result.error)
   }
 
-  const dest = result.ok
-    ? "/profile?verified=fayda"
-    : `/profile?verified=fayda&error=${encodeURIComponent(result.error ?? "verification_failed")}`
+  const dest = new URL("/profile", url.origin)
+  if (result.ok) {
+    dest.searchParams.set("verified", "fayda")
+  } else {
+    dest.searchParams.set("verified", "fayda")
+    dest.searchParams.set("error", result.error ?? "verification_failed")
+  }
   return NextResponse.redirect(dest, { status: 303 })
 }
 
