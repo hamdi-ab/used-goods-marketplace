@@ -20,8 +20,8 @@ insert into auth.users (
   updated_at
 )
 select
-  '00000000-0000-0000-0000-000000000000',
-  '00000000-0000-0000-0000-000000000001',
+  '00000000-0000-4000-8000-000000000000',
+  '00000000-0000-4000-8000-000000000001',
   'authenticated',
   'authenticated',
   'admin@vintch.local',
@@ -49,10 +49,10 @@ insert into auth.identities (
   updated_at
 )
 select
-  '00000000-0000-0000-0000-000000000001',
-  '00000000-0000-0000-0000-000000000001',
+  '00000000-0000-4000-8000-000000000001',
+  '00000000-0000-4000-8000-000000000001',
   jsonb_build_object(
-    'sub', '00000000-0000-0000-0000-000000000001',
+    'sub', '00000000-0000-4000-8000-000000000001',
     'email', 'admin@vintch.local'
   ),
   'email',
@@ -61,13 +61,13 @@ select
   now()
 where not exists (
   select 1 from auth.identities
-  where user_id = '00000000-0000-0000-0000-000000000001'
+  where user_id = '00000000-0000-4000-8000-000000000001'
 );
 
 -- Promote the auto-created profile (trigger made it a buyer) to admin.
 update public.profiles
 set role = 'admin', full_name = 'Marketplace Admin'
-where id = '00000000-0000-0000-0000-000000000001';
+where id = '00000000-0000-4000-8000-000000000001';
 
 ------------------------------------------------------------------------------
 -- T12 demo seeds: exercise every trust-badge state on a fresh `db reset`
@@ -81,11 +81,11 @@ where id = '00000000-0000-0000-0000-000000000001';
 ------------------------------------------------------------------------------
 do $$
 declare
-  admin_id uuid := '00000000-0000-0000-0000-000000000001';
-  seller_phone uuid := '00000000-0000-0000-0000-000000000002';
-  seller_fayda uuid := '00000000-0000-0000-0000-000000000003';
-  seller_plain uuid := '00000000-0000-0000-0000-000000000004';
-  a_buyer uuid := '00000000-0000-0000-0000-000000000005';
+  admin_id uuid := '00000000-0000-4000-8000-000000000001';
+  seller_phone uuid := '00000000-0000-4000-8000-000000000002';
+  seller_fayda uuid := '00000000-0000-4000-8000-000000000003';
+  seller_plain uuid := '00000000-0000-4000-8000-000000000004';
+  a_buyer uuid := '00000000-0000-4000-8000-000000000005';
   demo_password text := extensions.crypt('demo1234', extensions.gen_salt('bf'));
 begin
   -- auth users (the on_auth_user_created trigger creates the profile rows).
@@ -97,19 +97,19 @@ begin
                           email_change,
                           created_at, updated_at)
   values
-    ('00000000-0000-0000-0000-000000000000', seller_phone, 'authenticated', 'authenticated',
+    ('00000000-0000-4000-8000-000000000000', seller_phone, 'authenticated', 'authenticated',
      'amira.sellers@vintch.local', demo_password, now(),
      jsonb_build_object('provider', 'email', 'providers', array['email']),
      jsonb_build_object('full_name', 'Amira Sellers'), '', '', '', '', now(), now()),
-    ('00000000-0000-0000-0000-000000000000', seller_fayda, 'authenticated', 'authenticated',
+    ('00000000-0000-4000-8000-000000000000', seller_fayda, 'authenticated', 'authenticated',
      'fayad.verified@vintch.local', demo_password, now(),
      jsonb_build_object('provider', 'email', 'providers', array['email']),
      jsonb_build_object('full_name', 'Fayad Verified'), '', '', '', '', now(), now()),
-    ('00000000-0000-0000-0000-000000000000', seller_plain, 'authenticated', 'authenticated',
+    ('00000000-0000-4000-8000-000000000000', seller_plain, 'authenticated', 'authenticated',
      'kebede.trader@vintch.local', demo_password, now(),
      jsonb_build_object('provider', 'email', 'providers', array['email']),
      jsonb_build_object('full_name', 'Kebede Trader'), '', '', '', '', now(), now()),
-    ('00000000-0000-0000-0000-000000000000', a_buyer, 'authenticated', 'authenticated',
+    ('00000000-0000-4000-8000-000000000000', a_buyer, 'authenticated', 'authenticated',
      'biniam.buyer@vintch.local', demo_password, now(),
      jsonb_build_object('provider', 'email', 'providers', array['email']),
      jsonb_build_object('full_name', 'Biniam Buyer'), '', '', '', '', now(), now())
@@ -166,15 +166,15 @@ begin
   insert into public.listings (id, seller_id, category_id, title, description, price,
                               condition, negotiable, city, sub_city, status, published_at)
   values
-    ('10000000-0000-0000-0000-000000000002', seller_phone,
+    ('10000000-0000-4000-8000-000000000002', seller_phone,
      (select id from public.categories where slug = 'furniture' limit 1),
      'Refinished wooden chair', 'Solid wood, gently restored. Pickup available.', 1500,
      'Lightly Used', false, 'Addis Ababa', null, 'published', now()),
-    ('10000000-0000-0000-0000-000000000003', seller_fayda,
+    ('10000000-0000-4000-8000-000000000003', seller_fayda,
      (select id from public.categories where slug = 'furniture' limit 1),
      'Handwoven throw rug', 'Ethiopian handwoven cotton rug, excellent condition.', 2200,
      'Lightly Used', true, 'Addis Ababa', null, 'published', now()),
-    ('10000000-0000-0000-0000-000000000004', seller_plain,
+    ('10000000-0000-4000-8000-000000000004', seller_plain,
      (select id from public.categories where slug = 'furniture' limit 1),
      'Steel bedside table', 'Minimal steel frame bedside table, minor scuffs.', 950,
      'Fair', false, 'Dire Dawa', null, 'published', now())
@@ -205,10 +205,10 @@ end $$;
 -----------------------------------------------------------------------------
 do $$
 declare
-  seller_phone uuid := '00000000-0000-0000-0000-000000000002';
-  seller_fayda uuid := '00000000-0000-0000-0000-000000000003';
-  seller_plain uuid := '00000000-0000-0000-0000-000000000004';
-  a_buyer uuid := '00000000-0000-0000-0000-000000000005';
+  seller_phone uuid := '00000000-0000-4000-8000-000000000002';
+  seller_fayda uuid := '00000000-0000-4000-8000-000000000003';
+  seller_plain uuid := '00000000-0000-4000-8000-000000000004';
+  a_buyer uuid := '00000000-0000-4000-8000-000000000005';
   rec record;
 begin
   for rec in select * from (values
@@ -406,44 +406,44 @@ begin
   -- idempotent.
   insert into public.offers (id, listing_id, buyer_id, amount, message, status)
   values
-    ('30000000-0000-0000-0000-000000000001', '20000000-0000-0000-0000-000000000001',
+    ('30000000-0000-4000-8000-000000000001', '20000000-0000-4000-8000-000000000001',
      a_buyer, 26000, 'Hi, would you accept 26000 for the iPhone?', 'accepted'),
-    ('30000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000008',
+    ('30000000-0000-4000-8000-000000000002', '20000000-0000-4000-8000-000000000008',
      a_buyer, 35000, 'Is 35000 okay for the sofa set, delivered?', 'accepted'),
-    ('30000000-0000-0000-0000-000000000003', '20000000-0000-0000-0000-000000000004',
+    ('30000000-0000-4000-8000-000000000003', '20000000-0000-4000-8000-000000000004',
      a_buyer, 23000, '23000 for the Galaxy A54 if you can deliver to Piassa.', 'accepted'),
-    ('30000000-0000-0000-0000-000000000004', '20000000-0000-0000-0000-000000000016',
+    ('30000000-0000-4000-8000-000000000004', '20000000-0000-4000-8000-000000000016',
      a_buyer, 55000, 'Would you take 55000 for the fridge?', 'accepted'),
-    ('30000000-0000-0000-0000-000000000005', '20000000-0000-0000-0000-000000000011',
+    ('30000000-0000-4000-8000-000000000005', '20000000-0000-4000-8000-000000000011',
      a_buyer, 5000, '5000 for the bookshelf, I can pick it up.', 'accepted'),
-    ('30000000-0000-0000-0000-000000000006', '20000000-0000-0000-0000-000000000023',
+    ('30000000-0000-4000-8000-000000000006', '20000000-0000-4000-8000-000000000023',
      a_buyer, 150000, '150000 for the Boxer if the documents are ready.', 'accepted')
   on conflict (id) do nothing;
 
   update public.listings
     set status = 'sold', sold_to_buyer_id = a_buyer
     where id in (
-      '20000000-0000-0000-0000-000000000001',
-      '20000000-0000-0000-0000-000000000008',
-      '20000000-0000-0000-0000-000000000004',
-      '20000000-0000-0000-0000-000000000016',
-      '20000000-0000-0000-0000-000000000011',
-      '20000000-0000-0000-0000-000000000023'
+      '20000000-0000-4000-8000-000000000001',
+      '20000000-0000-4000-8000-000000000008',
+      '20000000-0000-4000-8000-000000000004',
+      '20000000-0000-4000-8000-000000000016',
+      '20000000-0000-4000-8000-000000000011',
+      '20000000-0000-4000-8000-000000000023'
     );
 
   insert into public.reviews (offer_id, seller_id, buyer_id, rating, comment)
   values
-    ('30000000-0000-0000-0000-000000000001', seller_phone, a_buyer, 5,
+    ('30000000-0000-4000-8000-000000000001', seller_phone, a_buyer, 5,
      'Exactly as described, met in Bole and it was an easy transaction.'),
-    ('30000000-0000-0000-0000-000000000002', seller_phone, a_buyer, 4,
+    ('30000000-0000-4000-8000-000000000002', seller_phone, a_buyer, 4,
      'Good sofa, delivery arranged without fuss. Slight delay but fair price.'),
-    ('30000000-0000-0000-0000-000000000003', seller_fayda, a_buyer, 4,
+    ('30000000-0000-4000-8000-000000000003', seller_fayda, a_buyer, 4,
      'Phone was clean and boxed as promised, smooth meetup.'),
-    ('30000000-0000-0000-0000-000000000004', seller_fayda, a_buyer, 4,
+    ('30000000-0000-4000-8000-000000000004', seller_fayda, a_buyer, 4,
      'Fridge works perfectly, still under warranty as said.'),
-    ('30000000-0000-0000-0000-000000000005', seller_plain, a_buyer, 3,
+    ('30000000-0000-4000-8000-000000000005', seller_plain, a_buyer, 3,
      'Bookshelf is sturdy but a bit more scuffed than the photos showed.'),
-    ('30000000-0000-0000-0000-000000000006', seller_plain, a_buyer, 3,
+    ('30000000-0000-4000-8000-000000000006', seller_plain, a_buyer, 3,
      'Bike runs well and papers were ready, though price took some negotiation.')
   on conflict (offer_id) do nothing;
 
