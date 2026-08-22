@@ -56,11 +56,13 @@ export function PrototypeProfileContent({
   user,
   profile,
   verifications,
+  faydaAvailable,
 }: {
   variant: VariantKey
   user: SessionUser
   profile: ProfileRow
   verifications: MyVerificationRow[]
+  faydaAvailable: boolean
 }) {
   const [state, formAction, pending] = useActionState(updateProfile, {})
   const [avatarUrl, setAvatarUrl] = useState(profile.avatar_url ?? null)
@@ -214,6 +216,14 @@ export function PrototypeProfileContent({
                 >
                   View public profile →
                 </Link>
+                {!verifiedTypes.has("fayda") && faydaAvailable ? (
+                  <Link
+                    href="/verify-fayda/start"
+                    className="text-sm font-medium text-primary hover:underline"
+                  >
+                    Verify with Fayda →
+                  </Link>
+                ) : null}
               </div>
             </div>
           </div>
@@ -404,6 +414,14 @@ export function PrototypeProfileContent({
                 >
                   View public profile →
                 </Link>
+                {!verifiedTypes.has("fayda") && faydaAvailable ? (
+                  <Link
+                    href="/verify-fayda/start"
+                    className="text-sm font-medium text-primary hover:underline"
+                  >
+                    Verify with Fayda →
+                  </Link>
+                ) : null}
               </div>
             </div>
           </div>

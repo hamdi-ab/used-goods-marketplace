@@ -4,6 +4,7 @@ import type { VariantKey } from "@/components/search/prototype-utils"
 import { getCurrentUser } from "@/lib/auth"
 import { fetchOwnProfile, type OwnProfileRow } from "@/lib/profiles"
 import { fetchMyVerifications } from "@/lib/verifications"
+import { faydaConfigured } from "@/lib/fayda/verification"
 
 import { PrototypeProfileContent } from "./prototype-profile-content"
 
@@ -44,6 +45,7 @@ export async function PrototypeProfilePage({ variant }: { variant: VariantKey })
         user={user}
         profile={(profile ?? {}) as OwnProfileRow}
         verifications={verifications}
+        faydaAvailable={faydaConfigured()}
       />
       <PrototypeFooter variant={variant} />
     </>
