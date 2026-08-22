@@ -67,9 +67,8 @@ export function CreateListingForm({
     setPreviews((p) => [...p, ...newUrls])
     setPhotoFiles((p) => [...p, ...toAdd])
 
-    if (newFiles.length > remaining) {
-      // Optionally surface a toast: "Up to 10 photos allowed"
-    }
+    // Clear input so re-selecting the same files fires onChange again
+    if (fileRef.current) fileRef.current.value = ""
   }
 
   return (
@@ -120,7 +119,7 @@ export function CreateListingForm({
           {previews.length > 0 ? (
             <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
               {previews.map((url, i) => (
-                <div key={url} className="relative aspect-video w-full overflow-hidden rounded-md border">
+                <div key={`${i}-${url}`} className="relative aspect-video w-full overflow-hidden rounded-md border">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={url} alt={`photo ${i + 1}`} className="h-full w-full object-cover" />
                   {i === 0 ? (
