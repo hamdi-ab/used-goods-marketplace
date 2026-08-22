@@ -78,7 +78,7 @@ export async function PrototypeDetailPage({
     <>
       <PrototypeHeader variant={variant} />
 
-      <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6 lg:px-8 min-h-[60vh]">
         {/* Back navigation */}
         <div className="mb-6">
           <Link
@@ -145,39 +145,39 @@ export async function PrototypeDetailPage({
               </div>
             </div>
 
-            {/* Seller Profile Card (trust + verified badges) */}
-            <div className="rounded-2xl border bg-card p-6 shadow-sm">
-              <div className="flex items-center gap-4">
-                <Avatar className="size-12 border">
-                  <AvatarImage
-                    src={seller?.avatar_url ?? undefined}
-                    alt={seller?.full_name ?? "Seller"}
-                  />
-                  <AvatarFallback className="font-semibold text-muted-foreground">
-                    {seller?.full_name?.slice(0, 2).toUpperCase() ?? "SV"}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-base font-semibold text-foreground">
-                    <Link
-                      href={withVariant(
-                        `/users/${seller?.id ?? l.seller_id}`,
-                        variant
-                      )}
-                      className="hover:text-[#2563EB] hover:underline"
-                    >
-                      {seller?.full_name ?? "Verified Seller"}
-                    </Link>
-                  </h3>
-                  <p className="text-xs text-foreground/70">
-                    {seller?.trust_score != null
-                      ? `Trust score: ${seller.trust_score}/100`
-                      : "Community seller"}
-                  </p>
+             {/* Seller Profile Card (trust + verified badges) */}
+              <div className="rounded-2xl border bg-card p-6 shadow-sm">
+                <div className="flex items-center gap-4">
+                  <Avatar className="size-12 border">
+                    <AvatarImage
+                      src={seller?.avatar_url ?? undefined}
+                      alt={seller?.full_name ?? "Seller"}
+                    />
+                    <AvatarFallback className="bg-primary/10 font-semibold text-primary">
+                      {seller?.full_name?.slice(0, 2).toUpperCase() ?? "SV"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="text-base font-semibold text-foreground">
+                      <Link
+                        href={withVariant(
+                          `/users/${seller?.id ?? l.seller_id}`,
+                          variant
+                        )}
+                        className="hover:text-[#2563EB] hover:underline"
+                      >
+                        {seller?.full_name ?? "Verified Seller"}
+                      </Link>
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {seller?.trust_score != null
+                        ? `Trust score: ${seller.trust_score}/100`
+                        : "Community seller"}
+                    </p>
+                  </div>
                 </div>
+                <SellerTrustRow seller={seller} />
               </div>
-              <SellerTrustRow seller={seller} />
-            </div>
 
             {/* Actions Card — trust evidence comes before the ask */}
             <div className="rounded-2xl border bg-card p-6 shadow-sm">
@@ -260,6 +260,23 @@ export async function PrototypeDetailPage({
   )
 }
 
+function TrustMeter({ score }: { score: number }) {
+  const pct = Math.max(0, Math.min(100, score))
+  const color =
+    pct >= 80 ? "bg-success" : pct >= 50 ? "bg-warning" : "bg-muted-foreground/30"
+  return (
+    <div className="flex items-center gap-2">
+      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+        <div
+          className={`h-full rounded-full transition-all ${color}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <span className="text-xs font-medium tabular-nums">{score}/100</span>
+    </div>
+  )
+}
+
 function SellerTrustRow({
   seller,
 }: {
@@ -278,20 +295,28 @@ function SellerTrustRow({
     },
   ].filter((b) => b.ok)
 
-  if (badges.length === 0) return null
-
   return (
-    <div className="mt-4 flex flex-wrap items-center gap-2 border-t pt-3">
-      {badges.map((b) => (
-        <Badge
-          key={b.label}
-          variant="outline"
-          className={`gap-1.5 font-medium ${b.cls}`}
-        >
-          <span className="size-1.5 rounded-full bg-current" />
-          {b.label}
-        </Badge>
-      ))}
+    <div className="mt-4 space-y-3 border-t pt-3">
+      {seller?.trust_score != null ? (
+        <div>
+          <p className="text-xs font-medium text-muted-foreground">Trust score</p>
+          <TrustMeter score={seller.trust_score} />
+        </div>
+      ) : null}
+      {badges.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-2">
+          {badges.map((b) => (
+            <Badge
+              key={b.label}
+              variant="outline"
+              className={`gap-1.5 font-medium ${b.cls}`}
+            >
+              <span className="size-1.5 rounded-full bg-current" />
+              {b.label}
+            </Badge>
+          ))}
+        </div>
+      ) : null}
     </div>
   )
 }
