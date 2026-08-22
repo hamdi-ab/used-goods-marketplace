@@ -56,13 +56,20 @@ export function CreateListingForm({
   }, [state, router])
 
   function handlePhotos(e: ChangeEvent<HTMLInputElement>) {
-    const files = Array.from(e.target.files ?? [])
-    urlRefs.current.forEach((url) => URL.revokeObjectURL(url))
-    urlRefs.current = []
-    const urls = files.map((f) => URL.createObjectURL(f))
-    urlRefs.current = urls
-    setPreviews(urls)
-    setPhotoFiles(files.filter((f) => f.size > 0))
+    const newFiles = Array.from(e.target.files ?? []).filter((f) => f.size > 0)
+    if (newFiles.length === 0) return
+
+    const remaining = 10 - photoFiles.length
+    const toAdd = newFiles.slice(0, remaining)
+
+    const newUrls = toAdd.map((f) => URL.createObjectURL(f))
+    urlRefs.current.push(...newUrls)
+    setPreviews((p) => [...p, ...newUrls])
+    setPhotoFiles((p) => [...p, ...toAdd])
+
+    if (newFiles.length > remaining) {
+      // Optionally surface a toast: "Up to 10 photos allowed"
+    }
   }
 
   return (
@@ -74,11 +81,12 @@ export function CreateListingForm({
           <CardTitle>Photos *</CardTitle>
           <CardDescription>
             First photo is the cover. Up to 10 JPG/PNG/WebP images, 5 MB each.
+            {previews.length > 0 ? ` (${previews.length}/10 added)` : ""}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div
-            className="flex min-h-[120px] cursor-pointer items-center justify-center rounded-lg border border-dashed border-border text-center text-sm text-muted-foreground transition hover:border-primary"
+            className="flex min-h-[120px] cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-border text-center text-sm text-muted-foreground transition hover:border-primary"
             onClick={() => fileRef.current?.click()}
           >
             <input
@@ -91,8 +99,20 @@ export function CreateListingForm({
               onChange={handlePhotos}
               aria-label="upload photos"
             />
-            <UploadIcon className="mb-2 size-6" />
-            <span>{previews.length ? "Change photos" : "Click to upload"}</span>
+            {previews.length > 0 ? (
+              <>
+                <UploadIcon className="size-6" />
+                <span className="font-medium text-foreground">Add more photos</span>
+                <span className="text-xs text-muted-foreground">
+                  {10 - previews.length} remaining
+                </span>
+              </>
+            ) : (
+              <>
+                <UploadIcon className="mb-2 size-6" />
+                <span>Click to upload</span>
+              </>
+            )}
           </div>
           {state.errors?.photos ? (
             <FieldError message={state.errors.photos[0]} />
@@ -103,6 +123,11 @@ export function CreateListingForm({
                 <div key={url} className="relative aspect-video w-full overflow-hidden rounded-md border">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={url} alt={`photo ${i + 1}`} className="h-full w-full object-cover" />
+                  {i === 0 ? (
+                    <span className="absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-primary-foreground">
+                      Cover
+                    </span>
+                  ) : null}
                   <button
                     type="button"
                     onClick={() => {
