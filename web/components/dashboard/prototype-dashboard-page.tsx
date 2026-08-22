@@ -46,7 +46,7 @@ export async function PrototypeDashboardPage({
     return (
       <>
         <PrototypeHeader variant={variant} />
-        <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-16">
+        <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col px-4 py-16 min-h-[60vh]">
           <h1 className="font-heading text-xl font-semibold text-foreground">
             Dashboard
           </h1>
@@ -246,7 +246,7 @@ export async function PrototypeDashboardPage({
     <>
       <PrototypeHeader variant={variant} />
 
-      <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6 lg:px-8 min-h-[60vh]">
         {/* Compact welcome header */}
         <div className="mb-8">
           <Badge variant="secondary">

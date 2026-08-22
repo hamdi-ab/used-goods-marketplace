@@ -32,7 +32,7 @@ export default async function FavoritesPage({
   })
 
   return (
-    <main className="mx-auto w-full max-w-[1280px] px-4 py-10 sm:px-6 lg:py-12">
+    <main className="mx-auto w-full max-w-[1280px] px-4 py-10 sm:px-6 lg:py-12 min-h-[60vh]">
       <h1 className="font-heading mb-8 text-2xl font-semibold text-foreground">
         Your favorites
       </h1>

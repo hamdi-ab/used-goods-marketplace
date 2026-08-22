@@ -45,7 +45,7 @@ export default async function MyReportsPage({
   const { reports } = await fetchMyReports(user.id)
 
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6 lg:px-8 min-h-[60vh]">
       <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
         <h1 className="font-heading text-2xl font-semibold text-foreground">
           My reports

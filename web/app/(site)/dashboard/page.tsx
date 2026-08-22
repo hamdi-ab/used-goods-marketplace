@@ -52,7 +52,7 @@ export default async function DashboardPage({
   const firstName = user.fullName?.split(" ")[0] ?? "there"
 
   return (
-    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6 lg:px-8 min-h-[60vh]">
       <div className="mb-8">
         <Badge variant="secondary">{ROLE_LABELS[user.role] ?? "Buyer"}</Badge>
         <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight text-foreground">

@@ -236,7 +236,7 @@ export async function PrototypeSellerOffersPage({
   return (
     <>
       <PrototypeHeader variant={variant} />
-      <main className="mx-auto w-full max-w-[960px] flex-1 px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-[960px] flex-1 px-4 py-8 sm:px-6 lg:px-8 min-h-[60vh]">
         <div className="mb-2 flex flex-wrap items-end justify-between gap-3">
           <div className="flex items-center gap-3">
             <h1 className="font-heading text-2xl font-semibold text-foreground">

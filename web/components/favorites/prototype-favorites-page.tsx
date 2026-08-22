@@ -33,7 +33,7 @@ export async function PrototypeFavoritesPage({
   return (
     <>
       <PrototypeHeader variant={variant} />
-      <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6 lg:py-10">
+      <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6 lg:py-10 min-h-[60vh]">
         <div className="mb-8 flex items-center gap-3">
           <h1 className="font-heading text-2xl font-semibold text-foreground">
             Your favorites
