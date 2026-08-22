@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { SparklesIcon, XIcon, RefreshCwIcon, CheckCircle2Icon } from "lucide-react"
+import { SparklesIcon, XIcon, RefreshCwIcon, CheckCircle2Icon, AlertTriangleIcon, XCircleIcon } from "lucide-react"
 
 import type { Category } from "@/lib/listings/constants"
 import type { AIListingSuggestion } from "@/lib/ai/constants"
@@ -23,6 +23,7 @@ type AiState =
   | { phase: "idle" }
   | { phase: "loading" }
   | { phase: "unavailable"; message: string }
+  | { phase: "error"; message: string }
   | { phase: "ready"; suggestion: AIListingSuggestion }
 
 function QualityMeter({ score }: { score: number }) {
@@ -123,18 +124,26 @@ export function AiAssist({
 
   async function run(mode: "generate" | "regenerate" = "generate") {
     setState({ phase: "loading" })
-    const fd = new FormData()
-    for (const f of photos) fd.append("photos", f)
-    fd.append("categories", JSON.stringify(categories))
-    fd.append("ai_event", mode)
-    if (title) fd.append("title", title)
-    if (description) fd.append("description", description)
-    const res = await generateListingSuggestionsAction({}, fd)
+    try {
+      const fd = new FormData()
+      for (const f of photos) fd.append("photos", f)
+      fd.append("categories", JSON.stringify(categories))
+      fd.append("ai_event", mode)
+      if (title) fd.append("title", title)
+      if (description) fd.append("description", description)
+      const res = await generateListingSuggestionsAction({}, fd)
 
-    if (res.ok && res.suggestion) {
-      setState({ phase: "ready", suggestion: res.suggestion })
-    } else {
-      setState({ phase: "unavailable", message: res.message ?? "AI unavailable" })
+      if (res.ok && res.suggestion) {
+        setState({ phase: "ready", suggestion: res.suggestion })
+      } else {
+        setState({ phase: "unavailable", message: res.message ?? "AI unavailable" })
+      }
+    } catch (err) {
+      const message =
+        err instanceof Error && err.message
+          ? err.message
+          : "Something went wrong. Please try again."
+      setState({ phase: "error", message })
     }
   }
 
@@ -179,7 +188,29 @@ export function AiAssist({
       </div>
 
       {state.phase === "unavailable" ? (
-        <p className="mt-3 text-sm text-muted-foreground">{state.message}</p>
+        <div className="mt-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+          <AlertTriangleIcon className="mt-0.5 size-4 shrink-0 text-amber-600" />
+          <p className="text-sm text-amber-800">{state.message}</p>
+        </div>
+      ) : null}
+
+      {state.phase === "error" ? (
+        <div className="mt-3 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3">
+          <XCircleIcon className="mt-0.5 size-4 shrink-0 text-red-600" />
+          <div className="flex-1">
+            <p className="text-sm font-medium text-red-800">Failed to generate suggestions</p>
+            <p className="mt-0.5 text-sm text-red-700">{state.message}</p>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setState({ phase: "idle" })}
+            className="text-red-700 hover:bg-red-100 hover:text-red-800"
+          >
+            Dismiss
+          </Button>
+        </div>
       ) : null}
 
       {state.phase === "loading" ? (
