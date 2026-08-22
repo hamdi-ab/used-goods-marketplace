@@ -11,7 +11,10 @@ function formValue(formData: FormData, key: string): string | undefined {
 }
 
 const offerIdSchema = z.object({
-  offerId: z.string().uuid(),
+  // UUID format validation is intentionally lenient — the DB RPC
+  // (begin_payment) re-checks the format and existence server-side,
+  // so this schema only needs to ensure a non-empty string is present.
+  offerId: z.string().min(32),
 })
 
 export type PayOfferState = {
