@@ -64,16 +64,18 @@ export function VariantB({ categories, listings, favoriteIds }: VariantBProps) {
         </div>
       </section>
 
-      <section aria-label="Marketplace metrics" className="grid gap-4 border-b pb-10 pt-8 sm:grid-cols-3">
-        {METRICS.map((m) => (
-          <div key={m.label} className="flex items-start gap-3">
-            <m.icon className="mt-1 size-5 text-primary" />
-            <div>
-              <p className="font-heading text-2xl font-bold">{m.value}</p>
-              <p className="text-sm text-muted-foreground">{m.label}</p>
+      <section aria-label="Marketplace metrics" className="border-b px-6 pb-10 pt-8 sm:px-10">
+        <div className="flex flex-col gap-6 sm:flex-row sm:justify-between sm:gap-10">
+          {METRICS.map((m) => (
+            <div key={m.label} className="flex items-start gap-3">
+              <m.icon className="mt-1 size-5 text-primary" />
+              <div>
+                <p className="font-heading text-2xl font-bold">{m.value}</p>
+                <p className="text-sm text-muted-foreground">{m.label}</p>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </section>
 
       <section className="grid gap-10 py-12 lg:grid-cols-2 lg:items-center">
