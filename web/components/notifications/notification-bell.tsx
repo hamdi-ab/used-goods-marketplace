@@ -41,19 +41,21 @@ export function NotificationBell({
       )}
     >
       <Link href={href}>
-        <BellIcon className="size-5" />
-        {unreadCount > 0 ? (
-          <span
-            className={cn(
-              "absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold",
-              tone === "blue"
-                ? "bg-white text-[#2563EB]"
-                : "bg-primary text-primary-foreground"
-            )}
-          >
-            {unreadCount > 99 ? "99+" : unreadCount}
-          </span>
-        ) : null}
+        <span className="relative inline-flex">
+          <BellIcon className="size-5" />
+          {unreadCount > 0 ? (
+            <span
+              className={cn(
+                "absolute top-0 right-0 flex h-4 min-w-4 translate-x-1/4 -translate-y-1/4 items-center justify-center rounded-full border-2 px-1 text-[10px] font-semibold",
+                tone === "blue"
+                  ? "border-[#2563EB] bg-white text-[#2563EB]"
+                  : "border-background bg-primary text-primary-foreground"
+              )}
+            >
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          ) : null}
+        </span>
       </Link>
     </Button>
   )
