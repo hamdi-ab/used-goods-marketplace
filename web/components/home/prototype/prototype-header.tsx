@@ -63,11 +63,23 @@ export function PrototypeHeader({ variant }: { variant: "A" | "B" }) {
         >
           <span
             className={cn(
-              "flex size-8 items-center justify-center rounded-lg text-sm font-bold",
-              blue ? "bg-white text-[#2563EB]" : "bg-primary text-primary-foreground"
+              "flex size-8 items-center justify-center rounded-lg",
+              blue ? "bg-white" : "bg-primary/10"
             )}
           >
-            V
+            <svg
+              viewBox="0 0 24 24"
+              className={cn("size-5", blue ? "text-[#2563EB]" : "text-primary")}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 6 A6 6 0 1 1 8 14" />
+              <path d="M8 14 L8 10 L12 10" />
+            </svg>
           </span>
           <span className="hidden sm:inline">{siteName}</span>
         </Link>
