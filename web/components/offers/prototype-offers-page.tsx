@@ -10,6 +10,7 @@ import { parseOffset } from "@/lib/pagination";
 import { formatShortDate } from "@/lib/utils";
 import { OfferStatusBadge } from "@/components/offers/offer-status-badge";
 import { BuyerOfferActions } from "@/components/offers/buyer-offer-actions";
+import { BuyerPayment } from "@/components/offers/buyer-payment";
 import { ReviewForm } from "@/components/reviews/review-form";
 import { ReviewStars } from "@/components/reviews/review-stars";
 import { Button } from "@/components/ui/button";
@@ -189,8 +190,9 @@ export async function PrototypeOffersPage({
 
                   {offer.status === "accepted" ? (
                     <div className="mt-4 border-t pt-3">
+                      <BuyerPayment offer={offer} />
                       {offer.review ? (
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 mt-3">
                           <ReviewStars rating={offer.review.rating} />
                           <span className="text-sm text-muted-foreground">
                             You rated this transaction {offer.review.rating}/5
