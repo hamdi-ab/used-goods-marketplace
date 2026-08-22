@@ -10,6 +10,7 @@ import {
   submitReportSchema,
   REPORT_NOTE_MAX,
 } from "@/lib/reports"
+import { uuidSchema } from "@/lib/uuid"
 
 function formValue(formData: FormData, key: string): string | undefined {
   const v = formData.get(key)
@@ -56,7 +57,7 @@ export async function submitReport(
 }
 
 const resolveSchema = z.object({
-  reportId: z.string().uuid(),
+  reportId: uuidSchema,
   action: z.enum(["remove_listing", "block_seller", "reject"]),
   adminNote: z
     .string()

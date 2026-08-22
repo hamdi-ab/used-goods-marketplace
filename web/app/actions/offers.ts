@@ -128,8 +128,8 @@ export async function offerAction(
 }
 
 const abandonSaleSchema = z.object({
-  offerId: z.string().uuid(),
-  listingId: z.string().uuid(),
+  offerId: uuidSchema,
+  listingId: uuidSchema,
 })
 
 export type AbandonSaleState = {
