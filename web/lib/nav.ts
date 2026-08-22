@@ -20,7 +20,7 @@ export type NavItem = {
   icon?: LucideIcon
 }
 
-export const siteName = "VinTech Marketplace"
+export const siteName = "Dagim Gebeya"
 
 // The login redirect target shared by signed-out CTAs (heart, make an offer,
 // contact seller, report). Login honors a `?next=` query param (see
