@@ -25,7 +25,9 @@ type FilterKey = (typeof FILTERS)[number]["key"]
 
 function ListingRow({ listing }: { listing: SellerListingRow }) {
   const [state, action, pending] = useActionState(deleteListing, {})
-  const [boostState, boostAction, boostPending] = useActionState(boostListing, {})
+  const [boostState, boostAction, boostPending] = useActionState(boostListing, {
+    ok: false,
+  })
   const [imgError, setImgError] = useState(false)
   const [confirming, setConfirming] = useState(false)
 
