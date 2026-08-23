@@ -95,6 +95,18 @@ export function SellerOfferActions({ offer }: { offer: SellerOfferRow }) {
               required
             />
           </div>
+          <div className="grid min-w-48 flex-1 gap-1.5">
+            <Label htmlFor={`counter-msg-${offer.id}`} className="text-xs">
+              Message (optional)
+            </Label>
+            <Input
+              id={`counter-msg-${offer.id}`}
+              name="message"
+              type="text"
+              maxLength={500}
+              placeholder="e.g. I can do this price if you pickup today"
+            />
+          </div>
           <Button
             type="submit"
             name="action"

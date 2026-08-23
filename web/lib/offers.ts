@@ -292,14 +292,27 @@ export async function declineOfferRow(offerId: string): Promise<OfferResult> {
 
 export async function counterOfferRow(
   offerId: string,
-  amount: number
+  amount: number,
+  message?: string | null
 ): Promise<OfferResult> {
   const supabase = await createClient()
   const result = await callOutcomeRpc(
     supabase,
     "counter_offer",
-    { p_offer_id: offerId, p_amount: amount },
+    { p_offer_id: offerId, p_amount: amount, p_message: message?.trim() || null },
     "counterOfferRow"
+  )
+  return { ok: result.ok === true, error: result.error ?? null }
+}
+
+// Buyer declines a seller's counter-offer (walk away from negotiation).
+export async function declineCounterRow(offerId: string): Promise<OfferResult> {
+  const supabase = await createClient()
+  const result = await callOutcomeRpc(
+    supabase,
+    "decline_counter",
+    { p_offer_id: offerId },
+    "declineCounterRow"
   )
   return { ok: result.ok === true, error: result.error ?? null }
 }
@@ -318,4 +331,36 @@ export async function abandonSaleRow(offerId: string): Promise<OfferResult> {
     "abandonSaleRow"
   )
   return { ok: result.ok === true, error: result.error ?? null }
+}
+
+// ---- Offer events (audit trail) ----
+
+export interface OfferEventRow {
+  id: string
+  offer_id: string
+  actor_id: string
+  from_status: OfferStatus | null
+  to_status: OfferStatus
+  amount: number | null
+  message: string | null
+  created_at: string
+}
+
+// Fetch the full negotiation history for an offer, oldest first.
+export async function fetchOfferEvents(
+  offerId: string,
+  client?: Supabase
+): Promise<OfferEventRow[]> {
+  const supabase = client ?? (await createClient())
+  const { data, error } = await supabase
+    .from("offer_events")
+    .select("id, offer_id, actor_id, from_status, to_status, amount, message, created_at")
+    .eq("offer_id", offerId)
+    .order("created_at", { ascending: true })
+
+  if (error) {
+    console.error("fetchOfferEvents:", error.message)
+    return []
+  }
+  return (data ?? []) as OfferEventRow[]
 }

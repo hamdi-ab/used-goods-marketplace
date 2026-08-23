@@ -5,7 +5,7 @@ import Link from "next/link"
 import { SendIcon } from "lucide-react"
 
 import { requireUser } from "@/lib/auth"
-import { fetchBuyerOffers } from "@/lib/offers"
+import { fetchBuyerOffers, fetchOfferEvents } from "@/lib/offers"
 import { verifyOfferPayment } from "@/lib/payments"
 import { formatPrice } from "@/lib/listings"
 import { nextOffset, parseOffset } from "@/lib/pagination"
@@ -13,6 +13,7 @@ import { formatShortDate } from "@/lib/utils"
 import { OfferStatusBadge } from "@/components/offers/offer-status-badge"
 import { BuyerOfferActions } from "@/components/offers/buyer-offer-actions"
 import { BuyerPayment } from "@/components/offers/buyer-payment"
+import { OfferHistory } from "@/components/offers/offer-history"
 import { ReviewForm } from "@/components/reviews/review-form"
 import { ReviewStars } from "@/components/reviews/review-stars"
 import { Button } from "@/components/ui/button"
@@ -37,6 +38,14 @@ export default async function OffersPage({
   const { offers, hasMore, error } = await fetchBuyerOffers(user.id, {
     offset,
   })
+
+  // Fetch negotiation history for each offer
+  const offersWithEvents = await Promise.all(
+    offers.map(async (offer) => ({
+      offer,
+      events: await fetchOfferEvents(offer.id),
+    }))
+  )
 
   let verifyResult: { ok: true; amount: number } | { ok: false; error: string } | null = null
   if (typeof params.tx_ref === "string" && typeof params.offer === "string") {
@@ -105,7 +114,7 @@ export default async function OffersPage({
         ) : null}
 
         <ul className="flex flex-col gap-4">
-          {offers.map((offer) => (
+          {offersWithEvents.map(({ offer, events }) => (
             <li key={offer.id}>
               <Card>
                 <CardContent className="p-4">
@@ -160,6 +169,12 @@ export default async function OffersPage({
 
                     <OfferStatusBadge status={offer.status} />
                   </div>
+
+                  {events.length > 0 ? (
+                    <div className="mt-4 border-t pt-3">
+                      <OfferHistory events={events} />
+                    </div>
+                  ) : null}
 
                   {offer.status === "countered" ? (
                     <div className="mt-4 border-t pt-3">
