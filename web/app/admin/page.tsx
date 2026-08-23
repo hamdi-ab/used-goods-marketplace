@@ -11,6 +11,7 @@ import {
 
 import { fetchAdminReports } from "@/lib/reports"
 import { fetchMarketplaceStats } from "@/lib/admin"
+import { BusinessLeadsWidget } from "@/components/admin/business-leads-widget"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -131,6 +132,10 @@ export default async function AdminDashboardPage() {
             )}
           </CardContent>
         </Card>
+      </div>
+
+      <div className="mt-8">
+        <BusinessLeadsWidget />
       </div>
     </div>
   )

@@ -2,6 +2,7 @@ import { Suspense } from "react"
 
 import { TIER_LIMITS, TIER_LABELS, type Tier } from "@/lib/plans/constants"
 import { StartProForm } from "@/components/pricing/start-pro-form"
+import { BusinessLeadForm } from "@/components/pricing/business-lead-form"
 
 const TIERS_IN_ORDER: Tier[] = ["free", "pro", "business"]
 
@@ -118,12 +119,9 @@ export default async function PricingPage({
                   <StartProForm />
                 </Suspense>
               ) : t === "business" ? (
-                <a
-                  href="/contact"
-                  className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                >
-                  Contact sales
-                </a>
+                <Suspense fallback={<div className="h-10" />}>
+                  <BusinessLeadForm />
+                </Suspense>
               ) : (
                 <a
                   href="/sell"
