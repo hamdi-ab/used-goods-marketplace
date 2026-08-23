@@ -44,6 +44,52 @@ The VinTech brief lists payments as a *plus*, not a requirement. We made the cor
 | **Overage** | Hard cap — generate button disabled at limit | Seller can buy a top-up pack or pay per-call |
 | **AI backend** | Demo flag `FAYDA_MOCK=true` swaps the model; suggestions are real Gemini output in dev | Production Gemini key with paid fallback |
 
+## Offer system (T08) — Industry parity
+
+The offer system is the core transaction flow of a P2P marketplace. Our implementation matches industry-standard negotiation:
+
+| Feature | eBay | FB Marketplace | Ours | Status |
+|---------|------|----------------|------|--------|
+| Make offer | ✅ | ✅ | ✅ | ✅ |
+| Include message | ✅ | ✅ | ✅ | ✅ |
+| Seller accepts | ✅ | ✅ | ✅ | ✅ |
+| Seller declines | ✅ | ✅ | ✅ | ✅ |
+| Seller counters (with message) | ✅ | ✅ | ✅ | ✅ |
+| Buyer accepts counter | ✅ | ✅ | ✅ | ✅ |
+| Buyer declines counter | ✅ | ✅ | ✅ | ✅ |
+| Buyer re-counters | ✅ | ✅ | ✅ | ✅ |
+| Multi-round negotiation | Unlimited | Unlimited | Unlimited | ✅ |
+| Offer expiry | 48h | None | 7 days | ✅ |
+| Offer audit trail | ✅ Full log | ✅ Chat | ✅ offer_events table | ✅ |
+| In-app notifications | ✅ | ✅ | ✅ All transitions | ✅ |
+| Push/email notifications | ✅ | ✅ | Deferred | v1.1 |
+
+### Complete negotiation flow
+
+```
+Buyer: "I offer 26,000"     → pending (notification: offer_received to seller)
+Seller: "How about 30,000?"  → countered + message (notification: offer_countered to buyer)
+Buyer: "How about 28,000?"   → countered (buyer re-counters)
+Seller: "29,000 final?"       → countered
+Buyer: [Accept 29,000]        → accepted (listing marked sold)
+```
+
+### Audit trail (offer_events)
+
+Every state change writes an event: `offer_id`, `actor_id`, `from_status`, `to_status`, `amount`, `message`, `created_at`. Buyers and sellers see the full negotiation timeline on the offer detail page.
+
+### In-app notifications
+
+| Event | Recipient | Message |
+|-------|-----------|---------|
+| offer_received | Seller | "New offer on your listing" + amount |
+| offer_accepted | Buyer | "Your offer was accepted!" |
+| offer_declined | Buyer | "Your offer was declined" |
+| offer_countered | Buyer | "Counter-offer received" + amount |
+| offer_counter_declined | Seller | "Your counter-offer was declined" |
+| review_received | Seller | "You received a new review" |
+| report_resolved | Reporter | "Your report has been resolved" |
+
 ## The demo transparency contract
 
 Every monetization surface that shows simulated data carries a visible marker:
@@ -66,7 +112,7 @@ These are the items ticket #97 and the roadmap carry forward:
 
 ## Judge-facing script
 
-> "The monetization loop works end-to-end in Chapa sandbox: boost records a paid window and surfaces analytics; Pro upgrade mutates the seller's tier when Chapa test-mode checkout completes; AI credits enforce a real monthly quota. In production the same Chapa integration handles recurring subscriptions and the analytics pipeline feeds real impression data. The `(demo)` badges mark exactly where we're showing simulated data — everything else is wired to the database."
+> "The offer system supports full multi-round negotiation — buyers and sellers can counter back and forth with messages, and every state change is logged in an audit trail. The monetization loop works end-to-end in Chapa sandbox: boost records a paid window and surfaces analytics; Pro upgrade mutates the seller's tier when Chapa test-mode checkout completes; AI credits enforce a real monthly quota. In production the same Chapa integration handles recurring subscriptions and the analytics pipeline feeds real impression data. The `(demo)` badges mark exactly where we're showing simulated data — everything else is wired to the database."
 
 ## Related documents
 
