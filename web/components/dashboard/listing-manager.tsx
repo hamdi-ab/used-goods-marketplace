@@ -3,7 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { useActionState, useState } from "react"
-import { EyeIcon, HeartIcon, PackageOpenIcon, PencilIcon, PlusIcon, XIcon } from "lucide-react"
+import { EyeIcon, HeartIcon, MousePointerClickIcon, PackageOpenIcon, PencilIcon, PlusIcon, SparklesIcon, TrendingUpIcon, XIcon } from "lucide-react"
 
 import { deleteListing, boostListing } from "@/app/actions/listings"
 import type { SellerListingRow } from "@/lib/listings"
@@ -59,9 +59,16 @@ function ListingRow({ listing }: { listing: SellerListingRow }) {
               </Link>
               {listing.status === "published" &&
               isBoostActive(listing.boosted_until) ? (
-                <span className="mt-1 block text-xs font-medium text-amber-600">
-                  Boosted — {boostLabel(listing.boosted_until)}
-                </span>
+                <div className="mt-2 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-1.5">
+                  <p className="flex items-center gap-1 text-xs font-semibold text-amber-700">
+                    <TrendingUpIcon className="size-3" />
+                    Boosted — {boostLabel(listing.boosted_until)}
+                  </p>
+                  <p className="mt-0.5 text-xs text-amber-600">
+                    ~{80 + (listing.id.charCodeAt(3) % 120)} views · {3 + (listing.id.charCodeAt(5) % 8)} clicks · {1 + (listing.id.charCodeAt(7) % 3)} inquiries
+                    <span className="ml-1 text-amber-400">(demo)</span>
+                  </p>
+                </div>
               ) : null}
             <div className="mt-1 flex flex-wrap items-center gap-2">
               <ListingStatusBadge status={listing.status} />

@@ -54,10 +54,21 @@ function FeatureRow({ feature, free, pro, business }: {
   )
 }
 
-export default function PricingPage() {
+export default async function PricingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+}) {
+  const sp = await searchParams
+  const upgradeStatus = typeof sp.upgrade === "string" ? sp.upgrade : null
+
   return (
     <main className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col items-center px-4 py-12 sm:px-6 lg:px-8">
       <header className="mb-10 text-center">
+        <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
+          <span className="size-1.5 rounded-full bg-amber-500" />
+          Demo mode — Chapa test transactions only
+        </div>
         <h1 className="font-heading text-3xl font-semibold text-foreground">
           Simple pricing, Addis-first
         </h1>
@@ -143,6 +154,24 @@ export default function PricingPage() {
       >
         <StartProForm />
       </Suspense>
+
+      {upgradeStatus === "ok" ? (
+        <div className="mt-8 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-center">
+          <p className="font-medium text-emerald-800">
+            Upgrade complete — you are now on Pro!
+          </p>
+          <p className="mt-1 text-sm text-emerald-600">
+            Your tier has been activated. Enjoy 25 listings, 30 AI credits, and
+            analytics.
+          </p>
+        </div>
+      ) : upgradeStatus === "failed" ? (
+        <div className="mt-8 rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-center">
+          <p className="font-medium text-destructive">
+            Upgrade could not be applied — please try again.
+          </p>
+        </div>
+      ) : null}
 
       <p className="mt-8 max-w-xl text-center text-xs text-muted-foreground">
         No subscription is required to sell. Paid features only unlock more

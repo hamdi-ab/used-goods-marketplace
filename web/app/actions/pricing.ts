@@ -46,7 +46,7 @@ export async function submitUpgradeIntent(
     return { message: "Could not start the upgrade — please try again later." }
   }
 
-  const returnUrl = `${SITE_URL}/pricing?upgraded=true&tx_ref=${encodeURIComponent(txRef)}`
+  const returnUrl = `${SITE_URL}/upgrade/callback?tx_ref=${encodeURIComponent(txRef)}`
   const init = await initializeChapaTransaction({
     txRef,
     amount: money.amount,
