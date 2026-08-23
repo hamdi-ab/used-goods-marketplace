@@ -9,6 +9,8 @@ import { z } from "zod"
 
 import { createClient } from "@/lib/supabase/client"
 import { AuthCard } from "@/components/auth/auth-card"
+import { AuthDivider } from "@/components/auth/auth-divider"
+import { GoogleButton } from "@/components/auth/google-button"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -119,6 +121,10 @@ export function RegisterForm() {
         <Button type="submit" disabled={isSubmitting} className="mt-2">
           {isSubmitting ? "Creating account…" : "Create account"}
         </Button>
+
+        <AuthDivider />
+
+        <GoogleButton>Sign up with Google</GoogleButton>
       </form>
     </AuthCard>
   )

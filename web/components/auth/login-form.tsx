@@ -10,6 +10,8 @@ import { z } from "zod"
 import { createClient } from "@/lib/supabase/client"
 import { isInternalPath } from "@/lib/utils"
 import { AuthCard } from "@/components/auth/auth-card"
+import { AuthDivider } from "@/components/auth/auth-divider"
+import { GoogleButton } from "@/components/auth/google-button"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -76,6 +78,10 @@ export function LoginForm({ next }: { next?: string }) {
         <Button type="submit" disabled={isSubmitting} className="mt-2">
           {isSubmitting ? "Logging in…" : "Log in"}
         </Button>
+
+        <AuthDivider />
+
+        <GoogleButton>Continue with Google</GoogleButton>
       </form>
     </AuthCard>
   )

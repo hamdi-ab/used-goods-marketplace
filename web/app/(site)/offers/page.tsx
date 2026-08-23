@@ -39,7 +39,6 @@ export default async function OffersPage({
     offset,
   })
 
-  // Fetch negotiation history for each offer
   const offersWithEvents = await Promise.all(
     offers.map(async (offer) => ({
       offer,
@@ -68,23 +67,34 @@ export default async function OffersPage({
   let body: ReactNode
   if (error) {
     body = (
-      <p className="py-8 text-sm text-muted-foreground">
-        Could not load offers. Try again.
-      </p>
+      <div className="flex flex-col items-center rounded-2xl border border-border bg-muted/30 px-4 py-20 text-center">
+        <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-muted">
+          <SendIcon className="size-6 text-muted-foreground/70" />
+        </div>
+        <h2 className="font-heading text-lg font-semibold">
+          Something went wrong
+        </h2>
+        <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+          We could not load your offers right now. Try again.
+        </p>
+        <Button asChild className="mt-4">
+          <Link href="/offers">Retry</Link>
+        </Button>
+      </div>
     )
   } else if (offers.length === 0) {
     body = (
-      <div className="flex flex-col items-center py-16 text-center">
+      <div className="flex flex-col items-center rounded-2xl border border-border bg-muted/30 px-4 py-20 text-center">
         <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-muted">
-          <SendIcon className="size-6 text-muted-foreground" />
+          <SendIcon className="size-6 text-muted-foreground/70" />
         </div>
         <h2 className="font-heading text-lg font-semibold">No offers yet</h2>
         <p className="mt-1 max-w-sm text-sm text-muted-foreground">
           When you make an offer on a listing it shows up here, where you can
           see whether the seller accepted, declined, or countered it.
         </p>
-        <Button asChild size="sm" className="mt-4">
-          <Link href="/">Browse listings</Link>
+        <Button asChild size="lg" className="mt-4 h-11">
+          <Link href="/search">Browse listings</Link>
         </Button>
       </div>
     )
@@ -93,7 +103,7 @@ export default async function OffersPage({
       <>
         {verifyResult ? (
           verifyResult.ok ? (
-            <div className="mb-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+            <div className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800">
               <p className="font-medium">
                 Payment received —{" "}
                 {formatPrice(verifyResult.amount, { maxFractionDigits: 2 })}
@@ -103,7 +113,7 @@ export default async function OffersPage({
               </p>
             </div>
           ) : (
-            <div className="mb-6 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
               <p className="font-medium">Payment not completed</p>
               <p className="mt-1">
                 {verifyResult.error} You can try the payment again on the offer

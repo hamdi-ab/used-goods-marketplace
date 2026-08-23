@@ -37,22 +37,33 @@ export default async function SellerOffersPage({
   let body: ReactNode
   if (error) {
     body = (
-      <p className="py-8 text-sm text-muted-foreground">
-        Could not load offers. Try again.
-      </p>
+      <div className="flex flex-col items-center rounded-2xl border border-border bg-muted/30 px-4 py-20 text-center">
+        <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-muted">
+          <InboxIcon className="size-6 text-muted-foreground/70" />
+        </div>
+        <h2 className="font-heading text-lg font-semibold">
+          Something went wrong
+        </h2>
+        <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+          We could not load your offers right now. Try again.
+        </p>
+        <Button asChild className="mt-4">
+          <Link href="/offers/seller">Retry</Link>
+        </Button>
+      </div>
     )
   } else if (offers.length === 0) {
     body = (
-      <div className="flex flex-col items-center py-16 text-center">
+      <div className="flex flex-col items-center rounded-2xl border border-border bg-muted/30 px-4 py-20 text-center">
         <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-muted">
-          <InboxIcon className="size-6 text-muted-foreground" />
+          <InboxIcon className="size-6 text-muted-foreground/70" />
         </div>
         <h2 className="font-heading text-lg font-semibold">No offers yet</h2>
         <p className="mt-1 max-w-sm text-sm text-muted-foreground">
           When a buyer makes an offer on one of your listings it appears here
           for you to accept, decline, or counter.
         </p>
-        <Button asChild size="sm" className="mt-4">
+        <Button asChild size="lg" className="mt-4 h-11">
           <Link href="/dashboard">Go to dashboard</Link>
         </Button>
       </div>
