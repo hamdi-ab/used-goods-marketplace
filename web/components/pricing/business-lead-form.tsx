@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useActionState } from "react"
 
-import { submitBusinessLead } from "@/app/actions/pricing"
+import { submitBusinessLead } from "@/app/actions/business-lead"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
