@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 
 import { createClient } from "@/lib/supabase/client"
-import { AuthCard } from "@/components/auth/auth-card"
+import { AuthLayout } from "@/components/auth/auth-layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -51,7 +51,7 @@ export function ForgotPasswordForm() {
 
   if (sent) {
     return (
-      <AuthCard
+      <AuthLayout
         title="Check your email"
         description="If an account exists for that address, we sent you a password reset link."
         footer={footer}
@@ -59,12 +59,12 @@ export function ForgotPasswordForm() {
         <p className="text-center text-sm text-muted-foreground">
           The link expires shortly. No email yet? Check your spam folder.
         </p>
-      </AuthCard>
+      </AuthLayout>
     )
   }
 
   return (
-    <AuthCard
+    <AuthLayout
       title="Reset your password"
       description="Enter the email on your account and we will send you a reset link."
       footer={footer}
@@ -78,10 +78,10 @@ export function ForgotPasswordForm() {
 
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-        <Button type="submit" disabled={isSubmitting} className="mt-2">
+        <Button type="submit" disabled={isSubmitting} className="mt-2 h-11">
           {isSubmitting ? "Sending link…" : "Send reset link"}
         </Button>
       </form>
-    </AuthCard>
+    </AuthLayout>
   )
 }

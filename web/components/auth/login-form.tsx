@@ -9,7 +9,7 @@ import { z } from "zod"
 
 import { createClient } from "@/lib/supabase/client"
 import { isInternalPath } from "@/lib/utils"
-import { AuthCard } from "@/components/auth/auth-card"
+import { AuthLayout } from "@/components/auth/auth-layout"
 import { AuthDivider } from "@/components/auth/auth-divider"
 import { GoogleButton } from "@/components/auth/google-button"
 import { Button } from "@/components/ui/button"
@@ -52,9 +52,9 @@ export function LoginForm({ next }: { next?: string }) {
   }
 
   return (
-    <AuthCard
-      title="Log in"
-      description="Welcome back. Sign in to your Dagim Gebeya account."
+    <AuthLayout
+      title="Welcome back"
+      description="Log in to your Dagim Gebeya account."
       footer={<>Don&apos;t have an account? <Link href="/register" className="font-medium text-primary hover:underline">Sign up</Link></>}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -75,7 +75,7 @@ export function LoginForm({ next }: { next?: string }) {
 
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-        <Button type="submit" disabled={isSubmitting} className="mt-2">
+        <Button type="submit" disabled={isSubmitting} className="mt-2 h-11">
           {isSubmitting ? "Logging in…" : "Log in"}
         </Button>
 
@@ -83,6 +83,6 @@ export function LoginForm({ next }: { next?: string }) {
 
         <GoogleButton>Continue with Google</GoogleButton>
       </form>
-    </AuthCard>
+    </AuthLayout>
   )
 }

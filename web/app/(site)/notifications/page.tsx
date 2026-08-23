@@ -18,3 +18,4 @@ export default async function NotificationsPage() {
 
   return <NotificationList notifications={notifications} />
 }
+

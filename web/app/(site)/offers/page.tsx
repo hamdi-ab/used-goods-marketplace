@@ -67,9 +67,9 @@ export default async function OffersPage({
   let body: ReactNode
   if (error) {
     body = (
-      <div className="flex flex-col items-center rounded-2xl border border-border bg-muted/30 px-4 py-20 text-center">
-        <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-muted">
-          <SendIcon className="size-6 text-muted-foreground/70" />
+      <div className="flex flex-col items-center rounded-2xl border border-[#2563EB]/30 bg-[#EEF4FF] px-4 py-20 text-center">
+        <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-white">
+          <SendIcon className="size-6 text-[#2563EB]" />
         </div>
         <h2 className="font-heading text-lg font-semibold">
           Something went wrong
@@ -77,16 +77,16 @@ export default async function OffersPage({
         <p className="mt-1 max-w-sm text-sm text-muted-foreground">
           We could not load your offers right now. Try again.
         </p>
-        <Button asChild className="mt-4">
+        <Button asChild className="mt-4 h-11">
           <Link href="/offers">Retry</Link>
         </Button>
       </div>
     )
   } else if (offers.length === 0) {
     body = (
-      <div className="flex flex-col items-center rounded-2xl border border-border bg-muted/30 px-4 py-20 text-center">
-        <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-muted">
-          <SendIcon className="size-6 text-muted-foreground/70" />
+      <div className="flex flex-col items-center rounded-2xl border border-[#2563EB]/30 bg-[#EEF4FF] px-4 py-20 text-center">
+        <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-white">
+          <SendIcon className="size-6 text-[#2563EB]" />
         </div>
         <h2 className="font-heading text-lg font-semibold">No offers yet</h2>
         <p className="mt-1 max-w-sm text-sm text-muted-foreground">

@@ -18,19 +18,17 @@ export function SiteFooter({ flush = false }: { flush?: boolean }) {
         <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr_1fr_1.2fr]">
           <div className="max-w-xs">
             <p className="flex items-center gap-2 font-heading text-lg font-semibold">
-              <span className="flex size-8 items-center justify-center rounded-lg bg-white">
+              <span className="flex size-8 items-center justify-center rounded-lg bg-white p-1">
                 <svg
                   viewBox="0 0 24 24"
-                  className="size-5 text-[#2563EB]"
+                  className="size-6 text-[#2563EB]"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2.5"
+                  strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 >
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M12 6 A6 6 0 1 1 8 14" />
-                  <path d="M8 14 L8 10 L12 10" />
+                  <path d="M21 12a9 9 0 0 1-9 9m9-9a9 9 0 0 0-9-9m9 9H3m9 9a9 9 0 0 1-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9m-9 9a9 9 0 0 1 9-9" />
                 </svg>
               </span>
               {siteName}

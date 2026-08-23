@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 
 import { createClient } from "@/lib/supabase/client"
-import { AuthCard } from "@/components/auth/auth-card"
+import { AuthLayout } from "@/components/auth/auth-layout"
 import { AuthDivider } from "@/components/auth/auth-divider"
 import { GoogleButton } from "@/components/auth/google-button"
 import { Button } from "@/components/ui/button"
@@ -73,7 +73,7 @@ export function RegisterForm() {
 
   if (sent) {
     return (
-      <AuthCard
+      <AuthLayout
         title="Check your email"
         description="We sent you a confirmation link. Follow it to activate your account before logging in."
         footer={<Link href="/login" className="font-medium text-primary hover:underline">Back to login</Link>}
@@ -81,14 +81,14 @@ export function RegisterForm() {
         <p className="text-center text-sm text-muted-foreground">
           The link is valid for a limited time. No email yet? Check your spam folder.
         </p>
-      </AuthCard>
+      </AuthLayout>
     )
   }
 
   return (
-    <AuthCard
-      title="Create your account"
-      description="Join Dagim Gebeya to buy and sell second-hand goods."
+    <AuthLayout
+      title="Join Dagim Gebeya"
+      description="Create an account to buy and sell second-hand goods."
       footer={<>Already have an account? <Link href="/login" className="font-medium text-primary hover:underline">Log in</Link></>}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
@@ -118,7 +118,7 @@ export function RegisterForm() {
 
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-        <Button type="submit" disabled={isSubmitting} className="mt-2">
+        <Button type="submit" disabled={isSubmitting} className="mt-2 h-11">
           {isSubmitting ? "Creating account…" : "Create account"}
         </Button>
 
@@ -126,6 +126,6 @@ export function RegisterForm() {
 
         <GoogleButton>Sign up with Google</GoogleButton>
       </form>
-    </AuthCard>
+    </AuthLayout>
   )
 }

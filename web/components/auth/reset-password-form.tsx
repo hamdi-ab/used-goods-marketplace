@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 
 import { createClient } from "@/lib/supabase/client"
-import { AuthCard } from "@/components/auth/auth-card"
+import { AuthLayout } from "@/components/auth/auth-layout"
 import { useSignOut } from "@/components/auth/use-sign-out"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -63,12 +63,20 @@ export function ResetPasswordForm() {
   const footer = <Link href="/login" className="font-medium text-primary hover:underline">Back to login</Link>
 
   if (loading) {
-    return <AuthCard title="Reset your password" description="Verifying your reset link…" footer={footer}><div /></AuthCard>
+    return (
+      <AuthLayout
+        title="Reset your password"
+        description="Verifying your reset link…"
+        footer={footer}
+      >
+        <div />
+      </AuthLayout>
+    )
   }
 
   if (invalid) {
     return (
-      <AuthCard
+      <AuthLayout
         title="Link invalid or expired"
         description="This password reset link is no longer valid. Request a new one to continue."
         footer={<Link href="/forgot-password" className="font-medium text-primary hover:underline">Request a new link</Link>}
@@ -76,12 +84,12 @@ export function ResetPasswordForm() {
         <p className="text-center text-sm text-muted-foreground">
           This password reset link is no longer valid. Request a new one to continue.
         </p>
-      </AuthCard>
+      </AuthLayout>
     )
   }
 
   return (
-    <AuthCard
+    <AuthLayout
       title="Choose a new password"
       description="Enter a new password for your account."
       footer={footer}
@@ -101,10 +109,10 @@ export function ResetPasswordForm() {
 
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-        <Button type="submit" disabled={isSubmitting} className="mt-2">
+        <Button type="submit" disabled={isSubmitting} className="mt-2 h-11">
           {isSubmitting ? "Saving…" : "Set new password"}
         </Button>
       </form>
-    </AuthCard>
+    </AuthLayout>
   )
 }
