@@ -19,9 +19,9 @@ export function StartProForm() {
   }, [state])
 
   return (
-    <form action={formAction} className="mt-10 w-full max-w-md">
-      <fieldset disabled={pending} className="flex flex-col gap-3">
-        <Button type="submit" variant="default" className="w-full sm:mt-2" disabled={pending}>
+    <form action={formAction} className="w-full">
+      <fieldset disabled={pending} className="flex flex-col gap-2">
+        <Button type="submit" variant="default" className="w-full" disabled={pending}>
           {pending ? (
             <>
               <Loader2Icon className="mr-2 h-4 w-4 animate-spin" />
@@ -30,25 +30,19 @@ export function StartProForm() {
           ) : (
             <>
               <CreditCardIcon className="mr-2 h-4 w-4" />
-              Upgrade to Pro — 199 ETB/mo
+              Upgrade to Pro
             </>
           )}
         </Button>
 
         {state.message ? (
-          <p
-            className={
-              state.ok
-                ? "text-sm text-green-700"
-                : "text-sm text-destructive"
-            }
-          >
+          <p className={state.ok ? "text-xs text-green-700" : "text-xs text-destructive"}>
             {state.message}
           </p>
         ) : null}
 
         <p className="text-xs text-muted-foreground">
-          Pay securely with Chapa. Cancel any time.
+          Cancel any time.
         </p>
       </fieldset>
     </form>
