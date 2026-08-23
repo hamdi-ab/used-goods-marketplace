@@ -39,16 +39,16 @@ export function AdminAccountForm({
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <div className="flex items-center gap-4">
-            <Avatar className="size-12">
-              <AvatarFallback>{initials(name)}</AvatarFallback>
+            <Avatar className="size-14">
+              <AvatarFallback className="text-base">{initials(name)}</AvatarFallback>
             </Avatar>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-foreground">{name}</p>
-              <p className="truncate text-xs text-muted-foreground">{user.email}</p>
+              <p className="font-medium text-foreground">{name}</p>
+              <p className="truncate text-sm text-muted-foreground">{user.email}</p>
             </div>
             <Badge variant="secondary">Admin</Badge>
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             Name and email are set at signup and cannot be changed here. Admins
             have no public marketplace profile.
           </p>

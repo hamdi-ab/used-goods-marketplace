@@ -79,10 +79,9 @@ export function AdminVerificationCard({
             <input type="hidden" name="status" value="verified" readOnly />
             <Button
               type="submit"
-              variant="outline"
+              variant="default"
               size="sm"
               disabled={pending}
-              className="border-green-200 text-green-800 hover:bg-green-50"
             >
               <BadgeCheckIcon className="mr-1.5 size-3.5" />
               Approve
@@ -92,7 +91,7 @@ export function AdminVerificationCard({
             <input type="hidden" name="userId" value={request.user_id} readOnly />
             <input type="hidden" name="type" value={request.type} readOnly />
             <input type="hidden" name="status" value="rejected" readOnly />
-            <Button type="submit" variant="ghost" size="sm" disabled={pending}>
+            <Button type="submit" variant="outline" size="sm" disabled={pending}>
               <XIcon className="mr-1.5 size-3.5" />
               Reject
             </Button>

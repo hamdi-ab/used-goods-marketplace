@@ -30,12 +30,12 @@ export default async function AdminVerificationsPage() {
 
       {requests.length === 0 ? (
         <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12">
-            <BadgeCheckIcon className="size-8 text-muted-foreground" />
+          <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
+            <BadgeCheckIcon className="size-10 text-muted-foreground/60" />
             <h2 className="font-heading text-lg font-semibold">
               All caught up
             </h2>
-            <p className="max-w-sm text-center text-sm text-muted-foreground">
+            <p className="max-w-sm text-sm text-muted-foreground">
               There are no verification requests to review right now.
             </p>
           </CardContent>

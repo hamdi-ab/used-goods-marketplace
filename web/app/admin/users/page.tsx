@@ -1,11 +1,9 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { UsersIcon } from "lucide-react"
 
 import { fetchAdminUsers } from "@/lib/admin"
 import { nextOffset, parseOffset } from "@/lib/pagination"
-import { AdminUserRow } from "@/components/admin/admin-user-row"
-import { Card, CardContent } from "@/components/ui/card"
+import { UsersTable } from "@/components/admin/users-table"
 
 export const metadata: Metadata = {
   title: "Admin — Users",
@@ -17,48 +15,36 @@ export default async function AdminUsersPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  const offset = parseOffset((await searchParams).offset)
-  const { users, count, hasMore, error } = await fetchAdminUsers({ offset })
+  const sp = await searchParams
+  const offset = parseOffset(sp.offset)
+  const search = typeof sp.search === "string" ? sp.search : ""
+  const role = sp.role === "buyer" || sp.role === "seller" || sp.role === "admin" ? sp.role : undefined
+
+  const { users, count, hasMore, error } = await fetchAdminUsers(
+    { offset },
+    { search, role }
+  )
 
   return (
     <div>
-      <div className="mb-8">
-        <h1 className="font-heading text-3xl font-semibold tracking-tight text-foreground">
+      <div className="mb-6">
+        <h1 className="font-heading text-2xl font-semibold tracking-tight text-foreground">
           Users
         </h1>
-        <p className="mt-2 max-w-xl text-muted-foreground">
-          {(count ?? 0).toLocaleString()} registered{" "}
-          {(count ?? 0) === 1 ? "user" : "users"}. Use Suspend to demote a
-          seller and archive their live listings; Restore re-instates a
-          suspended seller.
+        <p className="mt-1 text-sm text-muted-foreground">
+          Manage marketplace users. Use Suspend to demote a seller and archive their live listings.
         </p>
       </div>
 
       {error ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12">
-            <UsersIcon className="size-8 text-muted-foreground" />
-            <h2 className="font-heading text-lg font-semibold">
-              Could not load users
-            </h2>
-          </CardContent>
-        </Card>
-      ) : users.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12">
-            <UsersIcon className="size-8 text-muted-foreground" />
-            <h2 className="font-heading text-lg font-semibold">No users yet</h2>
-          </CardContent>
-        </Card>
+        <div className="rounded-lg border border-border bg-card p-6 text-center">
+          <p className="text-sm text-destructive">{error}</p>
+        </div>
       ) : (
         <>
-          <ul className="flex flex-col gap-3">
-            {users.map((user) => (
-              <AdminUserRow key={user.id} user={user} />
-            ))}
-          </ul>
+          <UsersTable users={users} count={count ?? 0} />
           {hasMore ? (
-            <div className="mt-8 flex justify-center">
+            <div className="mt-6 flex justify-center">
               <Link
                 href={`/admin/users?offset=${nextOffset(offset)}`}
                 className="text-sm font-medium underline"

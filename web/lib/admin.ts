@@ -47,6 +47,7 @@ export interface AdminListingRow {
   sold_to_buyer_id: string | null
   created_at: string
   published_at: string | null
+  images: { image_url: string; display_order: number }[] | null
   seller: {
     id: string
     full_name: string | null
@@ -77,16 +78,32 @@ export interface AdminUsersPage {
   error: string | null
 }
 
+export interface AdminUsersFilter {
+  search?: string
+  role?: "buyer" | "seller" | "admin"
+}
+
 export async function fetchAdminUsers(
   args: PagingArgs = {},
+  filter: AdminUsersFilter = {},
   client?: Supabase
 ): Promise<AdminUsersPage> {
   const supabase = client ?? (await createClient())
   const { limit, offset } = resolveWindow(args)
-  const { data, error, count } = await supabase
+
+  let query = supabase
     .from("profiles")
     .select(ADMIN_USER_COLUMNS, { count: "exact" })
     .is("deleted_at", null)
+
+  if (filter.search) {
+    query = query.ilike("full_name", `%${filter.search}%`)
+  }
+  if (filter.role) {
+    query = query.eq("role", filter.role)
+  }
+
+  const { data, error, count } = await query
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1)
 
@@ -111,21 +128,38 @@ export interface AdminListingsPage {
   error: string | null
 }
 
+export interface AdminListingsFilter {
+  search?: string
+  status?: string
+}
+
 export async function fetchAdminListings(
   args: PagingArgs = {},
+  filter: AdminListingsFilter = {},
   client?: Supabase
 ): Promise<AdminListingsPage> {
   const supabase = client ?? (await createClient())
   const { limit, offset } = resolveWindow(args)
-  const { data, error, count } = await supabase
+
+  let query = supabase
     .from("listings")
     .select(
       `id, title, price, condition, status, city, view_count, favorite_count,
        sold_to_buyer_id, created_at, published_at,
+       images:listing_images(image_url, display_order),
        seller:profiles!listings_seller_id_fkey(id, full_name)`,
       { count: "exact" }
     )
     .is("deleted_at", null)
+
+  if (filter.search) {
+    query = query.ilike("title", `%${filter.search}%`)
+  }
+  if (filter.status) {
+    query = query.eq("status", filter.status)
+  }
+
+  const { data, error, count } = await query
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1)
 
@@ -136,7 +170,8 @@ export async function fetchAdminListings(
 
   // PostgREST returns every embedded relation as an array, even a to-one join,
   // so `seller:profiles!listings_seller_id_fkey` arrives as `{...}[] | null`;
-  // flatten to a single row like the review buyer join does.
+  // flatten to a single row like the review buyer join does. `images` is a
+  // genuine one-to-many and stays as an array.
   type RawAdminListingRow = Omit<AdminListingRow, "price" | "seller"> & {
     price: string
     seller: { id: string; full_name: string | null }[] | null
