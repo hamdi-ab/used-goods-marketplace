@@ -32,23 +32,24 @@ export function ListingCard({
                 alt=""
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-cover transition-transform duration-200 group-hover:scale-105"
+                className={`object-cover transition-transform duration-200 group-hover:scale-105 ${
+                  listing.status === "sold" ? "opacity-50" : ""
+                }`}
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-sm text-muted-foreground">
                 No photo
               </div>
             )}
+            {listing.status === "sold" ? (
+              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                <span className="rounded-md bg-foreground/80 px-3 py-1 text-sm font-bold uppercase tracking-wider text-background">
+                  {LISTING_STATUS_LABELS.sold}
+                </span>
+              </div>
+            ) : null}
           </div>
         </Link>
-        {listing.status === "sold" ? (
-          <Badge
-            variant="secondary"
-            className="absolute left-2 top-2 backdrop-blur"
-          >
-            {LISTING_STATUS_LABELS.sold}
-          </Badge>
-        ) : null}
         {isBoostActive(listing.boosted_until) ? (
           <Badge
             variant="default"
