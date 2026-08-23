@@ -116,7 +116,7 @@ export function SearchControls({
             </SheetTrigger>
             <SheetContent>
               <SheetHeader>
-                <SheetTitle>Filters</SheetSheetTitle>
+                <SheetTitle>Filters</SheetTitle>
               </SheetHeader>
               <div className="mt-6 space-y-4">
                 <div className="flex flex-col gap-2">
