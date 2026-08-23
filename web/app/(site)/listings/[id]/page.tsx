@@ -7,20 +7,21 @@ import { MapPinIcon, TagIcon } from "lucide-react"
 import { ROLE_LABELS, getCurrentUser } from "@/lib/auth"
 import type { UserRole } from "@/lib/auth/types"
 import { fetchListing, formatCondition, formatPrice } from "@/lib/listings"
+import type { ListingWithRelations } from "@/lib/listings/constants"
 import { fetchFavoriteIds } from "@/lib/favorites"
-import { fetchSellerContactInfo } from "@/lib/contact"
+import { fetchSellerContactInfo, type SellerContactInfo } from "@/lib/contact"
 import { initials } from "@/lib/utils"
 import { FavoriteButton } from "@/components/favorites/favorite-button"
 import { ListingViewTracker } from "@/components/listings/listing-view-tracker"
 import { SimilarListings } from "@/components/listings/similar-listings"
+import { ListingGallery } from "@/components/listings/listing-gallery"
+import { ConditionChip } from "@/components/listings/condition-chip"
 import { MakeOfferButton } from "@/components/offers/make-offer-button"
 import { ContactButton } from "@/components/contact/contact-button"
 import { ReportButton } from "@/components/reports/report-button"
-import { SellerTrustBadges } from "@/components/verification/seller-trust-badges"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 export const dynamic = "force-dynamic"
 
@@ -58,168 +59,237 @@ export default async function ListingPage({
     ? (await fetchFavoriteIds(user.id)).includes(id)
     : null
 
-  const contactInfo = user
+  const contactInfo: SellerContactInfo | null = user
     ? await fetchSellerContactInfo(data.listing.seller_id)
     : null
 
   const { listing: l, images, category, seller } = data
-  const cover = images[0]?.image_url
-  const roleLabel =
-    ROLE_LABELS[(seller?.role ?? "seller") as UserRole] ?? "Seller"
   const isOwner = Boolean(user && user.id === l.seller_id)
 
   return (
-    <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6 lg:px-8 min-h-[60vh]">
       <ListingViewTracker listingId={l.id} />
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <div>
-          {cover ? (
-            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg border">
-              <Image
-                src={cover}
-                alt={l.title}
-                fill
-                priority
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover"
-              />
-              {images.length > 1 ? (
-                <div className="mt-3 grid grid-cols-5 gap-2">
-                  {images.map((img) => (
-                    <div
-                      key={img.id}
-                      className="relative aspect-video w-full overflow-hidden rounded-md border"
-                    >
-                      <Image
-                        src={img.image_url}
-                        alt={img.alt_text ?? l.title}
-                        fill
-                        sizes="(max-width: 768px) 18vw, 10vw"
-                        className="object-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
+
+      <div className="mb-6">
+        <Link
+          href="/search"
+          className="inline-flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
+          ← Back to listings
+        </Link>
+      </div>
+
+      <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-12">
+        <div className="order-2 lg:order-1 lg:col-span-7">
+          <div className="flex h-full flex-col rounded-2xl border bg-card p-5 shadow-sm">
+            <ListingGallery images={images} title={l.title} />
+          </div>
+        </div>
+
+        <div className="order-1 flex flex-col justify-between gap-6 lg:order-2 lg:col-span-5">
+          <div className="flex flex-col gap-5 rounded-2xl border bg-card p-6 shadow-sm">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-foreground/70">
+              {category ? (
+                <span className="inline-flex items-center gap-1 font-medium text-foreground">
+                  <TagIcon className="size-3.5" />
+                  {category.name}
+                </span>
+              ) : null}
+              {category && (l.city || l.sub_city) ? <span>•</span> : null}
+              {l.city || l.sub_city ? (
+                <span className="inline-flex items-center gap-1">
+                  <MapPinIcon className="size-3.5" />
+                  {[l.city, l.sub_city].filter(Boolean).join(", ")}
+                </span>
               ) : null}
             </div>
-          ) : (
-            <div className="flex aspect-[4/3] w-full items-center justify-center rounded-lg border bg-muted text-muted-foreground">
-              No photo
-            </div>
-          )}
-        </div>
 
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-wrap items-start gap-2">
-            <h1 className="font-heading flex-1 text-2xl font-semibold text-foreground">
-              {l.title}
-            </h1>
-            <Badge variant="secondary">{formatCondition(l.condition)}</Badge>
-            {l.ai_assisted ? (
-              <Badge variant="outline">AI-assisted</Badge>
-            ) : null}
-            <FavoriteButton listingId={l.id} initial={favorited} isOwner={isOwner} />
-            <ReportButton
-              target={{ type: "listing", listingId: l.id }}
-              signedIn={Boolean(user)}
-              isOwner={isOwner}
-            />
+            <div>
+              <div className="mb-2">
+                <ConditionChip condition={l.condition} />
+              </div>
+              <h1 className="font-heading text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                {l.title}
+              </h1>
+            </div>
+
+            <div className="rounded-xl border border-[#2563EB]/20 bg-[#2563EB]/5 p-4">
+              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                Price
+              </span>
+              <span className="font-heading mt-0.5 block text-3xl font-extrabold text-[#2563EB] sm:text-4xl">
+                {formatPrice(l.price, { maxFractionDigits: 2 })}
+              </span>
+              {l.negotiable ? (
+                <span className="mt-1 block text-xs font-medium text-foreground/70">
+                  Negotiable (or best offer)
+                </span>
+              ) : null}
+            </div>
           </div>
 
-          <p className="text-2xl font-semibold text-foreground">
-            {formatPrice(l.price, { maxFractionDigits: 2 })}
-            {l.negotiable ? " (or best offer)" : null}
-          </p>
-
-          <MakeOfferButton
-            listingId={l.id}
-            listingPrice={l.price}
-            isOwner={isOwner}
-            available={l.status === "published"}
-            signedIn={Boolean(user)}
-          />
-
-          <ContactButton
-            listingId={l.id}
-            sellerId={l.seller_id}
-            signedIn={Boolean(user)}
-            contactInfo={contactInfo}
-            isOwner={isOwner}
-          />
-
-          {category ? (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <TagIcon className="size-4" />
-              <span>{category.name}</span>
-            </div>
-          ) : null}
-
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <MapPinIcon className="size-4" />
-            <span>
-              {[l.city, l.sub_city].filter(Boolean).join(", ") || "Location not set"}
-            </span>
-          </div>
-          {l.address ? (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <MapPinIcon className="size-4" />
-              <span>{l.address}</span>
-            </div>
-          ) : null}
-
-          {l.description ? (
-            <p className="text-sm leading-relaxed text-foreground/80">
-              {l.description}
-            </p>
-          ) : (
-            <p className="text-sm text-muted-foreground">No description provided.</p>
-          )}
-
-          <Card>
-            <CardHeader className="flex-row items-center gap-3">
-              <Avatar className="size-10">
+          <div className="rounded-2xl border bg-card p-6 shadow-sm">
+            <div className="flex items-center gap-4">
+              <Avatar className="size-12 border">
                 <AvatarImage
                   src={seller?.avatar_url ?? undefined}
-                  alt={seller?.full_name ?? roleLabel}
+                  alt={seller?.full_name ?? "Seller"}
                 />
-                <AvatarFallback className="text-sm">
-                  {initials(seller?.full_name ?? "")}
+                <AvatarFallback className="bg-primary/10 font-semibold text-primary">
+                  {seller?.full_name?.slice(0, 2).toUpperCase() ?? "SV"}
                 </AvatarFallback>
               </Avatar>
-              <div className="min-w-0">
-                 <CardTitle className="text-base">
-                    <Link
-                      href={`/users/${seller?.id ?? l.seller_id}`}
-                      className="text-primary hover:underline"
-                    >
-                      {seller?.full_name ?? "View seller profile"}
-                    </Link>
-                 </CardTitle>
-                 <p className="text-sm text-muted-foreground">
-                   Trust score {seller?.trust_score ?? 50}
-                 </p>
-               </div>
-             </CardHeader>
-             <CardContent>
-               <SellerTrustBadges seller={seller} />
-             </CardContent>
-           </Card>
+              <div className="min-w-0 flex-1">
+                <h3 className="text-base font-semibold text-foreground">
+                  <Link
+                    href={`/users/${seller?.id ?? l.seller_id}`}
+                    className="hover:text-[#2563EB] hover:underline"
+                  >
+                    {seller?.full_name ?? "Verified Seller"}
+                  </Link>
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  {seller?.trust_score != null
+                    ? `Trust score: ${seller.trust_score}/100`
+                    : "Community seller"}
+                </p>
+              </div>
+            </div>
+            <SellerTrustRow seller={seller} />
+          </div>
 
-          <Button asChild size="lg">
-            <Link href={`/users/${seller?.id ?? l.seller_id}`}>
-              View seller profile
-            </Link>
-          </Button>
+          <div className="rounded-2xl border bg-card p-6 shadow-sm">
+            {l.status === "sold" ? (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                <p className="text-sm font-semibold text-amber-800">
+                  This item has been sold
+                </p>
+                <p className="mt-1 text-xs text-amber-700">
+                  It&apos;s no longer available.{" "}
+                  <Link
+                    href="#similar"
+                    className="font-medium underline underline-offset-2"
+                  >
+                    See similar listings
+                  </Link>{" "}
+                  instead.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-col gap-3">
+                  <MakeOfferButton
+                    listingId={l.id}
+                    listingPrice={l.price}
+                    isOwner={isOwner}
+                    available={l.status === "published"}
+                    signedIn={Boolean(user)}
+                  />
+                  <ContactButton
+                    listingId={l.id}
+                    sellerId={l.seller_id}
+                    signedIn={Boolean(user)}
+                    contactInfo={contactInfo}
+                    isOwner={isOwner}
+                  />
+                </div>
+                <div className="-mx-1 mt-3 flex items-center justify-end gap-1 border-t pt-3 text-xs text-foreground/70">
+                  <FavoriteButton
+                    listingId={l.id}
+                    initial={favorited}
+                    isOwner={isOwner}
+                  />
+                  <ReportButton
+                    target={{ type: "listing", listingId: l.id }}
+                    signedIn={Boolean(user)}
+                    isOwner={isOwner}
+                  />
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
-      <SimilarListings listingId={l.id} />
+      <div className="mt-8 rounded-2xl border bg-card p-8 shadow-sm">
+        <h2 className="font-heading mb-4 text-xl font-semibold text-foreground">
+          About this item
+        </h2>
+        {l.description ? (
+          <p className="whitespace-pre-line text-sm leading-relaxed text-foreground/80 sm:text-base">
+            {l.description}
+          </p>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            No description provided by seller.
+          </p>
+        )}
+      </div>
 
-      <div className="mt-8 text-center">
-        <Button asChild variant="link">
-          <Link href="/">← Back to listings</Link>
-        </Button>
+      <div id="similar" className="mt-12">
+        <SimilarListings listingId={l.id} />
       </div>
     </main>
+  )
+}
+
+function TrustMeter({ score }: { score: number }) {
+  const pct = Math.max(0, Math.min(100, score))
+  const color =
+    pct >= 80 ? "bg-success" : pct >= 50 ? "bg-warning" : "bg-muted-foreground/30"
+  return (
+    <div className="flex items-center gap-2">
+      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
+        <div
+          className={`h-full rounded-full transition-all ${color}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <span className="text-xs font-medium tabular-nums">{score}/100</span>
+    </div>
+  )
+}
+
+function SellerTrustRow({
+  seller,
+}: {
+  seller: ListingWithRelations["seller"]
+}) {
+  const badges = [
+    {
+      label: "Phone verified",
+      ok: seller?.phone_verified,
+      cls: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    },
+    {
+      label: "Fayda verified",
+      ok: seller?.fayda_verified,
+      cls: "border-[#2563EB]/30 bg-[#EEF4FF] text-[#2563EB]",
+    },
+  ].filter((b) => b.ok)
+
+  return (
+    <div className="mt-4 space-y-3 border-t pt-3">
+      {seller?.trust_score != null ? (
+        <div>
+          <p className="text-xs font-medium text-muted-foreground">Trust score</p>
+          <TrustMeter score={seller.trust_score} />
+        </div>
+      ) : null}
+      {badges.length > 0 ? (
+        <div className="flex flex-wrap items-center gap-2">
+          {badges.map((b) => (
+            <Badge
+              key={b.label}
+              variant="outline"
+              className={`gap-1.5 font-medium ${b.cls}`}
+            >
+              <span className="size-1.5 rounded-full bg-current" />
+              {b.label}
+            </Badge>
+          ))}
+        </div>
+      ) : null}
+    </div>
   )
 }
