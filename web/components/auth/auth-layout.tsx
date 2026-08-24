@@ -36,7 +36,7 @@ export function AuthLayout({
         <p className="mb-2 text-center font-heading text-sm font-semibold text-[#2563EB]">
           {title}
         </p>
-        <div className="rounded-2xl border border-white/20 bg-card p-6 shadow-lg shadow-[#172554]/15 sm:p-8">
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-lg sm:p-8">
           {description ? (
             <p className="mb-6 text-center text-sm text-muted-foreground">
               {description}
@@ -49,10 +49,10 @@ export function AuthLayout({
             </p>
           ) : null}
         </div>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-medium text-[#2563EB]">
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-medium text-muted-foreground">
           {TRUST_ITEMS.map((t) => (
             <span key={t.title} className="inline-flex items-center gap-1.5">
-              <span className="flex size-4 items-center justify-center rounded-full bg-[#2563EB]/10">
+              <span className="flex size-4 items-center justify-center rounded-full bg-primary/10 text-primary">
                 {t.icon}
               </span>
               {t.title}
