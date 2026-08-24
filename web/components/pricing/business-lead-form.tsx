@@ -16,7 +16,7 @@ export function BusinessLeadForm() {
   if (state.ok) {
     return (
       <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-center">
-        <p className="font-medium text-emerald-800">Thanks — we'll be in touch!</p>
+        <p className="font-medium text-emerald-800">Thanks — we&apos;ll be in touch!</p>
         <p className="mt-1 text-sm text-emerald-600">
           A member of our team will reach out within 24 hours to discuss Business tier options.
         </p>

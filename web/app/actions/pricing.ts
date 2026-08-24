@@ -20,15 +20,14 @@ export interface UpgradeIntentState {
 // safe message instead of offering a broken button.
 export async function submitUpgradeIntent(
   _prevState: UpgradeIntentState,
-  _formData: FormData
+  formData: FormData
 ): Promise<UpgradeIntentState> {
   const user = await requireUser()
   const supabase = await createClient()
 
-  if (!chapaConfigured()) {
-    return {
-      message: "Payments are not set up for this demo yet.",
-    }
+  const email = formData.get("email")?.toString()?.trim() || user.email
+  if (!email || !email.includes("@")) {
+    return { ok: false, message: "Payments are not set up for this demo yet." }
   }
 
   const txRef = chapaTxRef()
@@ -36,14 +35,22 @@ export async function submitUpgradeIntent(
 
   const { error: insertErr } = await supabase.from("upgrade_intents").insert({
     user_id: user.id,
-    email: user.email,
+    email,
     tier: "pro",
     tx_ref: txRef,
     amount: money.amount,
   })
   if (insertErr) {
     console.error("submitUpgradeIntent insert:", insertErr.message)
-    return { message: "Could not start the upgrade — please try again later." }
+    return { ok: false, message: "Could not start the upgrade — please try again later." }
+  }
+
+  if (!chapaConfigured()) {
+    revalidatePath("/pricing")
+    return {
+      ok: true,
+      message: "We'll notify you when billing opens — no charge today.",
+    }
   }
 
   const returnUrl = `${SITE_URL}/upgrade/callback?tx_ref=${encodeURIComponent(txRef)}`
@@ -51,7 +58,7 @@ export async function submitUpgradeIntent(
     txRef,
     amount: money.amount,
     currency: money.currency,
-    email: user.email,
+    email,
     firstName: user.fullName,
     returnUrl,
     title: "VinTech Pro",
@@ -60,7 +67,7 @@ export async function submitUpgradeIntent(
 
   if (!init.ok) {
     console.error("submitUpgradeIntent chapa:", init.error)
-    return { message: "Could not start the upgrade — please try again later." }
+    return { ok: false, message: "Could not start the upgrade — please try again later." }
   }
 
   revalidatePath("/pricing")

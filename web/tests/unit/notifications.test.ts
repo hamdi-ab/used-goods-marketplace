@@ -53,13 +53,23 @@ describe("notifications constants (#72)", () => {
     expect(NOTIFICATION_TYPES).toEqual([
       "offer_received",
       "offer_accepted",
+      "offer_declined",
+      "offer_countered",
+      "offer_counter_accepted",
+      "offer_counter_declined",
       "review_received",
       "report_resolved",
+      "business_lead",
     ])
     expect(NOTIFICATION_TYPE_LABELS.offer_received).toBe("New offer")
     expect(NOTIFICATION_TYPE_LABELS.offer_accepted).toBe("Offer accepted")
+    expect(NOTIFICATION_TYPE_LABELS.offer_declined).toBe("Offer declined")
+    expect(NOTIFICATION_TYPE_LABELS.offer_countered).toBe("Counter-offer received")
+    expect(NOTIFICATION_TYPE_LABELS.offer_counter_accepted).toBe("Counter accepted")
+    expect(NOTIFICATION_TYPE_LABELS.offer_counter_declined).toBe("Counter declined")
     expect(NOTIFICATION_TYPE_LABELS.review_received).toBe("New review")
     expect(NOTIFICATION_TYPE_LABELS.report_resolved).toBe("Report reviewed")
+    expect(NOTIFICATION_TYPE_LABELS.business_lead).toBe("Business lead")
   })
 
   it("maps offer/review events to a deep link and report_resolved to none", () => {

@@ -38,12 +38,14 @@ function StatTile({
 }) {
   return (
     <Card>
-      <CardContent className="flex flex-col gap-2 py-6">
-        <div className={`flex items-center gap-2 ${accent}`}>
-          <Icon className="size-5" />
-          <span className="text-sm font-medium text-muted-foreground">{label}</span>
+      <CardContent className="flex flex-col gap-3 py-6">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium text-muted-foreground">{label}</span>
+          <span className={`flex size-9 items-center justify-center rounded-lg bg-muted ${accent}`}>
+            <Icon className="size-4" />
+          </span>
         </div>
-        <p className="font-heading text-4xl font-semibold text-foreground">{value}</p>
+        <p className="font-heading text-3xl font-semibold tracking-tight text-foreground">{value}</p>
         {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}
       </CardContent>
     </Card>
@@ -67,7 +69,7 @@ function BreakdownRow({
       </span>
       <div className="h-2 min-w-0 flex-1 overflow-hidden rounded-full bg-muted">
         <div
-          className="h-full rounded-full bg-primary/70"
+          className="h-full rounded-full bg-primary transition-all duration-500"
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -86,10 +88,7 @@ export default async function AdminStatisticsPage() {
 
   const listingTotal = Object.values(breakdown.byStatus).reduce((a, b) => a + b, 0)
   const userTotal = Object.values(breakdown.byRole).reduce((a, b) => a + b, 0)
-  const reportTotal = Object.values(breakdown.byReportStatus).reduce(
-    (a, b) => a + b,
-    0
-  )
+  const reportTotal = Object.values(breakdown.byReportStatus).reduce((a, b) => a + b, 0)
 
   return (
     <div>
@@ -104,44 +103,12 @@ export default async function AdminStatisticsPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <StatTile
-          label="Total users"
-          value={stats.totalUsers}
-          icon={UsersIcon}
-          hint="Registered accounts"
-        />
-        <StatTile
-          label="Total listings"
-          value={stats.totalListings}
-          icon={ListIcon}
-          hint="All live listings"
-        />
-        <StatTile
-          label="Active listings"
-          value={stats.activeListings}
-          icon={PackageOpenIcon}
-          hint="Published and visible"
-        />
-        <StatTile
-          label="Products sold"
-          value={stats.productsSold}
-          icon={ShoppingBagIcon}
-          hint="Listings with a completed sale"
-        />
-        <StatTile
-          label="Verified sellers"
-          value={stats.verifiedSellers}
-          icon={VerifiedIcon}
-          accent="text-green-600"
-          hint="Sellers with a phone or Fayda verification"
-        />
-        <StatTile
-          label="Open reports"
-          value={stats.openReports}
-          icon={FlagIcon}
-          accent="text-amber-600"
-          hint="Awaiting moderation"
-        />
+        <StatTile label="Total users" value={stats.totalUsers} icon={UsersIcon} hint="Registered accounts" />
+        <StatTile label="Total listings" value={stats.totalListings} icon={ListIcon} hint="All live listings" />
+        <StatTile label="Active listings" value={stats.activeListings} icon={PackageOpenIcon} hint="Published and visible" />
+        <StatTile label="Products sold" value={stats.productsSold} icon={ShoppingBagIcon} hint="Listings with a completed sale" />
+        <StatTile label="Verified sellers" value={stats.verifiedSellers} icon={VerifiedIcon} accent="text-emerald-600" hint="Sellers with a phone or Fayda verification" />
+        <StatTile label="Open reports" value={stats.openReports} icon={FlagIcon} accent="text-amber-600" hint="Awaiting moderation" />
       </div>
 
       <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -156,12 +123,7 @@ export default async function AdminStatisticsPage() {
             ) : (
               <ul className="flex flex-col gap-3">
                 {Object.entries(breakdown.byStatus).map(([status, count]) => (
-                  <BreakdownRow
-                    key={status}
-                    label={status}
-                    count={count}
-                    total={listingTotal}
-                  />
+                  <BreakdownRow key={status} label={status} count={count} total={listingTotal} />
                 ))}
               </ul>
             )}
@@ -179,12 +141,7 @@ export default async function AdminStatisticsPage() {
             ) : (
               <ul className="flex flex-col gap-3">
                 {Object.entries(breakdown.byRole).map(([role, count]) => (
-                  <BreakdownRow
-                    key={role}
-                    label={role}
-                    count={count}
-                    total={userTotal}
-                  />
+                  <BreakdownRow key={role} label={role} count={count} total={userTotal} />
                 ))}
               </ul>
             )}
@@ -201,16 +158,9 @@ export default async function AdminStatisticsPage() {
               <p className="text-sm text-muted-foreground">No reports yet.</p>
             ) : (
               <ul className="flex flex-col gap-3">
-                {Object.entries(breakdown.byReportStatus).map(
-                  ([status, count]) => (
-                    <BreakdownRow
-                      key={status}
-                      label={status}
-                      count={count}
-                      total={reportTotal}
-                    />
-                  )
-                )}
+                {Object.entries(breakdown.byReportStatus).map(([status, count]) => (
+                  <BreakdownRow key={status} label={status} count={count} total={reportTotal} />
+                ))}
               </ul>
             )}
           </CardContent>

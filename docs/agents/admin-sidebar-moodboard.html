@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Sidebar Moodboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: oklch(1 0 0);
+  --fg: oklch(0.145 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-fg: oklch(0.556 0 0);
+  --border: oklch(0.922 0 0);
+  --primary: oklch(54.613% 0.215 262.9);
+  --card: oklch(1 0 0);
+  --radius: 0.75rem;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--muted);
+  color: var(--fg);
+  line-height: 1.6;
+  padding: 2rem;
+}
+h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.25rem; }
+.subtitle { color: var(--muted-fg); font-size: 0.85rem; margin-bottom: 2rem; }
+.variants { display: flex; gap: 2rem; flex-wrap: wrap; }
+.variant-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+}
+.variant-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.variant-header h2 { font-size: 0.9rem; font-weight: 600; }
+.variant-header .badge {
+  background: var(--primary);
+  color: white;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-weight: 500;
+}
+
+/* === Variant A — Rail === */
+.rail {
+  width: 240px;
+  height: 520px;
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+}
+.rail-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.rail-brand .logo {
+  width: 32px;
+  height: 32px;
+  background: var(--primary);
+  color: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.rail-brand .name { font-weight: 600; font-size: 0.9rem; color: var(--fg); }
+.rail-nav { flex: 1; padding: 0.75rem 0.75rem; display: flex; flex-direction: column; gap: 0.15rem; }
+.rail-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--muted-fg);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.rail-item:hover { background: var(--muted); color: var(--fg); }
+.rail-item.active {
+  background: color-mix(in oklch, var(--primary) 10%, transparent);
+  color: var(--primary);
+  font-weight: 500;
+}
+.rail-item svg { width: 18px; height: 18px; }
+.rail-item .badge-count {
+  margin-left: auto;
+  background: var(--muted);
+  color: var(--fg);
+  font-size: 0.65rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+.rail-divider { height: 1px; background: var(--border); margin: 0.5rem 0.75rem; }
+.rail-footer {
+  border-top: 1px solid var(--border);
+  padding: 0.75rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+.rail-collapse {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--muted-fg);
+  cursor: pointer;
+}
+.rail-collapse:hover { background: var(--muted); }
+
+/* === Variant B — Grouped === */
+.grouped {
+  width: 256px;
+  height: 520px;
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+}
+.grouped-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+.grouped-brand .logo {
+  width: 32px;
+  height: 32px;
+  background: var(--primary);
+  color: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.grouped-brand .name { font-weight: 600; font-size: 0.9rem; }
+.grouped-nav { flex: 1; padding: 0.75rem 0; overflow-y: auto; }
+.grouped-section { margin-bottom: 0.75rem; }
+.grouped-section-title {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-fg);
+  padding: 0.25rem 1.25rem;
+}
+.grouped-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 1.25rem;
+  font-size: 0.8rem;
+  color: var(--muted-fg);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.grouped-item:hover { background: var(--muted); color: var(--fg); }
+.grouped-item.active {
+  background: color-mix(in oklch, var(--primary) 10%, transparent);
+  color: var(--primary);
+  font-weight: 500;
+}
+.grouped-item svg { width: 18px; height: 18px; }
+.grouped-item .badge-count {
+  margin-left: auto;
+  background: var(--muted);
+  color: var(--fg);
+  font-size: 0.65rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 9999px;
+  font-weight: 600;
+}
+.grouped-footer {
+  border-top: 1px solid var(--border);
+  padding: 0.75rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+/* === Variant C — Dock === */
+.dock-layout {
+  width: 580px;
+  height: 520px;
+  background: var(--card);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.dock-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted-fg);
+  font-size: 0.85rem;
+  background: var(--muted);
+}
+.dock-bar {
+  height: 56px;
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0 1rem;
+}
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.35rem 0.9rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--muted-fg);
+}
+.dock-item:hover { background: var(--muted); color: var(--fg); }
+.dock-item.active {
+  background: color-mix(in oklch, var(--primary) 10%, transparent);
+  color: var(--primary);
+}
+.dock-item svg { width: 18px; height: 18px; }
+.dock-item .label { font-size: 0.6rem; font-weight: 500; }
+.dock-item .badge-dot {
+  position: relative;
+}
+.dock-item .badge-dot::after {
+  content: '3';
+  position: absolute;
+  top: -4px;
+  right: -8px;
+  background: var(--primary);
+  color: white;
+  font-size: 0.55rem;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+/* User avatar */
+.user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted-fg);
+}
+
+/* Icon classes */
+.icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+/* Tag pills */
+.tag-pills { display: flex; gap: 0.4rem; margin-top: 0.25rem; }
+.tag-pill {
+  background: var(--muted);
+  font-size: 0.65rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  color: var(--muted-fg);
+  font-weight: 500;
+}
+</style>
+</head>
+<body>
+
+<h1>Admin Sidebar — Visual Moodboard</h1>
+<p class="subtitle">Three structural directions · References: Vercel, Linear, PostHog, Supabase, Stripe</p>
+
+<div class="variants">
+
+<!-- ========== VARIANT A — RAIL ========== -->
+<div class="variant-card">
+  <div class="variant-header">
+    <h2>Variant A — Rail</h2>
+    <span class="badge">Vercel / Supabase</span>
+  </div>
+  <div class="rail">
+    <div class="rail-brand">
+      <div class="logo">V</div>
+      <span class="name">VinTech</span>
+    </div>
+    <nav class="rail-nav">
+      <div class="rail-item active">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="rail-item">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 5-9"/></svg>
+        Statistics
+      </div>
+      <div class="rail-item">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+        Reports
+        <span class="badge-count">3</span>
+      </div>
+      <div class="rail-item">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        Verifications
+      </div>
+      <div class="rail-item">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        Users
+      </div>
+      <div class="rail-item">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27,6.96 12,12.01 20.73,6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        Listings
+      </div>
+    </nav>
+    <div class="rail-divider"></div>
+    <div class="rail-footer">
+      <div class="rail-item">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Account
+      </div>
+      <div class="rail-item">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign out
+      </div>
+    </div>
+    <div class="rail-collapse">
+      <svg class="icon" style="width:16px;height:16px" viewBox="0 0 24 24"><polyline points="11,17 6,12 11,7"/><polyline points="18,17 13,12 18,7"/></svg>
+      Collapse sidebar
+    </div>
+  </div>
+  <div style="padding: 0.75rem 1.25rem; border-top: 1px solid var(--border);">
+    <div class="tag-pills">
+      <span class="tag-pill">240px → 64px</span>
+      <span class="tag-pill">Collapsible</span>
+      <span class="tag-pill">Badge counts</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========== VARIANT B — GROUPED ========== -->
+<div class="variant-card">
+  <div class="variant-header">
+    <h2>Variant B — Grouped</h2>
+    <span class="badge">Linear / Stripe</span>
+  </div>
+  <div class="grouped">
+    <div class="grouped-brand">
+      <div class="logo">V</div>
+      <span class="name">VinTech</span>
+    </div>
+    <nav class="grouped-nav">
+      <div class="grouped-section">
+        <div class="grouped-section-title">Overview</div>
+        <div class="grouped-item active">
+          <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </div>
+        <div class="grouped-item">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 5-9"/></svg>
+          Statistics
+        </div>
+      </div>
+      <div class="grouped-section">
+        <div class="grouped-section-title">Moderation</div>
+        <div class="grouped-item">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+          Reports
+          <span class="badge-count">3</span>
+        </div>
+        <div class="grouped-item">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          Verifications
+        </div>
+      </div>
+      <div class="grouped-section">
+        <div class="grouped-section-title">Manage</div>
+        <div class="grouped-item">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          Users
+        </div>
+        <div class="grouped-item">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27,6.96 12,12.01 20.73,6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          Listings
+        </div>
+      </div>
+    </nav>
+    <div class="grouped-footer">
+      <div class="grouped-item">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Account
+      </div>
+      <div class="grouped-item">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Sign out
+      </div>
+    </div>
+  </div>
+  <div style="padding: 0.75rem 1.25rem; border-top: 1px solid var(--border);">
+    <div class="tag-pills">
+      <span class="tag-pill">256px fixed</span>
+      <span class="tag-pill">Section headers</span>
+      <span class="tag-pill">Grouped nav</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========== VARIANT C — DOCK ========== -->
+<div class="variant-card">
+  <div class="variant-header">
+    <h2>Variant C — Dock</h2>
+    <span class="badge">PostHog / Raycast</span>
+  </div>
+  <div class="dock-layout">
+    <div class="dock-content">
+      ← Main content area →
+    </div>
+    <div class="dock-bar">
+      <div class="dock-item active">
+        <svg class="icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span class="label">Dashboard</span>
+      </div>
+      <div class="dock-item">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="M7 16l4-8 4 4 5-9"/></svg>
+        <span class="label">Statistics</span>
+      </div>
+      <div class="dock-item badge-dot">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+        <span class="label">Reports</span>
+      </div>
+      <div class="dock-item">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        <span class="label">Verifies</span>
+      </div>
+      <div class="dock-item">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+        <span class="label">Users</span>
+      </div>
+      <div class="dock-item">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27,6.96 12,12.01 20.73,6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        <span class="label">Listings</span>
+      </div>
+      <div class="dock-item">
+        <div class="user-avatar">JD</div>
+        <span class="label">Me</span>
+      </div>
+    </div>
+  </div>
+  <div style="padding: 0.75rem 1.25rem; border-top: 1px solid var(--border);">
+    <div class="tag-pills">
+      <span class="tag-pill">Bottom dock</span>
+      <span class="tag-pill">56px height</span>
+      <span class="tag-pill">Icon + label</span>
+    </div>
+  </div>
+</div>
+
+</div>
+
+</body>
+</html>

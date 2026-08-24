@@ -44,7 +44,7 @@ export type ChapaVerifyResult =
   | {
       ok: true
       status: "success"
-      mode: "test"
+      mode: string
       amount: number
       currency: string
       demo: boolean

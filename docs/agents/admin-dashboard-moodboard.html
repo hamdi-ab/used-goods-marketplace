@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard Moodboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: oklch(1 0 0);
+  --fg: oklch(0.145 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-fg: oklch(0.556 0 0);
+  --border: oklch(0.922 0 0);
+  --primary: oklch(54.613% 0.215 262.9);
+  --card: oklch(1 0 0);
+  --radius: 0.75rem;
+  --emerald: oklch(72.274% 0.192 149.6);
+  --amber: oklch(76.861% 0.165 70.1);
+  --red: oklch(63.686% 0.208 25.3);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--muted);
+  color: var(--fg);
+  line-height: 1.6;
+  padding: 2rem;
+}
+h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.25rem; }
+.subtitle { color: var(--muted-fg); font-size: 0.85rem; margin-bottom: 2rem; }
+.variants { display: flex; gap: 2rem; flex-wrap: wrap; }
+.variant-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+}
+.variant-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.variant-header h2 { font-size: 0.9rem; font-weight: 600; }
+.variant-header .badge {
+  background: var(--primary);
+  color: white;
+  font-size: 0.65rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-weight: 500;
+}
+
+/* ========== VARIANT A — COMMAND CENTER ========== */
+.command-center {
+  width: 720px;
+  min-height: 520px;
+  background: var(--card);
+  padding: 1.5rem;
+}
+.cc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+.cc-header h3 { font-size: 1.1rem; font-weight: 600; }
+.cc-header p { font-size: 0.8rem; color: var(--muted-fg); margin-top: 0.15rem; }
+.cc-header .btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.45rem 0.9rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.cc-kpis {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+}
+.cc-kpi {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 0.75rem;
+}
+.cc-kpi .label {
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: var(--muted-fg);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.cc-kpi .value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--fg);
+  margin-top: 0.25rem;
+  line-height: 1;
+}
+.cc-kpi .trend {
+  font-size: 0.6rem;
+  color: var(--emerald);
+  margin-top: 0.35rem;
+  font-weight: 500;
+}
+.cc-kpi.danger .value { color: var(--amber); }
+.cc-section-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-fg);
+  margin-bottom: 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.cc-section-title .count {
+  background: var(--amber);
+  color: white;
+  font-size: 0.6rem;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.cc-table {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  overflow: hidden;
+}
+.cc-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.85rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8rem;
+}
+.cc-row:last-child { border-bottom: none; }
+.cc-row .icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 0.4rem;
+  background: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+.cc-row .info { flex: 1; min-width: 0; }
+.cc-row .info .title {
+  font-weight: 500;
+  color: var(--fg);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cc-row .info .meta {
+  font-size: 0.7rem;
+  color: var(--muted-fg);
+  margin-top: 0.1rem;
+}
+.cc-row .badge-status {
+  font-size: 0.6rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  background: var(--muted);
+  color: var(--muted-fg);
+}
+.cc-row .badge-status.open { background: color-mix(in oklch, var(--amber) 15%, transparent); color: oklch(45% 0.15 70); }
+.cc-row .badge-status.verified { background: color-mix(in oklch, var(--emerald) 15%, transparent); color: oklch(40% 0.12 152); }
+.cc-row .actions {
+  display: flex;
+  gap: 0.35rem;
+}
+.cc-row .actions button {
+  font-size: 0.65rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 0.35rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted-fg);
+  cursor: pointer;
+  font-weight: 500;
+}
+.cc-row .actions button.primary { background: var(--primary); color: white; border-color: var(--primary); }
+.cc-row .actions button.danger { border-color: color-mix(in oklch, var(--red) 30%, transparent); color: var(--red); background: color-mix(in oklch, var(--red) 5%, transparent); }
+
+/* ========== VARIANT B — CARD FOCUS ========== */
+.card-focus {
+  width: 720px;
+  min-height: 520px;
+  background: var(--card);
+  padding: 1.5rem;
+}
+.cf-header { margin-bottom: 1.5rem; }
+.cf-header h3 { font-size: 1.25rem; font-weight: 600; }
+.cf-header p { font-size: 0.85rem; color: var(--muted-fg); margin-top: 0.25rem; }
+.cf-hero {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.cf-hero-card {
+  background: linear-gradient(135deg, var(--primary), color-mix(in oklch, var(--primary) 80%, black));
+  color: white;
+  border-radius: 0.85rem;
+  padding: 1.25rem;
+}
+.cf-hero-card .label { font-size: 0.7rem; opacity: 0.8; font-weight: 500; }
+.cf-hero-card .value { font-size: 2.25rem; font-weight: 700; margin-top: 0.4rem; line-height: 1; }
+.cf-hero-card .hint { font-size: 0.7rem; opacity: 0.75; margin-top: 0.5rem; }
+.cf-secondary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.65rem;
+  margin-bottom: 1.5rem;
+}
+.cf-sec-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 0.85rem;
+}
+.cf-sec-card .label { font-size: 0.65rem; color: var(--muted-fg); font-weight: 500; }
+.cf-sec-card .value { font-size: 1.35rem; font-weight: 700; margin-top: 0.2rem; }
+.cf-sec-card .icon { font-size: 1rem; margin-bottom: 0.35rem; }
+.cf-queue { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+.cf-queue-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  padding: 1rem;
+}
+.cf-queue-card .header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+.cf-queue-card .header h4 { font-size: 0.8rem; font-weight: 600; }
+.cf-queue-card .header .badge-count {
+  background: var(--amber);
+  color: white;
+  font-size: 0.6rem;
+  padding: 0.15rem 0.45rem;
+  border-radius: 9999px;
+  font-weight: 700;
+}
+.cf-queue-card .empty {
+  text-align: center;
+  padding: 1.5rem 0;
+  color: var(--muted-fg);
+  font-size: 0.75rem;
+}
+.cf-mini-card {
+  background: var(--muted);
+  border-radius: 0.4rem;
+  padding: 0.6rem;
+  margin-bottom: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.cf-mini-card .thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 0.35rem;
+  background: var(--border);
+  flex-shrink: 0;
+}
+.cf-mini-card .info { flex: 1; min-width: 0; }
+.cf-mini-card .info .title { font-size: 0.7rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cf-mini-card .info .meta { font-size: 0.6rem; color: var(--muted-fg); }
+.cf-mini-card .btn-sm {
+  font-size: 0.6rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.3rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  font-weight: 500;
+}
+
+/* ========== VARIANT C — OPERATIONAL FEED ========== */
+.operational-feed {
+  width: 720px;
+  min-height: 520px;
+  background: var(--card);
+  display: flex;
+}
+.of-sidebar {
+  width: 200px;
+  background: var(--muted);
+  border-right: 1px solid var(--border);
+  padding: 1.25rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.of-sidebar h4 {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted-fg);
+  font-weight: 600;
+  padding: 0 0.4rem;
+  margin-bottom: 0.25rem;
+}
+.of-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.35rem 0.4rem;
+}
+.of-stat-row .label { font-size: 0.75rem; color: var(--muted-fg); }
+.of-stat-row .value { font-size: 0.8rem; font-weight: 600; }
+.of-stat-row.highlight .value { color: var(--emerald); }
+.of-stat-row.warning .value { color: var(--amber); }
+.of-feed {
+  flex: 1;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+}
+.of-feed-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+.of-feed-header h3 { font-size: 1rem; font-weight: 600; }
+.of-feed-header .tabs { display: flex; gap: 0.25rem; }
+.of-feed-header .tabs .tab {
+  font-size: 0.7rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 9999px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--muted-fg);
+}
+.of-feed-header .tabs .tab.active { background: var(--primary); color: white; }
+.of-timeline {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.of-timeline-item {
+  display: flex;
+  gap: 0.75rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.of-timeline-item:last-child { border-bottom: none; }
+.of-timeline-item .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 0.35rem;
+  flex-shrink: 0;
+}
+.of-timeline-item .dot.report { background: var(--amber); }
+.of-timeline-item .dot.user { background: var(--primary); }
+.of-timeline-item .dot.verify { background: var(--emerald); }
+.of-timeline-item .dot.listing { background: var(--muted-fg); }
+.of-timeline-item .content { flex: 1; }
+.of-timeline-item .content .title { font-size: 0.78rem; font-weight: 500; }
+.of-timeline-item .content .desc { font-size: 0.7rem; color: var(--muted-fg); margin-top: 0.15rem; }
+.of-timeline-item .content .time { font-size: 0.6rem; color: var(--muted-fg); margin-top: 0.2rem; }
+.of-timeline-item .action {
+  font-size: 0.65rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.3rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  cursor: pointer;
+  height: fit-content;
+}
+
+/* Tag pills */
+.tag-pills { display: flex; gap: 0.4rem; margin-top: 0.5rem; }
+.tag-pill {
+  background: var(--muted);
+  font-size: 0.65rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 9999px;
+  color: var(--muted-fg);
+  font-weight: 500;
+}
+
+/* Icons */
+.icon { width: 16px; height: 16px; display: inline-block; vertical-align: text-bottom; }
+</style>
+</head>
+<body>
+
+<h1>Admin Dashboard — Visual Moodboard</h1>
+<p class="subtitle">Three structural directions · Command Center vs Card Focus vs Operational Feed</p>
+
+<div class="variants">
+
+<!-- ========== VARIANT A — COMMAND CENTER ========== -->
+<div class="variant-card">
+  <div class="variant-header">
+    <h2>Variant A — Command Center</h2>
+    <span class="badge">Dense / Table</span>
+  </div>
+  <div class="command-center">
+    <div class="cc-header">
+      <div>
+        <h3>Command Center</h3>
+        <p>Marketplace health and active moderation tasks</p>
+      </div>
+      <button class="btn">+ New action</button>
+    </div>
+
+    <div class="cc-kpis">
+      <div class="cc-kpi">
+        <div class="label">Users</div>
+        <div class="value">248</div>
+        <div class="trend">+12 this week</div>
+      </div>
+      <div class="cc-kpi">
+        <div class="label">Listings</div>
+        <div class="value">1,429</div>
+        <div class="trend">+86 this week</div>
+      </div>
+      <div class="cc-kpi">
+        <div class="label">Active</div>
+        <div class="value">1,102</div>
+        <div class="trend">77% published</div>
+      </div>
+      <div class="cc-kpi">
+        <div class="label">Sold</div>
+        <div class="value">327</div>
+        <div class="trend">+23 today</div>
+      </div>
+      <div class="cc-kpi">
+        <div class="label">Verified</div>
+        <div class="value">89</div>
+        <div class="trend">36% of sellers</div>
+      </div>
+      <div class="cc-kpi danger">
+        <div class="label">Reports</div>
+        <div class="value">3</div>
+        <div class="trend" style="color: var(--amber)">2 unresolved</div>
+      </div>
+    </div>
+
+    <div class="cc-section-title">
+      Moderation Queue
+      <span class="count">3</span>
+    </div>
+    <div class="cc-table">
+      <div class="cc-row">
+        <div class="icon">⚑</div>
+        <div class="info">
+          <div class="title">Samsung Galaxy S23 - Used</div>
+          <div class="meta">Listing · Reported for counterfeit</div>
+        </div>
+        <span class="badge-status open">Open</span>
+        <div class="actions">
+          <button class="primary">Review</button>
+          <button class="danger">Remove</button>
+        </div>
+      </div>
+      <div class="cc-row">
+        <div class="icon">⚑</div>
+        <div class="info">
+          <div class="title">Abebe Kebede</div>
+          <div class="meta">Seller · Reported for harassment</div>
+        </div>
+        <span class="badge-status open">Open</span>
+        <div class="actions">
+          <button class="primary">Review</button>
+          <button>Block</button>
+        </div>
+      </div>
+      <div class="cc-row">
+        <div class="icon">⚑</div>
+        <div class="info">
+          <div class="title">iPhone 15 Pro Max</div>
+          <div class="meta">Listing · Reported for scam</div>
+        </div>
+        <span class="badge-status open">Open</span>
+        <div class="actions">
+          <button class="primary">Review</button>
+          <button class="danger">Remove</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="padding: 0.75rem 1.25rem; border-top: 1px solid var(--border);">
+    <div class="tag-pills">
+      <span class="tag-pill">6-column KPI grid</span>
+      <span class="tag-pill">Inline table actions</span>
+      <span class="tag-pill">Dense scanable</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========== VARIANT B — CARD FOCUS ========== -->
+<div class="variant-card">
+  <div class="variant-header">
+    <h2>Variant B — Card Focus</h2>
+    <span class="badge">Hero metrics / Card grid</span>
+  </div>
+  <div class="card-focus">
+    <div class="cf-header">
+      <h3>Admin dashboard</h3>
+      <p>Marketplace health at a glance</p>
+    </div>
+
+    <div class="cf-hero">
+      <div class="cf-hero-card">
+        <div class="label">Total users</div>
+        <div class="value">248</div>
+        <div class="hint">+12 this week</div>
+      </div>
+      <div class="cf-hero-card" style="background: linear-gradient(135deg, var(--emerald), color-mix(in oklch, var(--emerald) 80%, black));">
+        <div class="label">Active listings</div>
+        <div class="value">1,102</div>
+        <div class="hint">77% of catalog</div>
+      </div>
+      <div class="cf-hero-card" style="background: linear-gradient(135deg, oklch(60% 0.15 30), oklch(45% 0.15 30));">
+        <div class="label">Products sold</div>
+        <div class="value">327</div>
+        <div class="hint">+23 today</div>
+      </div>
+    </div>
+
+    <div class="cf-secondary">
+      <div class="cf-sec-card">
+        <div class="icon">📋</div>
+        <div class="label">Total listings</div>
+        <div class="value">1,429</div>
+      </div>
+      <div class="cf-sec-card">
+        <div class="icon">✓</div>
+        <div class="label">Verified sellers</div>
+        <div class="value">89</div>
+      </div>
+      <div class="cf-sec-card">
+        <div class="icon">⚑</div>
+        <div class="label">Open reports</div>
+        <div class="value" style="color: var(--amber);">3</div>
+      </div>
+    </div>
+
+    <div class="cf-queue">
+      <div class="cf-queue-card">
+        <div class="header">
+          <h4>Moderation queue</h4>
+          <span class="badge-count">3</span>
+        </div>
+        <div class="cf-mini-card">
+          <div class="thumb"></div>
+          <div class="info">
+            <div class="title">Samsung Galaxy S23</div>
+            <div class="meta">Counterfeit · 2h ago</div>
+          </div>
+          <button class="btn-sm">Review</button>
+        </div>
+        <div class="cf-mini-card">
+          <div class="thumb"></div>
+          <div class="info">
+            <div class="title">Abebe Kebede</div>
+            <div class="meta">Harassment · 5h ago</div>
+          </div>
+          <button class="btn-sm">Review</button>
+        </div>
+      </div>
+      <div class="cf-queue-card">
+        <div class="header">
+          <h4>Verifications</h4>
+          <span class="badge-count" style="background: var(--emerald);">2</span>
+        </div>
+        <div class="cf-mini-card">
+          <div class="thumb"></div>
+          <div class="info">
+            <div class="title">Sara Mohammed</div>
+            <div class="meta">Phone · 1h ago</div>
+          </div>
+          <button class="btn-sm">Approve</button>
+        </div>
+        <div class="cf-mini-card">
+          <div class="thumb"></div>
+          <div class="info">
+            <div class="title">Dawit Tadesse</div>
+            <div class="meta">Fayda · 3h ago</div>
+          </div>
+          <button class="btn-sm">Review</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="padding: 0.75rem 1.25rem; border-top: 1px solid var(--border);">
+    <div class="tag-pills">
+      <span class="tag-pill">3 hero metric cards</span>
+      <span class="tag-pill">Card grid queue</span>
+      <span class="tag-pill">Bold visual hierarchy</span>
+    </div>
+  </div>
+</div>
+
+<!-- ========== VARIANT C — OPERATIONAL FEED ========== -->
+<div class="variant-card">
+  <div class="variant-header">
+    <h2>Variant C — Operational Feed</h2>
+    <span class="badge">Sidebar + Timeline</span>
+  </div>
+  <div class="operational-feed">
+    <div class="of-sidebar">
+      <div>
+        <h4>Overview</h4>
+        <div class="of-stat-row">
+          <span class="label">Users</span>
+          <span class="value">248</span>
+        </div>
+        <div class="of-stat-row">
+          <span class="label">Listings</span>
+          <span class="value">1,429</span>
+        </div>
+        <div class="of-stat-row">
+          <span class="label">Active</span>
+          <span class="value">1,102</span>
+        </div>
+        <div class="of-stat-row">
+          <span class="label">Sold</span>
+          <span class="value">327</span>
+        </div>
+      </div>
+      <div>
+        <h4>Health</h4>
+        <div class="of-stat-row highlight">
+          <span class="label">Verified</span>
+          <span class="value">89</span>
+        </div>
+        <div class="of-stat-row warning">
+          <span class="label">Reports</span>
+          <span class="value">3</span>
+        </div>
+        <div class="of-stat-row highlight">
+          <span class="label">Verifications</span>
+          <span class="value">2</span>
+        </div>
+      </div>
+      <div>
+        <h4>Quick Actions</h4>
+        <div class="of-stat-row">
+          <span class="label">+ New listing</span>
+        </div>
+        <div class="of-stat-row">
+          <span class="label">Export CSV</span>
+        </div>
+      </div>
+    </div>
+    <div class="of-feed">
+      <div class="of-feed-header">
+        <h3>Activity feed</h3>
+        <div class="tabs">
+          <button class="tab active">All</button>
+          <button class="tab">Reports</button>
+          <button class="tab">Users</button>
+          <button class="tab">Listings</button>
+        </div>
+      </div>
+      <div class="of-timeline">
+        <div class="of-timeline-item">
+          <div class="dot report"></div>
+          <div class="content">
+            <div class="title">New report: Samsung Galaxy S23</div>
+            <div class="desc">Reported for counterfeit by <strong>Yonas Hailu</strong></div>
+            <div class="time">2 hours ago</div>
+          </div>
+          <button class="action">Review</button>
+        </div>
+        <div class="of-timeline-item">
+          <div class="dot verify"></div>
+          <div class="content">
+            <div class="title">Verification approved: Sara Mohammed</div>
+            <div class="desc">Phone verification approved</div>
+            <div class="time">3 hours ago</div>
+          </div>
+        </div>
+        <div class="of-timeline-item">
+          <div class="dot user"></div>
+          <div class="content">
+            <div class="title">New user: Dawit Tadesse</div>
+            <div class="desc">Registered as buyer · Addis Ababa</div>
+            <div class="time">4 hours ago</div>
+          </div>
+        </div>
+        <div class="of-timeline-item">
+          <div class="dot report"></div>
+          <div class="content">
+            <div class="title">New report: Abebe Kebede</div>
+            <div class="desc">Reported for harassment by <strong>Meron Alemu</strong></div>
+            <div class="time">5 hours ago</div>
+          </div>
+          <button class="action">Review</button>
+        </div>
+        <div class="of-timeline-item">
+          <div class="dot listing"></div>
+          <div class="content">
+            <div class="title">Listing published: iPhone 15 Pro Max</div>
+            <div class="desc">By Abebe Kebede · ETB 45,000</div>
+            <div class="time">6 hours ago</div>
+          </div>
+        </div>
+        <div class="of-timeline-item">
+          <div class="dot verify"></div>
+          <div class="content">
+            <div class="title">Verification request: Dawit Tadesse</div>
+            <div class="desc">Fayda verification pending review</div>
+            <div class="time">7 hours ago</div>
+          </div>
+          <button class="action">Approve</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="padding: 0.75rem 1.25rem; border-top: 1px solid var(--border);">
+    <div class="tag-pills">
+      <span class="tag-pill">Stats sidebar</span>
+      <span class="tag-pill">Timeline feed</span>
+      <span class="tag-pill">Tab filter</span>
+    </div>
+  </div>
+</div>
+
+</div>
+
+</body>
+</html>
