@@ -84,7 +84,7 @@ export function BuyerPayment({ offer }: { offer: BuyerOfferRow }) {
           <ReceiptModal
             txRef={txRef}
             amount={amount}
-            paidAt={paidAt}
+            paidAt={paidAt ?? null}
             listingTitle={offer.listing?.title}
             onClose={() => setShowReceipt(false)}
           />

@@ -112,10 +112,10 @@ describe("chapa.verifyChapaTransaction (demo fallback)", () => {
     })
     expect(result.ok).toBe(true)
     if (result.ok) {
-      expect(result.receipt.status).toBe("success")
-      expect(result.receipt.mode).toBe("test")
-      expect(result.receipt.amount).toBe(500)
-      expect(result.receipt.currency).toBe("ETB")
+      expect(result.status).toBe("success")
+      expect(result.mode).toBe("test")
+      expect(result.amount).toBe(500)
+      expect(result.currency).toBe("ETB")
       expect(result.demo).toBe(true)
     }
   })
