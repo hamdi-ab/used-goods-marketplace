@@ -140,7 +140,7 @@ export async function fetchBuyerOffers(
        listing:listings(id, title, price, condition, city, published_at,
          images:listing_images(id, image_url, display_order)),
 review:reviews(id, rating),
-       payment:payments(id, amount, currency, status, mode, buyer_confirmed, paid_at, confirmed_at)`,
+       payment:payments(id, amount, currency, status, mode, buyer_confirmed, paid_at, confirmed_at, hold_expires_at, tx_ref, abandoned_at)`,
       { count: "exact" }
     )
     .eq("buyer_id", userId)
@@ -189,7 +189,7 @@ export async function fetchSellerOffers(
          seller:profiles!listings_seller_id_fkey(id, full_name, avatar_url, role, trust_score),
          images:listing_images(id, image_url, display_order)),
 buyer:profiles(id, full_name, avatar_url),
-       payment:payments(id, amount, currency, status, mode, buyer_confirmed, paid_at, confirmed_at)`,
+       payment:payments(id, amount, currency, status, mode, buyer_confirmed, paid_at, confirmed_at, hold_expires_at, tx_ref, abandoned_at)`,
       { count: "exact" }
     )
     .eq("listing.seller_id", userId)

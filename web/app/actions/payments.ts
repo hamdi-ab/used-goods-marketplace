@@ -3,7 +3,7 @@
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { confirmOfferReceipt, payOffer, requestWithdrawal } from "@/lib/payments"
+import { abandonStalePayment, confirmOfferReceipt, payOffer, requestWithdrawal } from "@/lib/payments"
 import { uuidSchema } from "@/lib/uuid"
 
 function formValue(formData: FormData, key: string): string | undefined {
@@ -90,5 +90,30 @@ export async function requestWithdrawalAction(
 
   revalidatePath("/offers/seller")
   revalidatePath("/dashboard")
+  return { ok: true }
+}
+
+export type AbandonStaleState = {
+  message?: string
+  ok?: boolean
+}
+
+// Seller abandons a stale payment after the 7-day window elapses.
+export async function abandonStalePaymentAction(
+  _prevState: AbandonStaleState,
+  formData: FormData
+): Promise<AbandonStaleState> {
+  const txRef = formValue(formData, "txRef")
+  if (!txRef) {
+    return { message: "Invalid request" }
+  }
+
+  const result = await abandonStalePayment(txRef)
+  if (!result.ok) {
+    return { message: result.error ?? "Could not abandon payment" }
+  }
+
+  revalidatePath("/offers")
+  revalidatePath("/offers/seller")
   return { ok: true }
 }

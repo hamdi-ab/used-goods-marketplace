@@ -24,6 +24,9 @@ function payment(overrides: Partial<OfferPayment> = {}): OfferPayment {
     buyer_confirmed: false,
     paid_at: null,
     confirmed_at: null,
+    hold_expires_at: null,
+    tx_ref: null,
+    abandoned_at: null,
     ...overrides,
   }
 }

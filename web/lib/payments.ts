@@ -19,6 +19,7 @@ import {
   WITHDRAWAL_MINIMUM,
   WITHDRAWAL_FEE,
   WITHDRAWAL_FREE_PER_MONTH,
+  HOLD_PERIOD_HOURS,
 } from "@/lib/payments/constants"
 
 export type PayOfferResult =
@@ -31,6 +32,10 @@ export type VerifyOfferPaymentResult =
 
 export type WithdrawalResult =
   | { ok: true; id: string; fee: number; netAmount: number }
+  | { ok: false; error: string }
+
+export type AbandonmentResult =
+  | { ok: true; canAbandon: boolean; daysRemaining: number }
   | { ok: false; error: string }
 
 // Same { ok, error } envelope every write-RPC caller lands on (see OfferResult).
@@ -229,6 +234,24 @@ export async function requestWithdrawal(
 
   const supabase = await createClient()
 
+  // Verify seller has sufficient available earnings (hold period elapsed)
+  const { data: payments } = await supabase
+    .from("payments")
+    .select("id, amount, buyer_confirmed, hold_expires_at")
+    .eq("seller_id", user.id)
+    .eq("status", "paid")
+
+  let available = 0
+  for (const p of payments ?? []) {
+    if (!p.buyer_confirmed) continue
+    if (p.hold_expires_at && new Date(p.hold_expires_at) > new Date()) continue
+    available += p.amount * (1 - PLATFORM_FEE_PERCENTAGE / 100)
+  }
+
+  if (amount > available) {
+    return { ok: false, error: `Insufficient available balance (${available.toFixed(2)} ETB)` }
+  }
+
   // Count withdrawals this month to determine fee
   const { count } = await supabase
     .from("withdrawals")
@@ -257,4 +280,54 @@ export async function requestWithdrawal(
   }
 
   return { ok: true, id: result.id ?? "", fee, netAmount }
+}
+
+// Check if a payment's hold period has elapsed and funds are available.
+export async function checkHoldReleased(paymentId: string): Promise<{ ok: boolean; released: boolean; hoursRemaining: number }> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc("check_hold_released", { p_payment_id: paymentId })
+
+  if (error) {
+    console.error("checkHoldReleased:", error.message)
+    return { ok: false, released: false, hoursRemaining: HOLD_PERIOD_HOURS }
+  }
+
+  const released = data as boolean
+  return { ok: true, released, hoursRemaining: released ? 0 : HOLD_PERIOD_HOURS }
+}
+
+// Mark a payment as abandoned (buyer returned without completing checkout).
+// Starts the 7-day timer before the seller can abandon the sale.
+export async function markPaymentAbandoned(txRef: string): Promise<{ ok: boolean; error: string | null }> {
+  const supabase = await createClient()
+  const result = await callOutcomeRpc(supabase, "mark_payment_abandoned", {
+    p_tx_ref: txRef,
+  }, "markPaymentAbandoned")
+
+  return { ok: result.ok === true, error: result.error ?? null }
+}
+
+// Check if a payment's 7-day abandonment window has elapsed.
+export async function checkPaymentAbandoned(txRef: string): Promise<{ ok: boolean; canAbandon: boolean; daysRemaining: number }> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.rpc("check_payment_abandoned", { p_tx_ref: txRef })
+
+  if (error) {
+    console.error("checkPaymentAbandoned:", error.message)
+    return { ok: false, canAbandon: false, daysRemaining: 7 }
+  }
+
+  const canAbandon = data as boolean
+  return { ok: true, canAbandon, daysRemaining: canAbandon ? 0 : 7 }
+}
+
+// Seller abandons a stale payment after the 7-day window. Fails the payment
+// and reopens the offer/listing to the market.
+export async function abandonStalePayment(txRef: string): Promise<{ ok: boolean; error: string | null }> {
+  const supabase = await createClient()
+  const result = await callOutcomeRpc(supabase, "abandon_stale_payment", {
+    p_tx_ref: txRef,
+  }, "abandonStalePayment")
+
+  return { ok: result.ok === true, error: result.error ?? null }
 }

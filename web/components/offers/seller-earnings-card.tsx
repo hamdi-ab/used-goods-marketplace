@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useActionState } from "react"
-import { ArrowDownIcon, BanknoteIcon, WalletIcon } from "lucide-react"
+import { ArrowDownIcon, BanknoteIcon, ClockIcon, WalletIcon } from "lucide-react"
 
 import { requestWithdrawalAction } from "@/app/actions/payments"
 import type { SellerOfferRow } from "@/lib/offers"
@@ -20,6 +20,7 @@ interface Earnings {
   netEarnings: number
   availableForWithdrawal: number
   pendingClearance: number
+  onHold: number
 }
 
 function calculateEarnings(offers: SellerOfferRow[]): Earnings {
@@ -28,6 +29,7 @@ function calculateEarnings(offers: SellerOfferRow[]): Earnings {
   let netEarnings = 0
   let availableForWithdrawal = 0
   let pendingClearance = 0
+  let onHold = 0
 
   for (const offer of offers) {
     if (offer.status !== "accepted" || !offer.payment) continue
@@ -39,13 +41,18 @@ function calculateEarnings(offers: SellerOfferRow[]): Earnings {
 
     const phase = paymentPhase(offer.payment)
     if (phase === "confirmed") {
-      availableForWithdrawal += amount - fee
+      // Check if hold period has elapsed
+      if (offer.payment.hold_expires_at && new Date(offer.payment.hold_expires_at) > new Date()) {
+        onHold += amount - fee
+      } else {
+        availableForWithdrawal += amount - fee
+      }
     } else if (phase === "paid") {
       pendingClearance += amount - fee
     }
   }
 
-  return { totalSales, platformFees, netEarnings, availableForWithdrawal, pendingClearance }
+  return { totalSales, platformFees, netEarnings, availableForWithdrawal, pendingClearance, onHold }
 }
 
 export function SellerEarningsCard({ offers }: SellerEarningsCardProps) {
@@ -78,6 +85,18 @@ export function SellerEarningsCard({ offers }: SellerEarningsCardProps) {
             {formatPrice(earnings.availableForWithdrawal, { maxFractionDigits: 2 })}
           </span>
         </div>
+
+        {earnings.onHold > 0 ? (
+          <div className="flex items-center justify-between">
+            <span className="flex items-center gap-2 text-sm text-muted-foreground">
+              <ClockIcon className="size-4" />
+              On hold (48h)
+            </span>
+            <span className="text-sm text-foreground">
+              {formatPrice(earnings.onHold, { maxFractionDigits: 2 })}
+            </span>
+          </div>
+        ) : null}
 
         {earnings.pendingClearance > 0 ? (
           <div className="flex items-center justify-between">

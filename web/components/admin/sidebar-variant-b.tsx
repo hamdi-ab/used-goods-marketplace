@@ -11,6 +11,7 @@ import {
   UsersIcon,
   BarChart3Icon,
   FlagIcon,
+  AlertTriangleIcon,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -40,6 +41,7 @@ const sections: NavSection[] = [
     label: "Moderation",
     items: [
       { title: "Reports", href: "/admin/reports", icon: FlagIcon, badge: 3 },
+      { title: "Disputes", href: "/admin/disputes", icon: AlertTriangleIcon, badge: 0 },
       { title: "Verifications", href: "/admin/verifications", icon: ShieldCheckIcon, badge: 0 },
     ],
   },

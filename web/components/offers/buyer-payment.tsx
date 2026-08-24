@@ -1,13 +1,15 @@
 "use client"
 
+import { useState } from "react"
 import { useActionState } from "react"
-import { CheckCircle2Icon, CreditCardIcon } from "lucide-react"
+import { CheckCircle2Icon, CreditCardIcon, AlertTriangleIcon } from "lucide-react"
 
 import { confirmReceiptAction, payOfferAction } from "@/app/actions/payments"
 import type { BuyerOfferRow } from "@/lib/offers"
 import { formatPrice } from "@/lib/listings/constants"
 import { paymentPhase } from "@/lib/payments/constants"
 import { Button } from "@/components/ui/button"
+import { DisputeForm } from "@/components/disputes/dispute-form"
 
 // #97 — the buyer's payment surface on an accepted offer. Starts the Chapa
 // sandbox checkout (redirecting on success via server action) and, once paid, the
@@ -38,6 +40,7 @@ export function BuyerPayment({ offer }: { offer: BuyerOfferRow }) {
   }
 
   if (phase === "paid") {
+    const [showDispute, setShowDispute] = useState(false)
     return (
       <div className="mt-4 border-t pt-3">
         <div className="flex flex-wrap items-center gap-3">
@@ -61,7 +64,21 @@ export function BuyerPayment({ offer }: { offer: BuyerOfferRow }) {
               </p>
             ) : null}
           </form>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowDispute(!showDispute)}
+          >
+            <AlertTriangleIcon className="mr-1 size-3" />
+            Report issue
+          </Button>
         </div>
+        {showDispute && offer.payment ? (
+          <div className="mt-3">
+            <DisputeForm paymentId={offer.payment.id} />
+          </div>
+        ) : null}
       </div>
     )
   }
