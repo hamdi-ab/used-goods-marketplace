@@ -24,7 +24,9 @@ export async function GET(request: Request): Promise<Response> {
 
   // Verify, then bounce to the offer list with the same params the page's own
   // verify-on-render reads — the banner is rendered there (idempotent refresh).
+  console.log("[payments/callback] verifying tx_ref:", txRef, "offer:", offerId)
   const result = await verifyOfferPayment({ offerId, txRef })
+  console.log("[payments/callback] verify result:", JSON.stringify(result))
 
   if (!result.ok) {
     // §11: the page banners the failure via the terminal row; the technical
