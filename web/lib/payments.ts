@@ -13,7 +13,13 @@ import {
   initializeChapaTransaction,
   verifyChapaTransaction,
 } from "@/lib/chapa"
-import { etb } from "@/lib/payments/constants"
+import {
+  etb,
+  PLATFORM_FEE_PERCENTAGE,
+  WITHDRAWAL_MINIMUM,
+  WITHDRAWAL_FEE,
+  WITHDRAWAL_FREE_PER_MONTH,
+} from "@/lib/payments/constants"
 
 export type PayOfferResult =
   | { ok: true; checkoutUrl: string }
@@ -21,6 +27,10 @@ export type PayOfferResult =
 
 export type VerifyOfferPaymentResult =
   | { ok: true; amount: number }
+  | { ok: false; error: string }
+
+export type WithdrawalResult =
+  | { ok: true; id: string; fee: number; netAmount: number }
   | { ok: false; error: string }
 
 // Same { ok, error } envelope every write-RPC caller lands on (see OfferResult).
@@ -174,4 +184,77 @@ export async function confirmOfferReceipt(offerId: string): Promise<PaymentResul
     p_offer_id: offerId,
   }, "confirmOfferReceipt")
   return { ok: result.ok === true, error: result.error ?? null }
+}
+
+// Calculate a seller's available earnings from confirmed payments.
+// Returns the sum of (amount - platform fee) for all confirmed payments.
+export async function calculateSellerEarnings(
+  sellerId: string
+): Promise<{ available: number; pending: number }> {
+  const supabase = await createClient()
+  const { data: payments } = await supabase
+    .from("payments")
+    .select("amount, buyer_confirmed")
+    .eq("seller_id", sellerId)
+    .eq("status", "paid")
+
+  let available = 0
+  let pending = 0
+
+  for (const p of payments ?? []) {
+    const net = p.amount * (1 - PLATFORM_FEE_PERCENTAGE / 100)
+    if (p.buyer_confirmed) {
+      available += net
+    } else {
+      pending += net
+    }
+  }
+
+  return { available, pending }
+}
+
+// Seller requests a withdrawal of available earnings. Validates minimum amount,
+// calculates fee if applicable, and creates a pending withdrawal row.
+export async function requestWithdrawal(
+  amount: number
+): Promise<WithdrawalResult> {
+  const user = await requireUser()
+  if (!user.email) {
+    return { ok: false, error: "Your account needs an email address" }
+  }
+
+  if (amount < WITHDRAWAL_MINIMUM) {
+    return { ok: false, error: `Minimum withdrawal is ${WITHDRAWAL_MINIMUM} ETB` }
+  }
+
+  const supabase = await createClient()
+
+  // Count withdrawals this month to determine fee
+  const { count } = await supabase
+    .from("withdrawals")
+    .select("*", { count: "exact", head: true })
+    .eq("seller_id", user.id)
+    .gte("created_at", new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString())
+    .in("status", ["pending", "processing", "completed"])
+
+  const usedThisMonth = count ?? 0
+  const fee = usedThisMonth >= WITHDRAWAL_FREE_PER_MONTH ? WITHDRAWAL_FEE : 0
+  const netAmount = amount - fee
+
+  if (netAmount <= 0) {
+    return { ok: false, error: "Fee exceeds withdrawal amount" }
+  }
+
+  const result = await callOutcomeRpc<{ ok: boolean; error: string | null; id?: string }>(supabase, "request_withdrawal", {
+    p_seller_id: user.id,
+    p_amount: amount,
+    p_payout_method: "bank_transfer",
+    p_payout_details: null,
+  }, "requestWithdrawal")
+
+  if (!result.ok) {
+    return { ok: false, error: result.error ?? "Could not process withdrawal" }
+  }
+
+  return { ok: true, id: result.id ?? "", fee, netAmount }
 }

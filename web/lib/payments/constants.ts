@@ -14,6 +14,14 @@ export type PaymentStatus = (typeof PAYMENT_STATUSES)[number]
 // The demo only ever moves ETB (mirrors the payments_currency_etb check).
 export const PAYMENT_CURRENCY = "ETB" as const
 
+// Platform commission rate — 5% of sale price deducted before seller payout.
+export const PLATFORM_FEE_PERCENTAGE = 5
+
+// Withdrawal configuration
+export const WITHDRAWAL_MINIMUM = 50 // ETB
+export const WITHDRAWAL_FREE_PER_MONTH = 2
+export const WITHDRAWAL_FEE = 5 // ETB per withdrawal after free ones
+
 // The domain's Money value object (domain model §11): a non-negative amount in
 // the marketplace's single supported currency. The currency literal is the TS
 // mirror of the DB's payments_currency_etb check — the DB stays the authority;

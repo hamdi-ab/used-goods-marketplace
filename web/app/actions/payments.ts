@@ -2,7 +2,8 @@
 
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
-import { confirmOfferReceipt, payOffer } from "@/lib/payments"
+import { redirect } from "next/navigation"
+import { confirmOfferReceipt, payOffer, requestWithdrawal } from "@/lib/payments"
 import { uuidSchema } from "@/lib/uuid"
 
 function formValue(formData: FormData, key: string): string | undefined {
@@ -16,12 +17,10 @@ const offerIdSchema = z.object({
 
 export type PayOfferState = {
   message?: string
-  checkoutUrl?: string
-  ok?: boolean
 }
 
-// #97 — the buyer starts payment for an accepted offer. On success the client
-// component redirects to Chapa's hosted checkout via the returned checkoutUrl.
+// #97 — the buyer starts payment for an accepted offer. On success, redirect
+// directly to Chapa's hosted checkout in the same tab.
 export async function payOfferAction(
   _prevState: PayOfferState,
   formData: FormData
@@ -38,10 +37,7 @@ export async function payOfferAction(
     return { message: result.error }
   }
 
-  return {
-    ok: true,
-    checkoutUrl: result.checkoutUrl,
-  }
+  redirect(result.checkoutUrl)
 }
 
 export type ConfirmReceiptState = {
@@ -69,5 +65,30 @@ export async function confirmReceiptAction(
 
   revalidatePath("/offers")
   revalidatePath("/offers/seller")
+  return { ok: true }
+}
+
+export type WithdrawalState = {
+  message?: string
+  ok?: boolean
+}
+
+// Seller requests a withdrawal of available earnings to their payout method.
+export async function requestWithdrawalAction(
+  _prevState: WithdrawalState,
+  formData: FormData
+): Promise<WithdrawalState> {
+  const amount = formValue(formData, "amount")
+  if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
+    return { message: "Invalid amount" }
+  }
+
+  const result = await requestWithdrawal(Number(amount))
+  if (!result.ok) {
+    return { message: result.error ?? "Could not process withdrawal" }
+  }
+
+  revalidatePath("/offers/seller")
+  revalidatePath("/dashboard")
   return { ok: true }
 }

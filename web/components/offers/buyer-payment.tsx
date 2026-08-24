@@ -1,6 +1,5 @@
 "use client"
 
-import { useEffect, useRef } from "react"
 import { useActionState } from "react"
 import { CheckCircle2Icon, CreditCardIcon } from "lucide-react"
 
@@ -11,23 +10,15 @@ import { paymentPhase } from "@/lib/payments/constants"
 import { Button } from "@/components/ui/button"
 
 // #97 — the buyer's payment surface on an accepted offer. Starts the Chapa
-// sandbox checkout (redirecting on success) and, once paid, the buyer-confirm
-// step that closes the deal. States: not started / pending+failed (pay again)
-// / paid (confirm receipt) / confirmed (closed).
+// sandbox checkout (redirecting on success via server action) and, once paid, the
+// buyer-confirm step that closes the deal. States: not started / pending+failed
+// (pay again) / paid (confirm receipt) / confirmed (closed).
 export function BuyerPayment({ offer }: { offer: BuyerOfferRow }) {
   const [payState, payFormAction, payPending] = useActionState(payOfferAction, {})
   const [confirmState, confirmFormAction, confirmPending] = useActionState(
     confirmReceiptAction,
     {}
   )
-
-  const redirected = useRef(false)
-  useEffect(() => {
-    if (payState.ok && payState.checkoutUrl && !redirected.current) {
-      redirected.current = true
-      window.open(payState.checkoutUrl, "_blank", "noopener,noreferrer")
-    }
-  }, [payState])
 
   if (offer.status !== "accepted") return null
 

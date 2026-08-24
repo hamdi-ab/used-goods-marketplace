@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import type { ReactNode } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import { InboxIcon } from "lucide-react"
 
@@ -13,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { OfferStatusBadge } from "@/components/offers/offer-status-badge"
 import { SellerOfferActions } from "@/components/offers/seller-offer-actions"
 import { SellerPaymentBadge } from "@/components/offers/seller-payment-badge"
+import { SellerEarningsCard } from "@/components/offers/seller-earnings-card"
 import { Button } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
@@ -191,6 +191,8 @@ export default async function SellerOffersPage({
         Offers from buyers on your listings. Accept the right price and the
         listing is marked sold.
       </p>
+
+      {offers.length > 0 ? <SellerEarningsCard offers={offers} /> : null}
 
       {body}
     </main>

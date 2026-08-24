@@ -30,6 +30,7 @@ export type RpcName =
   | "decline_counter"
   | "submit_business_lead"
   | "offer_events"
+  | "request_withdrawal"
 
 export type RpcArgs = Record<string, string | number | boolean | null | string[]>
 
