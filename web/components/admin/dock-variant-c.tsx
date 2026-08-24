@@ -11,7 +11,6 @@ import { useSignOut } from "@/components/auth/use-sign-out"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Badge } from "@/components/ui/badge"
 import {
   HomeIcon,
   LayoutDashboardIcon,

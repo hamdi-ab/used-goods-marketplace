@@ -4,10 +4,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import {
   ChevronLeftIcon,
-  ChevronRightIcon,
   HomeIcon,
   LayoutDashboardIcon,
-  ListIcon,
   PackageIcon,
   ShieldCheckIcon,
   UsersIcon,
@@ -17,12 +15,6 @@ import {
 
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
-
-const navSections = [
-  { key: "overview", label: "Overview" },
-  { key: "moderation", label: "Moderation" },
-  { key: "manage", label: "Manage" },
-] as const
 
 const navItems = [
   { title: "View Site", href: "/", icon: null, section: null },
