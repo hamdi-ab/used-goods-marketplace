@@ -85,7 +85,7 @@ export async function payOffer(offerId: string): Promise<PayOfferResult> {
     email: user.email,
     firstName: user.fullName,
     returnUrl: await paymentReturnUrl(offerId, txRef),
-    title: "VinTech Marketplace",
+    title: "Dagim Gebeya",
     description: "Payment for your marketplace purchase",
   })
 
