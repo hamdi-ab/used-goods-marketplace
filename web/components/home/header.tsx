@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
-import { HandshakeIcon, HeartIcon, HomeIcon, LayoutGridIcon, MenuIcon, SearchIcon } from "lucide-react"
+import { HandshakeIcon, HeartIcon, HomeIcon, LayoutGridIcon, MenuIcon, SearchIcon, XIcon } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -27,11 +27,13 @@ export function SiteHeader() {
   const router = useRouter()
   const { user } = useAuth()
   const [searchTerm, setSearchTerm] = useState("")
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchTerm.trim()) {
       router.push(`/search?q=${encodeURIComponent(searchTerm.trim())}`)
+      setMobileSearchOpen(false)
     }
   }
 
@@ -88,9 +90,13 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex flex-1 items-center justify-end gap-2">
+          {/* Search - shows on md+, toggle on mobile */}
           <form
             onSubmit={handleSearch}
-            className="hidden w-56 items-center gap-2 rounded-full bg-white/15 px-3.5 py-2 text-sm text-white/90 md:flex"
+            className={cn(
+              "items-center gap-2 rounded-full bg-white/15 px-3.5 py-2 text-sm text-white/90",
+              mobileSearchOpen ? "flex flex-1" : "hidden md:flex w-56"
+            )}
           >
             <SearchIcon className="size-4 shrink-0" />
             <input
@@ -100,7 +106,30 @@ export function SiteHeader() {
               placeholder="Search listings..."
               className="w-full bg-transparent text-white outline-none placeholder:text-current"
             />
+            {mobileSearchOpen ? (
+              <button
+                type="button"
+                onClick={() => setMobileSearchOpen(false)}
+                className="shrink-0 md:hidden"
+                aria-label="Close search"
+              >
+                <XIcon className="size-4" />
+              </button>
+            ) : null}
           </form>
+
+          {/* Mobile search toggle */}
+          <button
+            type="button"
+            onClick={() => setMobileSearchOpen(!mobileSearchOpen)}
+            className={cn(
+              "md:hidden flex size-10 items-center justify-center rounded-lg bg-white/15 text-white hover:bg-white/25",
+              mobileSearchOpen && "hidden"
+            )}
+            aria-label="Search"
+          >
+            <SearchIcon className="size-5" />
+          </button>
 
           {user ? (
             <>
@@ -142,7 +171,7 @@ export function SiteHeader() {
               <Button
                 variant="outline"
                 size="icon"
-                className="lg:hidden border-white/30 bg-transparent text-white hover:bg-white/10"
+                className="md:hidden border-white/30 bg-transparent text-white hover:bg-white/10"
                 aria-label="Open menu"
               >
                 <MenuIcon className="size-5" />
