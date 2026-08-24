@@ -4,6 +4,6 @@
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ?? "https://vintech-marketplace.vercel.app"
 
-export const SITE_TITLE = "VinTech Marketplace — Buy and sell used goods"
+export const SITE_TITLE = "Dagim Gebeya - Buy and sell second-hand goods in Ethiopia"
 export const SITE_DESCRIPTION =
-  "VinTech Marketplace is a trusted platform for buying and selling used goods."
+  "Dagim Gebeya is a trusted platform for buying and selling second-hand goods across Ethiopia."

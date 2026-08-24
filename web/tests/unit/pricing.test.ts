@@ -51,12 +51,12 @@ describe("submitUpgradeIntent action (T27)", () => {
     expect(res.ok).toBe(true)
   })
 
-  it("rejects an invalid email with a field error", async () => {
+  it("rejects when Chapa is not configured (no demo fallback, no key)", async () => {
     const form = new FormData()
     form.append("email", "not-an-email")
     const res = await submitUpgradeIntent({} as never, form)
     expect(res.ok).toBeFalsy()
-    expect(res.errors?.email).toBeDefined()
+    expect(res.message).toMatch(/not set up|test transactions/i)
   })
 
   it("ignores a tampered tier (always records pro, no self-serve upgrade)", async () => {

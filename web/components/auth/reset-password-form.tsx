@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useEffect, useState } from "react"
 import Link from "next/link"
@@ -7,8 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 
 import { createClient } from "@/lib/supabase/client"
-import { AuthCard } from "@/components/auth/auth-card"
-import { PrototypeAuthLayout } from "@/components/home/prototype/prototype-auth-layout"
+import { AuthLayout } from "@/components/auth/auth-layout"
 import { useSignOut } from "@/components/auth/use-sign-out"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
@@ -24,7 +23,7 @@ const resetPasswordSchema = z.object({
 
 type ResetPasswordValues = z.infer<typeof resetPasswordSchema>
 
-export function ResetPasswordForm({ variant }: { variant?: "A" | "B" }) {
+export function ResetPasswordForm() {
   const signOut = useSignOut()
   const [loading, setLoading] = useState(true)
   const [invalid, setInvalid] = useState(false)
@@ -61,112 +60,59 @@ export function ResetPasswordForm({ variant }: { variant?: "A" | "B" }) {
     await signOut("/login")
   }
 
-  const form = (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="password">New password</Label>
-        <PasswordInput
-          id="password"
-          autoComplete="new-password"
-          aria-invalid={!!errors.password}
-          {...register("password")}
-        />
-        {errors.password ? (
-          <p className="text-sm text-destructive">{errors.password.message}</p>
-        ) : null}
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="confirmPassword">Confirm new password</Label>
-        <PasswordInput
-          id="confirmPassword"
-          autoComplete="new-password"
-          aria-invalid={!!errors.confirmPassword}
-          {...register("confirmPassword")}
-        />
-        {errors.confirmPassword ? (
-          <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
-        ) : null}
-      </div>
-
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
-
-      <Button type="submit" disabled={isSubmitting} className="mt-2">
-        {isSubmitting ? "Saving…" : "Set new password"}
-      </Button>
-    </form>
-  )
-
-  const footer = (
-    <Link href="/login" className="font-medium text-primary hover:underline">
-      Back to login
-    </Link>
-  )
+  const footer = <Link href="/login" className="font-medium text-primary hover:underline">Back to login</Link>
 
   if (loading) {
-    if (variant) {
-      return <PrototypeAuthLayout variant={variant} title="Reset your password" description="Verifying your reset link…" footer={footer}><div /></PrototypeAuthLayout>
-    }
-    return <AuthCard title="Reset your password" description="Verifying your reset link…" footer={footer}><div /></AuthCard>
+    return (
+      <AuthLayout
+        title="Reset your password"
+        description="Verifying your reset link…"
+        footer={footer}
+      >
+        <div />
+      </AuthLayout>
+    )
   }
 
   if (invalid) {
-    const invalidContent = (
-      <p className="text-center text-sm text-muted-foreground">
-        This password reset link is no longer valid. Request a new one to continue.
-      </p>
-    )
-    if (variant) {
-      return (
-        <PrototypeAuthLayout
-          variant={variant}
-          title="Link invalid or expired"
-          description="This password reset link is no longer valid. Request a new one to continue."
-          footer={
-            <Link href="/forgot-password" className="font-medium text-primary hover:underline">
-              Request a new link
-            </Link>
-          }
-        >
-          {invalidContent}
-        </PrototypeAuthLayout>
-      )
-    }
     return (
-      <AuthCard
+      <AuthLayout
         title="Link invalid or expired"
         description="This password reset link is no longer valid. Request a new one to continue."
-        footer={
-          <Link href="/forgot-password" className="font-medium text-primary hover:underline">
-            Request a new link
-          </Link>
-        }
+        footer={<Link href="/forgot-password" className="font-medium text-primary hover:underline">Request a new link</Link>}
       >
-        {invalidContent}
-      </AuthCard>
-    )
-  }
-
-  if (variant) {
-    return (
-      <PrototypeAuthLayout
-        variant={variant}
-        title="Choose a new password"
-        description="Enter a new password for your account."
-        footer={footer}
-      >
-        {form}
-      </PrototypeAuthLayout>
+        <p className="text-center text-sm text-muted-foreground">
+          This password reset link is no longer valid. Request a new one to continue.
+        </p>
+      </AuthLayout>
     )
   }
 
   return (
-    <AuthCard
+    <AuthLayout
       title="Choose a new password"
       description="Enter a new password for your account."
       footer={footer}
     >
-      {form}
-    </AuthCard>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="password">New password</Label>
+          <PasswordInput id="password" autoComplete="new-password" aria-invalid={!!errors.password} {...register("password")} />
+          {errors.password ? <p className="text-sm text-destructive">{errors.password.message}</p> : null}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="confirmPassword">Confirm new password</Label>
+          <PasswordInput id="confirmPassword" autoComplete="new-password" aria-invalid={!!errors.confirmPassword} {...register("confirmPassword")} />
+          {errors.confirmPassword ? <p className="text-sm text-destructive">{errors.confirmPassword.message}</p> : null}
+        </div>
+
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+
+        <Button type="submit" disabled={isSubmitting} className="mt-2 h-11">
+          {isSubmitting ? "Saving…" : "Set new password"}
+        </Button>
+      </form>
+    </AuthLayout>
   )
 }

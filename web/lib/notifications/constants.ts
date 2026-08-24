@@ -10,16 +10,26 @@
 export const NOTIFICATION_TYPES = [
   "offer_received",
   "offer_accepted",
+  "offer_declined",
+  "offer_countered",
+  "offer_counter_accepted",
+  "offer_counter_declined",
   "review_received",
   "report_resolved",
+  "business_lead",
 ] as const
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number]
 
 export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   offer_received: "New offer",
   offer_accepted: "Offer accepted",
+  offer_declined: "Offer declined",
+  offer_countered: "Counter-offer received",
+  offer_counter_accepted: "Counter accepted",
+  offer_counter_declined: "Counter declined",
   review_received: "New review",
   report_resolved: "Report reviewed",
+  business_lead: "Business lead",
 }
 
 // The inbox page cap and the client poll interval (config.toml realtime is
@@ -42,10 +52,19 @@ export function notificationHref(
     case "offer_received":
       return "/offers/seller"
     case "offer_accepted":
+    case "offer_counter_accepted":
+      return "/offers"
+    case "offer_declined":
+    case "offer_countered":
+    case "offer_counter_declined":
       return "/offers"
     case "review_received":
       return "/offers"
     case "report_resolved":
+      return null
+    case "business_lead":
+      return "/admin"
+    default:
       return null
   }
 }

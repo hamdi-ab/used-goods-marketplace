@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import Link from "next/link"
@@ -8,8 +8,9 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 
 import { createClient } from "@/lib/supabase/client"
-import { AuthCard } from "@/components/auth/auth-card"
-import { PrototypeAuthLayout } from "@/components/home/prototype/prototype-auth-layout"
+import { AuthLayout } from "@/components/auth/auth-layout"
+import { AuthDivider } from "@/components/auth/auth-divider"
+import { GoogleButton } from "@/components/auth/google-button"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -29,7 +30,7 @@ const registerSchema = z
 
 type RegisterValues = z.infer<typeof registerSchema>
 
-export function RegisterForm({ variant }: { variant?: "A" | "B" }) {
+export function RegisterForm() {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [sent, setSent] = useState(false)
@@ -62,7 +63,6 @@ export function RegisterForm({ variant }: { variant?: "A" | "B" }) {
     }
 
     if (!data.session) {
-      // Email confirmation is enabled on hosted projects.
       setSent(true)
       return
     }
@@ -72,131 +72,60 @@ export function RegisterForm({ variant }: { variant?: "A" | "B" }) {
   }
 
   if (sent) {
-    const sentCard = (
-      <p className="text-center text-sm text-muted-foreground">
-        The link is valid for a limited time. No email yet? Check your spam folder.
-      </p>
-    )
-    const sentFooter = (
-      <Link href="/login" className="font-medium text-primary hover:underline">
-        Back to login
-      </Link>
-    )
-    if (variant) {
-      return (
-        <PrototypeAuthLayout
-          variant={variant}
-          title="Check your email"
-          description="We sent you a confirmation link. Follow it to activate your account before logging in."
-          footer={sentFooter}
-        >
-          {sentCard}
-        </PrototypeAuthLayout>
-      )
-    }
     return (
-      <AuthCard
+      <AuthLayout
         title="Check your email"
         description="We sent you a confirmation link. Follow it to activate your account before logging in."
-        footer={sentFooter}
+        footer={<Link href="/login" className="font-medium text-primary hover:underline">Back to login</Link>}
       >
-        {sentCard}
-      </AuthCard>
-    )
-  }
-
-  const form = (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="fullName">Full name</Label>
-        <Input
-          id="fullName"
-          autoComplete="name"
-          aria-invalid={!!errors.fullName}
-          {...register("fullName")}
-        />
-        {errors.fullName ? (
-          <p className="text-sm text-destructive">{errors.fullName.message}</p>
-        ) : null}
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          autoComplete="email"
-          aria-invalid={!!errors.email}
-          {...register("email")}
-        />
-        {errors.email ? (
-          <p className="text-sm text-destructive">{errors.email.message}</p>
-        ) : null}
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="password">Password</Label>
-        <PasswordInput
-          id="password"
-          autoComplete="new-password"
-          aria-invalid={!!errors.password}
-          {...register("password")}
-        />
-        {errors.password ? (
-          <p className="text-sm text-destructive">{errors.password.message}</p>
-        ) : null}
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="confirmPassword">Confirm password</Label>
-        <PasswordInput
-          id="confirmPassword"
-          autoComplete="new-password"
-          aria-invalid={!!errors.confirmPassword}
-          {...register("confirmPassword")}
-        />
-        {errors.confirmPassword ? (
-          <p className="text-sm text-destructive">{errors.confirmPassword.message}</p>
-        ) : null}
-      </div>
-
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
-
-      <Button type="submit" disabled={isSubmitting} className="mt-2">
-        {isSubmitting ? "Creating account…" : "Create account"}
-      </Button>
-    </form>
-  )
-
-  const footer = (
-    <>
-      Already have an account?{" "}
-      <Link href="/login" className="font-medium text-primary hover:underline">
-        Log in
-      </Link>
-    </>
-  )
-
-  if (variant) {
-    return (
-      <PrototypeAuthLayout
-        variant={variant}
-        title="Join VinTech Marketplace"
-        description="Buy and sell used goods with total confidence — verified local buyers, safe meetups."
-        footer={footer}
-      >
-        {form}
-      </PrototypeAuthLayout>
+        <p className="text-center text-sm text-muted-foreground">
+          The link is valid for a limited time. No email yet? Check your spam folder.
+        </p>
+      </AuthLayout>
     )
   }
 
   return (
-    <AuthCard
-      title="Create your account"
-      description="Join VinTech Marketplace to buy and sell used goods."
-      footer={footer}
+    <AuthLayout
+      title="Join Dagim Gebeya"
+      description="Create an account to buy and sell second-hand goods."
+      footer={<>Already have an account? <Link href="/login" className="font-medium text-primary hover:underline">Log in</Link></>}
     >
-      {form}
-    </AuthCard>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="fullName">Full name</Label>
+          <Input id="fullName" autoComplete="name" aria-invalid={!!errors.fullName} {...register("fullName")} />
+          {errors.fullName ? <p className="text-sm text-destructive">{errors.fullName.message}</p> : null}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" type="email" autoComplete="email" aria-invalid={!!errors.email} {...register("email")} />
+          {errors.email ? <p className="text-sm text-destructive">{errors.email.message}</p> : null}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="password">Password</Label>
+          <PasswordInput id="password" autoComplete="new-password" aria-invalid={!!errors.password} {...register("password")} />
+          {errors.password ? <p className="text-sm text-destructive">{errors.password.message}</p> : null}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="confirmPassword">Confirm password</Label>
+          <PasswordInput id="confirmPassword" autoComplete="new-password" aria-invalid={!!errors.confirmPassword} {...register("confirmPassword")} />
+          {errors.confirmPassword ? <p className="text-sm text-destructive">{errors.confirmPassword.message}</p> : null}
+        </div>
+
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+
+        <Button type="submit" disabled={isSubmitting} className="mt-2 h-11">
+          {isSubmitting ? "Creating account…" : "Create account"}
+        </Button>
+
+        <AuthDivider />
+
+        <GoogleButton>Sign up with Google</GoogleButton>
+      </form>
+    </AuthLayout>
   )
 }

@@ -5,7 +5,7 @@ import Link from "next/link"
 import { SendIcon } from "lucide-react"
 
 import { requireUser } from "@/lib/auth"
-import { fetchBuyerOffers } from "@/lib/offers"
+import { fetchBuyerOffers, fetchOfferEvents } from "@/lib/offers"
 import { verifyOfferPayment } from "@/lib/payments"
 import { formatPrice } from "@/lib/listings"
 import { nextOffset, parseOffset } from "@/lib/pagination"
@@ -13,37 +13,24 @@ import { formatShortDate } from "@/lib/utils"
 import { OfferStatusBadge } from "@/components/offers/offer-status-badge"
 import { BuyerOfferActions } from "@/components/offers/buyer-offer-actions"
 import { BuyerPayment } from "@/components/offers/buyer-payment"
+import { OfferHistory } from "@/components/offers/offer-history"
 import { ReviewForm } from "@/components/reviews/review-form"
 import { ReviewStars } from "@/components/reviews/review-stars"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { PrototypeOffersPage } from "@/components/offers/prototype-offers-page"
-import type { VariantKey } from "@/components/search/prototype-utils"
 
 export const dynamic = "force-dynamic"
 
 export const metadata: Metadata = {
   title: "My offers",
-  description: "Offers you have made on the VinTech Marketplace.",
+  description: "Offers you have made on Dagim Gebeya.",
 }
-
-const VARIANT_KEYS = ["A", "B"] as const
-type VariantKeyList = (typeof VARIANT_KEYS)[number]
 
 export default async function OffersPage({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  const { variant } = await searchParams
-  const key = VARIANT_KEYS.includes(variant as VariantKeyList)
-    ? (variant as VariantKey)
-    : null
-
-  if (key) {
-    return <PrototypeOffersPage variant={key} searchParams={searchParams} />
-  }
-
   const user = await requireUser()
   const params = await searchParams
   const offset = parseOffset(params.offset)
@@ -52,12 +39,13 @@ export default async function OffersPage({
     offset,
   })
 
-  // #97 — the buyer returns here from Chapa's hosted checkout with the tx_ref
-  // in the URL. The /payments/callback route already verified server-side, so
-  // by the time we render the row is terminal (paid/failed): banner from the
-  // embedded row, no second Chapa call (coding standard §20). The verify below
-  // only runs as the resume fallback when the callback was skipped (direct hit
-  // on a return URL with a still-pending payment).
+  const offersWithEvents = await Promise.all(
+    offers.map(async (offer) => ({
+      offer,
+      events: await fetchOfferEvents(offer.id),
+    }))
+  )
+
   let verifyResult: { ok: true; amount: number } | { ok: false; error: string } | null = null
   if (typeof params.tx_ref === "string" && typeof params.offer === "string") {
     const row = offers.find((o) => o.id === params.offer)?.payment
@@ -79,23 +67,34 @@ export default async function OffersPage({
   let body: ReactNode
   if (error) {
     body = (
-      <p className="py-8 text-sm text-muted-foreground">
-        Could not load offers. Try again.
-      </p>
+      <div className="flex flex-col items-center rounded-2xl border border-[#2563EB]/30 bg-[#EEF4FF] px-4 py-20 text-center">
+        <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-white">
+          <SendIcon className="size-6 text-[#2563EB]" />
+        </div>
+        <h2 className="font-heading text-lg font-semibold">
+          Something went wrong
+        </h2>
+        <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+          We could not load your offers right now. Try again.
+        </p>
+        <Button asChild className="mt-4 h-11">
+          <Link href="/offers">Retry</Link>
+        </Button>
+      </div>
     )
   } else if (offers.length === 0) {
     body = (
-      <div className="flex flex-col items-center py-16 text-center">
-        <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-muted">
-          <SendIcon className="size-6 text-muted-foreground" />
+      <div className="flex flex-col items-center rounded-2xl border border-[#2563EB]/30 bg-[#EEF4FF] px-4 py-20 text-center">
+        <div className="mb-4 flex size-14 items-center justify-center rounded-full bg-white">
+          <SendIcon className="size-6 text-[#2563EB]" />
         </div>
         <h2 className="font-heading text-lg font-semibold">No offers yet</h2>
         <p className="mt-1 max-w-sm text-sm text-muted-foreground">
           When you make an offer on a listing it shows up here, where you can
           see whether the seller accepted, declined, or countered it.
         </p>
-        <Button asChild size="sm" className="mt-4">
-          <Link href="/">Browse listings</Link>
+        <Button asChild size="lg" className="mt-4 h-11">
+          <Link href="/search">Browse listings</Link>
         </Button>
       </div>
     )
@@ -104,7 +103,7 @@ export default async function OffersPage({
       <>
         {verifyResult ? (
           verifyResult.ok ? (
-            <div className="mb-6 rounded-md border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+            <div className="mb-6 rounded-xl border border-green-200 bg-green-50 p-4 text-sm text-green-800">
               <p className="font-medium">
                 Payment received —{" "}
                 {formatPrice(verifyResult.amount, { maxFractionDigits: 2 })}
@@ -114,7 +113,7 @@ export default async function OffersPage({
               </p>
             </div>
           ) : (
-            <div className="mb-6 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
               <p className="font-medium">Payment not completed</p>
               <p className="mt-1">
                 {verifyResult.error} You can try the payment again on the offer
@@ -125,7 +124,7 @@ export default async function OffersPage({
         ) : null}
 
         <ul className="flex flex-col gap-4">
-          {offers.map((offer) => (
+          {offersWithEvents.map(({ offer, events }) => (
             <li key={offer.id}>
               <Card>
                 <CardContent className="p-4">
@@ -180,6 +179,12 @@ export default async function OffersPage({
 
                     <OfferStatusBadge status={offer.status} />
                   </div>
+
+                  {events.length > 0 ? (
+                    <div className="mt-4 border-t pt-3">
+                      <OfferHistory events={events} />
+                    </div>
+                  ) : null}
 
                   {offer.status === "countered" ? (
                     <div className="mt-4 border-t pt-3">

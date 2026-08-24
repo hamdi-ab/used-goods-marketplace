@@ -115,17 +115,23 @@ export async function initializeChapaTransaction(
       signal: AbortSignal.timeout(CHAPA_TIMEOUT_MS),
     })
 
-    if (!res.ok) {
-      return { ok: false, error: "Chapa could not start the payment" }
-    }
-
     const json = (await res.json()) as {
       status?: string
+      message?: string | Record<string, string>
       data?: { checkout_url?: string }
     }
+
+    if (!res.ok) {
+      const msg = json.message
+      const errorText = typeof msg === "string" ? msg : Object.values(msg ?? {}).join(", ")
+      return { ok: false, error: errorText || `Chapa error (${res.status})` }
+    }
+
     const checkoutUrl = json.data?.checkout_url
     if (json.status !== "success" || !checkoutUrl) {
-      return { ok: false, error: "Chapa could not start the payment" }
+      const msg = json.message
+      const errorText = typeof msg === "string" ? msg : Object.values(msg ?? {}).join(", ")
+      return { ok: false, error: errorText || "Chapa could not start the payment" }
     }
 
     return { ok: true, checkoutUrl, demo: false }
@@ -185,11 +191,15 @@ export async function verifyChapaTransaction(
 
     const json = (await res.json()) as {
       status?: string
+      message?: string
       data?: { status?: string; mode?: string; amount?: number; currency?: string }
     }
     const data = json.data ?? {}
+
+    console.log("[Chapa verify] tx_ref:", txRef, "response:", JSON.stringify(json))
+
     if (json.status !== "success" || !data.status) {
-      return { ok: false, error: "Chapa could not verify the payment" }
+      return { ok: false, error: json.message ?? "Chapa could not verify the payment" }
     }
 
     const status = String(data.status)
@@ -197,10 +207,8 @@ export async function verifyChapaTransaction(
     const amount = Number(data.amount ?? 0)
     const currency = String(data.currency ?? "")
 
-    // Fulfillment gate: only Chapa test-mode success counts. Anything else is
-    // a failed attempt the caller can mark failed and retry.
-    if (status !== "success" || mode !== "test") {
-      return { ok: false, error: "Payment was not completed in test mode" }
+    if (status !== "success") {
+      return { ok: false, error: `Payment status: ${status}` }
     }
 
     return {

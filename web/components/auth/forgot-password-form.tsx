@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
 import Link from "next/link"
@@ -7,8 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 
 import { createClient } from "@/lib/supabase/client"
-import { AuthCard } from "@/components/auth/auth-card"
-import { PrototypeAuthLayout } from "@/components/home/prototype/prototype-auth-layout"
+import { AuthLayout } from "@/components/auth/auth-layout"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -19,7 +18,7 @@ const forgotPasswordSchema = z.object({
 
 type ForgotPasswordValues = z.infer<typeof forgotPasswordSchema>
 
-export function ForgotPasswordForm({ variant }: { variant?: "A" | "B" }) {
+export function ForgotPasswordForm() {
   const [error, setError] = useState<string | null>(null)
   const [sent, setSent] = useState(false)
 
@@ -48,88 +47,41 @@ export function ForgotPasswordForm({ variant }: { variant?: "A" | "B" }) {
     setSent(true)
   }
 
-  const form = (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="email">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          autoComplete="email"
-          aria-invalid={!!errors.email}
-          {...register("email")}
-        />
-        {errors.email ? (
-          <p className="text-sm text-destructive">{errors.email.message}</p>
-        ) : null}
-      </div>
-
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
-
-      <Button type="submit" disabled={isSubmitting} className="mt-2">
-        {isSubmitting ? "Sending link…" : "Send reset link"}
-      </Button>
-    </form>
-  )
-
-  const footer = (
-    <>
-      Remembered it?{" "}
-      <Link href="/login" className="font-medium text-primary hover:underline">
-        Log in
-      </Link>
-    </>
-  )
+  const footer = <>Remembered it? <Link href="/login" className="font-medium text-primary hover:underline">Log in</Link></>
 
   if (sent) {
-    const sentContent = (
-      <p className="text-center text-sm text-muted-foreground">
-        The link expires shortly. No email yet? Check your spam folder.
-      </p>
-    )
-    if (variant) {
-      return (
-        <PrototypeAuthLayout
-          variant={variant}
-          title="Check your email"
-          description="If an account exists for that address, we sent you a password reset link."
-          footer={footer}
-        >
-          {sentContent}
-        </PrototypeAuthLayout>
-      )
-    }
     return (
-      <AuthCard
+      <AuthLayout
         title="Check your email"
         description="If an account exists for that address, we sent you a password reset link."
         footer={footer}
       >
-        {sentContent}
-      </AuthCard>
-    )
-  }
-
-  if (variant) {
-    return (
-      <PrototypeAuthLayout
-        variant={variant}
-        title="Reset your password"
-        description="Enter the email on your account and we will send you a reset link."
-        footer={footer}
-      >
-        {form}
-      </PrototypeAuthLayout>
+        <p className="text-center text-sm text-muted-foreground">
+          The link expires shortly. No email yet? Check your spam folder.
+        </p>
+      </AuthLayout>
     )
   }
 
   return (
-    <AuthCard
+    <AuthLayout
       title="Reset your password"
       description="Enter the email on your account and we will send you a reset link."
       footer={footer}
     >
-      {form}
-    </AuthCard>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="email">Email</Label>
+          <Input id="email" type="email" autoComplete="email" aria-invalid={!!errors.email} {...register("email")} />
+          {errors.email ? <p className="text-sm text-destructive">{errors.email.message}</p> : null}
+        </div>
+
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+
+        <Button type="submit" disabled={isSubmitting} className="mt-2 h-11">
+          {isSubmitting ? "Sending link…" : "Send reset link"}
+        </Button>
+      </form>
+    </AuthLayout>
   )
 }

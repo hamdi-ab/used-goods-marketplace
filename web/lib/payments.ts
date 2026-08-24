@@ -68,6 +68,10 @@ export async function payOffer(offerId: string): Promise<PayOfferResult> {
 
   const txRef = chapaTxRef()
   const money = etb(offer.amount)
+
+  if (!user.email) {
+    return { ok: false, error: "Your account needs an email address to make payments" }
+  }
   const begin = await callOutcomeRpc(supabase, "begin_payment", {
     p_offer_id: offerId,
     p_tx_ref: txRef,
@@ -85,7 +89,7 @@ export async function payOffer(offerId: string): Promise<PayOfferResult> {
     email: user.email,
     firstName: user.fullName,
     returnUrl: await paymentReturnUrl(offerId, txRef),
-    title: "VinTech Marketplace",
+    title: "Dagim Gebeya",
     description: "Payment for your marketplace purchase",
   })
 

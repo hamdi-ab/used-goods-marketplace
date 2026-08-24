@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import Link from "next/link"
 import { BellIcon } from "lucide-react"
@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button"
  * Header bell with an unread-count badge (fix #72). Hosts the useNotifications
  * hook so toasts fire wherever the header is mounted. Admins are
  * moderation-only (ADR-020) and don't trade, so the bell stays trader-side.
- * `tone` adapts the badge/icon for dark (blue) headers; `href` lets prototype
+ * `tone` adapts the badge/icon for dark (blue) headers; `href` lets 
  * headers carry the variant query string.
  */
 export function NotificationBell({

@@ -115,7 +115,7 @@ export async function offerAction(
       ? await acceptOfferRow(parsed.data.offerId)
       : parsed.data.action === "decline"
         ? await declineOfferRow(parsed.data.offerId)
-        : await counterOfferRow(parsed.data.offerId, parsed.data.amount as number)
+        : await counterOfferRow(parsed.data.offerId, parsed.data.amount as number, formValue(formData, "message"))
 
   if (!result.ok) {
     return { message: result.error ?? "Could not update the offer" }

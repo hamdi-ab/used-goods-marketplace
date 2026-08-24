@@ -1,23 +1,18 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import {
-  BarChart3Icon,
   CheckCircle2Icon,
-  ChevronRightIcon,
-  ExternalLinkIcon,
   FlagIcon,
   ListIcon,
   PackageOpenIcon,
-  RotateCcwIcon,
   ShoppingBagIcon,
-  TrashIcon,
-  UserRoundXIcon,
   UsersIcon,
   VerifiedIcon,
 } from "lucide-react"
 
 import { fetchAdminReports } from "@/lib/reports"
 import { fetchMarketplaceStats } from "@/lib/admin"
+import { BusinessLeadsWidget } from "@/components/admin/business-leads-widget"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -167,6 +162,9 @@ export default async function AdminDashboardPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Business Leads Widget (from main) */}
+      <BusinessLeadsWidget />
     </div>
   )
 }

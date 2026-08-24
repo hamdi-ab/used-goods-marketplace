@@ -167,6 +167,7 @@ export function AiAssist({
             <Badge
               variant={isAtCap(credits.used, credits.limit) ? "default" : "secondary"}
               className="gap-1"
+              title="AI generations used this month. Quota resets monthly."
             >
               <SparklesIcon className="size-3" />
               <span className="text-xs">
@@ -174,6 +175,9 @@ export function AiAssist({
               </span>
             </Badge>
           ) : null}
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium text-amber-800">
+            Demo AI
+          </span>
           <Button
             type="button"
             variant="outline"

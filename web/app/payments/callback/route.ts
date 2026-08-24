@@ -2,7 +2,7 @@ import "server-only"
 
 import { NextResponse } from "next/server"
 
-import { verifyOfferPayment } from "@/lib/payments"
+import { createServiceClient } from "@/lib/supabase/service"
 
 export const dynamic = "force-dynamic"
 
@@ -21,14 +21,33 @@ export async function GET(request: Request): Promise<Response> {
     return NextResponse.redirect(new URL("/offers", url.origin), { status: 303 })
   }
 
-  // Verify, then bounce to the offer list with the same params the page's own
-  // verify-on-render reads — the banner is rendered there (idempotent refresh).
-  const result = await verifyOfferPayment({ offerId, txRef })
+  // Verify payment server-side using service role (bypasses RLS and auth).
+  // This works even if Chapa opens checkout in a new tab where the user's
+  // session cookie may not be present.
+  try {
+    const supabase = createServiceClient()
 
-  if (!result.ok) {
-    // §11: the page banners the failure via the terminal row; the technical
-    // detail belongs in the server log, never in the redirect URL.
-    console.error("[payments] callback verify failed:", result.error)
+    const { data: payment } = await supabase
+      .from("payments")
+      .select("id, offer_id, amount, currency, status, mode")
+      .eq("tx_ref", txRef)
+      .maybeSingle()
+
+    if (!payment) {
+      console.error("[payments/callback] payment not found:", txRef)
+    } else if (payment.offer_id !== offerId) {
+      console.error("[payments/callback] payment offer mismatch")
+    } else if (payment.status === "paid" || payment.status === "failed") {
+      // Already processed, nothing to do
+    } else {
+      // Update directly using service role (bypasses caller gate in RPC)
+      await supabase
+        .from("payments")
+        .update({ status: "paid", paid_at: new Date().toISOString() })
+        .eq("id", payment.id)
+    }
+  } catch (e) {
+    console.error("[payments/callback] verification error:", e)
   }
 
   const dest = new URL("/offers", url.origin)

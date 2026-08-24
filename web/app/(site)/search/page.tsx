@@ -6,14 +6,11 @@ import { fetchCategories, searchListings } from "@/lib/listings"
 import { buildSearchUrl, nextOffset, parseSearchParams } from "@/lib/search"
 import { ListingCard } from "@/components/listings/listing-card"
 import { SearchFilters } from "@/components/search/search-filters"
-// PROTOTYPE — browse-page redesign variants, gated by ?variant= (dev only).
-import { PrototypeBrowsePage } from "@/components/search/prototype-browse-page"
-import type { VariantKey } from "@/components/search/prototype-utils"
 
 export const metadata: Metadata = {
   title: "Search listings",
   description:
-    "Search and filter used goods listings on VinTech Marketplace by keyword, category, price, condition, and city.",
+    "Search and filter second-hand listings on Dagim Gebeya by keyword, category, price, condition, and city.",
 }
 
 function SearchIcon({ className }: { className?: string }) {
@@ -52,9 +49,6 @@ export default async function SearchPage({
   const sp = await searchParams
   const filters = parseSearchParams(sp)
 
-  const variant =
-    sp.variant === "A" || sp.variant === "B" ? (sp.variant as VariantKey) : null
-
   const categoriesPromise = fetchCategories()
   const { listings, count, hasMore, error } = await searchListings({
     q: filters.q || undefined,
@@ -69,27 +63,11 @@ export default async function SearchPage({
   })
   const categories = await categoriesPromise
 
-  // PROTOTYPE — when a variant is requested, render the redesigned browse page
-  // with the same data. The default (no ?variant=) keeps the current page.
-  if (variant) {
-    return (
-      <PrototypeBrowsePage
-        variant={variant}
-        categories={categories}
-        filters={filters}
-        listings={listings}
-        count={count}
-        hasMore={hasMore}
-        error={Boolean(error)}
-      />
-    )
-  }
-
   return (
     <main className="mx-auto w-full max-w-[1280px] px-4 py-10 sm:px-6 lg:py-12">
       <section className="mb-8">
         <h1 className="font-heading text-3xl font-semibold leading-tight tracking-tight text-foreground sm:text-4xl">
-          {filters.q ? `Results for “${filters.q}”` : "Browse listings"}
+          {filters.q ? `Results for "${filters.q}"` : "Browse listings"}
         </h1>
         <p className="mt-2 text-muted-foreground">
           {error

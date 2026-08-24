@@ -1,15 +1,18 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { HeartIcon, InboxIcon, HandshakeIcon, LayoutDashboardIcon, PlusIcon, ShieldIcon, UserRoundIcon } from "lucide-react"
+import { BellIcon, EyeIcon, HandshakeIcon, HeartIcon, InboxIcon, LayoutGridIcon, PlusIcon, ShieldCheckIcon, ShieldIcon, UserRoundIcon } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 
 import { requireUser, ROLE_LABELS } from "@/lib/auth"
 import { fetchSellerListings } from "@/lib/listings"
 import { fetchAccountUsage } from "@/lib/usage"
-import { countIncomingOffers } from "@/lib/offers"
+import { countIncomingOffers, fetchBuyerOffers } from "@/lib/offers"
+import { fetchFavoriteIds } from "@/lib/favorites"
+import { fetchUnreadNotificationsCount } from "@/lib/notifications"
+import { fetchOwnProfile } from "@/lib/profiles"
 import { nextOffset, parseOffset } from "@/lib/pagination"
 import { promoteToSeller } from "@/app/actions/profile"
 import { ListingManager } from "@/components/dashboard/listing-manager"
-import { PrototypeDashboardPage } from "@/components/dashboard/prototype-dashboard-page"
 import { AccountUsageCard } from "@/components/dashboard/account-usage-card"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,7 +20,16 @@ import { Badge } from "@/components/ui/badge"
 
 export const metadata: Metadata = {
   title: "Dashboard",
-  description: "Your VinTech Marketplace dashboard.",
+  description: "Your Dagim Gebeya dashboard.",
+}
+
+interface StatTile {
+  label: string
+  value: string | number
+  href?: string
+  icon: LucideIcon
+  accent: string
+  sub: string
 }
 
 export default async function DashboardPage({
@@ -25,31 +37,44 @@ export default async function DashboardPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  const { variant } = await searchParams
-  const key = variant === "A" || variant === "B" ? (variant as "A" | "B") : null
-
-  // PROTOTYPE - the redesign variant is view-only during review and bypasses
-  // the auth redirect (see proxy.ts) so ?variant=A|B renders without a session.
-  if (key) {
-    return <PrototypeDashboardPage variant={key} />
-  }
-
+  const sp = await searchParams
   const user = await requireUser()
-  // The seller home only makes sense for users who can sell; buyers land on the
-  // profile gate instead of a dead-end /sell redirect (issue #13 AC5).
   const canSell = user.role === "seller" || user.role === "admin"
-  const offset = parseOffset((await searchParams).offset)
+  const offset = parseOffset(sp.offset)
 
-  const [openOfferCount, sellerUsage, sellerListings] = await Promise.all([
-    countIncomingOffers(user.id),
-    canSell ? fetchAccountUsage(user.id) : Promise.resolve(null),
-    canSell
-      ? fetchSellerListings(user.id, { offset })
-      : Promise.resolve(null),
-  ])
+  const [openOfferCount, sellerUsage, sellerListings, favorites, buyerOffers, unread, profile] =
+    await Promise.all([
+      countIncomingOffers(user.id),
+      canSell ? fetchAccountUsage(user.id) : Promise.resolve(null),
+      canSell ? fetchSellerListings(user.id, { offset }) : Promise.resolve(null),
+      fetchFavoriteIds(user.id),
+      canSell ? Promise.resolve(null) : fetchBuyerOffers(user.id, { limit: 1 }),
+      fetchUnreadNotificationsCount(user.id),
+      fetchOwnProfile(user.id),
+    ])
   const listings = sellerListings?.listings ?? []
-
   const firstName = user.fullName?.split(" ")[0] ?? "there"
+  const liveListings = listings.filter((l) => l.status === "published").length
+  const totalViews = listings.reduce((sum, l) => sum + (l.view_count ?? 0), 0)
+  const trustScore = profile?.trust_score ?? 50
+  const trustWord = trustScore >= 70 ? "High" : trustScore >= 40 ? "Fair" : "Low"
+  const myOffersCount = buyerOffers?.count ?? 0
+
+  const sellerStats: StatTile[] = [
+    { label: "Live listings", value: liveListings, href: "#listings", icon: LayoutGridIcon, accent: "text-[#2563EB]", sub: liveListings === 0 ? "Nothing live yet" : "Published & live" },
+    { label: "Total views", value: totalViews, href: "#listings", icon: EyeIcon, accent: "text-[#2563EB]", sub: "Across your listings" },
+    { label: "Open offers", value: openOfferCount, href: "/offers/seller", icon: InboxIcon, accent: "text-[#2563EB]", sub: openOfferCount === 0 ? "You're all caught up" : "Awaiting your reply" },
+    { label: "Notifications", value: unread, href: "/notifications", icon: BellIcon, accent: "text-[#2563EB]", sub: unread === 0 ? "You're all caught up" : "New activity to review" },
+    { label: "Trust score", value: `${trustScore} / 100`, icon: ShieldCheckIcon, accent: trustScore >= 70 ? "text-emerald-600" : trustScore >= 40 ? "text-amber-600" : "text-slate-500", sub: trustWord },
+  ]
+
+  const buyerStats: StatTile[] = [
+    { label: "Favorites", value: favorites.length, href: "/favorites", icon: HeartIcon, accent: "text-rose-500", sub: "Saved listings" },
+    { label: "My offers", value: myOffersCount, href: "/offers", icon: HandshakeIcon, accent: "text-[#2563EB]", sub: "Track the offers you've made" },
+    { label: "Trust score", value: `${trustScore} / 100`, icon: ShieldCheckIcon, accent: trustScore >= 70 ? "text-emerald-600" : trustScore >= 40 ? "text-amber-600" : "text-slate-500", sub: trustWord },
+  ]
+
+  const stats = canSell ? sellerStats : buyerStats
 
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6 lg:px-8 min-h-[60vh]">
@@ -59,13 +84,34 @@ export default async function DashboardPage({
           Welcome back, {firstName}
         </h1>
         <p className="mt-2 max-w-xl text-muted-foreground">
-          Manage your marketplace activity from here — track offers and
-          favorites, and keep on top of your listings.
+          Manage your marketplace activity from here.
         </p>
       </div>
 
+      <section className="mb-10">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          {stats.map((s) => {
+            const Inner = (
+              <div className="rounded-xl border bg-card p-4 transition-shadow hover:shadow-md">
+                <div className="flex items-center gap-2">
+                  <s.icon className={`size-4 ${s.accent}`} />
+                  <span className="text-xs font-medium text-muted-foreground">{s.label}</span>
+                </div>
+                <p className={`mt-2 font-heading text-xl font-bold ${s.accent}`}>{s.value}</p>
+                <p className="mt-1 text-xs text-muted-foreground">{s.sub}</p>
+              </div>
+            )
+            return s.href ? (
+              <Link key={s.label} href={s.href} className="block">{Inner}</Link>
+            ) : (
+              <div key={s.label}>{Inner}</div>
+            )
+          })}
+        </div>
+      </section>
+
       {canSell ? (
-        <section className="mb-10">
+        <section id="listings" className="mb-10">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="font-heading text-xl font-semibold">Your listings</h2>
@@ -108,9 +154,6 @@ export default async function DashboardPage({
                 offers will live here.
               </p>
             </div>
-            {/* Become-a-seller CTA (fix #71): one click promotes the buyer to
-                seller via the idempotent RPC; the dashboard re-renders with the
-                seller view on success. */}
             <form action={promoteToSeller}>
               <Button type="submit" variant="outline">
                 Start selling
@@ -121,42 +164,44 @@ export default async function DashboardPage({
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <InboxIcon className="size-5 text-primary" />
-              Incoming offers
-              {openOfferCount > 0 ? (
-                <Badge variant="secondary">{openOfferCount} open</Badge>
-              ) : null}
-            </CardTitle>
-            <CardDescription>
-              Accept, decline, or counter offers on your listings.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild variant="outline">
-              <Link href="/offers/seller">Manage offers</Link>
-            </Button>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <HandshakeIcon className="size-5 text-primary" />
-              My offers
-            </CardTitle>
-            <CardDescription>
-              Track the offers you have made and any counter-offers.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild variant="outline">
-              <Link href="/offers">View my offers</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        {canSell ? (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <InboxIcon className="size-5 text-primary" />
+                Incoming offers
+                {openOfferCount > 0 ? (
+                  <Badge variant="secondary">{openOfferCount} open</Badge>
+                ) : null}
+              </CardTitle>
+              <CardDescription>
+                Accept, decline, or counter offers on your listings.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild variant="outline">
+                <Link href="/offers/seller">Manage offers</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <HandshakeIcon className="size-5 text-primary" />
+                My offers
+              </CardTitle>
+              <CardDescription>
+                Track the offers you have made and any counter-offers.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild variant="outline">
+                <Link href="/offers">View my offers</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>
@@ -210,23 +255,6 @@ export default async function DashboardPage({
             </CardContent>
           </Card>
         ) : null}
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <LayoutDashboardIcon className="size-5 text-primary" />
-              Role
-            </CardTitle>
-            <CardDescription>
-              Your account role is <span className="font-medium text-foreground">{ROLE_LABELS[user.role] ?? user.role}</span>.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              New accounts start as buyers. Selling tools unlock when listings go live.
-            </p>
-          </CardContent>
-        </Card>
       </div>
     </main>
   )

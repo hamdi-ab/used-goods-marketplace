@@ -1,7 +1,7 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from "react"
 
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/home/header"
+import { SiteFooter } from "@/components/home/footer"
 
 export default function SiteLayout({ children }: { children: ReactNode }) {
   return (
@@ -10,5 +10,5 @@ export default function SiteLayout({ children }: { children: ReactNode }) {
       <div className="flex w-full flex-1 flex-col">{children}</div>
       <SiteFooter />
     </div>
-  );
+  )
 }

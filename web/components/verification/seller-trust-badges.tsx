@@ -5,10 +5,6 @@ import {
 } from "@/lib/verifications/constants"
 import { VerificationBadge } from "@/components/verification/verification-badge"
 
-// The verification badge row shown on every seller surface (listing cards,
-// seller profile, product page). Collapses to the "Not verified yet" empty
-// state when no badge is active — single source of truth for badge ordering
-// (sellerVerificationBadges), so this never forks between surfaces.
 export function SellerTrustBadges({
   seller,
 }: {

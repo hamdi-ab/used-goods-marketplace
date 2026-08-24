@@ -2,20 +2,17 @@ import { Suspense } from "react"
 
 import { TIER_LIMITS, TIER_LABELS, type Tier } from "@/lib/plans/constants"
 import { StartProForm } from "@/components/pricing/start-pro-form"
+import { BusinessLeadForm } from "@/components/pricing/business-lead-form"
 
 const TIERS_IN_ORDER: Tier[] = ["free", "pro", "business"]
 
 export const metadata = {
-  title: "VinTech pricing",
-  description: "VinTech marketplace plans. The core marketplace stays free; Pro adds capacity for frequent sellers.",
+  title: "Dagim Gebeya pricing",
+  description: "Dagim Gebeya marketplace plans. The core marketplace stays free; Pro adds capacity for frequent sellers.",
 }
 
-/** Tier-limit table columns that map 1:1 to a numeric TIER_LIMITS field. */
 type LimitFeature = "activeListings" | "imagesPerListing" | "aiGenerationsPerMonth"
 
-/** Format a tier limit for the pricing table. Null (uncapped AI) reads as
- * "Higher"; business active-listings/images render with the §36 hypothesis
- * suffix ("+"/">") while still reading the real constant from TIER_LIMITS. */
 function formatLimit(tier: Tier, kind: LimitFeature): string {
   const value = TIER_LIMITS[tier][kind]
   if (value === null) return "Higher"
@@ -24,130 +21,153 @@ function formatLimit(tier: Tier, kind: LimitFeature): string {
   return String(value)
 }
 
-/** Tier-limit table row: each column is formatted from TIER_LIMITS so the
- * numbers can't drift from the constants. */
-function LimitRow({ feature, kind }: { feature: string; kind: LimitFeature }) {
-  return (
-    <tr>
-      <td className="py-3 text-sm text-muted-foreground">{feature}</td>
-      <td className="py-3 text-sm">{formatLimit("free", kind)}</td>
-      <td className="py-3 text-sm font-medium text-primary">{formatLimit("pro", kind)}</td>
-      <td className="py-3 text-sm">{formatLimit("business", kind)}</td>
-    </tr>
-  )
-}
+const LIMIT_ROWS: { feature: string; kind: LimitFeature }[] = [
+  { feature: "Active listings", kind: "activeListings" },
+  { feature: "Images per listing", kind: "imagesPerListing" },
+  { feature: "AI generations / month", kind: "aiGenerationsPerMonth" },
+]
 
-/** Qualitative feature row (no corresponding TIER_LIMITS number). */
-function FeatureRow({ feature, free, pro, business }: {
-  feature: string
-  free: string
-  pro: string
-  business: string
+const FEATURE_ROWS: { feature: string; free: string; pro: string; business: string }[] = [
+  { feature: "Advanced analytics", free: "—", pro: "Included", business: "Included" },
+  { feature: "Price insights", free: "—", pro: "Included", business: "Included" },
+  { feature: "Business storefront", free: "—", pro: "—", business: "Included" },
+  { feature: "Listing boosts", free: "Add-on", pro: "Add-on", business: "Add-on" },
+]
+
+export default async function PricingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  return (
-    <tr>
-      <td className="py-3 text-sm text-muted-foreground">{feature}</td>
-      <td className="py-3 text-sm">{free}</td>
-      <td className="py-3 text-sm font-medium text-primary">{pro}</td>
-      <td className="py-3 text-sm">{business}</td>
-    </tr>
-  )
-}
+  const sp = await searchParams
+  const upgradeStatus = typeof sp.upgrade === "string" ? sp.upgrade : null
 
-export default function PricingPage() {
   return (
-    <main className="mx-auto flex w-full max-w-[1100px] flex-1 flex-col items-center px-4 py-12 sm:px-6 lg:px-8">
-      <header className="mb-10 text-center">
-        <h1 className="font-heading text-3xl font-semibold text-foreground">
-          Simple pricing, Addis-first
+    <main className="mx-auto w-full max-w-[1100px] flex-1 px-4 py-12 sm:px-6 lg:px-8">
+      <header className="mb-12 text-center">
+        <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-amber-100 px-3 py-1 text-xs font-medium text-amber-800">
+          <span className="size-1.5 rounded-full bg-amber-500" />
+          Demo mode — Chapa test transactions only
+        </div>
+        <h1 className="font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+          Simple pricing, free to start
         </h1>
-        <p className="mt-3 max-w-2xl text-balance text-sm text-muted-foreground">
-          The core marketplace is free for everyone. Pro adds capacity and
-          analytics for frequent sellers. Pricing is being validated — no
-          charges today.
+        <p className="mx-auto mt-3 max-w-2xl text-balance text-muted-foreground">
+          List and sell at no cost. Upgrade when you need more capacity, AI credits, and analytics.
         </p>
       </header>
 
-      <div className="w-full overflow-x-auto">
-        <table className="w-full border-collapse text-center">
-          <thead>
-            <tr>
-              {TIERS_IN_ORDER.map((t) => (
-                <th
-                  key={t}
-                  className={
-                    t === "pro"
-                        ? "border-b-2 border-primary px-4 py-3 text-sm font-semibold text-primary"
-                        : "border-b px-4 py-3 text-sm font-medium text-muted-foreground"
-                  }
-                >
+      <div className="grid gap-6 md:grid-cols-3">
+        {TIERS_IN_ORDER.map((t) => {
+          const isPro = t === "pro"
+          return (
+            <div
+              key={t}
+              className={[
+                "relative flex flex-col rounded-2xl border bg-card p-6",
+                isPro ? "border-primary shadow-lg ring-1 ring-primary/20" : "border-border",
+              ].join(" ")}
+            >
+              {isPro ? (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-xs font-medium text-primary-foreground">
+                  Most popular
+                </div>
+              ) : null}
+
+              <div className="mb-6">
+                <h2 className={["font-heading text-lg font-semibold", isPro ? "text-primary" : "text-foreground"].join(" ")}>
                   <Suspense fallback={t}>{TIER_LABELS[t]}</Suspense>
+                </h2>
+                <div className="mt-2">
                   {t === "pro" ? (
-                    <p className="mt-1 text-2xl font-bold text-foreground">
-                      199 ETB<span className="text-base font-medium text-muted-foreground">/mo</span>
+                    <p className="flex items-baseline gap-1">
+                      <span className="font-heading text-3xl font-bold text-foreground">199</span>
+                      <span className="text-sm text-muted-foreground">ETB / mo</span>
                     </p>
                   ) : t === "business" ? (
-                    <p className="mt-1 text-sm font-medium text-muted-foreground">Contact us</p>
+                    <p className="font-heading text-lg font-medium text-muted-foreground">Contact us</p>
                   ) : (
-                    <p className="mt-1 text-sm font-medium text-muted-foreground">Free</p>
+                    <p className="font-heading text-lg font-medium text-muted-foreground">Free</p>
                   )}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            <LimitRow feature="Active listings" kind="activeListings" />
-            <LimitRow feature="Images per listing" kind="imagesPerListing" />
-            <LimitRow feature="AI generations / month" kind="aiGenerationsPerMonth" />
-            <FeatureRow
-              feature="Advanced analytics"
-              free="—"
-              pro="Included"
-              business="Included"
-            />
-            <FeatureRow
-              feature="Price insights"
-              free="—"
-              pro="Included"
-              business="Included"
-            />
-            <FeatureRow
-              feature="Business storefront"
-              free="—"
-              pro="—"
-              business="Included"
-            />
-            <FeatureRow
-              feature="Listing boosts"
-              free="Add-on"
-              pro="Add-on"
-              business="Add-on"
-            />
-            <tr>
-              <td colSpan={4} className="py-4 text-left">
-                <span className="text-xs text-muted-foreground">
-                  Business tier and exact Pro pricing are hypotheses being
-                  validated against local usage — the cap shown here is the
-                  strategy §36 target (100+), not a promise.
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                </div>
+              </div>
+
+              <dl className="mb-6 flex-1 space-y-3">
+                {LIMIT_ROWS.map((row) => (
+                  <div key={row.feature} className="flex items-center justify-between text-sm">
+                    <dt className="text-muted-foreground">{row.feature}</dt>
+                    <dd className={["font-medium", isPro ? "text-primary" : "text-foreground"].join(" ")}>
+                      {formatLimit(t, row.kind)}
+                    </dd>
+                  </div>
+                ))}
+                {FEATURE_ROWS.map((row) => {
+                  const value = t === "free" ? row.free : t === "pro" ? row.pro : row.business
+                  return (
+                    <div key={row.feature} className="flex items-center justify-between text-sm">
+                      <dt className="text-muted-foreground">{row.feature}</dt>
+                      <dd className={["font-medium", isPro ? "text-primary" : "text-foreground"].join(" ")}>
+                        {value}
+                      </dd>
+                    </div>
+                  )
+                })}
+              </dl>
+
+              {t === "pro" ? (
+                <Suspense fallback={<div className="h-10" />}>
+                  <StartProForm />
+                </Suspense>
+              ) : t === "business" ? (
+                <Suspense fallback={<div className="h-10" />}>
+                  <BusinessLeadForm />
+                </Suspense>
+              ) : (
+                <a
+                  href="/sell"
+                  className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  Start for free
+                </a>
+              )}
+            </div>
+          )
+        })}
       </div>
 
-      <Suspense
-        fallback={
-          <p className="mt-8 text-sm text-muted-foreground">Pricing is loading…</p>
-        }
-      >
-        <StartProForm />
-      </Suspense>
+      {upgradeStatus === "ok" ? (
+        <div className="mt-8 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-center">
+          <p className="font-medium text-emerald-800">Upgrade complete — you are now on Pro!</p>
+          <p className="mt-1 text-sm text-emerald-600">
+            Your tier has been activated. Enjoy 25 listings, 30 AI credits, and analytics.
+          </p>
+        </div>
+      ) : upgradeStatus === "failed" ? (
+        <div className="mt-8 rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-center">
+          <p className="font-medium text-destructive">Upgrade could not be applied — please try again.</p>
+        </div>
+      ) : null}
 
-      <p className="mt-8 max-w-xl text-center text-xs text-muted-foreground">
-        No subscription is required to sell. Paid features only unlock more
-        capacity and tools; creating and selling stays free. We&apos;ll email you
-        when billing opens — no charges until then.
+      <div className="mt-12 space-y-4 rounded-2xl border bg-muted/50 p-6">
+        <h3 className="font-heading text-base font-semibold">Common questions</h3>
+        <div className="space-y-3 text-sm">
+          <div>
+            <p className="font-medium text-foreground">Do I need a subscription to sell?</p>
+            <p className="mt-1 text-muted-foreground">No. Listing, selling, and buying are always free. Pro only adds capacity and tools.</p>
+          </div>
+          <div>
+            <p className="font-medium text-foreground">Can I cancel Pro anytime?</p>
+            <p className="mt-1 text-muted-foreground">Yes. Cancel from your account settings — no lock-in, no questions.</p>
+          </div>
+          <div>
+            <p className="font-medium text-foreground">What payment methods do you accept?</p>
+            <p className="mt-1 text-muted-foreground">Payments are processed by Chapa. All major Ethiopian banks and mobile money are supported.</p>
+          </div>
+        </div>
+      </div>
+
+      <p className="mt-8 text-center text-xs text-muted-foreground">
+        Business tier pricing is custom. Contact us for storefront and multi-user features.
       </p>
     </main>
   )

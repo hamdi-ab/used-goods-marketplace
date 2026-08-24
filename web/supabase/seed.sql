@@ -373,6 +373,22 @@ begin
     on conflict (id) do nothing;
   end loop;
 
+  -- Free tier caps active (published) listings at 5 per seller. The demo
+  -- catalog is richer than that, so mark all but the first 5 published
+  -- listings per seller as sold — the catalog stays browsable on /search but
+  -- no seller sits above their free-tier cap on the dashboard.
+  with ranked as (
+    select id, seller_id,
+           row_number() over (partition by seller_id order by created_at, id) as rn
+    from public.listings
+    where seller_id in (seller_phone, seller_fayda, seller_plain)
+      and status = 'published'
+  )
+  update public.listings l
+    set status = 'sold', sold_to_buyer_id = a_buyer
+    from ranked r
+    where l.id = r.id and r.rn > 5;
+
   -- One stand-in image per demo listing that does not already have one
   -- (covers the T12 three listings and the ~67 above). Rows are numbered to
   -- rotate between a few local assets so cards look varied during the demo.
