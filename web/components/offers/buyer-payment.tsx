@@ -25,7 +25,7 @@ export function BuyerPayment({ offer }: { offer: BuyerOfferRow }) {
   useEffect(() => {
     if (payState.ok && payState.checkoutUrl && !redirected.current) {
       redirected.current = true
-      window.location.assign(payState.checkoutUrl)
+      window.open(payState.checkoutUrl, "_blank", "noopener,noreferrer")
     }
   }, [payState])
 
