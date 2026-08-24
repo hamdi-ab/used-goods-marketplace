@@ -30,6 +30,9 @@ const script = (
       select: () => b,
       eq: () => b,
       is: () => b,
+      ilike: () => b,
+      order: () => b,
+      range: () => b,
       update: (values: unknown) => {
         ;(updatesByTable[table] ??= []).push(values)
         return b
@@ -123,6 +126,8 @@ describe("admin read pages (P1.14 #81)", () => {
     const b: Record<string, unknown> = {
       select: () => b,
       is: () => b,
+      eq: () => b,
+      ilike: () => b,
       order: () => b,
       range: () => b,
       then: (resolve: (value: unknown) => unknown) =>
@@ -156,7 +161,7 @@ describe("admin read pages (P1.14 #81)", () => {
           count: 30,
         })
       )
-      const result = await fetchAdminUsers({}, client)
+      const result = await fetchAdminUsers({}, {}, client)
       expect(result.users[0].full_name).toBe("Alem")
       expect(result.count).toBe(30)
       expect(result.hasMore).toBe(true)
@@ -166,7 +171,7 @@ describe("admin read pages (P1.14 #81)", () => {
       const client = db(() =>
         builder({ data: null, error: { message: "db down" }, count: null })
       )
-      const result = await fetchAdminUsers({}, client)
+      const result = await fetchAdminUsers({}, {}, client)
       expect(result).toMatchObject({
         users: [],
         hasMore: false,
@@ -199,7 +204,7 @@ describe("admin read pages (P1.14 #81)", () => {
           count: 1,
         })
       )
-      const result = await fetchAdminListings({}, client)
+      const result = await fetchAdminListings({}, {}, client)
       expect(result.listings[0].title).toBe("Chair")
       expect(result.listings[0].price).toBe(100)
       expect(result.listings[0].seller?.full_name).toBe("Alem")
@@ -211,7 +216,7 @@ describe("admin read pages (P1.14 #81)", () => {
       const client = db(() =>
         builder({ data: null, error: { message: "db down" }, count: null })
       )
-      const result = await fetchAdminListings({}, client)
+      const result = await fetchAdminListings({}, {}, client)
       expect(result).toMatchObject({
         listings: [],
         hasMore: false,
