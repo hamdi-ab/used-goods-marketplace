@@ -16,7 +16,8 @@ export function heartClasses(active: boolean, className?: string): string {
   return cn(
     "inline-flex size-9 items-center justify-center rounded-full",
     "bg-white/90 text-slate-700 shadow-sm ring-1 ring-black/5",
-    "transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2",
+    "transition-all duration-200 ease-out hover:bg-white hover:scale-110 focus-visible:outline-2 focus-visible:outline-offset-2",
+    "active:scale-90",
     active && "text-primary",
     className
   )
@@ -78,7 +79,7 @@ export function FavoriteButton({
         aria-pressed={favorite}
         className={heartClasses(favorite, className)}
       >
-        <Heart className={cn("size-4", favorite && "fill-current")} />
+        <Heart className={cn("size-4 transition-transform duration-200", favorite && "fill-current scale-110")} />
       </button>
     </form>
   )

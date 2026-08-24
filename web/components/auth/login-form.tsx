@@ -73,9 +73,9 @@ export function LoginForm({ next }: { next?: string }) {
           {errors.password ? <p className="text-sm text-destructive">{errors.password.message}</p> : null}
         </div>
 
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        {error ? <p className="text-sm text-destructive shake">{error}</p> : null}
 
-        <Button type="submit" disabled={isSubmitting} className="mt-2 h-11">
+        <Button type="submit" disabled={isSubmitting} className="mt-2 h-11 press-feedback">
           {isSubmitting ? "Logging in…" : "Log in"}
         </Button>
 

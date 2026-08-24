@@ -116,9 +116,9 @@ export function RegisterForm() {
           {errors.confirmPassword ? <p className="text-sm text-destructive">{errors.confirmPassword.message}</p> : null}
         </div>
 
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        {error ? <p className="text-sm text-destructive shake">{error}</p> : null}
 
-        <Button type="submit" disabled={isSubmitting} className="mt-2 h-11">
+        <Button type="submit" disabled={isSubmitting} className="mt-2 h-11 press-feedback">
           {isSubmitting ? "Creating account…" : "Create account"}
         </Button>
 

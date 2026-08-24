@@ -92,7 +92,7 @@ export default async function DashboardPage({
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 min-[500px]:grid-cols-3">
           {stats.map((s) => {
             const Inner = (
-              <div className="rounded-xl border bg-card p-4 transition-shadow hover:shadow-md">
+              <div className="rounded-xl border bg-card p-4 hover-lift">
                 <div className="flex items-center gap-2">
                   <s.icon className={`size-4 ${s.accent}`} />
                   <span className="text-xs font-medium text-muted-foreground">{s.label}</span>
@@ -163,7 +163,7 @@ export default async function DashboardPage({
         </Card>
       )}
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 [&>div]:hover-lift">
         {canSell ? (
           <Card>
             <CardHeader>

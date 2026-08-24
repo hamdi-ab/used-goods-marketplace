@@ -43,7 +43,7 @@ export function ListingCard({
   const trustBadges = sellerVerificationBadges(seller)
 
   return (
-    <div className="group w-full overflow-hidden rounded-xl border bg-card transition-shadow duration-200 hover:shadow-lg">
+    <div className="group w-full overflow-hidden rounded-xl border bg-card hover-lift">
       <div className="relative">
         <Link href={href} aria-label={listing.title}>
           <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
@@ -53,7 +53,7 @@ export function ListingCard({
                 alt=""
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className={`object-cover transition-transform duration-200 group-hover:scale-105 ${
+                className={`object-cover transition-transform duration-300 ease-out group-hover:scale-105 ${
                   listing.status === "sold" ? "opacity-50" : ""
                 }`}
               />

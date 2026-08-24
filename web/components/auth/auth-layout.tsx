@@ -29,7 +29,7 @@ export function AuthLayout({
 }) {
   return (
     <main className="flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm fade-up">
         <div className="mx-auto mb-5 flex size-12 items-center justify-center rounded-2xl bg-[#2563EB] shadow-md shadow-[#2563EB]/30" aria-hidden="true">
           <MarketplaceLogo />
         </div>

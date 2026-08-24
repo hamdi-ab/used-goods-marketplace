@@ -277,7 +277,7 @@ export function NotificationList({
                           {!n.is_read ? (
                             <span
                               aria-hidden="true"
-                              className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full border-2 border-background bg-[#2563EB]"
+                              className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full border-2 border-background bg-[#2563EB] animate-pulse-dot"
                             />
                           ) : null}
                           {style.icon}
