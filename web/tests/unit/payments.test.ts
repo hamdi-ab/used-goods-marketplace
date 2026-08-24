@@ -17,6 +17,7 @@ import {
 function payment(overrides: Partial<OfferPayment> = {}): OfferPayment {
   return {
     id: "11111111-1111-4111-8111-111111111111",
+    tx_ref: null,
     amount: 500,
     currency: "ETB",
     status: "pending",
