@@ -195,6 +195,9 @@ export async function verifyChapaTransaction(
       data?: { status?: string; mode?: string; amount?: number; currency?: string }
     }
     const data = json.data ?? {}
+
+    console.log("[Chapa verify] tx_ref:", txRef, "response:", JSON.stringify(json))
+
     if (json.status !== "success" || !data.status) {
       return { ok: false, error: json.message ?? "Chapa could not verify the payment" }
     }
