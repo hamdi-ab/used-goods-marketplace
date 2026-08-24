@@ -17,8 +17,9 @@ export async function GET(request: Request): Promise<Response> {
   let txRef = url.searchParams.get("tx_ref")
   let offerId = url.searchParams.get("offer")
 
-  // Chapa redirects with HTML-encoded ampersands (&amp; instead of &), which
-  // breaks standard URL parsing. Fall back to regex extraction from raw URL.
+  // Chapa redirects with HTML-encoded ampersands (&amp; instead of &),
+  // sometimes further URL-encoded as &amp%3B. Standard URL parsing fails.
+  // Fall back to regex extraction from raw URL.
   if (!txRef || !offerId) {
     const rawUrl = request.url
     if (!txRef) {
@@ -26,8 +27,9 @@ export async function GET(request: Request): Promise<Response> {
       if (m) txRef = decodeURIComponent(m[1])
     }
     if (!offerId) {
-      const m = rawUrl.match(/[?&]offer=([^&]+)/)
-      if (m) offerId = decodeURIComponent(m[1])
+      // Match offer= followed by anything that looks like a UUID (36 chars)
+      const m = rawUrl.match(/[?&]amp(?:%3B|;)offer=([0-9a-f-]{36})/)
+      if (m) offerId = m[1]
     }
   }
 
@@ -52,17 +54,20 @@ export async function GET(request: Request): Promise<Response> {
 
   if (!payment) {
     console.error("[payments/callback] payment not found:", txRef)
-  } else if (payment.offer_id !== offerId) {
-    console.error("[payments/callback] payment offer mismatch")
   } else if (payment.status === "paid" || payment.status === "failed") {
     // Already processed, nothing to do
   } else {
-    // Update directly using service role (bypasses caller gate in RPC)
-    const { error: updateError } = await supabase
-      .from("payments")
-      .update({ status: "paid", paid_at: new Date().toISOString() })
-      .eq("id", payment.id)
-    console.log("[payments/callback] update result:", JSON.stringify(updateError))
+    // Update directly using service role (bypasses caller gate in RPC).
+    // If offerId is available, verify it matches; otherwise trust tx_ref (it's unique).
+    if (offerId && payment.offer_id !== offerId) {
+      console.error("[payments/callback] payment offer mismatch")
+    } else {
+      const { error: updateError } = await supabase
+        .from("payments")
+        .update({ status: "paid", paid_at: new Date().toISOString() })
+        .eq("id", payment.id)
+      console.log("[payments/callback] update result:", JSON.stringify(updateError))
+    }
   }
 
   const dest = new URL("/offers", url.origin)
