@@ -14,40 +14,55 @@ export const dynamic = "force-dynamic"
 // refreshed return URL), so a verification can never be lost to a dropped tab.
 export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url)
-  const txRef = url.searchParams.get("tx_ref")
-  const offerId = url.searchParams.get("offer")
+  let txRef = url.searchParams.get("tx_ref")
+  let offerId = url.searchParams.get("offer")
 
+  // Chapa redirects with HTML-encoded ampersands (&amp; instead of &), which
+  // breaks standard URL parsing. Fall back to regex extraction from raw URL.
   if (!txRef || !offerId) {
+    const rawUrl = request.url
+    if (!txRef) {
+      const m = rawUrl.match(/[?&]tx_ref=([^&]+)/)
+      if (m) txRef = decodeURIComponent(m[1])
+    }
+    if (!offerId) {
+      const m = rawUrl.match(/[?&]offer=([^&]+)/)
+      if (m) offerId = decodeURIComponent(m[1])
+    }
+  }
+
+  console.log("[payments/callback] HIT", { txRef, offerId, rawUrl: request.url })
+
+  if (!txRef) {
     return NextResponse.redirect(new URL("/offers", url.origin), { status: 303 })
   }
 
   // Verify payment server-side using service role (bypasses RLS and auth).
   // This works even if Chapa opens checkout in a new tab where the user's
   // session cookie may not be present.
-  try {
-    const supabase = createServiceClient()
+  const supabase = createServiceClient()
 
-    const { data: payment } = await supabase
+  const { data: payment, error: fetchError } = await supabase
+    .from("payments")
+    .select("id, offer_id, amount, currency, status, mode")
+    .eq("tx_ref", txRef)
+    .maybeSingle()
+
+  console.log("[payments/callback] payment:", JSON.stringify(payment), "fetchError:", JSON.stringify(fetchError))
+
+  if (!payment) {
+    console.error("[payments/callback] payment not found:", txRef)
+  } else if (payment.offer_id !== offerId) {
+    console.error("[payments/callback] payment offer mismatch")
+  } else if (payment.status === "paid" || payment.status === "failed") {
+    // Already processed, nothing to do
+  } else {
+    // Update directly using service role (bypasses caller gate in RPC)
+    const { error: updateError } = await supabase
       .from("payments")
-      .select("id, offer_id, amount, currency, status, mode")
-      .eq("tx_ref", txRef)
-      .maybeSingle()
-
-    if (!payment) {
-      console.error("[payments/callback] payment not found:", txRef)
-    } else if (payment.offer_id !== offerId) {
-      console.error("[payments/callback] payment offer mismatch")
-    } else if (payment.status === "paid" || payment.status === "failed") {
-      // Already processed, nothing to do
-    } else {
-      // Update directly using service role (bypasses caller gate in RPC)
-      await supabase
-        .from("payments")
-        .update({ status: "paid", paid_at: new Date().toISOString() })
-        .eq("id", payment.id)
-    }
-  } catch (e) {
-    console.error("[payments/callback] verification error:", e)
+      .update({ status: "paid", paid_at: new Date().toISOString() })
+      .eq("id", payment.id)
+    console.log("[payments/callback] update result:", JSON.stringify(updateError))
   }
 
   const dest = new URL("/offers", url.origin)
