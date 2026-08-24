@@ -191,11 +191,12 @@ export async function verifyChapaTransaction(
 
     const json = (await res.json()) as {
       status?: string
+      message?: string
       data?: { status?: string; mode?: string; amount?: number; currency?: string }
     }
     const data = json.data ?? {}
     if (json.status !== "success" || !data.status) {
-      return { ok: false, error: "Chapa could not verify the payment" }
+      return { ok: false, error: json.message ?? "Chapa could not verify the payment" }
     }
 
     const status = String(data.status)
@@ -203,10 +204,8 @@ export async function verifyChapaTransaction(
     const amount = Number(data.amount ?? 0)
     const currency = String(data.currency ?? "")
 
-    // Fulfillment gate: only Chapa test-mode success counts. Anything else is
-    // a failed attempt the caller can mark failed and retry.
-    if (status !== "success" || mode !== "test") {
-      return { ok: false, error: "Payment was not completed in test mode" }
+    if (status !== "success") {
+      return { ok: false, error: `Payment status: ${status}` }
     }
 
     return {
