@@ -80,9 +80,9 @@ export function BuyerPayment({ offer }: { offer: BuyerOfferRow }) {
           </div>
         ) : null}
 
-        {showReceipt ? (
+        {showReceipt && txRef ? (
           <ReceiptModal
-            txRef={txRef ?? ""}
+            txRef={txRef}
             amount={amount}
             paidAt={paidAt}
             listingTitle={offer.listing?.title}

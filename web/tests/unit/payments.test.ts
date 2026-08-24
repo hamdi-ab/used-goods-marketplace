@@ -17,6 +17,7 @@ import {
 function payment(overrides: Partial<OfferPayment> = {}): OfferPayment {
   return {
     id: "11111111-1111-4111-8111-111111111111",
+    tx_ref: null,
     amount: 500,
     currency: "ETB",
     status: "pending",
@@ -111,10 +112,10 @@ describe("chapa.verifyChapaTransaction (demo fallback)", () => {
     })
     expect(result.ok).toBe(true)
     if (result.ok) {
-      expect(result.status).toBe("success")
-      expect(result.mode).toBe("test")
-      expect(result.amount).toBe(500)
-      expect(result.currency).toBe("ETB")
+      expect(result.receipt.status).toBe("success")
+      expect(result.receipt.mode).toBe("test")
+      expect(result.receipt.amount).toBe(500)
+      expect(result.receipt.currency).toBe("ETB")
       expect(result.demo).toBe(true)
     }
   })

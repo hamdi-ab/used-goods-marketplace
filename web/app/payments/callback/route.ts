@@ -71,7 +71,7 @@ export async function GET(request: Request): Promise<Response> {
   }
 
   const dest = new URL("/offers", url.origin)
-  dest.searchParams.set("offer", offerId)
+  if (offerId) dest.searchParams.set("offer", offerId)
   dest.searchParams.set("tx_ref", txRef)
   return NextResponse.redirect(dest, { status: 303 })
 }
