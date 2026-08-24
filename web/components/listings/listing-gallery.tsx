@@ -104,10 +104,10 @@ export function ListingGallery({
                   onClick={() => setActive(i)}
                   aria-label={`View image ${i + 1} of ${images.length}`}
                   aria-current={i === active ? "true" : undefined}
-                  className={`relative aspect-[4/3] w-20 shrink-0 cursor-pointer overflow-hidden rounded-lg border-2 bg-muted ring-offset-2 transition-all ${
+                  className={`relative aspect-[4/3] w-20 shrink-0 cursor-pointer overflow-hidden rounded-lg border-2 bg-muted ring-offset-2 transition-all duration-200 ease-out ${
                     i === active
-                      ? "border-[#2563EB] opacity-100"
-                      : "border-transparent opacity-60 hover:opacity-100"
+                      ? "border-[#2563EB] opacity-100 scale-105"
+                      : "border-transparent opacity-60 hover:opacity-100 hover:-translate-y-0.5 hover:shadow-md"
                   }`}
                 >
                   <Image

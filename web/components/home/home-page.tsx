@@ -38,25 +38,25 @@ export function HomePage({ categories, listings, favoriteIds }: HomePageProps) {
           <div className="absolute inset-0 bg-gradient-to-r from-[#2563EB] via-[#3B82F6]/85 to-transparent" />
         </div>
         <div className="relative z-10 px-6 py-16 sm:px-10 sm:py-24 lg:max-w-3xl">
-          <p className="text-xs font-semibold uppercase tracking-widest text-white/90">
+          <p className="text-xs font-semibold uppercase tracking-widest text-white/90 fade-up" style={{ animationDelay: '0.1s' }}>
             Addis Ababa &middot; second-hand, reimagined
           </p>
-          <h1 className="mt-4 font-heading text-4xl font-bold leading-tight tracking-tight sm:text-6xl">
+          <h1 className="mt-4 font-heading text-4xl font-bold leading-tight tracking-tight sm:text-6xl fade-up" style={{ animationDelay: '0.2s' }}>
             Beautiful second-hand. Total peace of mind.
           </h1>
-          <p className="mt-5 max-w-xl text-lg text-white/80">
+          <p className="mt-5 max-w-xl text-lg text-white/80 fade-up" style={{ animationDelay: '0.3s' }}>
             A curated marketplace where every seller is verified, every
             transaction is local, and every item has a story worth keeping.
           </p>
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg">
+          <div className="mt-9 flex flex-col gap-3 sm:flex-row fade-up" style={{ animationDelay: '0.4s' }}>
+            <Button asChild size="lg" className="press-feedback">
               <Link href="/search">Explore listings</Link>
             </Button>
             <Button
               asChild
               size="lg"
               variant="outline"
-              className="border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
+              className="border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white press-feedback"
             >
               <Link href="/sell">Start selling</Link>
             </Button>
@@ -64,10 +64,10 @@ export function HomePage({ categories, listings, favoriteIds }: HomePageProps) {
         </div>
       </section>
 
-      <section aria-label="Marketplace metrics" className="border-b px-6 pb-10 pt-8 sm:px-10">
+      <section aria-label="Marketplace metrics" className="border-b px-6 pb-10 pt-8 sm:px-10 overflow-hidden">
         <div className="flex flex-col gap-6 sm:flex-row sm:justify-between sm:gap-10">
           {METRICS.map((m) => (
-            <div key={m.label} className="flex items-start gap-3">
+            <div key={m.label} className="flex items-start gap-3 fade-up" style={{ animationDelay: `${0.1 * (METRICS.indexOf(m) + 1)}s` }}>
               <m.icon className="mt-1 size-5 text-primary" />
               <div>
                 <p className="font-heading text-2xl font-bold">{m.value}</p>
@@ -251,14 +251,14 @@ export function HomePage({ categories, listings, favoriteIds }: HomePageProps) {
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90">
+            <Button asChild size="lg" className="bg-white text-primary hover:bg-white/90 press-feedback">
               <Link href="/sell">Start selling</Link>
             </Button>
             <Button
               asChild
               size="lg"
               variant="outline"
-              className="border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white"
+              className="border-white/40 bg-transparent text-white hover:bg-white/10 hover:text-white press-feedback"
             >
               <Link href="/search">Browse listings</Link>
             </Button>

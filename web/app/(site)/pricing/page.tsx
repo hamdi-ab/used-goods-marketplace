@@ -64,8 +64,8 @@ export default async function PricingPage({
             <div
               key={t}
               className={[
-                "relative flex flex-col rounded-2xl border bg-card p-6",
-                isPro ? "border-primary shadow-lg ring-1 ring-primary/20" : "border-border",
+                "relative flex flex-col rounded-2xl border bg-card p-6 transition-all duration-200 ease-out",
+                isPro ? "border-primary shadow-lg ring-1 ring-primary/20 hover:shadow-xl hover:-translate-y-2" : "border-border hover:shadow-lg hover:-translate-y-2 hover:border-primary",
               ].join(" ")}
             >
               {isPro ? (

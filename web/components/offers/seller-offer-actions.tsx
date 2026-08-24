@@ -78,7 +78,7 @@ export function SellerOfferActions({ offer }: { offer: SellerOfferRow }) {
       <input type="hidden" name="listingId" value={offer.listing_id} />
 
       {countering ? (
-        <div className="flex flex-wrap items-end gap-2">
+        <div className="flex flex-wrap items-end gap-2 fade-up">
           <div className="grid min-w-36 flex-1 gap-1.5">
             <Label htmlFor={`counter-${offer.id}`} className="text-xs">
               Counter amount
@@ -112,7 +112,7 @@ export function SellerOfferActions({ offer }: { offer: SellerOfferRow }) {
             name="action"
             value="counter"
             disabled={pending}
-            className="h-11"
+            className="h-11 press-feedback"
           >
             Send counter
           </Button>
@@ -132,7 +132,7 @@ export function SellerOfferActions({ offer }: { offer: SellerOfferRow }) {
             name="action"
             value="accept"
             disabled={pending}
-            className="h-11"
+            className="h-11 press-feedback"
           >
             Accept
           </Button>
@@ -140,7 +140,7 @@ export function SellerOfferActions({ offer }: { offer: SellerOfferRow }) {
             type="button"
             variant="outline"
             onClick={() => setCountering(true)}
-            className="h-11"
+            className="h-11 press-feedback"
           >
             Counter
           </Button>
@@ -150,7 +150,7 @@ export function SellerOfferActions({ offer }: { offer: SellerOfferRow }) {
             value="decline"
             variant="ghost"
             disabled={pending}
-            className="h-11"
+            className="h-11 press-feedback"
           >
             Decline
           </Button>
