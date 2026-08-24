@@ -115,17 +115,19 @@ export async function initializeChapaTransaction(
       signal: AbortSignal.timeout(CHAPA_TIMEOUT_MS),
     })
 
-    if (!res.ok) {
-      return { ok: false, error: "Chapa could not start the payment" }
-    }
-
     const json = (await res.json()) as {
       status?: string
+      message?: string
       data?: { checkout_url?: string }
     }
+
+    if (!res.ok) {
+      return { ok: false, error: json.message ?? `Chapa error (${res.status})` }
+    }
+
     const checkoutUrl = json.data?.checkout_url
     if (json.status !== "success" || !checkoutUrl) {
-      return { ok: false, error: "Chapa could not start the payment" }
+      return { ok: false, error: json.message ?? "Chapa could not start the payment" }
     }
 
     return { ok: true, checkoutUrl, demo: false }
