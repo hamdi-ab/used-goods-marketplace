@@ -117,17 +117,21 @@ export async function initializeChapaTransaction(
 
     const json = (await res.json()) as {
       status?: string
-      message?: string
+      message?: string | Record<string, string>
       data?: { checkout_url?: string }
     }
 
     if (!res.ok) {
-      return { ok: false, error: json.message ?? `Chapa error (${res.status})` }
+      const msg = json.message
+      const errorText = typeof msg === "string" ? msg : Object.values(msg ?? {}).join(", ")
+      return { ok: false, error: errorText || `Chapa error (${res.status})` }
     }
 
     const checkoutUrl = json.data?.checkout_url
     if (json.status !== "success" || !checkoutUrl) {
-      return { ok: false, error: json.message ?? "Chapa could not start the payment" }
+      const msg = json.message
+      const errorText = typeof msg === "string" ? msg : Object.values(msg ?? {}).join(", ")
+      return { ok: false, error: errorText || "Chapa could not start the payment" }
     }
 
     return { ok: true, checkoutUrl, demo: false }
