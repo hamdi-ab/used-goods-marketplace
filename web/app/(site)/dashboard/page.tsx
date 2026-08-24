@@ -89,7 +89,7 @@ export default async function DashboardPage({
       </div>
 
       <section className="mb-10">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 min-[500px]:grid-cols-3">
           {stats.map((s) => {
             const Inner = (
               <div className="rounded-xl border bg-card p-4 transition-shadow hover:shadow-md">
