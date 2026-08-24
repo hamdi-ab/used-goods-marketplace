@@ -12,12 +12,13 @@ export default function GlobalError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
-  const [online, setOnline] = useState(true)
+  const [online, setOnline] = useState(() =>
+    typeof navigator !== "undefined" ? navigator.onLine : true,
+  )
 
   useEffect(() => {
     const handleOnline = () => setOnline(true)
     const handleOffline = () => setOnline(false)
-    setOnline(navigator.onLine)
     window.addEventListener("online", handleOnline)
     window.addEventListener("offline", handleOffline)
     return () => {
