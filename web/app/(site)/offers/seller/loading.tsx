@@ -1,10 +1,10 @@
 export default function SellerOffersLoading() {
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6 lg:px-8">
+    <main className="mx-auto w-full max-w-[960px] flex-1 px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-8 h-7 w-48 animate-pulse rounded bg-muted" />
       <div className="flex flex-col gap-4 animate-pulse">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="h-40 rounded-lg border bg-background">
+          <div key={i} className="h-40 rounded-2xl border bg-background">
             <div className="flex items-start gap-3 p-4">
               <div className="size-10 shrink-0 rounded-full bg-muted" />
               <div className="flex-1 space-y-2">
