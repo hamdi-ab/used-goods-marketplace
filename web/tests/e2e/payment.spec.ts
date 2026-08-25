@@ -54,7 +54,7 @@ test.describe("payment system", () => {
     await page.goto("/admin/disputes")
 
     await expect(page.getByRole("heading", { name: "Disputes", exact: true })).toBeVisible()
-    await expect(page.getByText(/No open disputes|Disputes opened by buyers/)).toBeVisible()
+    await expect(page.getByText(/No open disputes/)).toBeVisible()
   })
 
   test("admin sidebar has disputes link", async ({ page }) => {
