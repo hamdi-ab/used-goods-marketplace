@@ -64,7 +64,7 @@ export function EarningsCard({ earnings, withdrawals, compact = false }: Earning
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Pending</p>
-            <p className="font-semibold text-blue-600">{formatPrice(earnings.pendingClearance, { maxFractionDigits: 0 })}</p>
+            <p className="font-semibold text-blue-600">{formatPrice(earnings.pendingClearance + earnings.pendingWithdrawals, { maxFractionDigits: 0 })}</p>
           </div>
         </div>
       ) : (
@@ -96,6 +96,16 @@ export function EarningsCard({ earnings, withdrawals, compact = false }: Earning
                 Pending (awaiting confirmation)
               </span>
               <span className="text-foreground">{formatPrice(earnings.pendingClearance, { maxFractionDigits: 2 })}</span>
+            </div>
+          ) : null}
+
+          {earnings.pendingWithdrawals > 0 ? (
+            <div className="flex items-center justify-between text-sm">
+              <span className="flex items-center gap-2 text-muted-foreground">
+                <ClockIcon className="size-4" />
+                Pending withdrawals
+              </span>
+              <span className="text-amber-600">-{formatPrice(earnings.pendingWithdrawals, { maxFractionDigits: 2 })}</span>
             </div>
           ) : null}
 

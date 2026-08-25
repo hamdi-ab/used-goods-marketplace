@@ -264,6 +264,7 @@ export interface SellerEarnings {
   availableForWithdrawal: number
   pendingClearance: number
   onHold: number
+  pendingWithdrawals: number
 }
 
 // Server-side earnings calculation for use in dashboard/offers pages.
@@ -301,7 +302,32 @@ export async function fetchSellerEarnings(userId: string): Promise<SellerEarning
     }
   }
 
-  return { totalSales, platformFees, netEarnings, availableForWithdrawal, pendingClearance, onHold }
+  // Subtract pending and processing withdrawals from available balance.
+  // Industry standard (Stripe, PayPal): when a payout is initiated, the
+  // amount is immediately reserved/frozen — it cannot be withdrawn again
+  // until the payout settles (completed) or fails (returns to available).
+  const { data: pendingWithdrawals } = await supabase
+    .from("withdrawals")
+    .select("amount")
+    .eq("seller_id", userId)
+    .in("status", ["pending", "processing"])
+
+  const pendingWithdrawalTotal = (pendingWithdrawals ?? []).reduce(
+    (sum, w) => sum + Number(w.amount),
+    0
+  )
+
+  availableForWithdrawal = Math.max(0, availableForWithdrawal - pendingWithdrawalTotal)
+
+  return {
+    totalSales,
+    platformFees,
+    netEarnings,
+    availableForWithdrawal,
+    pendingClearance,
+    onHold,
+    pendingWithdrawals: pendingWithdrawalTotal,
+  }
 }
 
 export interface WithdrawalRow {
