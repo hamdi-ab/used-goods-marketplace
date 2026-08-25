@@ -58,7 +58,8 @@ export async function completeProfile(
   }
 
   revalidatePath("/profile")
-  redirect("/profile")
+  revalidatePath("/sell")
+  redirect(formData.get("redirectTo") === "sell" ? "/sell" : "/profile")
 }
 
 const editProfileSchema = z.object({

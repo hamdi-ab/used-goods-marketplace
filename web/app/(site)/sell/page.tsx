@@ -1,9 +1,10 @@
 import type { Metadata } from "next"
 
-import { requireSeller } from "@/lib/auth"
+import { requireUser } from "@/lib/auth"
 import { fetchCategories } from "@/lib/listings"
 import { fetchAccountUsage } from "@/lib/usage"
 import { CreateListingForm } from "@/components/listings/create-listing-form"
+import { SellerOnboardingCard } from "@/components/listings/seller-onboarding-card"
 
 export const metadata: Metadata = {
   title: "Sell an item",
@@ -11,9 +12,27 @@ export const metadata: Metadata = {
 }
 
 export default async function SellPage() {
-  const seller = await requireSeller()
+  const user = await requireUser()
+
+  // Buyer or incomplete seller → show onboarding card first
+  const needsOnboarding = user.role === "buyer" || (user.role === "seller" && !user.profileCompleted)
+
+  if (needsOnboarding) {
+    return (
+      <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8 min-h-[60vh]">
+        <h1 className="font-heading text-2xl font-semibold text-foreground">
+          Start selling
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Tell us a little about you to start listing items.
+        </p>
+        <SellerOnboardingCard fullName={user.fullName} />
+      </main>
+    )
+  }
+
   const categories = await fetchCategories()
-  const usage = await fetchAccountUsage(seller.id)
+  const usage = await fetchAccountUsage(user.id)
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8 min-h-[60vh]">
