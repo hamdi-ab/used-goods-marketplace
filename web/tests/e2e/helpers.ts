@@ -11,8 +11,9 @@ export const USERS = {
 
 export async function loginAs(page: Page, email: string, password: string) {
   await page.goto("/login")
-  await page.getByLabel("Email").fill(email)
-  await page.getByLabel("Password", { exact: true }).fill(password)
+  await page.waitForLoadState("domcontentloaded")
+  await page.getByLabel("Email").fill(email, { timeout: 30_000 })
+  await page.getByLabel("Password", { exact: true }).fill(password, { timeout: 30_000 })
   await page.getByRole("button", { name: "Log in" }).click()
   // Logged in when the avatar menu appears in the header. Dev-mode first
   // compile of the redirect target is slow, so allow generous time.
