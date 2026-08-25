@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 
-import { USERS, loginAs } from "./helpers"
+import { USERS, loginAs, signOut } from "./helpers"
 
 // Payment system E2E: withdrawal, disputes, abandonment, hold period.
 // Uses demo mode (CHAPA_DEMO_FALLBACK=true) for deterministic payment simulation.
@@ -49,6 +49,7 @@ test.describe("payment system", () => {
   })
 
   test("admin can access disputes page", async ({ page }) => {
+    await signOut(page)
     await loginAs(page, USERS.admin.email, USERS.admin.password)
     await page.goto("/admin/disputes")
 
@@ -57,6 +58,7 @@ test.describe("payment system", () => {
   })
 
   test("admin sidebar has disputes link", async ({ page }) => {
+    await signOut(page)
     await loginAs(page, USERS.admin.email, USERS.admin.password)
     await page.goto("/admin")
 
@@ -64,6 +66,7 @@ test.describe("payment system", () => {
   })
 
   test("buyer can open dispute on paid offer", async ({ page }) => {
+    await signOut(page)
     await loginAs(page, USERS.buyer.email, USERS.buyer.password)
     await page.goto("/offers")
 
@@ -90,6 +93,7 @@ test.describe("payment system", () => {
   })
 
   test("dispute form validates required fields", async ({ page }) => {
+    await signOut(page)
     await loginAs(page, USERS.buyer.email, USERS.buyer.password)
     await page.goto("/offers")
 
@@ -144,8 +148,12 @@ test.describe("payment system", () => {
 })
 
 test.describe("payment flow (demo mode)", () => {
-  test("buyer can initiate payment for accepted offer", async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
+    await signOut(page)
     await loginAs(page, USERS.buyer.email, USERS.buyer.password)
+  })
+
+  test("buyer can initiate payment for accepted offer", async ({ page }) => {
     await page.goto("/offers")
 
     // Find accepted offer with pay button
@@ -159,7 +167,6 @@ test.describe("payment flow (demo mode)", () => {
   })
 
   test("buyer can confirm receipt on paid offer", async ({ page }) => {
-    await loginAs(page, USERS.buyer.email, USERS.buyer.password)
     await page.goto("/offers")
 
     // Find paid offer with confirm button
