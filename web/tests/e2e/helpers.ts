@@ -6,14 +6,13 @@ export const USERS = {
   seller: { email: "amira.sellers@vintch.local", password: "demo1234" },
   sellerFayda: { email: "fayad.verified@vintch.local", password: "demo1234" },
   sellerPlain: { email: "kebede.trader@vintch.local", password: "demo1234" },
-  buyer: { email: "biniam.buyer@vintch.local", password: "demo1234" },
+  buyer: { email: "test@gmail.com", password: "demo1234" },
 } as const
 
 export async function loginAs(page: Page, email: string, password: string) {
   await page.goto("/login")
-  await page.waitForLoadState("domcontentloaded")
-  await page.getByLabel("Email").fill(email, { timeout: 30_000 })
-  await page.getByLabel("Password", { exact: true }).fill(password, { timeout: 30_000 })
+  await page.getByLabel("Email").fill(email)
+  await page.getByLabel("Password", { exact: true }).fill(password)
   await page.getByRole("button", { name: "Log in" }).click()
   // Logged in when the avatar menu appears in the header. Dev-mode first
   // compile of the redirect target is slow, so allow generous time.

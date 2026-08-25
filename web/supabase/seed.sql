@@ -109,10 +109,10 @@ begin
      'kebede.trader@vintch.local', demo_password, now(),
      jsonb_build_object('provider', 'email', 'providers', array['email']),
      jsonb_build_object('full_name', 'Kebede Trader'), '', '', '', '', now(), now()),
-    ('00000000-0000-4000-8000-000000000000', a_buyer, 'authenticated', 'authenticated',
-     'biniam.buyer@vintch.local', demo_password, now(),
-     jsonb_build_object('provider', 'email', 'providers', array['email']),
-     jsonb_build_object('full_name', 'Biniam Buyer'), '', '', '', '', now(), now())
+     ('00000000-0000-4000-8000-000000000000', a_buyer, 'authenticated', 'authenticated',
+      'test@gmail.com', demo_password, now(),
+      jsonb_build_object('provider', 'email', 'providers', array['email']),
+      jsonb_build_object('full_name', 'Biniam Buyer'), '', '', '', '', now(), now())
   on conflict (id) do nothing;
 
   -- identity rows (idempotent by user_id).
@@ -125,7 +125,7 @@ begin
       (seller_phone, 'amira.sellers@vintch.local'),
       (seller_fayda, 'fayad.verified@vintch.local'),
       (seller_plain, 'kebede.trader@vintch.local'),
-      (a_buyer, 'biniam.buyer@vintch.local')
+      (a_buyer, 'test@gmail.com')
   ) as s(id, email)
   where not exists (select 1 from auth.identities where user_id = s.id);
 
@@ -150,7 +150,7 @@ begin
   where id = seller_plain;
 
   update public.profiles set
-    role = 'buyer', full_name = 'Biniam Buyer', city = 'Addis Ababa',
+    role = 'buyer', full_name = 'Biniam Buyer', city = 'Addis Ababa', email = 'test@gmail.com',
     phone_verified = false, fayda_verified = false, trust_score = 50
   where id = a_buyer;
 
