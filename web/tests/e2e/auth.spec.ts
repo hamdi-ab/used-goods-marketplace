@@ -9,14 +9,20 @@ const PASSWORD = "demo1234"
 // survived. This test drives the real flow in a real browser and asserts the
 // UI flips to logged-out WITHOUT a page reload — the exact behavior that broke.
 test.describe("auth flow", () => {
-  test("seller with incomplete profile redirects to onboarding", async ({ page }) => {
+  test("seller with incomplete profile redirects to onboarding when selling", async ({ page }) => {
     await page.goto("/login")
     await page.getByLabel("Email").fill(SELLER_EMAIL)
     await page.getByLabel("Password", { exact: true }).fill(PASSWORD)
     await page.getByRole("button", { name: "Log in" }).click()
 
-    // Seller with incomplete profile → /onboarding
-    await expect(page).toHaveURL("/onboarding", { timeout: 30_000 })
+    // Seller login → home (onboarding only when selling)
+    await expect(page).toHaveURL("/", { timeout: 30_000 })
+
+    // Navigate to sell → should see onboarding card
+    await page.goto("/sell")
+    await expect(page.getByText("Start selling")).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByLabel("Full name *")).toBeVisible()
+    await expect(page.getByLabel("City *")).toBeVisible()
   })
 
   test("buyer skips onboarding and lands on home", async ({ page }) => {
@@ -27,6 +33,19 @@ test.describe("auth flow", () => {
 
     // Buyer → home (onboarding is seller-only)
     await expect(page).toHaveURL("/", { timeout: 30_000 })
+  })
+
+  test("buyer sees onboarding card when selling", async ({ page }) => {
+    await page.goto("/login")
+    await page.getByLabel("Email").fill(BUYER_EMAIL)
+    await page.getByLabel("Password", { exact: true }).fill(PASSWORD)
+    await page.getByRole("button", { name: "Log in" }).click()
+
+    await expect(page).toHaveURL("/", { timeout: 30_000 })
+
+    // Navigate to sell → should see onboarding card
+    await page.goto("/sell")
+    await expect(page.getByText("Start selling")).toBeVisible({ timeout: 30_000 })
   })
 
   test("login and sign out round-trips through the header menu", async ({ page }) => {

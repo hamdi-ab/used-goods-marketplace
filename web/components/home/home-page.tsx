@@ -29,13 +29,13 @@ export function HomePage({ categories, listings, favoriteIds }: HomePageProps) {
       <section className="relative mt-6 overflow-hidden rounded-3xl bg-[#3B82F6] text-white sm:mt-10">
         <div className="absolute inset-0">
           <Image
-            src="/images/photos/photo-modern-apartment.png"
+            src="/images/photos/photo-hero-section.png"
             alt=""
             fill
             sizes="100vw"
             className="object-cover opacity-25"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#2563EB] via-[#3B82F6]/85 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#2563EB]/85 via-[#3B82F6]/70 to-transparent" />
         </div>
         <div className="relative z-10 px-6 py-16 sm:px-10 sm:py-24 lg:max-w-3xl">
           <p className="text-xs font-semibold uppercase tracking-widest text-white/90 fade-up" style={{ animationDelay: '0.1s' }}>
@@ -170,8 +170,8 @@ export function HomePage({ categories, listings, favoriteIds }: HomePageProps) {
         </div>
         <div className="relative aspect-[4/3] overflow-hidden rounded-2xl border shadow-sm">
           <Image
-            src="/images/photos/photo-seller-taking-photos.png"
-            alt="A seller photographing an item for their listing"
+            src="/images/illustrations/trust-ai-listing.png"
+            alt="AI listing assistant generating a listing from a phone photo"
             fill
             sizes="(max-width: 1024px) 100vw, 50vw"
             className="object-cover"
