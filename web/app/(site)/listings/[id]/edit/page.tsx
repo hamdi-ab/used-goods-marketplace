@@ -4,6 +4,7 @@ import Link from "next/link"
 import { requireSeller } from "@/lib/auth"
 import { fetchCategories, fetchListing } from "@/lib/listings"
 import { EditListingForm } from "@/components/listings/edit-listing-form"
+import { Breadcrumbs } from "@/components/ui/breadcrumbs"
 
 export const dynamic = "force-dynamic"
 
@@ -21,6 +22,15 @@ export default async function EditListingPage({
   const categories = await fetchCategories()
   return (
     <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
+      <Breadcrumbs
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Browse", href: "/search" },
+          { label: data.listing.title, href: `/listings/${data.listing.id}` },
+          { label: "Edit" },
+        ]}
+      />
+
       <div className="mb-2 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="font-heading text-2xl font-semibold text-foreground">

@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
 import { HandshakeIcon, HeartIcon, HomeIcon, LayoutGridIcon, MenuIcon, SearchIcon, XIcon } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import Image from "next/image"
+import DagimLogo from "@/components/brand/dagim-logo"
 
 import { cn } from "@/lib/utils"
 import { siteName } from "@/lib/nav"
@@ -46,13 +46,7 @@ export function SiteHeader() {
           className="flex shrink-0 items-center gap-2 rounded-md font-heading text-lg font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/60"
         >
           <span className="flex size-8 items-center justify-center rounded-lg bg-white p-1">
-            <Image
-              src="/images/logo/logo-mark.png"
-              alt=""
-              width={24}
-              height={24}
-              className="size-6"
-            />
+            <DagimLogo width={24} height={24} />
           </span>
           <span className="hidden sm:inline">{siteName}</span>
         </Link>

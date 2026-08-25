@@ -19,6 +19,7 @@ import { ConditionChip } from "@/components/listings/condition-chip"
 import { MakeOfferButton } from "@/components/offers/make-offer-button"
 import { ContactButton } from "@/components/contact/contact-button"
 import { ReportButton } from "@/components/reports/report-button"
+import { Breadcrumbs } from "@/components/ui/breadcrumbs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -70,14 +71,13 @@ export default async function ListingPage({
     <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6 lg:px-8 min-h-[60vh]">
       <ListingViewTracker listingId={l.id} />
 
-      <div className="mb-6">
-        <Link
-          href="/search"
-          className="inline-flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
-          ← Back to listings
-        </Link>
-      </div>
+      <Breadcrumbs
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Browse", href: "/search" },
+          { label: l.title },
+        ]}
+      />
 
       <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-12">
         <div className="order-2 lg:order-1 lg:col-span-7">

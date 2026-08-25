@@ -401,12 +401,7 @@ begin
   )
   insert into public.listing_images (listing_id, image_url, display_order, alt_text)
   select id,
-         (array[
-           '/images/illustrations/trust-safe-transactions.svg',
-           '/images/photos/photo-modern-apartment.svg',
-           '/images/photos/photo-seller-taking-photos.svg',
-           '/images/photos/photo-buyer-meeting-seller.svg'
-         ])[1 + mod(rn - 1, 4)],
+         '/images/photos/photo-hero-section.png',
          0,
          coalesce(title, 'Demo listing image')
   from ranked;

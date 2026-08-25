@@ -13,6 +13,7 @@ import {
   FlagIcon,
   AlertTriangleIcon,
   BanknoteIcon,
+  UserPlusIcon,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -52,6 +53,7 @@ const sections: NavSection[] = [
     items: [
       { title: "Users", href: "/admin/users", icon: UsersIcon, badge: 0 },
       { title: "Listings", href: "/admin/listings", icon: PackageIcon, badge: 0 },
+      { title: "Business Leads", href: "/admin/business-leads", icon: UserPlusIcon, badge: 0 },
     ],
   },
 ]

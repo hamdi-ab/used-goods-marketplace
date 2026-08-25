@@ -1,0 +1,54 @@
+import React from "react";
+
+interface DagimLogoProps {
+  width?: number | string;
+  height?: number | string;
+  className?: string;
+}
+
+export default function DagimLogo({
+  width = 200,
+  height = 200,
+  className = "",
+}: DagimLogoProps) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 200 200"
+      width={width}
+      height={height}
+      className={className}
+      fill="none"
+      role="img"
+      aria-label="Dagim Gebeya"
+    >
+      {/* Reuse arc — clockwise from top, open at the bottom-left */}
+      <path
+        d="M100 25C140 25 172 57 172 95C172 133 140 165 100 165C75 165 53 152 41 132"
+        stroke="#2563EB"
+        strokeWidth="12"
+        strokeLinecap="round"
+      />
+      {/* Arrowhead — follows the clockwise tangent at the open end */}
+      <path
+        d="M50 140L41 132L56 126"
+        stroke="#2563EB"
+        strokeWidth="12"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      {/* DG Monogram — centered */}
+      <g fill="#2563EB">
+        {/* D */}
+        <path d="M60 72H80C91.046 72 100 80.954 100 92V108C100 119.046 91.046 128 80 128H60V72ZM78 114C83.523 114 88 109.523 88 104V96C88 90.477 83.523 86 78 86H72V114H78Z" />
+        {/* G */}
+        <path d="M114 97H128V107C125.5 108.5 122.5 109.5 119 109.5C111.5 109.5 105.5 103.5 105.5 96C105.5 88.5 111.5 82.5 119 82.5C123 82.5 126.5 84 129 86.5L137 79C133 75 127.5 72 119 72C105.5 72 94.5 83 94.5 96C94.5 109 105.5 120 119 120C126 120 132 117.5 136.5 113.5V102H114V97Z" />
+      </g>
+      {/* Leaf accent — simplified, sits in the arc gap at the top-right */}
+      <path
+        d="M155 50C158 44 166 44 168 50C170 56 163 60 158 57C154 55 153 53 155 50Z"
+        fill="#22C55E"
+      />
+    </svg>
+  );
+}

@@ -16,6 +16,12 @@ export default async function PhoneVerificationPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-16 sm:px-6 lg:px-8">
+      <a
+        href="/profile"
+        className="mb-6 inline-flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+      >
+        ← Back to profile
+      </a>
       <div className="flex flex-col gap-4">
         <h1 className="text-2xl font-bold">Verify your phone number</h1>
         <p className="text-sm text-muted-foreground">
