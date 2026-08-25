@@ -282,9 +282,6 @@ export default async function OffersPage({
         <h1 className="font-heading text-2xl font-semibold text-foreground">
           My offers
         </h1>
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/offers/seller">View incoming offers →</Link>
-        </Button>
       </div>
 
       {body}

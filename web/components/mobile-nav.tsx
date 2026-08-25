@@ -14,7 +14,7 @@ export function MobileNav() {
   const pathname = usePathname()
   const { user, role } = useAuth()
 
-  const nav = role === "admin" ? adminNav : mobileNav
+  const nav = role === "admin" ? adminNav : mobileNav(role)
 
   return (
     <nav className="flex flex-col gap-1 p-4" aria-label="Mobile">

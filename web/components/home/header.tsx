@@ -3,12 +3,12 @@
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useState } from "react"
-import { HandshakeIcon, HeartIcon, HomeIcon, LayoutGridIcon, MenuIcon, SearchIcon, XIcon } from "lucide-react"
+import { HomeIcon, MenuIcon, SearchIcon, XIcon } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import DagimLogo from "@/components/brand/dagim-logo"
 
 import { cn } from "@/lib/utils"
-import { siteName } from "@/lib/nav"
+import { primaryNav, siteName } from "@/lib/nav"
 import { useAuth } from "@/components/auth/auth-provider"
 import { NotificationBell } from "@/components/notifications/notification-bell"
 import { Button } from "@/components/ui/button"
@@ -16,17 +16,11 @@ import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/s
 import { MobileNav } from "@/components/mobile-nav"
 import { UserMenu } from "@/components/auth/user-menu"
 
-const NAV: { title: string; href: string; icon: LucideIcon }[] = [
-  { title: "Home", href: "/", icon: HomeIcon },
-  { title: "Browse", href: "/search", icon: LayoutGridIcon },
-  { title: "Offers", href: "/offers", icon: HandshakeIcon },
-  { title: "Favorites", href: "/favorites", icon: HeartIcon },
-]
-
 export function SiteHeader() {
   const pathname = usePathname()
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, role } = useAuth()
+  const nav = primaryNav(role)
   const [searchTerm, setSearchTerm] = useState("")
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
 
@@ -52,9 +46,9 @@ export function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-0.5 lg:flex text-white" aria-label="Primary">
-          {NAV.map((item) => {
+          {nav.map((item) => {
             const active = pathname === item.href
-            const Icon = item.icon
+            const Icon = item.icon ?? HomeIcon
             return (
               <Link
                 key={item.href}
