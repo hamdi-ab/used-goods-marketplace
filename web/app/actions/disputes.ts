@@ -4,9 +4,7 @@ import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { decideDispute, openDispute } from "@/lib/disputes"
 import { uuidSchema } from "@/lib/uuid"
-
-// Re-export formValue from payments actions (shared helper)
-import { formValue } from "./payments"
+import { formValue } from "@/lib/form-value"
 
 const decideSchema = z.object({
   disputeId: uuidSchema,

@@ -5,11 +5,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { abandonStalePayment, confirmOfferReceipt, payOffer, requestWithdrawal } from "@/lib/payments"
 import { uuidSchema } from "@/lib/uuid"
-
-export function formValue(formData: FormData, key: string): string | undefined {
-  const v = formData.get(key)
-  return typeof v === "string" && v.length > 0 ? v : undefined
-}
+import { formValue } from "@/lib/form-value"
 
 const offerIdSchema = z.object({
   offerId: uuidSchema,
