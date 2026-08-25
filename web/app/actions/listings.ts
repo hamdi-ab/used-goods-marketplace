@@ -93,7 +93,7 @@ export async function createListing(
     address: formValue(formData, "address"),
      negotiable: formData.get("negotiable") === "on",
      ai_assisted: formData.get("ai_assisted") === "on",
-     photos: files.length ? files : undefined,
+     photos: files,
   })
 
   if (!parsed.success) {

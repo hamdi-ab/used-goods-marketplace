@@ -9,13 +9,13 @@
 
 import { CONDITIONS } from "@/lib/listings/constants"
 
-export const AI_LISTING_MODEL = "gemini-2.5-flash"
+export const AI_LISTING_MODEL = "gemini-3.1-flash-lite"
 export const AI_LISTING_BASE_URL = `https://generativelanguage.googleapis.com/v1/models/${AI_LISTING_MODEL}:generateContent`
 
 // NFR-AI-002: AI responses should complete within 10 seconds. The seam passes
 // this to AbortSignal.timeout so a hung Gemini call degrades instead of leaving
 // the seller stuck on "Generating…".
-export const AI_LISTING_TIMEOUT_MS = 10_000
+export const AI_LISTING_TIMEOUT_MS = 60_000
 
 // Reuses the shared listing_condition vocabulary (lib/listings/constants) so the
 // AI seam and the DB enum (DB spec §8) can never drift apart. Gemini must emit
