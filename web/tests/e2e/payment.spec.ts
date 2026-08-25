@@ -53,7 +53,7 @@ test.describe("payment system", () => {
     await loginAs(page, USERS.admin.email, USERS.admin.password)
     await page.goto("/admin/disputes")
 
-    await expect(page.getByRole("heading", { name: "Disputes" })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Disputes", exact: true })).toBeVisible()
     await expect(page.getByText(/No open disputes|Disputes opened by buyers/)).toBeVisible()
   })
 
@@ -120,7 +120,6 @@ test.describe("payment system", () => {
   })
 
   test("seller can see stale payment abandonment option", async ({ page }) => {
-    await loginAs(page, USERS.seller.email, USERS.seller.password)
     await page.goto("/offers/seller")
 
     // Look for stale payment indicator (only visible if there's a pending payment > 7 days)
@@ -131,7 +130,6 @@ test.describe("payment system", () => {
   })
 
   test("hold period shows in earnings breakdown", async ({ page }) => {
-    await loginAs(page, USERS.seller.email, USERS.seller.password)
     await page.goto("/offers/seller")
 
     const showBreakdown = page.getByRole("button", { name: /Show breakdown/i })

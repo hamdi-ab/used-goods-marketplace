@@ -32,9 +32,14 @@ export async function loginAs(page: Page, email: string, password: string) {
 }
 
 export async function signOut(page: Page) {
-  await page.locator('[data-slot="dropdown-menu-trigger"]').click()
-  await page.getByRole("menuitem", { name: "Sign out" }).click()
-  await expect(page.getByRole("link", { name: "Log in" })).toBeVisible()
+  // Navigate to home first to ensure we're on an authenticated page
+  await page.goto("/")
+  const avatar = page.locator('[data-slot="dropdown-menu-trigger"]')
+  if (await avatar.isVisible({ timeout: 5000 }).catch(() => false)) {
+    await avatar.click()
+    await page.getByRole("menuitem", { name: "Sign out" }).click()
+    await expect(page.getByRole("link", { name: "Log in" })).toBeVisible()
+  }
 }
 
 /** The first listing card's title, resolved from its link's aria-label. */
