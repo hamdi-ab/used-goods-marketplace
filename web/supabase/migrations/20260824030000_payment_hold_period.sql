@@ -37,10 +37,11 @@ begin
     return jsonb_build_object('ok', true, 'error', null);
   end if;
 
+  -- Hold period: random 48-72 hours to prevent predictability
   update public.payments
     set buyer_confirmed = true,
         confirmed_at = now(),
-        hold_expires_at = now() + interval '48 hours'
+        hold_expires_at = now() + interval '48 hours' + (random() * interval '24 hours')
     where id = v_payment.id;
 
   return jsonb_build_object('ok', true, 'error', null);

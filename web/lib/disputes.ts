@@ -1,12 +1,11 @@
 import "server-only"
 
 import { createClient } from "@/lib/supabase/server"
-import type { Supabase } from "@/lib/supabase/types"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
 
-export type DisputeReason = "not_received" | "not_as_description" | "damaged" | "other"
+export type DisputeReason = "not_received" | "not_as_description"
 export type DisputeStatus = "open" | "under_review" | "resolved_buyer" | "resolved_seller" | "appealed" | "closed"
-export type DisputeResolution = "refund_buyer" | "pay_seller" | "partial_refund" | "no_action"
+export type DisputeResolution = "refund_buyer" | "pay_seller"
 
 export interface Dispute {
   id: string
@@ -43,7 +42,7 @@ export interface DisputeWithRelations extends Dispute {
       id: string
       title: string
     } | null
-  }
+  } | null
   opener: {
     id: string
     full_name: string | null
@@ -57,36 +56,47 @@ const DISPUTE_COLUMNS = `
   appeal_evidence_urls, created_at, updated_at
 `
 
-export async function fetchDisputeById(disputeId: string): Promise<Dispute | null> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from("disputes")
-    .select(DISPUTE_COLUMNS)
-    .eq("id", disputeId)
-    .maybeSingle()
-
-  if (error) {
-    console.error("fetchDisputeById:", error.message)
-    return null
-  }
-
-  return data as unknown as Dispute
+interface RawDisputeRow {
+  id: string
+  payment_id: string
+  offer_id: string
+  opened_by: string
+  reason: string
+  description: string
+  evidence_urls: string[]
+  status: string
+  resolution: string | null
+  admin_note: string | null
+  decided_by: string | null
+  decided_at: string | null
+  appeal_note: string | null
+  appeal_evidence_urls: string[]
+  created_at: string
+  updated_at: string
 }
 
-export async function fetchDisputesByPayment(paymentId: string): Promise<Dispute[]> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from("disputes")
-    .select(DISPUTE_COLUMNS)
-    .eq("payment_id", paymentId)
-    .order("created_at", { ascending: false })
-
-  if (error) {
-    console.error("fetchDisputesByPayment:", error.message)
-    return []
-  }
-
-  return (data ?? []) as unknown as Dispute[]
+interface RawDisputeWithRelations extends RawDisputeRow {
+  payment: Array<{
+    id: string
+    amount: number
+    currency: string
+    status: string
+    buyer_id: string
+    seller_id: string
+  }>
+  offer: Array<{
+    id: string
+    amount: number
+    listing: Array<{
+      id: string
+      title: string
+    }> | null
+  }>
+  opener: Array<{
+    id: string
+    full_name: string | null
+    avatar_url: string | null
+  }> | null
 }
 
 export async function fetchAdminDisputes(): Promise<DisputeWithRelations[]> {
@@ -103,16 +113,31 @@ export async function fetchAdminDisputes(): Promise<DisputeWithRelations[]> {
     .order("created_at", { ascending: true })
 
   if (error) {
-    console.error("fetchAdminDisputes:", error.message)
+    console.debug("fetchAdminDisputes:", error.message)
     return []
   }
 
-  return (data ?? []).map((row: any) => ({
-    ...row,
-    payment: row.payment ?? null,
-    offer: row.offer ?? null,
-    opener: row.opener ?? null,
-  })) as DisputeWithRelations[]
+  return (data ?? []).map((row: RawDisputeWithRelations) => ({
+    id: row.id,
+    payment_id: row.payment_id,
+    offer_id: row.offer_id,
+    opened_by: row.opened_by,
+    reason: row.reason as DisputeReason,
+    description: row.description,
+    evidence_urls: row.evidence_urls,
+    status: row.status as DisputeStatus,
+    resolution: row.resolution as DisputeResolution | null,
+    admin_note: row.admin_note,
+    decided_by: row.decided_by,
+    decided_at: row.decided_at,
+    appeal_note: row.appeal_note,
+    appeal_evidence_urls: row.appeal_evidence_urls,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+    payment: row.payment?.[0] ?? null,
+    offer: row.offer?.[0] ? { ...row.offer[0], listing: row.offer[0].listing?.[0] ?? null } : null,
+    opener: row.opener?.[0] ?? null,
+  }))
 }
 
 export interface OpenDisputeParams {
@@ -147,23 +172,6 @@ export async function decideDispute(params: DecideDisputeParams): Promise<{ ok: 
     p_resolution: params.resolution,
     p_admin_note: params.adminNote?.trim() || null,
   }, "decideDispute")
-
-  return { ok: result.ok === true, error: result.error ?? null }
-}
-
-export interface AppealDisputeParams {
-  disputeId: string
-  appealNote: string
-  appealEvidenceUrls?: string[]
-}
-
-export async function appealDispute(params: AppealDisputeParams): Promise<{ ok: boolean; error: string | null }> {
-  const supabase = await createClient()
-  const result = await callOutcomeRpc(supabase, "appeal_dispute", {
-    p_dispute_id: params.disputeId,
-    p_appeal_note: params.appealNote,
-    p_appeal_evidence_urls: params.appealEvidenceUrls ?? [],
-  }, "appealDispute")
 
   return { ok: result.ok === true, error: result.error ?? null }
 }

@@ -91,12 +91,11 @@ begin
     return jsonb_build_object('ok', false, 'error', 'minimum withdrawal is 50 ETB');
   end if;
 
-  -- Count withdrawals this month to determine fee
+  -- Count all withdrawals this month to determine fee (including failed)
   select count(*) into v_used_this_month
   from public.withdrawals
   where seller_id = p_seller_id
-    and created_at >= date_trunc('month', now())
-    and status in ('pending', 'processing', 'completed');
+    and created_at >= date_trunc('month', now());
 
   if v_used_this_month >= v_free_withdrawals then
     v_fee := v_withdrawal_fee;

@@ -5,14 +5,12 @@ import { revalidatePath } from "next/cache"
 import { decideDispute, openDispute } from "@/lib/disputes"
 import { uuidSchema } from "@/lib/uuid"
 
-function formValue(formData: FormData, key: string): string | undefined {
-  const v = formData.get(key)
-  return typeof v === "string" && v.length > 0 ? v : undefined
-}
+// Re-export formValue from payments actions (shared helper)
+import { formValue } from "./payments"
 
 const decideSchema = z.object({
   disputeId: uuidSchema,
-  resolution: z.enum(["refund_buyer", "pay_seller", "partial_refund", "no_action"]),
+  resolution: z.enum(["refund_buyer", "pay_seller"]),
   adminNote: z.string().optional(),
 })
 
@@ -51,8 +49,9 @@ export async function decideDisputeAction(
 
 const openSchema = z.object({
   paymentId: uuidSchema,
-  reason: z.enum(["not_received", "not_as_description", "damaged", "other"]),
+  reason: z.enum(["not_received", "not_as_description"]),
   description: z.string().min(1, "Description is required"),
+  evidenceUrls: z.array(z.string()).min(1, "At least one evidence item is required"),
 })
 
 export type OpenDisputeState = {
@@ -68,16 +67,18 @@ export async function openDisputeAction(
     paymentId: formValue(formData, "paymentId"),
     reason: formValue(formData, "reason"),
     description: formValue(formData, "description"),
+    evidenceUrls: parseEvidenceUrls(formData.get("evidenceUrls")),
   })
 
   if (!parsed.success) {
-    return { message: "Invalid request" }
+    return { message: parsed.error.flatten().fieldErrors.evidenceUrls?.[0] ?? "Invalid request" }
   }
 
   const result = await openDispute({
     paymentId: parsed.data.paymentId,
     reason: parsed.data.reason,
     description: parsed.data.description,
+    evidenceUrls: parsed.data.evidenceUrls,
   })
 
   if (!result.ok) {
@@ -86,4 +87,14 @@ export async function openDisputeAction(
 
   revalidatePath("/offers")
   return { ok: true }
+}
+
+function parseEvidenceUrls(value: FormDataEntryValue | null): string[] {
+  if (typeof value !== "string" || !value) return []
+  try {
+    const parsed = JSON.parse(value)
+    return Array.isArray(parsed) ? parsed.filter((u): u is string => typeof u === "string") : []
+  } catch {
+    return []
+  }
 }

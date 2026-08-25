@@ -6,13 +6,21 @@ import { redirect } from "next/navigation"
 import { abandonStalePayment, confirmOfferReceipt, payOffer, requestWithdrawal } from "@/lib/payments"
 import { uuidSchema } from "@/lib/uuid"
 
-function formValue(formData: FormData, key: string): string | undefined {
+export function formValue(formData: FormData, key: string): string | undefined {
   const v = formData.get(key)
   return typeof v === "string" && v.length > 0 ? v : undefined
 }
 
 const offerIdSchema = z.object({
   offerId: uuidSchema,
+})
+
+const amountSchema = z.object({
+  amount: z.coerce.number().positive("Amount must be greater than 0"),
+})
+
+const txRefSchema = z.object({
+  txRef: z.string().min(1, "Transaction reference is required"),
 })
 
 export type PayOfferState = {
@@ -78,12 +86,14 @@ export async function requestWithdrawalAction(
   _prevState: WithdrawalState,
   formData: FormData
 ): Promise<WithdrawalState> {
-  const amount = formValue(formData, "amount")
-  if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
-    return { message: "Invalid amount" }
+  const parsed = amountSchema.safeParse({
+    amount: formValue(formData, "amount"),
+  })
+  if (!parsed.success) {
+    return { message: parsed.error.flatten().fieldErrors.amount?.[0] ?? "Invalid amount" }
   }
 
-  const result = await requestWithdrawal(Number(amount))
+  const result = await requestWithdrawal(parsed.data.amount)
   if (!result.ok) {
     return { message: result.error ?? "Could not process withdrawal" }
   }
@@ -103,12 +113,14 @@ export async function abandonStalePaymentAction(
   _prevState: AbandonStaleState,
   formData: FormData
 ): Promise<AbandonStaleState> {
-  const txRef = formValue(formData, "txRef")
-  if (!txRef) {
+  const parsed = txRefSchema.safeParse({
+    txRef: formValue(formData, "txRef"),
+  })
+  if (!parsed.success) {
     return { message: "Invalid request" }
   }
 
-  const result = await abandonStalePayment(txRef)
+  const result = await abandonStalePayment(parsed.data.txRef)
   if (!result.ok) {
     return { message: result.error ?? "Could not abandon payment" }
   }

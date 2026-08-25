@@ -91,7 +91,6 @@ set search_path = public
 as $$
 declare
   v_payment public.payments;
-  v_offer public.offers;
   v_listing public.listings;
 begin
   if (select auth.uid()) is null then
@@ -122,13 +121,7 @@ begin
     set status = 'failed'
     where id = v_payment.id;
 
-  -- Reopen the offer
-  select * into v_offer from public.offers where id = v_payment.offer_id for update;
-  update public.offers
-    set status = 'declined'
-    where id = v_payment.offer_id;
-
-  -- Reopen the listing
+  -- Reopen the listing (offer stays active per spec #117)
   select * into v_listing from public.listings where id = v_payment.listing_id for update;
   update public.listings
     set status = 'published', sold_to_buyer_id = null

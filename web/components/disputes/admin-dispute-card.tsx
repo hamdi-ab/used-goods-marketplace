@@ -24,8 +24,6 @@ interface AdminDisputeCardProps {
 const RESOLUTION_LABELS: Record<DisputeResolution, string> = {
   refund_buyer: "Refund buyer",
   pay_seller: "Pay seller",
-  partial_refund: "Partial refund",
-  no_action: "No action",
 }
 
 const STATUS_STYLES: Record<string, string> = {
