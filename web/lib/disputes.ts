@@ -105,8 +105,8 @@ export async function fetchAdminDisputes(): Promise<DisputeWithRelations[]> {
     .from("disputes")
     .select(`
       ${DISPUTE_COLUMNS},
-      payment:payments(id, amount, currency, status, buyer_id, seller_id),
-      offer:offers(id, amount, listing:listings(id, title)),
+      payment!disputes_payment_id_fkey(id, amount, currency, status, buyer_id, seller_id),
+      offer!disputes_offer_id_fkey(id, amount, listing:listings(id, title)),
       opener:profiles!disputes_opened_by_fkey(id, full_name, avatar_url)
     `)
     .in("status", ["open", "under_review", "appealed"])
@@ -134,9 +134,9 @@ export async function fetchAdminDisputes(): Promise<DisputeWithRelations[]> {
     appeal_evidence_urls: row.appeal_evidence_urls,
     created_at: row.created_at,
     updated_at: row.updated_at,
-    payment: row.payment?.[0] ?? null,
-    offer: row.offer?.[0] ? { ...row.offer[0], listing: row.offer[0].listing?.[0] ?? null } : null,
-    opener: row.opener?.[0] ?? null,
+    payment: Array.isArray(row.payment) ? row.payment?.[0] ?? null : row.payment ?? null,
+    offer: Array.isArray(row.offer) ? (row.offer?.[0] ? { ...row.offer[0], listing: Array.isArray(row.offer[0].listing) ? row.offer[0].listing?.[0] ?? null : row.offer[0].listing ?? null } : null) : row.offer ?? null,
+    opener: Array.isArray(row.opener) ? row.opener?.[0] ?? null : row.opener ?? null,
   }))
 }
 

@@ -3,6 +3,8 @@
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { decideDispute, openDispute } from "@/lib/disputes"
+import { createNotification } from "@/lib/notifications"
+import { createClient } from "@/lib/supabase/server"
 import { uuidSchema } from "@/lib/uuid"
 import { formValue } from "@/lib/form-value"
 
@@ -39,6 +41,25 @@ export async function decideDisputeAction(
 
   if (!result.ok) {
     return { message: result.error ?? "Could not decide dispute" }
+  }
+
+  // Notify the buyer about the dispute resolution
+  const resolutionLabel = parsed.data.resolution === "refund_buyer" ? "Refund approved" : "Payment released to seller"
+  const supabase = await createClient()
+  const { data: dispute } = await supabase
+    .from("disputes")
+    .select("payment:payments!disputes_payment_id_fkey(buyer_id)")
+    .eq("id", parsed.data.disputeId)
+    .maybeSingle()
+  const buyerId = (dispute as unknown as { payment: { buyer_id: string }[] })?.payment?.[0]?.buyer_id
+  if (buyerId) {
+    await createNotification({
+      userId: buyerId,
+      type: "dispute_resolved",
+      title: `Dispute resolved: ${resolutionLabel}`,
+      body: parsed.data.adminNote ?? "Your dispute has been reviewed and resolved.",
+      metadata: { dispute_id: parsed.data.disputeId },
+    })
   }
 
   revalidatePath("/admin/disputes")
@@ -83,6 +104,25 @@ export async function openDisputeAction(
     return { message: result.error ?? "Could not open dispute" }
   }
 
+  // Notify admins about new dispute
+  const supabase = await createClient()
+  const { data: admins } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("role", "admin")
+  if (admins) {
+    for (const admin of admins) {
+      await createNotification({
+        userId: admin.id,
+        type: "dispute_opened",
+        title: "New dispute opened",
+        body: `Reason: ${parsed.data.reason.replace(/_/g, " ")}`,
+        metadata: { payment_id: parsed.data.paymentId },
+      })
+    }
+  }
+
   revalidatePath("/offers")
+  revalidatePath("/admin/disputes")
   return { ok: true }
 }

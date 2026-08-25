@@ -24,13 +24,14 @@ import {
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 
-type FilterKey = "all" | "offers" | "reviews" | "reports"
+type FilterKey = "all" | "offers" | "reviews" | "reports" | "disputes"
 
 const FILTERS: { key: FilterKey; label: string }[] = [
   { key: "all", label: "All" },
   { key: "offers", label: "Offers" },
   { key: "reviews", label: "Reviews" },
   { key: "reports", label: "Reports" },
+  { key: "disputes", label: "Disputes" },
 ]
 
 const FILTER_LABEL: Record<FilterKey, string> = {
@@ -38,6 +39,7 @@ const FILTER_LABEL: Record<FilterKey, string> = {
   offers: "offer notifications",
   reviews: "review notifications",
   reports: "report notifications",
+  disputes: "dispute notifications",
 }
 
 function matchesFilter(type: NotificationType, filter: FilterKey): boolean {
@@ -45,6 +47,8 @@ function matchesFilter(type: NotificationType, filter: FilterKey): boolean {
   if (filter === "offers")
     return type === "offer_received" || type === "offer_accepted"
   if (filter === "reviews") return type === "review_received"
+  if (filter === "disputes")
+    return type === "dispute_opened" || type === "dispute_resolved"
   return type === "report_resolved"
 }
 
@@ -84,6 +88,14 @@ const TYPE_STYLE: Record<NotificationType, { icon: ReactNode; chip: string }> = 
   business_lead: {
     icon: <StarIcon className="size-5" />,
     chip: "bg-amber-100 text-amber-700",
+  },
+  dispute_opened: {
+    icon: <BellIcon className="size-5" />,
+    chip: "bg-red-100 text-red-700",
+  },
+  dispute_resolved: {
+    icon: <ShieldCheckIcon className="size-5" />,
+    chip: "bg-emerald-100 text-emerald-700",
   },
 }
 

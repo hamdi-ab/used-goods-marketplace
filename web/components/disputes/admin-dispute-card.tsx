@@ -166,7 +166,9 @@ export function AdminDisputeCard({ dispute }: AdminDisputeCardProps) {
               {pending ? "Deciding..." : "Decide dispute"}
             </Button>
 
-            {state.message ? (
+            {state.ok ? (
+              <p className="text-sm text-green-600">Decision recorded!</p>
+            ) : state.message ? (
               <p role="alert" className="text-sm text-destructive">{state.message}</p>
             ) : null}
           </form>
