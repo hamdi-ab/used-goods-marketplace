@@ -72,9 +72,9 @@ where id = '00000000-0000-4000-8000-000000000001';
 ------------------------------------------------------------------------------
 -- T12 demo seeds: exercise every trust-badge state on a fresh `db reset`
 -- (issue #16 AC-3): Verified Seller + Phone Verified, Verified Seller + Fayda,
--- Verified Seller alone, and a buyer that renders the "Not verified yet"
--- empty state. A published listing per seller makes the badge set visible on
--- listing cards (AC-2), not only on profile pages. Verification events are
+-- a plain seller (no verification — "Not verified yet"), and a buyer that renders
+-- the "Not verified yet" empty state. A published listing per seller makes the
+-- badge set visible on listing cards (AC-2), not only on profile pages. Verification events are
 -- written through the audit `verifications` table too, so the T12 read model
 -- (profiles.phone_verified / fayda_verified) and the audit log stay in sync.
 -- Passwords are demo-only (`demo1234`); change before shared hosting.

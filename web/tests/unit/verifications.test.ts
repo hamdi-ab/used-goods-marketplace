@@ -37,10 +37,10 @@ describe("verifications.badge rules", () => {
     ).toEqual(["verified-seller", "fayda"])
   })
 
-  it("renders only the Verified Seller badge for an unverified seller", () => {
+  it("shows no badges for an unverified seller", () => {
     expect(
       sellerVerificationBadges({ role: "seller", phone_verified: false, fayda_verified: false })
-    ).toEqual(["verified-seller"])
+    ).toEqual([])
   })
 
   it("shows no badges for a buyer", () => {
@@ -55,7 +55,7 @@ describe("verifications.badge rules", () => {
   })
 
   it("treats missing flags as not verified", () => {
-    expect(sellerVerificationBadges({ role: "seller" })).toEqual(["verified-seller"])
+    expect(sellerVerificationBadges({ role: "seller" })).toEqual([])
     expect(sellerVerificationBadges({ role: "buyer" })).toEqual([])
   })
 })
@@ -69,7 +69,7 @@ describe("verifications.hasVerification", () => {
 
   it("is true when any badge is active", () => {
     expect(
-      hasVerification({ role: "seller", phone_verified: false, fayda_verified: false })
+      hasVerification({ role: "seller", phone_verified: true, fayda_verified: false })
     ).toBe(true)
     expect(
       hasVerification({ role: "buyer", phone_verified: true, fayda_verified: false })

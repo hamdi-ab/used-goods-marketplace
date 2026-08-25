@@ -1,6 +1,7 @@
 "use client"
 
 import { useActionState, useRef, useState, type ChangeEvent } from "react"
+import { toast } from "sonner"
 import Link from "next/link"
 import { UploadIcon, ShieldCheckIcon, PhoneIcon, UserCheckIcon } from "lucide-react"
 
@@ -75,15 +76,20 @@ export function ProfileForm({
     form.set("avatar", file)
     const res = await uploadAvatar(user.id, { url: null, error: null }, form)
     setAvatarUploading(false)
-    if (res.error) setAvatarError(res.error)
-    else setAvatarUrl(res.url)
+    if (res.error) {
+      setAvatarError(res.error)
+      toast.error(res.error)
+    } else {
+      setAvatarUrl(res.url)
+      toast.success("Profile photo uploaded")
+    }
   }
 
   const verifiedTypes = new Set(
     verifications.filter((v) => v.status === "verified").map((v) => v.type)
   )
   const trustBadges = [
-    { label: "Verified Seller", show: user.role === "seller", icon: ShieldCheckIcon, cls: "border-[#2563EB]/30 bg-[#EEF4FF] text-[#2563EB]" },
+    { label: "Verified Seller", show: user.role === "seller" && verifiedTypes.size > 0, icon: ShieldCheckIcon, cls: "border-[#2563EB]/30 bg-[#EEF4FF] text-[#2563EB]" },
     { label: "Phone verified", show: verifiedTypes.has("phone"), icon: PhoneIcon, cls: "border-emerald-200 bg-emerald-50 text-emerald-700" },
     { label: "Fayda verified", show: verifiedTypes.has("fayda"), icon: UserCheckIcon, cls: "border-[#2563EB]/30 bg-[#EEF4FF] text-[#2563EB]" },
   ].filter((b) => b.show)

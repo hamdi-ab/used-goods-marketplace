@@ -3,8 +3,7 @@
 -- Adds a `p_verified_seller boolean default null` parameter to `search_listings`
 -- that, when supplied, restricts results to listings whose seller carries the
 -- "Verified Seller" badge. Per `lib/verifications/constants.ts` that badge is
--- `profiles.role = 'seller'` (a live role, distinct from the future-only Fayda
--- badge, so the facet does NOT filter on fayda_verified).
+-- `profiles.role = 'seller' AND (profiles.phone_verified OR profiles.fayda_verified)`.
 -- null = no filter (backwards compatible with the existing call site and the
 -- industry-audit #12 deviation note).
 --
@@ -110,7 +109,7 @@ begin
     and (p_max_price is null or l.price <= p_max_price)
     and (p_condition is null or l.condition = p_condition)
     and (p_city is null or l.city ilike '%' || p_city || '%')
-    and (p_verified_seller is null or u.role = 'seller')
+    and (p_verified_seller is null or (u.role = 'seller' and (u.phone_verified or u.fayda_verified)))
     and (
       v_tsq is null
       or l.search_vector @@ v_tsq
