@@ -10,10 +10,12 @@ import { countIncomingOffers, fetchBuyerOffers } from "@/lib/offers"
 import { fetchFavoriteIds } from "@/lib/favorites"
 import { fetchUnreadNotificationsCount } from "@/lib/notifications"
 import { fetchOwnProfile } from "@/lib/profiles"
+import { fetchSellerEarnings, fetchSellerWithdrawals } from "@/lib/payments"
 import { nextOffset, parseOffset } from "@/lib/pagination"
 import { promoteToSeller } from "@/app/actions/profile"
 import { ListingManager } from "@/components/dashboard/listing-manager"
 import { AccountUsageCard } from "@/components/dashboard/account-usage-card"
+import { EarningsCard } from "@/components/earnings/earnings-card"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -52,6 +54,13 @@ export default async function DashboardPage({
       fetchUnreadNotificationsCount(user.id),
       fetchOwnProfile(user.id),
     ])
+
+  const [earnings, withdrawals] = canSell
+    ? await Promise.all([
+        fetchSellerEarnings(user.id),
+        fetchSellerWithdrawals(user.id),
+      ])
+    : [null, null]
   const listings = sellerListings?.listings ?? []
   const firstName = user.fullName?.split(" ")[0] ?? "there"
   const liveListings = listings.filter((l) => l.status === "published").length
@@ -112,7 +121,8 @@ export default async function DashboardPage({
 
       {canSell ? (
         <section id="listings" className="mb-10">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          {earnings ? <EarningsCard earnings={earnings} withdrawals={withdrawals ?? []} /> : null}
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="font-heading text-xl font-semibold">Your listings</h2>
               <p className="text-sm text-muted-foreground">

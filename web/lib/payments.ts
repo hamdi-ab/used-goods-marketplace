@@ -256,3 +256,78 @@ export async function abandonStalePayment(txRef: string): Promise<{ ok: boolean;
 
   return { ok: result.ok === true, error: result.error ?? null }
 }
+
+export interface SellerEarnings {
+  totalSales: number
+  platformFees: number
+  netEarnings: number
+  availableForWithdrawal: number
+  pendingClearance: number
+  onHold: number
+}
+
+// Server-side earnings calculation for use in dashboard/offers pages.
+export async function fetchSellerEarnings(userId: string): Promise<SellerEarnings> {
+  const supabase = await createClient()
+
+  const { data: payments } = await supabase
+    .from("payments")
+    .select("amount, buyer_confirmed, hold_expires_at, status")
+    .eq("seller_id", userId)
+    .eq("status", "paid")
+
+  let totalSales = 0
+  let platformFees = 0
+  let netEarnings = 0
+  let availableForWithdrawal = 0
+  let pendingClearance = 0
+  let onHold = 0
+
+  for (const p of payments ?? []) {
+    const amount = Number(p.amount)
+    totalSales += amount
+    const fee = (amount * PLATFORM_FEE_PERCENTAGE) / 100
+    platformFees += fee
+    netEarnings += amount - fee
+
+    if (p.buyer_confirmed) {
+      if (p.hold_expires_at && new Date(p.hold_expires_at) > new Date()) {
+        onHold += amount - fee
+      } else {
+        availableForWithdrawal += amount - fee
+      }
+    } else {
+      pendingClearance += amount - fee
+    }
+  }
+
+  return { totalSales, platformFees, netEarnings, availableForWithdrawal, pendingClearance, onHold }
+}
+
+export interface WithdrawalRow {
+  id: string
+  amount: number
+  fee: number
+  net_amount: number
+  status: string
+  payout_method: string
+  payout_details: string | null
+  created_at: string
+  processed_at: string | null
+}
+
+export async function fetchSellerWithdrawals(userId: string): Promise<WithdrawalRow[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from("withdrawals")
+    .select("id, amount, fee, net_amount, status, payout_method, payout_details, created_at, processed_at")
+    .eq("seller_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(10)
+
+  if (error) {
+    console.error("fetchSellerWithdrawals:", error.message)
+    return []
+  }
+  return data ?? []
+}

@@ -5,6 +5,7 @@ import { InboxIcon } from "lucide-react"
 
 import { requireUser } from "@/lib/auth"
 import { fetchSellerOffers, OPEN_OFFER_STATUSES } from "@/lib/offers"
+import { fetchSellerEarnings, fetchSellerWithdrawals } from "@/lib/payments"
 import { formatPrice } from "@/lib/listings"
 import { nextOffset, parseOffset } from "@/lib/pagination"
 import { formatShortDate, initials, cn } from "@/lib/utils"
@@ -12,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { OfferStatusBadge } from "@/components/offers/offer-status-badge"
 import { SellerOfferActions } from "@/components/offers/seller-offer-actions"
 import { SellerPaymentBadge } from "@/components/offers/seller-payment-badge"
-import { SellerEarningsCard } from "@/components/offers/seller-earnings-card"
+import { EarningsCard } from "@/components/earnings/earnings-card"
 import { Button } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
@@ -33,6 +34,11 @@ export default async function SellerOffersPage({
   const { offers, hasMore, error } = await fetchSellerOffers(user.id, {
     offset,
   })
+
+  const [earnings, withdrawals] = await Promise.all([
+    fetchSellerEarnings(user.id),
+    fetchSellerWithdrawals(user.id),
+  ])
 
   const openCount = offers.filter((o) =>
     OPEN_OFFER_STATUSES.includes(o.status)
@@ -192,7 +198,7 @@ export default async function SellerOffersPage({
         listing is marked sold.
       </p>
 
-      {offers.length > 0 ? <SellerEarningsCard offers={offers} /> : null}
+      {earnings ? <EarningsCard earnings={earnings} withdrawals={withdrawals} compact /> : null}
 
       {body}
     </main>
