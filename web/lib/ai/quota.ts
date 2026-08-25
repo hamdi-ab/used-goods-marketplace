@@ -11,12 +11,12 @@ export async function countAiGenerationsThisMonth(
   client?: Supabase
 ): Promise<number> {
   const supabase = client ?? (await createClient())
-  const { data } = await callRpc<{ used: number }>(
+  const { data } = await callRpc<{ used: number }[]>(
     supabase,
     "current_ai_generation_count",
     {}
   )
-  return data?.used ?? 0
+  return data?.[0]?.used ?? 0
 }
 
 /** Insert one consumed AI credit (on a successful draft). Returns the new
