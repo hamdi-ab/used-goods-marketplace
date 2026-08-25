@@ -112,7 +112,7 @@ export function EarningsCard({ earnings, withdrawals, compact = false }: Earning
         </div>
       )}
 
-      <div className="mt-4">
+      <div className="mt-4 space-y-3">
         {state.ok ? (
           <div className="rounded-lg border border-green-200 bg-green-50 p-3 text-sm text-green-800">
             <p className="flex items-center gap-2 font-medium">
@@ -126,86 +126,84 @@ export function EarningsCard({ earnings, withdrawals, compact = false }: Earning
             </p>
             <p className="mt-1 text-xs text-muted-foreground">Status: pending — funds will be transferred within 24-48 hours.</p>
           </div>
+        ) : null}
+
+        {!showPayoutForm ? (
+          <Button
+            type="button"
+            className="w-full"
+            disabled={!canWithdraw}
+            onClick={() => setShowPayoutForm(true)}
+          >
+            <BanknoteIcon className="mr-2 size-4" />
+            {canWithdraw
+              ? "Request withdrawal"
+              : `Min. withdrawal is ${formatPrice(WITHDRAWAL_MINIMUM, { maxFractionDigits: 0 })}`}
+          </Button>
         ) : (
           <form action={formAction} className="space-y-3">
-            {!showPayoutForm ? (
-              <Button
-                type="button"
-                className="w-full"
-                disabled={!canWithdraw}
-                onClick={() => setShowPayoutForm(true)}
-              >
-                <BanknoteIcon className="mr-2 size-4" />
-                {canWithdraw
-                  ? "Request withdrawal"
-                  : `Min. withdrawal is ${formatPrice(WITHDRAWAL_MINIMUM, { maxFractionDigits: 0 })}`}
+            <div>
+              <p className="mb-2 text-xs font-medium text-muted-foreground">Payout method</p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPayoutMethod("bank_transfer")}
+                  className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition ${
+                    payoutMethod === "bank_transfer"
+                      ? "border-[#2563EB] bg-[#2563EB]/10 text-[#2563EB]"
+                      : "border-border hover:bg-muted"
+                  }`}
+                >
+                  <BanknoteIcon className="size-3" />
+                  Bank transfer
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPayoutMethod("mobile_money")}
+                  className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition ${
+                    payoutMethod === "mobile_money"
+                      ? "border-[#2563EB] bg-[#2563EB]/10 text-[#2563EB]"
+                      : "border-border hover:bg-muted"
+                  }`}
+                >
+                  <SmartphoneIcon className="size-3" />
+                  Mobile money
+                </button>
+              </div>
+              <input type="hidden" name="payoutMethod" value={payoutMethod} />
+            </div>
+            <div>
+              <Label htmlFor={`account-${compact ? "compact" : "full"}`} className="text-xs">
+                {payoutMethod === "mobile_money" ? "Mobile money number" : "Bank account number"}
+              </Label>
+              <Input
+                id={`account-${compact ? "compact" : "full"}`}
+                name="accountNumber"
+                value={accountNumber}
+                onChange={(e) => setAccountNumber(e.target.value)}
+                placeholder={payoutMethod === "mobile_money" ? "0912345678" : "1000000000000"}
+                className="mt-1"
+              />
+              <p className="mt-1 text-xs text-muted-foreground">
+                {payoutMethod === "mobile_money"
+                  ? "Enter your TeleBirr or CBE Birr phone number"
+                  : "Enter your CBE or commercial bank account number"}
+              </p>
+            </div>
+            <input type="hidden" name="amount" value={String(earnings.availableForWithdrawal)} />
+            <div className="flex gap-2">
+              <Button type="submit" disabled={pending || !accountNumber.trim()}>
+                {pending ? "Submitting..." : `Withdraw ${formatPrice(earnings.availableForWithdrawal, { maxFractionDigits: 2 })}`}
               </Button>
-            ) : (
-              <>
-                <div>
-                  <p className="mb-2 text-xs font-medium text-muted-foreground">Payout method</p>
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setPayoutMethod("bank_transfer")}
-                      className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition ${
-                        payoutMethod === "bank_transfer"
-                          ? "border-[#2563EB] bg-[#2563EB]/10 text-[#2563EB]"
-                          : "border-border hover:bg-muted"
-                      }`}
-                    >
-                      <BanknoteIcon className="size-3" />
-                      Bank transfer
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setPayoutMethod("mobile_money")}
-                      className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs transition ${
-                        payoutMethod === "mobile_money"
-                          ? "border-[#2563EB] bg-[#2563EB]/10 text-[#2563EB]"
-                          : "border-border hover:bg-muted"
-                      }`}
-                    >
-                      <SmartphoneIcon className="size-3" />
-                      Mobile money
-                    </button>
-                  </div>
-                  <input type="hidden" name="payoutMethod" value={payoutMethod} />
-                </div>
-                <div>
-                  <Label htmlFor={`account-${compact ? "compact" : "full"}`} className="text-xs">
-                    {payoutMethod === "mobile_money" ? "Mobile money number" : "Bank account number"}
-                  </Label>
-                  <Input
-                    id={`account-${compact ? "compact" : "full"}`}
-                    name="accountNumber"
-                    value={accountNumber}
-                    onChange={(e) => setAccountNumber(e.target.value)}
-                    placeholder={payoutMethod === "mobile_money" ? "0912345678" : "1000000000000"}
-                    className="mt-1"
-                  />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {payoutMethod === "mobile_money"
-                      ? "Enter your TeleBirr or CBE Birr phone number"
-                      : "Enter your CBE or commercial bank account number"}
-                  </p>
-                </div>
-                <input type="hidden" name="amount" value={String(earnings.availableForWithdrawal)} />
-                <div className="flex gap-2">
-                  <Button type="submit" disabled={pending || !accountNumber.trim()}>
-                    {pending ? "Submitting..." : `Withdraw ${formatPrice(earnings.availableForWithdrawal, { maxFractionDigits: 2 })}`}
-                  </Button>
-                  <Button type="button" variant="outline" onClick={() => setShowPayoutForm(false)}>
-                    Cancel
-                  </Button>
-                </div>
-              </>
-            )}
+              <Button type="button" variant="outline" onClick={() => setShowPayoutForm(false)}>
+                Cancel
+              </Button>
+            </div>
+            {state.message ? (
+              <p role="alert" className="text-sm text-destructive">{state.message}</p>
+            ) : null}
           </form>
         )}
-        {state.message ? (
-          <p role="alert" className="mt-2 text-sm text-destructive">{state.message}</p>
-        ) : null}
       </div>
 
       {withdrawals.length > 0 ? (
