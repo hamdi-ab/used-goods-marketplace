@@ -14,6 +14,7 @@ import { OfferStatusBadge } from "@/components/offers/offer-status-badge"
 import { SellerOfferActions } from "@/components/offers/seller-offer-actions"
 import { SellerPaymentBadge } from "@/components/offers/seller-payment-badge"
 import { EarningsCard } from "@/components/earnings/earnings-card"
+import { Breadcrumbs } from "@/components/ui/breadcrumbs"
 import { Button } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
@@ -177,30 +178,39 @@ export default async function SellerOffersPage({
   }
 
   return (
-    <main className="mx-auto w-full max-w-[960px] flex-1 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-2 flex flex-wrap items-end justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <h1 className="font-heading text-2xl font-semibold text-foreground">
-            Incoming offers
-          </h1>
-          {openCount > 0 ? (
-            <span className="rounded-full bg-[#2563EB]/10 px-2.5 py-1 text-xs font-semibold text-[#2563EB]">
-              {openCount} open
-            </span>
-          ) : null}
+    <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6 lg:px-8 min-h-[60vh]">
+      <Breadcrumbs
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Offers", href: "/offers" },
+          { label: "Incoming offers" },
+        ]}
+      />
+
+      <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <div className="lg:col-span-8">
+          <div className="flex items-center gap-3">
+            <h1 className="font-heading text-2xl font-semibold text-foreground">
+              Incoming offers
+            </h1>
+            {openCount > 0 ? (
+              <span className="rounded-full bg-[#2563EB]/10 px-2.5 py-1 text-xs font-semibold text-[#2563EB]">
+                {openCount} open
+              </span>
+            ) : null}
+          </div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Offers buyers have made on your listings.
+          </p>
         </div>
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/offers">← View my offers</Link>
-        </Button>
+        <div className="lg:col-span-4">
+          <EarningsCard earnings={earnings} withdrawals={withdrawals} compact />
+        </div>
       </div>
-      <p className="mb-8 text-sm text-muted-foreground">
-        Offers from buyers on your listings. Accept the right price and the
-        listing is marked sold.
-      </p>
 
-      {earnings ? <EarningsCard earnings={earnings} withdrawals={withdrawals} compact /> : null}
-
-      {body}
+      <div className="mt-6">
+        {body}
+      </div>
     </main>
   )
 }
