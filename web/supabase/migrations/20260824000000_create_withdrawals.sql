@@ -120,6 +120,86 @@ begin
 end;
 $$;
 
+--------------------------------------------------------------------------------
+-- approve_withdrawal: admin approves a pending withdrawal, marking it completed.
+--------------------------------------------------------------------------------
+create or replace function public.approve_withdrawal(p_withdrawal_id uuid)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_withdrawal public.withdrawals;
+begin
+  if (select auth.uid()) is null then
+    return jsonb_build_object('ok', false, 'error', 'not authenticated');
+  end if;
+
+  if not public.is_admin() then
+    return jsonb_build_object('ok', false, 'error', 'only admins can approve withdrawals');
+  end if;
+
+  select * into v_withdrawal from public.withdrawals where id = p_withdrawal_id for update;
+  if not found then
+    return jsonb_build_object('ok', false, 'error', 'withdrawal not found');
+  end if;
+
+  if v_withdrawal.status <> 'pending' then
+    return jsonb_build_object('ok', false, 'error', 'withdrawal is not pending');
+  end if;
+
+  update public.withdrawals
+    set status = 'completed',
+        processed_at = now()
+    where id = p_withdrawal_id;
+
+  return jsonb_build_object('ok', true, 'error', null, 'seller_id', v_withdrawal.seller_id);
+end;
+$$;
+
+--------------------------------------------------------------------------------
+-- reject_withdrawal: admin rejects a pending withdrawal, funds return to seller.
+--------------------------------------------------------------------------------
+create or replace function public.reject_withdrawal(p_withdrawal_id uuid, p_reason text default null)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_withdrawal public.withdrawals;
+begin
+  if (select auth.uid()) is null then
+    return jsonb_build_object('ok', false, 'error', 'not authenticated');
+  end if;
+
+  if not public.is_admin() then
+    return jsonb_build_object('ok', false, 'error', 'only admins can reject withdrawals');
+  end if;
+
+  select * into v_withdrawal from public.withdrawals where id = p_withdrawal_id for update;
+  if not found then
+    return jsonb_build_object('ok', false, 'error', 'withdrawal not found');
+  end if;
+
+  if v_withdrawal.status <> 'pending' then
+    return jsonb_build_object('ok', false, 'error', 'withdrawal is not pending');
+  end if;
+
+  update public.withdrawals
+    set status = 'failed',
+        processed_at = now()
+    where id = p_withdrawal_id;
+
+  return jsonb_build_object('ok', true, 'error', null, 'seller_id', v_withdrawal.seller_id);
+end;
+$$;
+
 grant select on public.withdrawals to authenticated;
 revoke all on function public.request_withdrawal(uuid, numeric, text, jsonb) from public;
+revoke all on function public.approve_withdrawal(uuid) from public;
+revoke all on function public.reject_withdrawal(uuid, text) from public;
 grant execute on function public.request_withdrawal(uuid, numeric, text, jsonb) to authenticated;
+grant execute on function public.approve_withdrawal(uuid) to authenticated;
+grant execute on function public.reject_withdrawal(uuid, text) to authenticated;

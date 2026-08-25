@@ -257,6 +257,66 @@ export async function abandonStalePayment(txRef: string): Promise<{ ok: boolean;
   return { ok: result.ok === true, error: result.error ?? null }
 }
 
+export async function approveWithdrawal(withdrawalId: string): Promise<{ ok: boolean; error: string | null; sellerId?: string }> {
+  const supabase = await createClient()
+  const result = await callOutcomeRpc<{ ok: boolean; error: string | null; seller_id?: string }>(supabase, "approve_withdrawal", {
+    p_withdrawal_id: withdrawalId,
+  }, "approveWithdrawal")
+
+  return { ok: result.ok === true, error: result.error ?? null, sellerId: result.seller_id }
+}
+
+export async function rejectWithdrawal(withdrawalId: string, reason?: string): Promise<{ ok: boolean; error: string | null; sellerId?: string }> {
+  const supabase = await createClient()
+  const result = await callOutcomeRpc<{ ok: boolean; error: string | null; seller_id?: string }>(supabase, "reject_withdrawal", {
+    p_withdrawal_id: withdrawalId,
+    p_reason: reason ?? null,
+  }, "rejectWithdrawal")
+
+  return { ok: result.ok === true, error: result.error ?? null, sellerId: result.seller_id }
+}
+
+export interface AdminWithdrawalRow {
+  id: string
+  seller_id: string
+  seller_name: string | null
+  amount: number
+  fee: number
+  net_amount: number
+  status: string
+  payout_method: string
+  payout_details: string | null
+  created_at: string
+  processed_at: string | null
+}
+
+export async function fetchAdminWithdrawals(status?: string): Promise<AdminWithdrawalRow[]> {
+  const supabase = await createClient()
+  let query = supabase
+    .from("withdrawals")
+    .select(`
+      id, seller_id, amount, fee, net_amount, status, payout_method, payout_details, created_at, processed_at,
+      seller:profiles!withdrawals_seller_id_fkey(full_name)
+    `)
+    .order("created_at", { ascending: false })
+
+  if (status) {
+    query = query.eq("status", status)
+  }
+
+  const { data, error } = await query
+
+  if (error) {
+    console.error("fetchAdminWithdrawals:", error.message)
+    return []
+  }
+
+  return (data ?? []).map((row: { seller: Array<{ full_name: string | null }> } & Record<string, unknown>) => ({
+    ...row,
+    seller_name: row.seller?.[0]?.full_name ?? "Unknown",
+  })) as unknown as AdminWithdrawalRow[]
+}
+
 export interface SellerEarnings {
   totalSales: number
   platformFees: number

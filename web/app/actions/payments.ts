@@ -3,7 +3,7 @@
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
-import { abandonStalePayment, confirmOfferReceipt, payOffer, requestWithdrawal } from "@/lib/payments"
+import { abandonStalePayment, approveWithdrawal, confirmOfferReceipt, payOffer, rejectWithdrawal, requestWithdrawal } from "@/lib/payments"
 import { uuidSchema } from "@/lib/uuid"
 import { formValue } from "@/lib/form-value"
 
@@ -133,5 +133,47 @@ export async function abandonStalePaymentAction(
 
   revalidatePath("/offers")
   revalidatePath("/offers/seller")
+  return { ok: true }
+}
+
+export type ApproveWithdrawalState = {
+  message?: string
+  ok?: boolean
+}
+
+export async function approveWithdrawalAction(
+  _prevState: ApproveWithdrawalState,
+  formData: FormData
+): Promise<ApproveWithdrawalState> {
+  const withdrawalId = formValue(formData, "withdrawalId")
+  if (!withdrawalId) {
+    return { message: "Invalid request" }
+  }
+
+  const result = await approveWithdrawal(withdrawalId)
+  if (!result.ok) {
+    return { message: result.error ?? "Could not approve withdrawal" }
+  }
+
+  revalidatePath("/admin/withdrawals")
+  return { ok: true }
+}
+
+export async function rejectWithdrawalAction(
+  _prevState: ApproveWithdrawalState,
+  formData: FormData
+): Promise<ApproveWithdrawalState> {
+  const withdrawalId = formValue(formData, "withdrawalId")
+  const reason = formValue(formData, "reason")
+  if (!withdrawalId) {
+    return { message: "Invalid request" }
+  }
+
+  const result = await rejectWithdrawal(withdrawalId, reason || undefined)
+  if (!result.ok) {
+    return { message: result.error ?? "Could not reject withdrawal" }
+  }
+
+  revalidatePath("/admin/withdrawals")
   return { ok: true }
 }
