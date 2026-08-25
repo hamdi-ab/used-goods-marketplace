@@ -13,6 +13,8 @@ const offerIdSchema = z.object({
 
 const amountSchema = z.object({
   amount: z.coerce.number().positive("Amount must be greater than 0"),
+  payoutMethod: z.enum(["bank_transfer", "mobile_money"]).default("bank_transfer"),
+  accountNumber: z.string().optional(),
 })
 
 const txRefSchema = z.object({
@@ -75,6 +77,9 @@ export async function confirmReceiptAction(
 export type WithdrawalState = {
   message?: string
   ok?: boolean
+  fee?: number
+  netAmount?: number
+  payoutMethod?: string
 }
 
 // Seller requests a withdrawal of available earnings to their payout method.
@@ -89,14 +94,19 @@ export async function requestWithdrawalAction(
     return { message: parsed.error.flatten().fieldErrors.amount?.[0] ?? "Invalid amount" }
   }
 
-  const result = await requestWithdrawal(parsed.data.amount)
+  const accountNumber = formValue(formData, "accountNumber")
+  if (!accountNumber || !accountNumber.trim()) {
+    return { message: "Please enter your account number" }
+  }
+
+  const result = await requestWithdrawal(parsed.data.amount, parsed.data.payoutMethod, accountNumber.trim())
   if (!result.ok) {
     return { message: result.error ?? "Could not process withdrawal" }
   }
 
   revalidatePath("/offers/seller")
   revalidatePath("/dashboard")
-  return { ok: true }
+  return { ok: true, fee: result.fee, netAmount: result.netAmount, payoutMethod: parsed.data.payoutMethod }
 }
 
 export type AbandonStaleState = {

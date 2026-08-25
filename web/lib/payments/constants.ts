@@ -36,7 +36,7 @@ export interface Money {
 
 // The one construction site for the money pair, so callers never assemble
 // { amount, currency } by hand and drift the currency.
-export function etb(amount: number): Money {
+export function formatEtb(amount: number): Money {
   return { amount, currency: PAYMENT_CURRENCY }
 }
 

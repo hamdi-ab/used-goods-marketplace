@@ -49,7 +49,7 @@ const openSchema = z.object({
   paymentId: uuidSchema,
   reason: z.enum(["not_received", "not_as_description"]),
   description: z.string().min(1, "Description is required"),
-  evidenceUrls: z.array(z.string()).min(1, "At least one evidence item is required"),
+  evidenceUrls: z.array(z.string()).default([]),
 })
 
 export type OpenDisputeState = {
@@ -65,11 +65,11 @@ export async function openDisputeAction(
     paymentId: formValue(formData, "paymentId"),
     reason: formValue(formData, "reason"),
     description: formValue(formData, "description"),
-    evidenceUrls: parseEvidenceUrls(formData.get("evidenceUrls")),
+    evidenceUrls: [],
   })
 
   if (!parsed.success) {
-    return { message: parsed.error.flatten().fieldErrors.evidenceUrls?.[0] ?? "Invalid request" }
+    return { message: "Invalid request" }
   }
 
   const result = await openDispute({
@@ -85,14 +85,4 @@ export async function openDisputeAction(
 
   revalidatePath("/offers")
   return { ok: true }
-}
-
-function parseEvidenceUrls(value: FormDataEntryValue | null): string[] {
-  if (typeof value !== "string" || !value) return []
-  try {
-    const parsed = JSON.parse(value)
-    return Array.isArray(parsed) ? parsed.filter((u): u is string => typeof u === "string") : []
-  } catch {
-    return []
-  }
 }

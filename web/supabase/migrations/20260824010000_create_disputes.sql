@@ -1,4 +1,4 @@
--- Disputes: buyer-seller transaction disputes resolved by platform admin.
+﻿-- Disputes: buyer-seller transaction disputes resolved by platform admin.
 --
 -- A dispute can be opened by either party after payment but before the deal
 -- closes (buyer confirmation or 48-72h auto-close). The platform admin reviews
@@ -201,8 +201,12 @@ begin
     return jsonb_build_object('ok', false, 'error', 'dispute not found');
   end if;
 
-  -- Only participants can appeal
-  if not (v_dispute.opened_by = (select auth.uid()) or public.is_admin()) then
+  -- Only participants can appeal — not admins
+  if public.is_admin() then
+    return jsonb_build_object('ok', false, 'error', 'not allowed');
+  end if;
+
+  if not (v_dispute.opened_by = (select auth.uid())) then
     -- Also allow the other party (seller if buyer opened, buyer if seller opened)
     if not exists (
       select 1 from public.payments p

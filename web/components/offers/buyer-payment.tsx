@@ -16,11 +16,16 @@ import { DisputeForm } from "@/components/disputes/dispute-form"
 // buyer-confirm step that closes the deal. States: not started / pending+failed
 // (pay again) / paid (confirm receipt) / confirmed (closed).
 export function BuyerPayment({ offer }: { offer: BuyerOfferRow }) {
+  // ALL hooks must be called unconditionally at the top — never after an early
+  // return. React requires the same hook call order across renders; if phase
+  // flips between renders, a hook-after-return would change the hook count and
+  // crash with "Rendered fewer hooks than expected."
   const [payState, payFormAction, payPending] = useActionState(payOfferAction, {})
   const [confirmState, confirmFormAction, confirmPending] = useActionState(
     confirmReceiptAction,
     {}
   )
+  const [showDispute, setShowDispute] = useState(false)
 
   if (offer.status !== "accepted") return null
 
@@ -40,7 +45,6 @@ export function BuyerPayment({ offer }: { offer: BuyerOfferRow }) {
   }
 
   if (phase === "paid") {
-    const [showDispute, setShowDispute] = useState(false)
     return (
       <div className="mt-4 border-t pt-3">
         <div className="flex flex-wrap items-center gap-3">

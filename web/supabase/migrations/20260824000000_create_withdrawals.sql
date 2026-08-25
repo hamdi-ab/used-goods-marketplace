@@ -16,7 +16,8 @@ create table if not exists public.withdrawals (
   net_amount numeric(12, 2) not null,
   currency text not null default 'ETB',
   status public.withdrawal_status not null default 'pending',
-  payout_method text not null default 'bank_transfer',
+  payout_method text not null default 'bank_transfer'
+    check (payout_method in ('bank_transfer', 'mobile_money')),
   payout_details jsonb,
   processed_at timestamptz,
   created_at timestamptz not null default now(),
@@ -78,6 +79,7 @@ declare
   v_used_this_month integer;
   v_fee numeric;
   v_net numeric;
+  v_id uuid;
 begin
   if (select auth.uid()) is null then
     return jsonb_build_object('ok', false, 'error', 'not authenticated');
@@ -112,9 +114,9 @@ begin
     seller_id, amount, fee, net_amount, currency, payout_method, payout_details
   ) values (
     p_seller_id, p_amount, v_fee, v_net, 'ETB', p_payout_method, p_payout_details
-  );
+  ) returning id into v_id;
 
-  return jsonb_build_object('ok', true, 'error', null);
+  return jsonb_build_object('ok', true, 'error', null, 'id', v_id, 'fee', v_fee, 'netAmount', v_net);
 end;
 $$;
 

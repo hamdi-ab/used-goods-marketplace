@@ -14,12 +14,9 @@ import {
   verifyChapaTransaction,
 } from "@/lib/chapa"
 import {
-  etb,
+  formatEtb,
   PLATFORM_FEE_PERCENTAGE,
   WITHDRAWAL_MINIMUM,
-  WITHDRAWAL_FEE,
-  WITHDRAWAL_FREE_PER_MONTH,
-  HOLD_PERIOD_HOURS,
 } from "@/lib/payments/constants"
 
 export type PayOfferResult =
@@ -82,7 +79,7 @@ export async function payOffer(offerId: string): Promise<PayOfferResult> {
   }
 
   const txRef = chapaTxRef()
-  const money = etb(offer.amount)
+  const money = formatEtb(offer.amount)
 
   if (!user.email) {
     return { ok: false, error: "Your account needs an email address to make payments" }
@@ -196,7 +193,9 @@ export async function confirmOfferReceipt(offerId: string): Promise<PaymentResul
 // Seller requests a withdrawal of available earnings. Validates minimum amount,
 // calculates fee if applicable, and creates a pending withdrawal row.
 export async function requestWithdrawal(
-  amount: number
+  amount: number,
+  payoutMethod: "bank_transfer" | "mobile_money" = "bank_transfer",
+  accountNumber?: string
 ): Promise<WithdrawalResult> {
   const user = await requireUser()
   if (!user.email) {
@@ -227,37 +226,22 @@ export async function requestWithdrawal(
     return { ok: false, error: `Insufficient available balance (${available.toFixed(2)} ETB)` }
   }
 
-  // Count all withdrawals this month to determine fee (including failed ones)
-  const startOfMonth = new Date()
-  startOfMonth.setDate(1)
-  startOfMonth.setHours(0, 0, 0, 0)
+  const payoutDetails = accountNumber
+    ? JSON.stringify({ account_number: accountNumber })
+    : null
 
-  const { count } = await supabase
-    .from("withdrawals")
-    .select("*", { count: "exact", head: true })
-    .eq("seller_id", user.id)
-    .gte("created_at", startOfMonth.toISOString())
-
-  const usedThisMonth = count ?? 0
-  const fee = usedThisMonth >= WITHDRAWAL_FREE_PER_MONTH ? WITHDRAWAL_FEE : 0
-  const netAmount = amount - fee
-
-  if (netAmount <= 0) {
-    return { ok: false, error: "Fee exceeds withdrawal amount" }
-  }
-
-  const result = await callOutcomeRpc<{ ok: boolean; error: string | null; id?: string }>(supabase, "request_withdrawal", {
+  const result = await callOutcomeRpc<{ ok: boolean; error: string | null; id?: string; fee?: number; netAmount?: number }>(supabase, "request_withdrawal", {
     p_seller_id: user.id,
     p_amount: amount,
-    p_payout_method: "bank_transfer",
-    p_payout_details: null,
+    p_payout_method: payoutMethod,
+    p_payout_details: payoutDetails,
   }, "requestWithdrawal")
 
   if (!result.ok) {
     return { ok: false, error: result.error ?? "Could not process withdrawal" }
   }
 
-  return { ok: true, id: result.id ?? "", fee, netAmount }
+  return { ok: true, id: result.id ?? "", fee: result.fee ?? 0, netAmount: result.netAmount ?? amount }
 }
 
 

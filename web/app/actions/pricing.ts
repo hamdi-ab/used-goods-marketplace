@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache"
 import { requireUser } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
 import { chapaConfigured, chapaTxRef, initializeChapaTransaction } from "@/lib/chapa"
-import { etb } from "@/lib/payments/constants"
+import { formatEtb } from "@/lib/payments/constants"
 import { SITE_URL } from "@/lib/site"
 
 export interface UpgradeIntentState {
@@ -31,7 +31,7 @@ export async function submitUpgradeIntent(
   }
 
   const txRef = chapaTxRef()
-  const money = etb(199)
+  const money = formatEtb(199)
 
   const { error: insertErr } = await supabase.from("upgrade_intents").insert({
     user_id: user.id,

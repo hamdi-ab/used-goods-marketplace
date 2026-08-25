@@ -7,7 +7,7 @@
  * the server seam into the client graph. (Mirrors lib/reviews/constants.)
  *
  * Badge semantics (documented in the verifications migration, T12):
- *   - verified-seller ("Verified Seller"): profiles.role = 'seller'
+ *   - verified-seller ("Verified Seller"): profiles.role = 'seller' AND (profiles.phone_verified OR profiles.fayda_verified)
  *   - phone ("Phone Verified"):        profiles.phone_verified
  *   - fayda ("Fayda Verified"):        profiles.fayda_verified (placeholder, AC-1)
  *   - empty state "Not verified yet":  none of the above are active.
@@ -79,7 +79,9 @@ export function sellerVerificationBadges(
 ): VerificationBadge[] {
   if (!seller) return []
   const badges: VerificationBadge[] = []
-  if (seller.role === "seller") badges.push("verified-seller")
+  if (seller.role === "seller" && (seller.phone_verified || seller.fayda_verified)) {
+    badges.push("verified-seller")
+  }
   if (seller.phone_verified) badges.push("phone")
   if (seller.fayda_verified) badges.push("fayda")
   return badges
