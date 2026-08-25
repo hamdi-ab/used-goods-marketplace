@@ -103,9 +103,15 @@ export default async function globalSetup(_config: FullConfig) {
       clearTimeout(timer)
       console.log(`warm ${route} -> ${res.status}`)
     } catch (err) {
-      console.log(
-        `warm ${route} -> FAILED ${err instanceof Error ? err.message : err}`
-      )
+      // "destination stream closed early" is benign during Turbopack warmup —
+      // the dev server was busy compiling when the fetch connected. Tests use
+      // page.goto() which waits properly, so this doesn't affect results.
+      const msg = err instanceof Error ? err.message : String(err)
+      if (msg.includes("destination stream")) {
+        console.log(`warm ${route} -> ok (stream closed during compile)`)
+      } else {
+        console.log(`warm ${route} -> FAILED ${msg}`)
+      }
     }
   }
   await resetDemoState()
