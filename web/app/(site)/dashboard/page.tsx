@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { BellIcon, EyeIcon, HandshakeIcon, HeartIcon, InboxIcon, LayoutGridIcon, PlusIcon, ShieldCheckIcon, ShieldIcon, UserRoundIcon } from "lucide-react"
+import { redirect } from "next/navigation"
+import { BellIcon, EyeIcon, HandshakeIcon, HeartIcon, InboxIcon, LayoutGridIcon, PlusIcon, ShieldCheckIcon, UserRoundIcon } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
 import { requireUser, ROLE_LABELS } from "@/lib/auth"
@@ -41,7 +42,14 @@ export default async function DashboardPage({
 }) {
   const sp = await searchParams
   const user = await requireUser()
-  const canSell = user.role === "seller" || user.role === "admin"
+
+  // Admins have their own dashboard at /admin — redirect them there.
+  // The seller dashboard (listings, earnings, AI credits) is seller-only data.
+  if (user.role === "admin") {
+    redirect("/admin")
+  }
+
+  const canSell = user.role === "seller"
   const offset = parseOffset(sp.offset)
 
   const [openOfferCount, sellerUsage, sellerListings, favorites, buyerOffers, unread, profile] =
@@ -246,25 +254,6 @@ export default async function DashboardPage({
             </Button>
           </CardContent>
         </Card>
-
-        {user.role === "admin" ? (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <ShieldIcon className="size-5 text-primary" />
-                Moderation
-              </CardTitle>
-              <CardDescription>
-                Manage users, listings, and the moderation queue.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button asChild variant="outline">
-                <Link href="/admin">Open admin</Link>
-              </Button>
-            </CardContent>
-          </Card>
-        ) : null}
       </div>
     </main>
   )
