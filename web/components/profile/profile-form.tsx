@@ -16,7 +16,6 @@ import type { MyVerificationRow } from "@/lib/verifications"
 import { cn, initials } from "@/lib/utils"
 import { updateProfile, uploadAvatar } from "@/app/actions/profile"
 import { VerificationCard } from "./verification-card"
-import { VerificationBadge } from "@/components/verification/verification-badge"
 
 type ProfileRow = {
   avatar_url: string | null
@@ -309,48 +308,6 @@ export function ProfileForm({
           </form>
 
           <VerificationCard verifications={verifications} faydaAvailable={faydaAvailable} />
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Identity verification</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3">
-              {faydaOutcome ? (
-                faydaOutcome.ok ? (
-                  <p className="text-sm text-green-600">
-                    Your identity was verified with Fayda.
-                  </p>
-                ) : (
-                  <p role="alert" className="text-sm text-destructive">
-                    Fayda verification failed
-                    {faydaOutcome.error ? `: ${faydaOutcome.error}` : "."}
-                  </p>
-                )
-              ) : null}
-              {profile.fayda_verified ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <VerificationBadge variant="fayda" />
-                  <span className="text-sm text-muted-foreground">
-                    Identity authenticated against the national ID.
-                  </span>
-                </div>
-              ) : faydaAvailable ? (
-                <div className="flex flex-wrap items-center gap-3">
-                  <p className="text-sm text-muted-foreground">
-                    Verify your identity against the national ID (demo) to earn the
-                    Fayda trust badge on your listings.
-                  </p>
-                  <Button asChild size="sm">
-                    <Link href="/verify-fayda/start">Verify with Fayda</Link>
-                  </Button>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Fayda verification is not set up in this environment.
-                </p>
-              )}
-            </CardContent>
-          </Card>
         </div>
       </div>
 
