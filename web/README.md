@@ -290,7 +290,7 @@ Redirect to `/login` if not authenticated:
 | Amira Sellers | `amira.sellers@vintch.local` | Seller (Phone ✓) | 85 |
 | Fayad Verified | `fayad.verified@vintch.local` | Seller (Fayda ✓) | 75 |
 | Kebede Trader | `kebede.trader@vintch.local` | Seller (plain) | 60 |
-| Biniam Buyer | `biniam.buyer@vintch.local` | Buyer | 50 |
+| Biniam Buyer | `test@gmail.com` | Buyer | 50 |
 
 ---
 
