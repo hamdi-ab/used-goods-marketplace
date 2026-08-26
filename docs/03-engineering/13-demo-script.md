@@ -64,11 +64,11 @@ Pacing: each shot advances exactly one story step; total ≤ 5:00.
 - **Voice:** "Discovery is fast — and buyers can ask for verified sellers only." (Trust beat T5.)
 
 ### Shot 5 — Result → detail with trust bar (~20 s)
-- **Screen:** Open a card → listing detail shows the seller's Trust score and verified badges.
+- **Screen:** Open a card → listing detail (`/listings/[id]`) shows the seller's trust score, verified badges, and "Contact seller" button.
 - **Voice:** "Every listing carries the seller's trust history, so buyers know who they are dealing with." (Trust beat T6.)
 
 ### Shot 6 — Buyer contacts the seller (~20 s)
-- **Screen:** Telegram / call buttons; a contact attempt is recorded (t.me deep-link / `tel:`).
+- **Screen:** "Contact seller" button → dialog with Telegram / call options; a contact attempt is recorded (t.me deep-link / `tel:`).
 - **Voice:** "Talk first, in the way that suits Addis — Telegram or a call."
 
 ### Shot 7 — Offer lifecycle (~40 s)
@@ -76,7 +76,7 @@ Pacing: each shot advances exactly one story step; total ≤ 5:00.
 - **Voice:** "Then make an offer, and the seller sees it on their dashboard the moment it lands."
 
 ### Shot 8 — (optional) Admin moderation (~30 s)
-- **Screen:** Admin queue sees the new listing / a reported listing; toggle on/off.
+- **Screen:** Sign in as admin → `/admin` dashboard. Moderation queue sees reports, listings, users, verifications, withdrawals.
 - **Voice:** "And there is a real governance layer behind the marketplace."
 
 ### Shot 9 — Closing (~15 s)
@@ -204,13 +204,13 @@ Jiji Boost Packages), and the quota meters sell headroom, not restriction.
 
 ### Monetization beat M1 — the VinTech account card (Shot 2/3)
 - **Account:** Amira Sellers (dashboard).
-- **Screen:** dashboard "VinTech account" card (T28): `Active listings 2/5` and
-  `AI credits 1/3` progress bars, plan label **Free**, an "Upgrade to Pro" CTA.
+- **Screen:** dashboard "VinTech account" card (T28): `Active listings X/5` and
+  `AI credits Y/3` progress bars, plan label **Free**, an "Upgrade to Pro" CTA.
 - **Narrator:** "Every seller sees live usage — the free plan is a real starter,
   with headroom shown as headroom."
 
 ### Monetization beat M2 — hit the cap, sell a slot (Shot 7)
-- **Account:** Kebede Trader (already near the 5-listing cap) → `/sell`.
+- **Account:** Any seller → `/sell` with 5+ active listings.
 - **Screen:** publishing an over-cap listing is rejected with the §26 message
   ("You've reached your free plan's limit") + actions `[Manage Listings]`
   `[Upgrade to Pro]`; listing still works via selling/archiving (sold frees a
