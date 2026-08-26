@@ -4,7 +4,7 @@
 export const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL ??
   (process.env.NODE_ENV === "production"
-    ? "https://vintech-marketplace.vercel.app"
+    ? "https://dagimgebeya.c2studio.dev"
     : "http://localhost:3000")
 
 export const SITE_TITLE = "Dagim Gebeya - Buy and sell second-hand goods in Ethiopia"
