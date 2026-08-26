@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { MapPinIcon, SendIcon } from "lucide-react"
+import { MapPinIcon, PhoneIcon, SendIcon } from "lucide-react"
 
 import { ROLE_LABELS, type UserRole, getCurrentUser } from "@/lib/auth"
 import { fetchPublicProfile } from "@/lib/profiles"
@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ContactButton } from "@/components/contact/contact-button"
+import { Breadcrumbs } from "@/components/ui/breadcrumbs"
 import { ReportButton } from "@/components/reports/report-button"
 import { ReviewStars } from "@/components/reviews/review-stars"
 import { ListingCard } from "@/components/listings/listing-card"
@@ -58,16 +59,26 @@ export default async function UserProfilePage({
   ])
   const contactInfo = user ? await fetchSellerContactInfo(id) : null
 
+  const isOwnProfile = user?.id === id
+
   return (
     <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6">
-        <Link
-          href="/search"
-          className="inline-flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+      <Breadcrumbs
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Browse", href: "/search" },
+          { label: profile.full_name ?? "Seller" },
+        ]}
+      />
+
+      {isOwnProfile ? (
+        <a
+          href="/profile"
+          className="mb-4 inline-flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
-          ← Back to listings
-        </Link>
-      </div>
+          ← Back to my profile
+        </a>
+      ) : null}
 
       {/* Harmonized bento grid */}
       <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-12">
@@ -151,6 +162,17 @@ export default async function UserProfilePage({
           )}
 
           <div className="flex flex-col gap-3 border-t pt-4 text-sm">
+            {profile.phone && (
+              <div className="flex items-center gap-3">
+                <PhoneIcon className="size-4 shrink-0 text-muted-foreground" />
+                <a
+                  href={`tel:${profile.phone}`}
+                  className="text-primary underline"
+                >
+                  {profile.phone}
+                </a>
+              </div>
+            )}
             <div className="flex items-center gap-3">
               <MapPinIcon className="size-4 shrink-0 text-muted-foreground" />
               <span>

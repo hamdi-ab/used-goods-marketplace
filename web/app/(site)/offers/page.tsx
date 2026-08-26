@@ -4,12 +4,14 @@ import Image from "next/image"
 import Link from "next/link"
 import { SendIcon } from "lucide-react"
 
-import { requireUser } from "@/lib/auth"
+import { requireTrader } from "@/lib/auth"
 import { fetchBuyerOffers, fetchOfferEvents } from "@/lib/offers"
 import { verifyOfferPayment } from "@/lib/payments"
+import type { OfferPayment } from "@/lib/payments/constants"
 import { formatPrice } from "@/lib/listings"
 import { nextOffset, parseOffset } from "@/lib/pagination"
 import { formatShortDate } from "@/lib/utils"
+import { createClient } from "@/lib/supabase/server"
 import { OfferStatusBadge } from "@/components/offers/offer-status-badge"
 import { BuyerOfferActions } from "@/components/offers/buyer-offer-actions"
 import { BuyerPayment } from "@/components/offers/buyer-payment"
@@ -31,9 +33,10 @@ export default async function OffersPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  const user = await requireUser()
+  const user = await requireTrader()
   const params = await searchParams
   const offset = parseOffset(params.offset)
+  const supabase = await createClient()
 
   const { offers, hasMore, error } = await fetchBuyerOffers(user.id, {
     offset,
@@ -47,20 +50,62 @@ export default async function OffersPage({
   )
 
   let verifyResult: { ok: true; amount: number } | { ok: false; error: string } | null = null
-  if (typeof params.tx_ref === "string" && typeof params.offer === "string") {
-    const row = offers.find((o) => o.id === params.offer)?.payment
-    if (!row || row.status === "pending") {
+  if (typeof params.tx_ref === "string") {
+    // Find the offer either by the offer param, or by looking up the payment row
+    // by tx_ref (Chapa sometimes mangles the offer param in the callback URL).
+    let offer = typeof params.offer === "string"
+      ? offers.find((o) => o.id === params.offer)
+      : undefined
+    if (!offer) {
+      const { data: paymentByTxRef } = await supabase
+        .from("payments")
+        .select("offer_id")
+        .eq("tx_ref", params.tx_ref)
+        .maybeSingle()
+      if (paymentByTxRef) {
+        offer = offers.find((o) => o.id === paymentByTxRef.offer_id)
+      }
+    }
+    const row = offer?.payment
+    const effectiveOfferId = offer?.id ?? (typeof params.offer === "string" ? params.offer : null)
+    if (effectiveOfferId && (!row || row.status === "pending")) {
       const result = await verifyOfferPayment({
-        offerId: params.offer,
+        offerId: effectiveOfferId,
         txRef: params.tx_ref,
       })
       verifyResult = result.ok
         ? { ok: true, amount: result.amount }
         : { ok: false, error: result.error }
-    } else if (row.status === "paid") {
+    } else if (row?.status === "paid") {
       verifyResult = { ok: true, amount: row.amount }
     } else {
       verifyResult = { ok: false, error: "Payment not completed" }
+    }
+    // After a callback-driven verify, re-fetch this offer's payment so the child
+    // component (BuyerPayment) always sees the latest state from the DB.
+    if (verifyResult?.ok && offer) {
+      const { data: freshPayment } = await supabase
+        .from("payments")
+        .select("id, amount, currency, status, mode, buyer_confirmed, paid_at, confirmed_at, hold_expires_at, tx_ref, abandoned_at")
+        .eq("offer_id", offer.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (freshPayment) {
+        offer.payment = {
+          id: freshPayment.id,
+          amount: Number(freshPayment.amount),
+          currency: freshPayment.currency,
+          status: freshPayment.status as OfferPayment["status"],
+          mode: freshPayment.mode,
+          buyer_confirmed: freshPayment.buyer_confirmed,
+          paid_at: freshPayment.paid_at,
+          confirmed_at: freshPayment.confirmed_at,
+          hold_expires_at: freshPayment.hold_expires_at,
+          tx_ref: freshPayment.tx_ref,
+          abandoned_at: freshPayment.abandoned_at,
+        }
+      }
     }
   }
 
@@ -237,9 +282,6 @@ export default async function OffersPage({
         <h1 className="font-heading text-2xl font-semibold text-foreground">
           My offers
         </h1>
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/offers/seller">View incoming offers →</Link>
-        </Button>
       </div>
 
       {body}

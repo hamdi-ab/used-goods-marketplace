@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState, useEffect, useRef, useState, type ChangeEvent } from "react"
+import { useActionState, useEffect, useRef, useState, useTransition, type ChangeEvent } from "react"
 import { useRouter } from "next/navigation"
 import { XIcon, UploadIcon } from "lucide-react"
 
@@ -28,6 +28,7 @@ export function CreateListingForm({
 }) {
   const router = useRouter()
   const [state, formAction, pending] = useActionState(createListing, {})
+  const [isPending, startTransition] = useTransition()
   const [previews, setPreviews] = useState<string[]>([])
   const [photoFiles, setPhotoFiles] = useState<File[]>([])
   const fileRef = useRef<HTMLInputElement>(null)
@@ -72,7 +73,18 @@ export function CreateListingForm({
   }
 
   return (
-    <form action={formAction}>
+    <form
+      action={formAction}
+      onSubmit={(e) => {
+        const formData = new FormData(e.currentTarget)
+        formData.delete("photos")
+        photoFiles.forEach((f) => formData.append("photos", f))
+        startTransition(() => {
+          formAction(formData)
+        })
+        e.preventDefault()
+      }}
+    >
       <input type="hidden" name="ai_assisted" value={aiAssisted ? "on" : ""} />
 
       <Card className="mb-6">

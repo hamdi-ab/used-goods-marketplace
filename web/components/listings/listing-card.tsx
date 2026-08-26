@@ -43,7 +43,7 @@ export function ListingCard({
   const trustBadges = sellerVerificationBadges(seller)
 
   return (
-    <div className="group w-full overflow-hidden rounded-xl border bg-card transition-shadow duration-200 hover:shadow-lg">
+    <div className="group flex h-full w-full flex-col overflow-hidden rounded-xl border bg-card hover-lift">
       <div className="relative">
         <Link href={href} aria-label={listing.title}>
           <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
@@ -53,7 +53,7 @@ export function ListingCard({
                 alt=""
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className={`object-cover transition-transform duration-200 group-hover:scale-105 ${
+                className={`object-cover transition-transform duration-300 ease-out group-hover:scale-105 ${
                   listing.status === "sold" ? "opacity-50" : ""
                 }`}
               />
@@ -62,13 +62,6 @@ export function ListingCard({
                 No photo
               </div>
             )}
-            {listing.status === "sold" ? (
-              <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                <span className="rounded-md bg-foreground/80 px-3 py-1 text-sm font-bold uppercase tracking-wider text-background">
-                  {LISTING_STATUS_LABELS.sold}
-                </span>
-              </div>
-            ) : null}
           </div>
         </Link>
         {isBoostActive(listing.boosted_until) ? (
@@ -84,8 +77,11 @@ export function ListingCard({
         ) : null}
       </div>
 
-      <Link href={href} className="block space-y-1.5 px-3.5 pb-4 pt-3">
-        <p className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">
+      <Link href={href} className="flex flex-1 flex-col space-y-1.5 px-3.5 pb-4 pt-3">
+        <p
+          className="line-clamp-2 min-h-[2.5rem] text-sm font-semibold leading-snug text-foreground"
+          title={listing.title}
+        >
           {listing.title}
         </p>
         <p className="text-[15px] font-extrabold text-primary">
@@ -98,7 +94,7 @@ export function ListingCard({
           ) : null}
         </div>
         {seller ? (
-          <div className="flex items-center gap-1.5 pt-0.5">
+          <div className="mt-auto flex items-center gap-1.5 pt-0.5">
             <Avatar className="h-5 w-5">
               <AvatarImage
                 src={seller.avatar_url ?? ""}

@@ -80,8 +80,11 @@ export async function generateListingSuggestions(
   categories: Category[],
   context: AIPromptContext = {}
 ): Promise<AIListingResult> {
+  const t0 = Date.now()
+  console.log(`[AI] start: ${photos.length} photos, ${categories.length} categories`)
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
+    console.log("[AI] no API key")
     return { ok: false, reason: "unavailable", message: "AI assist is unavailable right now" }
   }
 
@@ -90,25 +93,36 @@ export async function generateListingSuggestions(
   // shared rate limiter.
   const parts: { mimeType: string; data: string }[] = []
   for (const file of photos) {
+    const tValidate = Date.now()
     const invalid = await validateImageFile(file)
+    console.log(`[AI] validateImageFile(${file.name}, ${file.size}B): ${Date.now() - tValidate}ms, invalid=${invalid}`)
     if (invalid) {
       return { ok: false, reason: "degraded", message: invalid }
     }
     // validateImageFile guarantees a real image, so the re-detected mime is
     // non-null; it is the forwarded mime, never the client-declared file.type.
+    const tMime = Date.now()
     const mime = (await detectImageMime(file)) ?? ""
+    console.log(`[AI] detectImageMime(${file.name}): ${Date.now() - tMime}ms, mime=${mime}`)
+    const tInline = Date.now()
     parts.push(await toInlinePart(file, mime))
+    console.log(`[AI] toInlinePart(${file.name}): ${Date.now() - tInline}ms, base64=${parts[parts.length - 1].data.length}chars`)
   }
   if (!parts.length) {
+    console.log("[AI] no parts after processing")
     return { ok: false, reason: "degraded", message: "No readable photos" }
   }
 
   const categoryNames = [...new Set(categories.map((c) => c.name))]
   if (!categoryNames.length) {
+    console.log("[AI] no category names")
     return { ok: false, reason: "degraded", message: "No categories available" }
   }
 
-  if (!(await aiRequestAllowed())) {
+  const tRate = Date.now()
+  const rateAllowed = await aiRequestAllowed()
+  console.log(`[AI] aiRequestAllowed: ${Date.now() - tRate}ms, allowed=${rateAllowed}`)
+  if (!rateAllowed) {
     return {
       ok: false,
       reason: "rate_limited",
@@ -135,8 +149,10 @@ export async function generateListingSuggestions(
       responseSchema: buildResponseSchema(categoryNames),
     },
   }
+  console.log(`[AI] request body: ${JSON.stringify(body).length}bytes, ${parts.length} images`)
 
   let res: Response
+  const tFetch = Date.now()
   try {
     res = await fetch(url, {
       method: "POST",
@@ -146,9 +162,11 @@ export async function generateListingSuggestions(
       // leaving the seller stuck.
       signal: AbortSignal.timeout(AI_LISTING_TIMEOUT_MS),
     })
-  } catch {
+  } catch (err) {
+    console.log(`[AI] fetch error after ${Date.now() - tFetch}ms:`, err)
     return { ok: false, reason: "degraded", message: "AI request failed" }
   }
+  console.log(`[AI] fetch done: ${Date.now() - tFetch}ms, status=${res.status}`)
 
   if (res.status === 429) {
     return {
@@ -165,12 +183,17 @@ export async function generateListingSuggestions(
     }
   }
   if (!res.ok) {
+    const errText = await res.text().catch(() => "")
+    console.log(`[AI] non-ok response: ${res.status}, body=${errText.slice(0, 200)}`)
     return { ok: false, reason: "degraded", message: "AI request failed" }
   }
 
+  const tJson = Date.now()
   const json = (await res.json().catch(() => null)) as GeminiResponse | null
+  console.log(`[AI] json parse: ${Date.now() - tJson}ms, hasCandidates=${!!json?.candidates?.length}`)
   const text = json?.candidates?.[0]?.content?.parts?.[0]?.text
   if (!text) {
+    console.log("[AI] no text in response:", JSON.stringify(json).slice(0, 300))
     return { ok: false, reason: "degraded", message: "AI request failed" }
   }
 
@@ -178,16 +201,19 @@ export async function generateListingSuggestions(
   try {
     parsed = JSON.parse(text)
   } catch {
+    console.log("[AI] JSON parse failed:", text.slice(0, 200))
     return { ok: false, reason: "degraded", message: "AI request failed" }
   }
 
   const result = suggestionSchema(categoryNames).safeParse(parsed)
   if (!result.success) {
+    console.log("[AI] schema validation failed:", result.error.message)
     return { ok: false, reason: "degraded", message: "AI request failed" }
   }
 
   const out = result.data
   const category = categories.find((c) => c.name === out.category)
+  console.log(`[AI] done: total ${Date.now() - t0}ms, title="${out.title.slice(0, 30)}..."`)
   return {
     ok: true,
     suggestion: {

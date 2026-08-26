@@ -6,6 +6,7 @@ import { faydaMockMode } from "@/lib/fayda/verification"
 import { getProviderKeys, getDevClientKeys, toJwks } from "@/lib/fayda/keys"
 import type { FaydaKeyPair } from "@/lib/fayda/keys"
 import { FAYDA_MOCK_KID, FAYDA_TEST_SUB, FAYDA_ENV } from "@/lib/fayda/constants"
+import { faydaIssuerBase, faydaRedirectUri } from "@/lib/site"
 import {
   validateAuthorizeRequest,
   issueAuthorizationCode,
@@ -28,13 +29,11 @@ function providerKeys(): FaydaKeyPair {
 }
 
 function registeredRedirectUri(): string {
-  // In dev the registered callback is the app's (research §3 seam).
-  return process.env[FAYDA_ENV.REDIRECT_URI] ?? ""
+  return faydaRedirectUri()
 }
 
 function issuerBase(request: Request): string {
-  const url = new URL(request.url)
-  return `${url.protocol}//${url.host}/mock-fayda`
+  return faydaIssuerBase()
 }
 
 // Discovery: a faithful eSignet surface so the marketplace's discovery-fetching
@@ -79,11 +78,11 @@ function redirectError(dest: string | null, error: string): NextResponse {
   return NextResponse.redirect(url, { status: 303 })
 }
 
-// Dev-only guardrail (ADR-020 D6): the mock provider never mounts in a
-// production build, and is additionally gated on FAYDA_MOCK=true. This keeps a
-// fake-identity surface out of any deployed build.
+// Demo-mode gate: the mock provider is active whenever FAYDA_MOCK=true.
+// For the competition demo we run the mock in the deployed build (no real
+// eSignet credentials available). Set FAYDA_MOCK=false + real FAYDA_ISSUER_URL
+// to switch to production Fayda — the OIDC surface is identical.
 function mockAllowed(): boolean {
-  if (process.env.NODE_ENV === "production") return false
   return faydaMockMode()
 }
 

@@ -1,10 +1,9 @@
 import type { Metadata } from "next"
 import type { ReactNode } from "react"
-import Image from "next/image"
 import Link from "next/link"
 import { InboxIcon } from "lucide-react"
 
-import { requireUser } from "@/lib/auth"
+import { requireTrader } from "@/lib/auth"
 import { fetchSellerOffers, OPEN_OFFER_STATUSES } from "@/lib/offers"
 import { formatPrice } from "@/lib/listings"
 import { nextOffset, parseOffset } from "@/lib/pagination"
@@ -13,6 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { OfferStatusBadge } from "@/components/offers/offer-status-badge"
 import { SellerOfferActions } from "@/components/offers/seller-offer-actions"
 import { SellerPaymentBadge } from "@/components/offers/seller-payment-badge"
+import { Breadcrumbs } from "@/components/ui/breadcrumbs"
 import { Button } from "@/components/ui/button"
 
 export const dynamic = "force-dynamic"
@@ -28,7 +28,7 @@ export default async function SellerOffersPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const sp = await searchParams
-  const user = await requireUser()
+  const user = await requireTrader()
   const offset = parseOffset(typeof sp.offset === "string" ? sp.offset : undefined)
   const { offers, hasMore, error } = await fetchSellerOffers(user.id, {
     offset,
@@ -171,8 +171,15 @@ export default async function SellerOffersPage({
   }
 
   return (
-    <main className="mx-auto w-full max-w-[960px] flex-1 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-2 flex flex-wrap items-end justify-between gap-3">
+    <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6 lg:px-8 min-h-[60vh]">
+      <Breadcrumbs
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Incoming offers" },
+        ]}
+      />
+
+      <div className="mt-4">
         <div className="flex items-center gap-3">
           <h1 className="font-heading text-2xl font-semibold text-foreground">
             Incoming offers
@@ -183,16 +190,14 @@ export default async function SellerOffersPage({
             </span>
           ) : null}
         </div>
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/offers">← View my offers</Link>
-        </Button>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Offers buyers have made on your listings.
+        </p>
       </div>
-      <p className="mb-8 text-sm text-muted-foreground">
-        Offers from buyers on your listings. Accept the right price and the
-        listing is marked sold.
-      </p>
 
-      {body}
+      <div className="mt-6">
+        {body}
+      </div>
     </main>
   )
 }

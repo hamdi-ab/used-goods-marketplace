@@ -21,6 +21,7 @@ marketplace. Target length: **3–5 minutes, ≤ 5:00**.
 - [ ] No local stack in the video — record against the production URL.
 - [ ] Recording tool ready (OS-native or OBS); trim to ≤ 5:00.
 - [ ] Browser window clean, e.g. 1440×900, no bookmarks bar clutter.
+- [ ] Mock services verified: `PHONE_MOCK=true`, `FAYDA_MOCK=true`, `CHAPA_DEMO_FALLBACK=false` (test mode).
 
 ## 1. Demo accounts
 
@@ -28,6 +29,19 @@ Use the demo accounts (canonical table in
 [`web/README.md`](../../web/README.md) under "Database migrations"): sign in as
 the buyer (`biniam.buyer@vintch.local`) for the search/offer flow, and as a
 seller (e.g. `amira.sellers@vintch.local`) for the create-listing flow.
+
+### Demo environment — mock services for judges
+
+The deployed demo runs with **mock external services** because real provider credentials are unavailable for the competition:
+
+| Service | Demo behavior | Production swap |
+|---------|---------------|-----------------|
+| **Phone (SMS OTP)** | Mock mode (`PHONE_MOCK=true`). No real SMS sent. Enter `123456` to verify. | Set `PHONE_MOCK=false` to use real Supabase Auth SMS OTP. |
+| **Fayda (national ID)** | In-app mock OIDC provider at `/mock-fayda/*`. Returns test identity `fayad.verified@vintch.local`. Gated on `FAYDA_MOCK=true`. | Set `FAYDA_MOCK=false` + real `FAYDA_ISSUER_URL`, `FAYDA_CLIENT_ID`, `FAYDA_CLIENT_PRIVATE_JWK` from partner.fayda.et. OIDC surface is identical. |
+| **Chapa (payments)** | Test-mode secret key (`CHASECK_TEST-...`). Real Chapa API calls in sandbox. | Replace with live secret key from dashboard.chapa.co. |
+| **Gemini AI** | Real API key, `gemini-3.1-flash` model. AI listing assistant works in demo. | Same — already production. |
+
+The Fayda mock runs in **all environments** (dev + deployed) — no localhost references. URLs auto-derive from `SITE_URL` in `web/lib/site.ts`. See [`10-submission-readiness.md` §5a](10-submission-readiness.md) for details.
 
 ## 2. Shot list
 
@@ -38,7 +52,7 @@ Pacing: each shot advances exactly one story step; total ≤ 5:00.
 - **Voice:** "The fastest and most trustworthy way to buy and sell used goods in Addis Ababa."
 
 ### Shot 2 — Seller creates a listing (~60 s)
-- **Screen:** Sign in as **Amira** → `/sell`. Fill title, description, price in ETB, condition, Addis location; pick the AI Listing Assistant to suggest a title/description/category (AI differentiator, optional path).
+- **Screen:** Sign in as **Amira** (`amira.sellers@vintch.local`) → `/sell`. Fill title, description, price in ETB, condition, Addis location; pick the AI Listing Assistant to suggest a title/description/category (AI differentiator, optional path).
 - **Voice:** "Listing is effortless — and the AI assistant writes a convincing post in seconds."
 
 ### Shot 3 — Listing goes live, with the trust bar (~20 s)
@@ -46,15 +60,15 @@ Pacing: each shot advances exactly one story step; total ≤ 5:00.
 - **Voice:** "Live instantly — with the trust bar buyers look for." (Trust beats T2–T4.)
 
 ### Shot 4 — Buyer searches and filters (~30 s)
-- **Screen:** Sign in as **Biniam**. Keyword search + filters (category / price / condition / city / **Verified seller only**) → results snap in.
+- **Screen:** Sign in as **Biniam** (`test@gmail.com`). Keyword search + filters (category / price / condition / city / **Verified seller only**) → results snap in.
 - **Voice:** "Discovery is fast — and buyers can ask for verified sellers only." (Trust beat T5.)
 
 ### Shot 5 — Result → detail with trust bar (~20 s)
-- **Screen:** Open a card → listing detail shows the seller's Trust score and verified badges.
+- **Screen:** Open a card → listing detail (`/listings/[id]`) shows the seller's trust score, verified badges, and "Contact seller" button.
 - **Voice:** "Every listing carries the seller's trust history, so buyers know who they are dealing with." (Trust beat T6.)
 
 ### Shot 6 — Buyer contacts the seller (~20 s)
-- **Screen:** Telegram / call buttons; a contact attempt is recorded (t.me deep-link / `tel:`).
+- **Screen:** "Contact seller" button → dialog with Telegram / call options; a contact attempt is recorded (t.me deep-link / `tel:`).
 - **Voice:** "Talk first, in the way that suits Addis — Telegram or a call."
 
 ### Shot 7 — Offer lifecycle (~40 s)
@@ -62,7 +76,7 @@ Pacing: each shot advances exactly one story step; total ≤ 5:00.
 - **Voice:** "Then make an offer, and the seller sees it on their dashboard the moment it lands."
 
 ### Shot 8 — (optional) Admin moderation (~30 s)
-- **Screen:** Admin queue sees the new listing / a reported listing; toggle on/off.
+- **Screen:** Sign in as admin → `/admin` dashboard. Moderation queue sees reports, listings, users, verifications, withdrawals.
 - **Voice:** "And there is a real governance layer behind the marketplace."
 
 ### Shot 9 — Closing (~15 s)
@@ -86,7 +100,9 @@ Demo accounts (from `web/supabase/seed.sql`, all `demo1234`):
 | Amira Sellers | `amira.sellers@vintch.local` | Verified Seller + Phone | 85 |
 | Fayad Verified | `fayad.verified@vintch.local` | Verified Seller + Fayda | 75 |
 | Kebede Trader | `kebede.trader@vintch.local` | Verified Seller only | 60 |
-| Biniam Buyer | `biniam.buyer@vintch.local` | (buyer — none) | 50 |
+| Biniam Buyer | `test@gmail.com` | (buyer — none) | 50 |
+
+> **Note:** The buyer account email is `test@gmail.com` in the seed (not `@vintch.local`).
 
 ### Trust beat T1 — become a seller is one tap (Shot 2)
 - **Account:** a fresh buyer (Biniam) or the judge's own signup.
@@ -107,25 +123,26 @@ Demo accounts (from `web/supabase/seed.sql`, all `demo1234`):
 - **Narrator:** "Every card carries the seller's earned badges and a trust
   score — the same on home, search, and the detail page."
 
-### Trust beat T3 — earn a phone badge, best-effort OTP (Shot 3)
+### Trust beat T3 — earn a phone badge (demo: enter 123456)
 - **Account:** Amira Sellers (`/profile`).
 - **Screen:** the Verification card (`components/profile/verification-card.tsx`)
   under the profile form.
 - **What happens on screen:** Phone row shows *Verified* (seed). For a fresh
-  seller: "Request verification" → the #99 decision — the in-profile OTP panel
-  (Supabase test-OTP sandbox) auto-badges on success; on SMS failure it falls
-  back to the admin-reviewed request.
-- **Narrator:** "Phone verification is offered, not forced — and if a code
-  can't be delivered, an admin can confirm it instead. It never blocks listing."
+  seller: "Request verification" → in demo mode, enter any phone → enter code
+  `123456` → auto-badges on success. Production uses real Supabase SMS OTP.
+- **Narrator:** "Phone verification is offered, not forced — it never blocks listing."
 
-### Trust beat T4 — one-click Fayda verification (Shot 3)
+### Trust beat T4 — one-click Fayda verification (demo: mock OIDC)
 - **Account:** Fayad Verified (`/profile`).
 - **Screen:** the same Verification card, Fayda row.
-- **What happens on screen:** one click → the mock Fayda OIDC (T21, live on
-  hosted) → `record_fayda_verification` flips `fayda_verified` and the badge
-  row gains *Fayda Verified*; trust jumps (50 → 70 on a fresh seller).
+- **What happens on screen:** one click → the mock Fayda OIDC provider (runs in
+  dev + deployed) → consent screen (demo identity) → `record_fayda_verification`
+  flips `fayda_verified` and the badge row gains *Fayda Verified*; trust jumps.
 - **Narrator:** "Fayda ID verification is a login, not a document upload —
   seconds, no PII stored. Verified sellers rank higher in search."
+- **Note:** The deployed demo uses an in-app mock OIDC provider (no real eSignet
+  credentials for the competition). The verify-only OIDC surface is identical to
+  production Fayda — swapping to real credentials is config-only.
 
 ### Trust beat T5 — the buyer filters verified sellers (Shot 4)
 - **Account:** Biniam Buyer → `/search`.
@@ -187,13 +204,13 @@ Jiji Boost Packages), and the quota meters sell headroom, not restriction.
 
 ### Monetization beat M1 — the VinTech account card (Shot 2/3)
 - **Account:** Amira Sellers (dashboard).
-- **Screen:** dashboard "VinTech account" card (T28): `Active listings 2/5` and
-  `AI credits 1/3` progress bars, plan label **Free**, an "Upgrade to Pro" CTA.
+- **Screen:** dashboard "VinTech account" card (T28): `Active listings X/5` and
+  `AI credits Y/3` progress bars, plan label **Free**, an "Upgrade to Pro" CTA.
 - **Narrator:** "Every seller sees live usage — the free plan is a real starter,
   with headroom shown as headroom."
 
 ### Monetization beat M2 — hit the cap, sell a slot (Shot 7)
-- **Account:** Kebede Trader (already near the 5-listing cap) → `/sell`.
+- **Account:** Any seller → `/sell` with 5+ active listings.
 - **Screen:** publishing an over-cap listing is rejected with the §26 message
   ("You've reached your free plan's limit") + actions `[Manage Listings]`
   `[Upgrade to Pro]`; listing still works via selling/archiving (sold frees a
@@ -213,17 +230,14 @@ Jiji Boost Packages), and the quota meters sell headroom, not restriction.
 ### Monetization beat M4 — the pricing ladder (Shot 9, before closing)
 - **Account:** any; footer → `/pricing`.
 - **Screen:** Free / Pro / Business three-column table (T27); Pro highlighted
-  at **199 ETB/month** with a "pricing being validated" note; Business "Contact
-  us / coming soon"; "Start Pro" captures email as intent only — mock success,
-  no billing.
+  at **199 ETB/month**. Logged-in Pro users see "You're on Pro" instead of
+  upgrade CTA. Business "Contact us / coming soon".
 - **Narrator:** "Free stays genuinely usable. Pro is capacity for frequent
-  sellers. And when billing opens, the intent we capture today becomes the
-  waitlist."
+  sellers. Upgrade uses Chapa test mode — real sandbox, no live billing."
 
 ### What is NOT in the monetization storyline
 - No real billing/payment anywhere (ADR-021 + §17) — boosts and Pro are demo
-  surfaces; the Chapa bonus beat (2c) is the only "money moves" moment and it
-  is optional.
+  surfaces. The Chapa upgrade flow runs in test mode (sandbox, no live charges).
 - No listing fees, no paywall on core listing/search/contact.
 
 ## 3. Time budget

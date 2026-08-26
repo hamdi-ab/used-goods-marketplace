@@ -90,7 +90,7 @@ function ListingRow({ listing }: { listing: SellerListingRow }) {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-4 ml-auto pl-8 mt-3 sm:mt-0">
             <Button asChild variant="outline">
               <Link href={`/listings/${listing.id}/edit`}>
                 <PencilIcon className="mr-1.5 size-3.5" />
@@ -238,9 +238,9 @@ export function ListingManager({
   const hiddenCount = filtered.length - visible.length
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-6">
       <div
-        className="flex flex-wrap gap-2"
+        className="flex flex-wrap gap-2 mb-2"
         role="group"
         aria-label="Filter listings by status"
       >

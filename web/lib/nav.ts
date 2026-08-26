@@ -11,8 +11,10 @@ import {
   BarChart3Icon,
   ShieldCheckIcon,
   UserCogIcon,
+  LayoutGridIcon,
   type LucideIcon,
 } from "lucide-react"
+import type { UserRole } from "@/lib/auth/types"
 
 export type NavItem = {
   title: string
@@ -33,21 +35,52 @@ export function buildLoginUrl(pathname: string): string {
 
 // Component standards §12 caps primary destinations at 5. Dashboard and
 // Profile live in the account menu (components/auth/user-menu.tsx) instead.
-export const primaryNav: NavItem[] = [
-  { title: "Home", href: "/" },
-  { title: "Browse", href: "/search" },
-  { title: "Sell", href: "/sell" },
-  { title: "Offers", href: "/offers" },
-  { title: "Favorites", href: "/favorites" },
-]
+//
+// Nav is role-scoped: buyers see "My offers" (offers they made), sellers see
+// "Incoming offers" (offers they received). This follows the Airbnb pattern
+// (Trips vs Reservations) — each role sees only their mental model, no
+// cross-contamination, no confusing links to the other role's view.
+export function primaryNav(role: UserRole | null): NavItem[] {
+  if (role === "admin") {
+    return [
+      { title: "Home", href: "/", icon: HomeIcon },
+      { title: "Browse", href: "/search", icon: LayoutGridIcon },
+    ]
+  }
 
-export const mobileNav: NavItem[] = [
-  { title: "Home", href: "/", icon: HomeIcon },
-  { title: "Search", href: "/search", icon: SearchIcon },
-  { title: "Sell", href: "/sell", icon: PlusIcon },
-  { title: "Offers", href: "/offers", icon: HandshakeIcon },
-  { title: "Favorites", href: "/favorites", icon: HeartIcon },
-]
+  const offers: NavItem =
+    role === "seller"
+      ? { title: "Incoming offers", href: "/offers/seller", icon: HandshakeIcon }
+      : { title: "My offers", href: "/offers", icon: HandshakeIcon }
+
+  return [
+    { title: "Home", href: "/", icon: HomeIcon },
+    { title: "Browse", href: "/search", icon: LayoutGridIcon },
+    offers,
+    { title: "Favorites", href: "/favorites", icon: HeartIcon },
+  ]
+}
+
+export function mobileNav(role: UserRole | null): NavItem[] {
+  if (role === "admin") {
+    return [
+      { title: "Home", href: "/", icon: HomeIcon },
+      { title: "Search", href: "/search", icon: SearchIcon },
+    ]
+  }
+
+  const offers: NavItem =
+    role === "seller"
+      ? { title: "Incoming offers", href: "/offers/seller", icon: HandshakeIcon }
+      : { title: "My offers", href: "/offers", icon: HandshakeIcon }
+
+  return [
+    { title: "Home", href: "/", icon: HomeIcon },
+    { title: "Search", href: "/search", icon: SearchIcon },
+    offers,
+    { title: "Favorites", href: "/favorites", icon: HeartIcon },
+  ]
+}
 
 export const footerNav: NavItem[] = [
   { title: "About", href: "/about" },

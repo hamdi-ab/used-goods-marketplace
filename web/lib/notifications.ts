@@ -115,3 +115,34 @@ export async function markAllNotificationsRead(
   if (error) return { ok: false, error: error.message }
   return { ok: true, error: null }
 }
+
+export interface CreateNotificationParams {
+  userId: string
+  type: NotificationType
+  title: string
+  body?: string | null
+  metadata?: Record<string, string | number | null>
+}
+
+/** Insert a notification for a user. */
+export async function createNotification(
+  params: CreateNotificationParams,
+  client?: Supabase
+): Promise<{ ok: boolean; error: string | null }> {
+  const supabase = client ?? (await createClient())
+
+  const { error } = await supabase.from("notifications").insert({
+    user_id: params.userId,
+    type: params.type,
+    title: params.title,
+    body: params.body ?? null,
+    metadata: params.metadata ?? {},
+    is_read: false,
+  })
+
+  if (error) {
+    console.error("createNotification:", error.message)
+    return { ok: false, error: error.message }
+  }
+  return { ok: true, error: null }
+}

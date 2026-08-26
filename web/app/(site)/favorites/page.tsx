@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Heart } from "lucide-react"
 
-import { requireUser } from "@/lib/auth"
+import { requireTrader } from "@/lib/auth"
 import { fetchFavoriteListings } from "@/lib/favorites"
 import { Button } from "@/components/ui/button"
 import { FavoritesGrid } from "@/components/favorites/favorites-grid"
@@ -9,7 +9,7 @@ import { FavoritesGrid } from "@/components/favorites/favorites-grid"
 export const dynamic = "force-dynamic"
 
 export default async function FavoritesPage() {
-  const user = await requireUser()
+  const user = await requireTrader()
   const { listings, error } = await fetchFavoriteListings(user.id)
 
   return (

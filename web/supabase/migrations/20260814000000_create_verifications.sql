@@ -17,13 +17,12 @@
 --
 -- Badges (AC-1) are derived from profile state, which the read policies below
 -- expose publicly (phone is the only masked column, per T03):
---   * "Verified Seller" shield  = profiles.role = 'seller' (onboarded to sell)
+--   * "Verified Seller" shield  = profiles.role = 'seller' AND (profiles.phone_verified OR profiles.fayda_verified)
 --   * "Phone Verified"          = profiles.phone_verified
 --   * "Fayda Verified"          = profiles.fayda_verified (placeholder, AC-1)
--- `verified_seller` is intentionally NOT a separate column: the existing
--- role='seller' already represents an approved-seller account (INV-001/INV-004
--- ownership model), so a seller IS the verified-seller badge. A profile with
--- role='buyer' (or one with no flags) renders the "Not verified yet" empty state.
+-- `verified_seller` is intentionally NOT a separate column: the badge requires
+-- both the seller role AND a real verification (phone or Fayda). A seller with
+-- neither flag, or a buyer, renders the "Not verified yet" empty state.
 
 create type public.verification_type as enum ('email', 'phone', 'telegram', 'fayda');
 create type public.verification_status as enum ('pending', 'verified', 'rejected');

@@ -176,6 +176,17 @@ the model.
 
 See `.env.example` for the full set. Secrets must never be committed.
 
+### Deployed demo (competition)
+
+For the VinTech Challenge 2026 submission, the deployed build uses:
+
+- **Hosted Supabase** (not local Docker) — set via Vercel env vars
+- **Mock Fayda** (`FAYDA_MOCK=true`) — the mock OIDC provider at `/mock-fayda/*`
+  runs in the deployed build because real eSignet credentials aren't available
+  for the competition. The verify-only OIDC surface is identical to production
+  Fayda, so swapping to real credentials later is a config-only change.
+- **Chapa test mode** — test secret key, demo fallback for sandbox payments
+
 ## CI/CD
 
 Pull requests run lint, type check, and build via GitHub Actions

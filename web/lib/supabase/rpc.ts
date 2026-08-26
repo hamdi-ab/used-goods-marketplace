@@ -30,6 +30,16 @@ export type RpcName =
   | "decline_counter"
   | "submit_business_lead"
   | "offer_events"
+  | "request_withdrawal"
+  | "approve_withdrawal"
+  | "reject_withdrawal"
+  | "open_dispute"
+  | "decide_dispute"
+  | "appeal_dispute"
+  | "mark_payment_abandoned"
+  | "check_payment_abandoned"
+  | "abandon_stale_payment"
+  | "check_hold_released"
 
 export type RpcArgs = Record<string, string | number | boolean | null | string[]>
 

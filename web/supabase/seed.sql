@@ -72,9 +72,9 @@ where id = '00000000-0000-4000-8000-000000000001';
 ------------------------------------------------------------------------------
 -- T12 demo seeds: exercise every trust-badge state on a fresh `db reset`
 -- (issue #16 AC-3): Verified Seller + Phone Verified, Verified Seller + Fayda,
--- Verified Seller alone, and a buyer that renders the "Not verified yet"
--- empty state. A published listing per seller makes the badge set visible on
--- listing cards (AC-2), not only on profile pages. Verification events are
+-- a plain seller (no verification — "Not verified yet"), and a buyer that renders
+-- the "Not verified yet" empty state. A published listing per seller makes the
+-- badge set visible on listing cards (AC-2), not only on profile pages. Verification events are
 -- written through the audit `verifications` table too, so the T12 read model
 -- (profiles.phone_verified / fayda_verified) and the audit log stay in sync.
 -- Passwords are demo-only (`demo1234`); change before shared hosting.
@@ -109,10 +109,10 @@ begin
      'kebede.trader@vintch.local', demo_password, now(),
      jsonb_build_object('provider', 'email', 'providers', array['email']),
      jsonb_build_object('full_name', 'Kebede Trader'), '', '', '', '', now(), now()),
-    ('00000000-0000-4000-8000-000000000000', a_buyer, 'authenticated', 'authenticated',
-     'biniam.buyer@vintch.local', demo_password, now(),
-     jsonb_build_object('provider', 'email', 'providers', array['email']),
-     jsonb_build_object('full_name', 'Biniam Buyer'), '', '', '', '', now(), now())
+     ('00000000-0000-4000-8000-000000000000', a_buyer, 'authenticated', 'authenticated',
+      'test@gmail.com', demo_password, now(),
+      jsonb_build_object('provider', 'email', 'providers', array['email']),
+      jsonb_build_object('full_name', 'Biniam Buyer'), '', '', '', '', now(), now())
   on conflict (id) do nothing;
 
   -- identity rows (idempotent by user_id).
@@ -125,7 +125,7 @@ begin
       (seller_phone, 'amira.sellers@vintch.local'),
       (seller_fayda, 'fayad.verified@vintch.local'),
       (seller_plain, 'kebede.trader@vintch.local'),
-      (a_buyer, 'biniam.buyer@vintch.local')
+      (a_buyer, 'test@gmail.com')
   ) as s(id, email)
   where not exists (select 1 from auth.identities where user_id = s.id);
 
@@ -150,7 +150,7 @@ begin
   where id = seller_plain;
 
   update public.profiles set
-    role = 'buyer', full_name = 'Biniam Buyer', city = 'Addis Ababa',
+    role = 'buyer', full_name = 'Biniam Buyer', city = 'Addis Ababa', email = 'test@gmail.com',
     phone_verified = false, fayda_verified = false, trust_score = 50
   where id = a_buyer;
 
@@ -401,12 +401,7 @@ begin
   )
   insert into public.listing_images (listing_id, image_url, display_order, alt_text)
   select id,
-         (array[
-           '/images/illustrations/trust-safe-transactions.svg',
-           '/images/photos/photo-modern-apartment.svg',
-           '/images/photos/photo-seller-taking-photos.svg',
-           '/images/photos/photo-buyer-meeting-seller.svg'
-         ])[1 + mod(rn - 1, 4)],
+         '/images/photos/photo-hero-section.png',
          0,
          coalesce(title, 'Demo listing image')
   from ranked;

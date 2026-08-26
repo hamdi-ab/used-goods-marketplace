@@ -5,31 +5,26 @@ import { MenuIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { SidebarSwitcher } from "@/components/admin/sidebar-switcher"
-import { DockVariantC } from "@/components/admin/dock-variant-c"
+import { SidebarVariantB } from "@/components/admin/sidebar-variant-b"
 
-function AdminSidebar({ variant }: { variant: "A" | "B" }) {
+function AdminSidebar({ reportCount }: { reportCount: number }) {
   return (
     <div className="flex h-full flex-col">
-      <SidebarSwitcher variant={variant} />
+      <SidebarVariantB reportCount={reportCount} />
     </div>
   )
 }
 
 interface AdminShellProps {
   children: ReactNode
-  variant?: "A" | "B" | "C"
+  reportCount?: number
 }
 
-export function AdminShell({ children, variant = "B" }: AdminShellProps) {
-  if (variant === "C") {
-    return <DockVariantC>{children}</DockVariantC>
-  }
-
+export function AdminShell({ children, reportCount = 0 }: AdminShellProps) {
   return (
     <div className="min-h-full bg-muted/30">
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-border bg-background lg:block">
-        <AdminSidebar variant={variant} />
+        <AdminSidebar reportCount={reportCount} />
       </aside>
 
       <div className="flex min-h-full flex-col lg:pl-64">
@@ -42,7 +37,7 @@ export function AdminShell({ children, variant = "B" }: AdminShellProps) {
             </SheetTrigger>
             <SheetContent side="left" className="w-72 p-0">
               <SheetTitle className="sr-only">Admin menu</SheetTitle>
-              <AdminSidebar variant={variant} />
+              <AdminSidebar reportCount={reportCount} />
             </SheetContent>
           </Sheet>
           <span className="font-heading text-base font-semibold text-foreground">

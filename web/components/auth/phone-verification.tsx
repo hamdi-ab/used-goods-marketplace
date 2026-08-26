@@ -11,9 +11,12 @@ import { markPhoneVerified } from "@/app/actions/phone-verification"
 type PhoneVerificationProps = {
   initialPhone?: string
   verified?: boolean
+  mockMode?: boolean
 }
 
-export function PhoneVerification({ initialPhone = "", verified = false }: PhoneVerificationProps) {
+const MOCK_OTP = "123456"
+
+export function PhoneVerification({ initialPhone = "", verified = false, mockMode = false }: PhoneVerificationProps) {
   const [phone, setPhone] = useState(initialPhone)
   const [otp, setOtp] = useState("")
   const [step, setStep] = useState<"phone" | "otp" | "success">(verified ? "success" : "phone")
@@ -23,6 +26,12 @@ export function PhoneVerification({ initialPhone = "", verified = false }: Phone
   async function sendOtp() {
     setError(null)
     setLoading(true)
+    if (mockMode) {
+      // Demo mock: simulate sending OTP. The test code is always "123456".
+      setLoading(false)
+      setStep("otp")
+      return
+    }
     const supabase = createClient()
     const { error } = await supabase.auth.signInWithOtp({ phone })
     setLoading(false)
@@ -36,6 +45,18 @@ export function PhoneVerification({ initialPhone = "", verified = false }: Phone
   async function verifyOtp() {
     setError(null)
     setLoading(true)
+    if (mockMode) {
+      // Demo mock: only accept the test OTP "123456".
+      if (otp !== MOCK_OTP) {
+        setLoading(false)
+        setError("Invalid code. Use 123456 for the demo.")
+        return
+      }
+      await markPhoneVerified()
+      setLoading(false)
+      setStep("success")
+      return
+    }
     const supabase = createClient()
     const { error } = await supabase.auth.verifyOtp({ phone, token: otp, type: "sms" })
     if (error) {
@@ -63,7 +84,11 @@ export function PhoneVerification({ initialPhone = "", verified = false }: Phone
     return (
       <div className="flex flex-col gap-3">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="otp">Enter the 6-digit code sent to {phone}</Label>
+          <Label htmlFor="otp">
+            {mockMode
+              ? `Enter the 6-digit code (demo code: ${MOCK_OTP})`
+              : `Enter the 6-digit code sent to ${phone}`}
+          </Label>
           <Input
             id="otp"
             type="text"

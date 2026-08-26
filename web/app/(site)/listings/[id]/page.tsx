@@ -19,6 +19,7 @@ import { ConditionChip } from "@/components/listings/condition-chip"
 import { MakeOfferButton } from "@/components/offers/make-offer-button"
 import { ContactButton } from "@/components/contact/contact-button"
 import { ReportButton } from "@/components/reports/report-button"
+import { Breadcrumbs } from "@/components/ui/breadcrumbs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -70,14 +71,13 @@ export default async function ListingPage({
     <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6 lg:px-8 min-h-[60vh]">
       <ListingViewTracker listingId={l.id} />
 
-      <div className="mb-6">
-        <Link
-          href="/search"
-          className="inline-flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
-        >
-          ← Back to listings
-        </Link>
-      </div>
+      <Breadcrumbs
+        items={[
+          { label: "Home", href: "/" },
+          { label: "Browse", href: "/search" },
+          { label: l.title },
+        ]}
+      />
 
       <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-12">
         <div className="order-2 lg:order-1 lg:col-span-7">
@@ -173,6 +173,27 @@ export default async function ListingPage({
                     See similar listings
                   </Link>{" "}
                   instead.
+                </p>
+              </div>
+            ) : l.status === "draft" ? (
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-sm font-semibold text-slate-700">
+                  This listing is a draft
+                </p>
+                <p className="mt-1 text-xs text-slate-600">
+                  It&apos;s not visible to other users yet. Publish it to receive offers.
+                </p>
+              </div>
+            ) : isOwner ? (
+              <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+                <p className="text-sm font-semibold text-blue-800">
+                  This is your listing
+                </p>
+                <p className="mt-1 text-xs text-blue-600">
+                  You can&apos;t make offers to or contact yourself.{" "}
+                  <Link href="/dashboard" className="font-medium underline underline-offset-2">
+                    Manage in dashboard
+                  </Link>
                 </p>
               </div>
             ) : (

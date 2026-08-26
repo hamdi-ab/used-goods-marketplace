@@ -1,7 +1,8 @@
 import type { ReactNode } from "react"
 
 import { requireAdmin } from "@/lib/auth"
-import { AdminShellWithVariant } from "@/components/admin/admin-shell-with-variant"
+import { fetchAdminReports } from "@/lib/reports"
+import { AdminShell } from "@/components/admin/admin-shell"
 
 export default async function AdminLayout({
   children,
@@ -9,6 +10,7 @@ export default async function AdminLayout({
   children: ReactNode
 }) {
   await requireAdmin()
+  const reports = await fetchAdminReports()
 
-  return <AdminShellWithVariant>{children}</AdminShellWithVariant>
+  return <AdminShell reportCount={reports.length}>{children}</AdminShell>
 }

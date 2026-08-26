@@ -1,8 +1,11 @@
 import { Suspense } from "react"
+import Link from "next/link"
 
+import { getCurrentUser } from "@/lib/auth"
 import { TIER_LIMITS, TIER_LABELS, type Tier } from "@/lib/plans/constants"
 import { StartProForm } from "@/components/pricing/start-pro-form"
 import { BusinessLeadForm } from "@/components/pricing/business-lead-form"
+import { CheckIcon } from "lucide-react"
 
 const TIERS_IN_ORDER: Tier[] = ["free", "pro", "business"]
 
@@ -10,6 +13,8 @@ export const metadata = {
   title: "Dagim Gebeya pricing",
   description: "Dagim Gebeya marketplace plans. The core marketplace stays free; Pro adds capacity for frequent sellers.",
 }
+
+export const dynamic = "force-dynamic"
 
 type LimitFeature = "activeListings" | "imagesPerListing" | "aiGenerationsPerMonth"
 
@@ -34,6 +39,18 @@ const FEATURE_ROWS: { feature: string; free: string; pro: string; business: stri
   { feature: "Listing boosts", free: "Add-on", pro: "Add-on", business: "Add-on" },
 ]
 
+function CurrentPlanLink({ tier }: { tier: Tier }) {
+  return (
+    <Link
+      href="/dashboard"
+      className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+    >
+      <CheckIcon className="mr-1.5 size-4 text-emerald-600" />
+      You&apos;re on {TIER_LABELS[tier]}
+    </Link>
+  )
+}
+
 export default async function PricingPage({
   searchParams,
 }: {
@@ -41,6 +58,8 @@ export default async function PricingPage({
 }) {
   const sp = await searchParams
   const upgradeStatus = typeof sp.upgrade === "string" ? sp.upgrade : null
+  const user = await getCurrentUser()
+  const currentTier = user?.tier ?? "free"
 
   return (
     <main className="mx-auto w-full max-w-[1100px] flex-1 px-4 py-12 sm:px-6 lg:px-8">
@@ -64,8 +83,8 @@ export default async function PricingPage({
             <div
               key={t}
               className={[
-                "relative flex flex-col rounded-2xl border bg-card p-6",
-                isPro ? "border-primary shadow-lg ring-1 ring-primary/20" : "border-border",
+                "relative flex flex-col rounded-2xl border bg-card p-6 transition-all duration-200 ease-out",
+                isPro ? "border-primary shadow-lg ring-1 ring-primary/20 hover:shadow-xl hover:-translate-y-2" : "border-border hover:shadow-lg hover:-translate-y-2 hover:border-primary",
               ].join(" ")}
             >
               {isPro ? (
@@ -114,21 +133,31 @@ export default async function PricingPage({
                 })}
               </dl>
 
-              {t === "pro" ? (
-                <Suspense fallback={<div className="h-10" />}>
-                  <StartProForm />
-                </Suspense>
-              ) : t === "business" ? (
+              {t === "free" ? (
+                currentTier === "free" ? (
+                  <div className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-border bg-muted px-4 text-sm font-medium text-muted-foreground">
+                    Current plan
+                  </div>
+                ) : (
+                  <CurrentPlanLink tier={currentTier} />
+                )
+              ) : t === "pro" ? (
+                currentTier === "pro" ? (
+                  <div className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-primary bg-primary/10 px-4 text-sm font-medium text-primary">
+                    <CheckIcon className="mr-1.5 size-4" />
+                    You&apos;re on Pro
+                  </div>
+                ) : currentTier === "business" ? (
+                  <CurrentPlanLink tier={currentTier} />
+                ) : (
+                  <Suspense fallback={<div className="h-10" />}>
+                    <StartProForm />
+                  </Suspense>
+                )
+              ) : (
                 <Suspense fallback={<div className="h-10" />}>
                   <BusinessLeadForm />
                 </Suspense>
-              ) : (
-                <a
-                  href="/sell"
-                  className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                >
-                  Start for free
-                </a>
               )}
             </div>
           )

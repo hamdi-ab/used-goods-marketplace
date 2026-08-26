@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache"
 import { requireUser } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
 import { chapaConfigured, chapaTxRef, initializeChapaTransaction } from "@/lib/chapa"
-import { etb } from "@/lib/payments/constants"
+import { formatEtb } from "@/lib/payments/constants"
 import { SITE_URL } from "@/lib/site"
 
 export interface UpgradeIntentState {
@@ -25,13 +25,14 @@ export async function submitUpgradeIntent(
   const user = await requireUser()
   const supabase = await createClient()
 
-  const email = formData.get("email")?.toString()?.trim() || user.email
-  if (!email || !email.includes("@")) {
-    return { ok: false, message: "Payments are not set up for this demo yet." }
+  let email = formData.get("email")?.toString()?.trim() || user.email
+  // Chapa rejects non-standard test emails — use their test address for demo accounts
+  if (!email || !email.includes("@") || email.endsWith("@vintch.local")) {
+    email = "test@chapa.co"
   }
 
   const txRef = chapaTxRef()
-  const money = etb(199)
+  const money = formatEtb(199)
 
   const { error: insertErr } = await supabase.from("upgrade_intents").insert({
     user_id: user.id,
@@ -54,19 +55,20 @@ export async function submitUpgradeIntent(
   }
 
   const returnUrl = `${SITE_URL}/upgrade/callback?tx_ref=${encodeURIComponent(txRef)}`
+
   const init = await initializeChapaTransaction({
     txRef,
     amount: money.amount,
     currency: money.currency,
     email,
-    firstName: user.fullName,
+    firstName: user.fullName ?? "Customer",
     returnUrl,
-    title: "VinTech Pro",
-    description: "Pro tier — 199 ETB/month",
+    title: "VinTech",
+    description: "Pro tier 199 ETB",
   })
 
   if (!init.ok) {
-    console.error("submitUpgradeIntent chapa:", init.error)
+    console.error("[Chapa init] error:", init.error)
     return { ok: false, message: "Could not start the upgrade — please try again later." }
   }
 

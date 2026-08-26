@@ -14,6 +14,17 @@ export type PaymentStatus = (typeof PAYMENT_STATUSES)[number]
 // The demo only ever moves ETB (mirrors the payments_currency_etb check).
 export const PAYMENT_CURRENCY = "ETB" as const
 
+// Platform commission rate — 5% of sale price deducted before seller payout.
+export const PLATFORM_FEE_PERCENTAGE = 5
+
+// Withdrawal configuration
+export const WITHDRAWAL_MINIMUM = 50 // ETB
+export const WITHDRAWAL_FREE_PER_MONTH = 2
+export const WITHDRAWAL_FEE = 5 // ETB per withdrawal after free ones
+
+// Hold period after buyer confirmation before funds are available for withdrawal
+export const HOLD_PERIOD_HOURS = 48
+
 // The domain's Money value object (domain model §11): a non-negative amount in
 // the marketplace's single supported currency. The currency literal is the TS
 // mirror of the DB's payments_currency_etb check — the DB stays the authority;
@@ -25,7 +36,7 @@ export interface Money {
 
 // The one construction site for the money pair, so callers never assemble
 // { amount, currency } by hand and drift the currency.
-export function etb(amount: number): Money {
+export function formatEtb(amount: number): Money {
   return { amount, currency: PAYMENT_CURRENCY }
 }
 
@@ -41,6 +52,8 @@ export interface OfferPayment {
   buyer_confirmed: boolean
   paid_at: string | null
   confirmed_at: string | null
+  hold_expires_at: string | null
+  abandoned_at: string | null
 }
 
 export type PaymentPhase = "unpaid" | "paid" | "confirmed"

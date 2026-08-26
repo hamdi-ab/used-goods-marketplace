@@ -44,8 +44,8 @@ describe("consumeAiGeneration RPC (T25)", () => {
 })
 
 describe("countAiGenerationsThisMonth (T25)", () => {
-  it("reads used from current_ai_generation_count, defaulting to 0", async () => {
-    vi.mocked(callRpc).mockResolvedValue({ data: { used: 4 }, error: null })
+  it("reads used from current_ai_generation_count (returns table → array)", async () => {
+    vi.mocked(callRpc).mockResolvedValue({ data: [{ used: 4 }], error: null })
     await expect(countAiGenerationsThisMonth()).resolves.toBe(4)
 
     vi.mocked(callRpc).mockResolvedValue({ data: null, error: null })

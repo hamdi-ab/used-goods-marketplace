@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 export function UserMenu({ tone = "light" }: { tone?: "light" | "blue" }) {
-  const { user, loading } = useAuth()
+  const { user, role, loading } = useAuth()
   const signOut = useSignOut()
 
   if (loading) {
@@ -39,6 +39,7 @@ export function UserMenu({ tone = "light" }: { tone?: "light" | "blue" }) {
 
   const name = (user.user_metadata?.full_name as string | undefined) ?? user.email
   const avatarUrl = user.user_metadata?.avatar_url as string | undefined
+  const isAdmin = role === "admin"
 
   return (
     <DropdownMenu>
@@ -76,51 +77,55 @@ export function UserMenu({ tone = "light" }: { tone?: "light" | "blue" }) {
 
         {/* Account section */}
         <div>
-          <DropdownMenuItem asChild>
-            <Link href="/profile" className="flex items-center gap-3 rounded-md px-2 py-2 text-sm">
-              <UserRoundIcon className="size-4 text-muted-foreground" />
-              <span className="flex-1">Profile</span>
-              <ChevronRightIcon className="size-4 text-muted-foreground/50" />
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/dashboard" className="flex items-center gap-3 rounded-md px-2 py-2 text-sm">
-              <LayoutDashboardIcon className="size-4 text-muted-foreground" />
-              <span className="flex-1">Dashboard</span>
-              <ChevronRightIcon className="size-4 text-muted-foreground/50" />
-            </Link>
-          </DropdownMenuItem>
+          {isAdmin ? (
+            <DropdownMenuItem asChild>
+              <Link href="/admin" className="flex items-center gap-3 rounded-md px-2 py-2 text-sm">
+                <LayoutDashboardIcon className="size-4 text-muted-foreground" />
+                <span className="flex-1">Admin</span>
+                <ChevronRightIcon className="size-4 text-muted-foreground/50" />
+              </Link>
+            </DropdownMenuItem>
+          ) : (
+            <>
+              <DropdownMenuItem asChild>
+                <Link href="/profile" className="flex items-center gap-3 rounded-md px-2 py-2 text-sm">
+                  <UserRoundIcon className="size-4 text-muted-foreground" />
+                  <span className="flex-1">Profile</span>
+                  <ChevronRightIcon className="size-4 text-muted-foreground/50" />
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard" className="flex items-center gap-3 rounded-md px-2 py-2 text-sm">
+                  <LayoutDashboardIcon className="size-4 text-muted-foreground" />
+                  <span className="flex-1">Dashboard</span>
+                  <ChevronRightIcon className="size-4 text-muted-foreground/50" />
+                </Link>
+              </DropdownMenuItem>
+            </>
+          )}
         </div>
 
         <DropdownMenuSeparator className="my-1" />
 
         {/* Activity section */}
-        <div>
-          <DropdownMenuItem asChild>
-            <Link href="/favorites" className="flex items-center gap-3 rounded-md px-2 py-2 text-sm">
-              <HeartIcon className="size-4 text-muted-foreground" />
-              <span className="flex-1">Favorites</span>
-              <ChevronRightIcon className="size-4 text-muted-foreground/50" />
-            </Link>
-          </DropdownMenuItem>
-          <DropdownMenuItem asChild>
-            <Link href="/reports" className="flex items-center gap-3 rounded-md px-2 py-2 text-sm">
-              <FlagIcon className="size-4 text-muted-foreground" />
-              <span className="flex-1">My reports</span>
-              <ChevronRightIcon className="size-4 text-muted-foreground/50" />
-            </Link>
-          </DropdownMenuItem>
-        </div>
-
-        <DropdownMenuSeparator className="my-1" />
-
-        {/* Sell action */}
-        <DropdownMenuItem asChild>
-          <Link href="/sell" className="flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium text-primary">
-            <PlusIcon className="size-4" />
-            <span className="flex-1">Sell an item</span>
-          </Link>
-        </DropdownMenuItem>
+        {!isAdmin ? (
+          <div>
+            <DropdownMenuItem asChild>
+              <Link href="/favorites" className="flex items-center gap-3 rounded-md px-2 py-2 text-sm">
+                <HeartIcon className="size-4 text-muted-foreground" />
+                <span className="flex-1">Favorites</span>
+                <ChevronRightIcon className="size-4 text-muted-foreground/50" />
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/reports" className="flex items-center gap-3 rounded-md px-2 py-2 text-sm">
+                <FlagIcon className="size-4 text-muted-foreground" />
+                <span className="flex-1">My reports</span>
+                <ChevronRightIcon className="size-4 text-muted-foreground/50" />
+              </Link>
+            </DropdownMenuItem>
+          </div>
+        ) : null}
 
         <DropdownMenuSeparator className="my-1" />
 

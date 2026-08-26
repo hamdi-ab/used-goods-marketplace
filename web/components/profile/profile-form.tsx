@@ -1,6 +1,7 @@
 "use client"
 
 import { useActionState, useRef, useState, type ChangeEvent } from "react"
+import { toast } from "sonner"
 import Link from "next/link"
 import { UploadIcon, ShieldCheckIcon, PhoneIcon, UserCheckIcon } from "lucide-react"
 
@@ -15,7 +16,6 @@ import type { MyVerificationRow } from "@/lib/verifications"
 import { cn, initials } from "@/lib/utils"
 import { updateProfile, uploadAvatar } from "@/app/actions/profile"
 import { VerificationCard } from "./verification-card"
-import { VerificationBadge } from "@/components/verification/verification-badge"
 
 type ProfileRow = {
   avatar_url: string | null
@@ -75,15 +75,20 @@ export function ProfileForm({
     form.set("avatar", file)
     const res = await uploadAvatar(user.id, { url: null, error: null }, form)
     setAvatarUploading(false)
-    if (res.error) setAvatarError(res.error)
-    else setAvatarUrl(res.url)
+    if (res.error) {
+      setAvatarError(res.error)
+      toast.error(res.error)
+    } else {
+      setAvatarUrl(res.url)
+      toast.success("Profile photo uploaded")
+    }
   }
 
   const verifiedTypes = new Set(
     verifications.filter((v) => v.status === "verified").map((v) => v.type)
   )
   const trustBadges = [
-    { label: "Verified Seller", show: user.role === "seller", icon: ShieldCheckIcon, cls: "border-[#2563EB]/30 bg-[#EEF4FF] text-[#2563EB]" },
+    { label: "Verified Seller", show: user.role === "seller" && verifiedTypes.size > 0, icon: ShieldCheckIcon, cls: "border-[#2563EB]/30 bg-[#EEF4FF] text-[#2563EB]" },
     { label: "Phone verified", show: verifiedTypes.has("phone"), icon: PhoneIcon, cls: "border-emerald-200 bg-emerald-50 text-emerald-700" },
     { label: "Fayda verified", show: verifiedTypes.has("fayda"), icon: UserCheckIcon, cls: "border-[#2563EB]/30 bg-[#EEF4FF] text-[#2563EB]" },
   ].filter((b) => b.show)
@@ -172,6 +177,16 @@ export function ProfileForm({
                       {b.label}
                     </Badge>
                   ))}
+                </div>
+              ) : null}
+
+              {user.role === "seller" && verifiedTypes.size < 2 ? (
+                <div className="rounded-lg border border-[#2563EB]/30 bg-[#EEF4FF] p-3">
+                  <p className="text-xs font-medium text-[#2563EB]">Become a Verified Seller</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Verify both your phone and Fayda ID to earn the Verified Seller badge.
+                    Buyers trust verified sellers more.
+                  </p>
                 </div>
               ) : null}
 
@@ -303,48 +318,6 @@ export function ProfileForm({
           </form>
 
           <VerificationCard verifications={verifications} faydaAvailable={faydaAvailable} />
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Identity verification</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3">
-              {faydaOutcome ? (
-                faydaOutcome.ok ? (
-                  <p className="text-sm text-green-600">
-                    Your identity was verified with Fayda.
-                  </p>
-                ) : (
-                  <p role="alert" className="text-sm text-destructive">
-                    Fayda verification failed
-                    {faydaOutcome.error ? `: ${faydaOutcome.error}` : "."}
-                  </p>
-                )
-              ) : null}
-              {profile.fayda_verified ? (
-                <div className="flex flex-wrap items-center gap-2">
-                  <VerificationBadge variant="fayda" />
-                  <span className="text-sm text-muted-foreground">
-                    Identity authenticated against the national ID.
-                  </span>
-                </div>
-              ) : faydaAvailable ? (
-                <div className="flex flex-wrap items-center gap-3">
-                  <p className="text-sm text-muted-foreground">
-                    Verify your identity against the national ID (demo) to earn the
-                    Fayda trust badge on your listings.
-                  </p>
-                  <Button asChild size="sm">
-                    <Link href="/verify-fayda/start">Verify with Fayda</Link>
-                  </Button>
-                </div>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  Fayda verification is not set up in this environment.
-                </p>
-              )}
-            </CardContent>
-          </Card>
         </div>
       </div>
 
