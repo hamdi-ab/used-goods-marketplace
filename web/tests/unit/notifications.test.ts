@@ -60,6 +60,8 @@ describe("notifications constants (#72)", () => {
       "review_received",
       "report_resolved",
       "business_lead",
+      "dispute_opened",
+      "dispute_resolved",
     ])
     expect(NOTIFICATION_TYPE_LABELS.offer_received).toBe("New offer")
     expect(NOTIFICATION_TYPE_LABELS.offer_accepted).toBe("Offer accepted")
@@ -70,6 +72,8 @@ describe("notifications constants (#72)", () => {
     expect(NOTIFICATION_TYPE_LABELS.review_received).toBe("New review")
     expect(NOTIFICATION_TYPE_LABELS.report_resolved).toBe("Report reviewed")
     expect(NOTIFICATION_TYPE_LABELS.business_lead).toBe("Business lead")
+    expect(NOTIFICATION_TYPE_LABELS.dispute_opened).toBe("Dispute opened")
+    expect(NOTIFICATION_TYPE_LABELS.dispute_resolved).toBe("Dispute resolved")
   })
 
   it("maps offer/review events to a deep link and report_resolved to none", () => {

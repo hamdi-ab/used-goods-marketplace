@@ -154,6 +154,7 @@ describe("generateListingSuggestions (T14 / FS-005)", () => {
       status: 500,
       statusText: "Server Error",
       json: async () => ({}),
+      text: async () => "",
     })
     const res = await generateListingSuggestions([photo()], CATEGORIES)
     expect(res.ok).toBe(false)

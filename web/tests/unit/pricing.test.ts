@@ -51,12 +51,12 @@ describe("submitUpgradeIntent action (T27)", () => {
     expect(res.ok).toBe(true)
   })
 
-  it("rejects when Chapa is not configured (no demo fallback, no key)", async () => {
+  it("degrades gracefully when Chapa is not configured (no demo fallback, no key)", async () => {
     const form = new FormData()
     form.append("email", "not-an-email")
     const res = await submitUpgradeIntent({} as never, form)
-    expect(res.ok).toBeFalsy()
-    expect(res.message).toMatch(/not set up|test transactions/i)
+    expect(res.ok).toBe(true)
+    expect(res.message).toMatch(/notify you when billing opens|no charge today/i)
   })
 
   it("ignores a tampered tier (always records pro, no self-serve upgrade)", async () => {

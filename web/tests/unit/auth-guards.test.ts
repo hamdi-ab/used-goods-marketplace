@@ -4,6 +4,12 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(),
 }))
 
+// unstable_cache requires Next.js's incremental cache, which isn't available
+// in Vitest — stub it to call the fn and return its result unchanged.
+vi.mock("next/cache", () => ({
+  unstable_cache: (fn: unknown) => fn,
+}))
+
 const redirectMock = vi.fn()
 
 vi.mock("next/navigation", () => ({
