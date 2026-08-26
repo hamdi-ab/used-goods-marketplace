@@ -59,6 +59,8 @@ export default async function UserProfilePage({
   ])
   const contactInfo = user ? await fetchSellerContactInfo(id) : null
 
+  const isOwnProfile = user?.id === id
+
   return (
     <main className="mx-auto w-full max-w-[1280px] flex-1 px-4 py-8 sm:px-6 lg:px-8">
       <Breadcrumbs
@@ -68,6 +70,15 @@ export default async function UserProfilePage({
           { label: profile.full_name ?? "Seller" },
         ]}
       />
+
+      {isOwnProfile ? (
+        <a
+          href="/profile"
+          className="mb-4 inline-flex items-center text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+        >
+          ← Back to my profile
+        </a>
+      ) : null}
 
       {/* Harmonized bento grid */}
       <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-12">
