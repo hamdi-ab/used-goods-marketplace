@@ -5,7 +5,6 @@ import { InboxIcon } from "lucide-react"
 
 import { requireUser } from "@/lib/auth"
 import { fetchSellerOffers, OPEN_OFFER_STATUSES } from "@/lib/offers"
-import { fetchSellerEarnings, fetchSellerWithdrawals } from "@/lib/payments"
 import { formatPrice } from "@/lib/listings"
 import { nextOffset, parseOffset } from "@/lib/pagination"
 import { formatShortDate, initials, cn } from "@/lib/utils"
@@ -13,7 +12,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { OfferStatusBadge } from "@/components/offers/offer-status-badge"
 import { SellerOfferActions } from "@/components/offers/seller-offer-actions"
 import { SellerPaymentBadge } from "@/components/offers/seller-payment-badge"
-import { EarningsCard } from "@/components/earnings/earnings-card"
 import { Breadcrumbs } from "@/components/ui/breadcrumbs"
 import { Button } from "@/components/ui/button"
 
@@ -35,11 +33,6 @@ export default async function SellerOffersPage({
   const { offers, hasMore, error } = await fetchSellerOffers(user.id, {
     offset,
   })
-
-  const [earnings, withdrawals] = await Promise.all([
-    fetchSellerEarnings(user.id),
-    fetchSellerWithdrawals(user.id),
-  ])
 
   const openCount = offers.filter((o) =>
     OPEN_OFFER_STATUSES.includes(o.status)
@@ -186,25 +179,20 @@ export default async function SellerOffersPage({
         ]}
       />
 
-      <div className="mt-4 grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <div className="lg:col-span-8">
-          <div className="flex items-center gap-3">
-            <h1 className="font-heading text-2xl font-semibold text-foreground">
-              Incoming offers
-            </h1>
-            {openCount > 0 ? (
-              <span className="rounded-full bg-[#2563EB]/10 px-2.5 py-1 text-xs font-semibold text-[#2563EB]">
-                {openCount} open
-              </span>
-            ) : null}
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Offers buyers have made on your listings.
-          </p>
+      <div className="mt-4">
+        <div className="flex items-center gap-3">
+          <h1 className="font-heading text-2xl font-semibold text-foreground">
+            Incoming offers
+          </h1>
+          {openCount > 0 ? (
+            <span className="rounded-full bg-[#2563EB]/10 px-2.5 py-1 text-xs font-semibold text-[#2563EB]">
+              {openCount} open
+            </span>
+          ) : null}
         </div>
-        <div className="lg:col-span-4">
-          <EarningsCard earnings={earnings} withdrawals={withdrawals} compact />
-        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Offers buyers have made on your listings.
+        </p>
       </div>
 
       <div className="mt-6">

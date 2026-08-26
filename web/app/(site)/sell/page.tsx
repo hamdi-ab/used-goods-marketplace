@@ -14,10 +14,8 @@ export const metadata: Metadata = {
 export default async function SellPage() {
   const user = await requireUser()
 
-  // Buyer or incomplete seller → show onboarding card first
-  const needsOnboarding = user.role === "buyer" || (user.role === "seller" && !user.profileCompleted)
-
-  if (needsOnboarding) {
+  // Only buyers need onboarding — sellers go straight to listing form
+  if (user.role === "buyer") {
     return (
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8 min-h-[60vh]">
         <h1 className="font-heading text-2xl font-semibold text-foreground">
