@@ -182,7 +182,6 @@ export default async function SellerOffersPage({
       <Breadcrumbs
         items={[
           { label: "Home", href: "/" },
-          { label: "Offers", href: "/offers" },
           { label: "Incoming offers" },
         ]}
       />
