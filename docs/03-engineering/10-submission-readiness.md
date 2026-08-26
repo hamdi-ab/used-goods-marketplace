@@ -102,6 +102,22 @@ Fold this into T17's definition of done (do not duplicate the roadmap checklist;
 - Demo video ≈ 3–5 minutes rendered and hosted.
 - README/doc pack links updated to the live URL (map Destination: "hosted live demo by Aug 26").
 
+# 5a. Demo Environment — Mock Services for Judges
+
+The deployed demo runs with **mock external services** because real provider credentials are unavailable for the competition. This is intentional and documented — swapping to production providers is config-only.
+
+| Service | Demo behavior | Production swap |
+|---------|---------------|-----------------|
+| **Fayda (national ID)** | In-app mock OIDC provider at `/mock-fayda/*`. Verify-only flow returns a test `sub` (`fayda-test-0001`). Gated on `FAYDA_MOCK=true`. | Set `FAYDA_MOCK=false` + real `FAYDA_ISSUER_URL`, `FAYDA_CLIENT_ID`, `FAYDA_CLIENT_PRIVATE_JWK` from partner.fayda.et. OIDC surface is identical. |
+| **Chapa (payments)** | Test-mode secret key (`CHASECK_TEST-...`). Real Chapa API calls in sandbox. | Replace with live secret key from dashboard.chapa.co. |
+| **Gemini AI** | Real API key, `gemini-3.1-flash` model. AI listing assistant works in demo. | Same — already production. |
+
+**Fayda mock URLs auto-derive from `SITE_URL`** (`web/lib/site.ts`):
+- Dev: `http://localhost:3000/mock-fayda`
+- Deployed: `https://<your-app>.vercel.app/mock-fayda`
+
+No code changes needed between dev and deployed demo — the mock provider is the same OIDC surface either way.
+
 # 6. Open items that depend on the build
 
 - Whether the AI Listing Assistant & trust-score demos seed well against the hosted DB (depends on T14).

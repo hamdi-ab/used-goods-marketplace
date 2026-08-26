@@ -29,6 +29,18 @@ Use the demo accounts (canonical table in
 the buyer (`biniam.buyer@vintch.local`) for the search/offer flow, and as a
 seller (e.g. `amira.sellers@vintch.local`) for the create-listing flow.
 
+### Demo environment — mock services for judges
+
+The deployed demo runs with **mock external services** because real provider credentials are unavailable for the competition:
+
+| Service | Demo behavior | Production swap |
+|---------|---------------|-----------------|
+| **Fayda (national ID)** | In-app mock OIDC provider at `/mock-fayda/*`. Returns test identity `fayad.verified@vintch.local`. Gated on `FAYDA_MOCK=true`. | Set `FAYDA_MOCK=false` + real `FAYDA_ISSUER_URL`, `FAYDA_CLIENT_ID`, `FAYDA_CLIENT_PRIVATE_JWK` from partner.fayda.et. OIDC surface is identical. |
+| **Chapa (payments)** | Test-mode secret key (`CHASECK_TEST-...`). Real Chapa API calls in sandbox. | Replace with live secret key from dashboard.chapa.co. |
+| **Gemini AI** | Real API key, `gemini-3.1-flash` model. AI listing assistant works in demo. | Same — already production. |
+
+The Fayda mock runs in **all environments** (dev + deployed) — no localhost references. URLs auto-derive from `SITE_URL` in `web/lib/site.ts`. See [`10-submission-readiness.md` §5a](10-submission-readiness.md) for details.
+
 ## 2. Shot list
 
 Pacing: each shot advances exactly one story step; total ≤ 5:00.
