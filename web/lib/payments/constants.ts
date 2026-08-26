@@ -44,6 +44,7 @@ export function formatEtb(amount: number): Money {
 // the offer fetch embeds the raw rows and maps them with pickPayment.
 export interface OfferPayment {
   id: string
+  tx_ref: string | null
   amount: number
   currency: string
   status: PaymentStatus
