@@ -74,7 +74,6 @@ export async function GET(request: Request): Promise<Response> {
   if (result.ok) {
     dest.searchParams.set("verified", "fayda")
   } else {
-    dest.searchParams.set("verified", "fayda")
     dest.searchParams.set("error", result.error ?? "verification_failed")
   }
   return NextResponse.redirect(dest, { status: 303 })
