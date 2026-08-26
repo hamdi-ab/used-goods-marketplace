@@ -49,7 +49,6 @@ export function primaryNav(role: UserRole | null): NavItem[] {
   return [
     { title: "Home", href: "/", icon: HomeIcon },
     { title: "Browse", href: "/search", icon: LayoutGridIcon },
-    { title: "Sell", href: "/sell", icon: PlusIcon },
     offers,
     { title: "Favorites", href: "/favorites", icon: HeartIcon },
   ]
@@ -64,7 +63,6 @@ export function mobileNav(role: UserRole | null): NavItem[] {
   return [
     { title: "Home", href: "/", icon: HomeIcon },
     { title: "Search", href: "/search", icon: SearchIcon },
-    { title: "Sell", href: "/sell", icon: PlusIcon },
     offers,
     { title: "Favorites", href: "/favorites", icon: HeartIcon },
   ]
