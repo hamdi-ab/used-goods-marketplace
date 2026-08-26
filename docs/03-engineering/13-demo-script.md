@@ -97,9 +97,9 @@ Demo accounts (from `web/supabase/seed.sql`, all `demo1234`):
 
 | Account | Email | Badges shown | Trust |
 |---|---|---|---|
-| Amira Sellers | `amira.sellers@vintch.local` | Verified Seller + Phone | 61 (earned) |
-| Fayad Verified | `fayad.verified@vintch.local` | Verified Seller + Fayda | 57 (earned) |
-| Kebede Trader | `kebede.trader@vintch.local` | Verified Seller only | 40 (earned) |
+| Amira Sellers | `amira.sellers@vintch.local` | Verified Seller + Phone | 85 |
+| Fayad Verified | `fayad.verified@vintch.local` | Verified Seller + Fayda | 75 |
+| Kebede Trader | `kebede.trader@vintch.local` | Verified Seller only | 60 |
 | Biniam Buyer | `test@gmail.com` | (buyer — none) | 50 |
 
 > **Note:** The buyer account email is `test@gmail.com` in the seed (not `@vintch.local`).
@@ -178,11 +178,19 @@ MVP**. Runs from the `fm/chapa-sandbox-demo` branch with
 `CHAPA_DEMO_FALLBACK=true` — the full state machine works with no network or
 Chapa account. If time is tight, cut this beat before cutting the trust beat.
 
-### Shot 7b — Upgrade to Pro with Chapa (~20 s)
-- **Account:** any → `/pricing` or dashboard upgrade card.
-- **Screen:** Click "Upgrade to Pro" → Chapa hosted checkout (test mode) → payment form → return to `/pricing?upgrade=ok` → "You're on Pro" confirmation.
-- **Voice:** "Pro unlocks 25 listings, 30 AI credits, and analytics. Upgrade is powered by Chapa, Ethiopia's leading payment gateway."
-- **Judging note:** Runs in Chapa **test mode** (sandbox). No live charges. Real Chapa integration — swap to live key for production.
+### Shot 7b — Pay with Chapa, confirm receipt (~20 s)
+- **Account:** Biniam Buyer → the accepted offer (Shot 7 leaves it accepted).
+- **Screen:** on the accepted offer, **Pay with Chapa** → hosted checkout
+  (fallback) → test card (Visa `4200 0000 0000 0000`, CVV `123`, expiry
+  `12/34`) → return to `/offers?tx_ref=…` → **Paid ETB — confirm receipt** →
+  seller sees **Paid ETB X — buyer confirmed receipt**.
+- **Voice:** "The brief lists payments as a plus — here is payment readiness,
+  demonstrated in Chapa test mode. The live app stays free of payment
+  infrastructure, so nothing can break the core loop."
+- **Judging note:** frame this as ADR-021's argument: money and goods move
+  outside the app (meetup + Telegram/call, as Addis does today); Chapa/Fayda
+  are the mapped migration path as trust and volume grow. Turns the missing
+  payment from a gap into a feasibility + technical-execution point.
 
 ## 2d. Monetization storyline — quotas → boost → pricing (demo centrepiece 2)
 
