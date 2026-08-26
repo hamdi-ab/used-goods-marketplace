@@ -3,7 +3,7 @@
 A trusted platform for buying and selling second-hand goods in Ethiopia.
 Built for the **VinTech Challenge 2026**.
 
-**Live demo:** https://dagim-gebeya.vercel.app (pending deployment)
+**Live demo:** https://dagimgebeya-irgqv92xi-hamdi-abdulfetah-s-projects.vercel.app
 
 ---
 
@@ -168,16 +168,16 @@ Create `web/.env.local`:
 
 ```env
 # Hosted Supabase (production)
-NEXT_PUBLIC_SUPABASE_URL=https://fqbtbprwruwollkkpbou.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_a9DENFjtGXHK1SUVXc1V8Q_ngZ9QN4T
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 # Chapa (test mode)
-CHAPA_SECRET_KEY=CHASECK_TEST-QlfU5RsprI3fDoEXy0bJNMSc0vbqJT34
+CHAPA_SECRET_KEY=CHASECK_TEST-your-key
 CHAPA_DEMO_FALLBACK=false
 
 # Gemini AI
-GEMINI_API_KEY=AQ.Ab8RN6I1xrxfP52YUICTKDA9I3tw6xzy0LsyC2tb6Vp6NHVLeA
+GEMINI_API_KEY=your-gemini-key
 
 # Demo mocks (set false for production)
 FAYDA_MOCK=true
@@ -272,7 +272,7 @@ Redirect to `/login` if not authenticated:
 
 ### Verification Flow
 1. Go to `/profile` → Verification card
-2. Phone: Enter number → Enter code `123456` (demo) → Badge earned
+2. Phone: Enter number → Enter code (demo: `123456`) → Badge earned
 3. Fayda: Click "Verify with Fayda" → Mock OIDC consent → Badge earned
 
 ### Upgrade Flow
@@ -284,17 +284,13 @@ Redirect to `/login` if not authenticated:
 
 ## Demo Accounts
 
-All passwords: `demo1234`
-
 | Account | Email | Role | Trust |
 |---------|-------|------|-------|
 | Admin | `admin@vintch.local` | Admin | — |
 | Amira Sellers | `amira.sellers@vintch.local` | Seller (Phone ✓) | 85 |
 | Fayad Verified | `fayad.verified@vintch.local` | Seller (Fayda ✓) | 75 |
 | Kebede Trader | `kebede.trader@vintch.local` | Seller (plain) | 60 |
-| Biniam Buyer | `test@gmail.com` | Buyer | 50 |
-
-> **Note:** The buyer account email is `test@gmail.com` (not `@vintch.local`).
+| Biniam Buyer | `biniam.buyer@vintch.local` | Buyer | 50 |
 
 ---
 
