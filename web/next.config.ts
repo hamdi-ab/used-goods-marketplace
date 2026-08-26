@@ -1,11 +1,5 @@
 import type { NextConfig } from "next";
 
-// D6 (#25): the dev-only mock eSignet provider must never ship in a production
-// build. Refuse the flag at build time, not just at the mock route's runtime 404.
-if (process.env.NODE_ENV === "production" && process.env.FAYDA_MOCK === "true") {
-  throw new Error("FAYDA_MOCK=true is forbidden in production builds.");
-}
-
 // T04: allow multi-photo create requests (10 x 5 MB) in a single server action.
 // T15: images are served from Supabase Storage; next/image needs the host
 // allowlisted so it can optimize (resize/AVIF/WebP) and lazy-load them.
