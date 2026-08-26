@@ -35,6 +35,7 @@ The deployed demo runs with **mock external services** because real provider cre
 
 | Service | Demo behavior | Production swap |
 |---------|---------------|-----------------|
+| **Phone (SMS OTP)** | Mock mode (`PHONE_MOCK=true`). No real SMS sent. Enter `123456` to verify. | Set `PHONE_MOCK=false` to use real Supabase Auth SMS OTP. |
 | **Fayda (national ID)** | In-app mock OIDC provider at `/mock-fayda/*`. Returns test identity `fayad.verified@vintch.local`. Gated on `FAYDA_MOCK=true`. | Set `FAYDA_MOCK=false` + real `FAYDA_ISSUER_URL`, `FAYDA_CLIENT_ID`, `FAYDA_CLIENT_PRIVATE_JWK` from partner.fayda.et. OIDC surface is identical. |
 | **Chapa (payments)** | Test-mode secret key (`CHASECK_TEST-...`). Real Chapa API calls in sandbox. | Replace with live secret key from dashboard.chapa.co. |
 | **Gemini AI** | Real API key, `gemini-3.1-flash` model. AI listing assistant works in demo. | Same — already production. |

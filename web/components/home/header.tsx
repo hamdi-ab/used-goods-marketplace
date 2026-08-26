@@ -39,8 +39,8 @@ export function SiteHeader() {
           href="/"
           className="flex shrink-0 items-center gap-2 rounded-md font-heading text-lg font-semibold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-white/60"
         >
-          <span className="flex size-8 items-center justify-center rounded-lg bg-white p-1">
-            <DagimLogo width={24} height={24} />
+          <span className="flex size-10 items-center justify-center rounded-xl bg-white shadow-md">
+            <DagimLogo width={32} height={32} />
           </span>
           <span className="hidden sm:inline">{siteName}</span>
         </Link>

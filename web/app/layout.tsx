@@ -26,7 +26,7 @@ export const metadata: Metadata = {
   },
   description: SITE_DESCRIPTION,
   icons: {
-    icon: "/images/logo/dagim-logo.svg",
+    icon: "/images/logo/dagim-logo-cropped.png",
   },
   openGraph: {
     type: "website",
