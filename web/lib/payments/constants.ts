@@ -53,7 +53,6 @@ export interface OfferPayment {
   paid_at: string | null
   confirmed_at: string | null
   hold_expires_at: string | null
-  tx_ref: string | null
   abandoned_at: string | null
 }
 
