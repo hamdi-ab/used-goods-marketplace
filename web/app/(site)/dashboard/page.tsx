@@ -1,10 +1,11 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { redirect } from "next/navigation"
-import { BellIcon, EyeIcon, HandshakeIcon, HeartIcon, InboxIcon, LayoutGridIcon, PlusIcon, ShieldCheckIcon, UserRoundIcon } from "lucide-react"
+import { BellIcon, EyeIcon, HandshakeIcon, HeartIcon, InboxIcon, LayoutGridIcon, PlusIcon, ShieldCheckIcon, UserRoundIcon, SparklesIcon } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 
 import { requireUser, ROLE_LABELS } from "@/lib/auth"
+import { TIER_LABELS } from "@/lib/plans/constants"
 import { fetchSellerListings } from "@/lib/listings"
 import { fetchAccountUsage } from "@/lib/usage"
 import { countIncomingOffers, fetchBuyerOffers } from "@/lib/offers"
@@ -25,6 +26,8 @@ export const metadata: Metadata = {
   title: "Dashboard",
   description: "Your Dagim Gebeya dashboard.",
 }
+
+export const dynamic = "force-dynamic"
 
 interface StatTile {
   label: string
@@ -96,7 +99,12 @@ export default async function DashboardPage({
   return (
     <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-10 sm:px-6 lg:px-8 min-h-[60vh]">
       <div className="mb-8">
-        <Badge variant="secondary">{ROLE_LABELS[user.role] ?? "Buyer"}</Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="secondary">{ROLE_LABELS[user.role] ?? "Buyer"}</Badge>
+          <Badge variant={user.tier === "free" ? "outline" : "default"}>
+            {TIER_LABELS[user.tier] ?? "Free"}
+          </Badge>
+        </div>
         <h1 className="mt-3 font-heading text-3xl font-semibold tracking-tight text-foreground">
           Welcome back, {firstName}
         </h1>
@@ -105,8 +113,31 @@ export default async function DashboardPage({
         </p>
       </div>
 
+      {user.tier === "free" ? (
+        <Card className="mb-10 border-primary/20 bg-primary/5">
+          <CardContent className="flex flex-col items-start gap-4 py-6 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="rounded-lg bg-primary/10 p-2">
+                <SparklesIcon className="size-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-heading text-lg font-semibold">
+                  Upgrade to Pro
+                </h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Get 25 listings, 30 AI credits/month, analytics, and price insights.
+                </p>
+              </div>
+            </div>
+            <Button asChild>
+              <Link href="/pricing">View plans</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      ) : null}
+
       <section className="mb-10">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5 min-[500px]:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {stats.map((s) => {
             const Inner = (
               <div className="rounded-xl border bg-card p-4 hover-lift">
@@ -130,7 +161,7 @@ export default async function DashboardPage({
       {canSell ? (
         <section id="listings" className="mb-10">
           {earnings ? <EarningsCard earnings={earnings} withdrawals={withdrawals ?? []} /> : null}
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <div className="mt-6 mb-6 flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="font-heading text-xl font-semibold">Your listings</h2>
               <p className="text-sm text-muted-foreground">
@@ -147,7 +178,9 @@ export default async function DashboardPage({
 
           {sellerUsage ? <AccountUsageCard usage={sellerUsage} /> : null}
 
-          <ListingManager listings={listings} />
+          <div className="mt-8">
+            <ListingManager listings={listings} />
+          </div>
 
           {sellerListings?.hasMore ? (
             <div className="mt-6 flex justify-center">

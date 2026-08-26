@@ -7,7 +7,7 @@
 -- verified. Idempotent: re-running on an already-consumed row is a no-op.
 
 create or replace function public.apply_upgrade(p_tx_ref text)
-returns void
+returns jsonb
 language plpgsql
 security definer
 set search_path = public
@@ -24,21 +24,25 @@ begin
    for update;
 
   if not found then
-    raise exception 'upgrade_not_found';
+    return jsonb_build_object('ok', false, 'error', 'upgrade_not_found');
   end if;
 
   if v_user_id is distinct from auth.uid() then
-    raise exception 'not_owner';
+    return jsonb_build_object('ok', false, 'error', 'not_owner');
   end if;
 
+  -- Mark as consumed FIRST so the guard trigger allows the tier change
+  update public.upgrade_intents
+     set consumed_at = now()
+   where tx_ref = p_tx_ref;
+
+  -- Now update tier (trigger checks for consumed upgrade)
   update public.profiles
      set tier = 'pro'
    where id = v_user_id
      and tier = 'free';
 
-  update public.upgrade_intents
-     set consumed_at = now()
-   where tx_ref = p_tx_ref;
+  return jsonb_build_object('ok', true, 'error', null);
 end;
 $$;
 

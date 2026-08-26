@@ -1,8 +1,11 @@
 import { Suspense } from "react"
+import Link from "next/link"
 
+import { getCurrentUser } from "@/lib/auth"
 import { TIER_LIMITS, TIER_LABELS, type Tier } from "@/lib/plans/constants"
 import { StartProForm } from "@/components/pricing/start-pro-form"
 import { BusinessLeadForm } from "@/components/pricing/business-lead-form"
+import { CheckIcon } from "lucide-react"
 
 const TIERS_IN_ORDER: Tier[] = ["free", "pro", "business"]
 
@@ -10,6 +13,8 @@ export const metadata = {
   title: "Dagim Gebeya pricing",
   description: "Dagim Gebeya marketplace plans. The core marketplace stays free; Pro adds capacity for frequent sellers.",
 }
+
+export const dynamic = "force-dynamic"
 
 type LimitFeature = "activeListings" | "imagesPerListing" | "aiGenerationsPerMonth"
 
@@ -41,6 +46,8 @@ export default async function PricingPage({
 }) {
   const sp = await searchParams
   const upgradeStatus = typeof sp.upgrade === "string" ? sp.upgrade : null
+  const user = await getCurrentUser()
+  const currentTier = user?.tier ?? "free"
 
   return (
     <main className="mx-auto w-full max-w-[1100px] flex-1 px-4 py-12 sm:px-6 lg:px-8">
@@ -114,21 +121,43 @@ export default async function PricingPage({
                 })}
               </dl>
 
-              {t === "pro" ? (
-                <Suspense fallback={<div className="h-10" />}>
-                  <StartProForm />
-                </Suspense>
-              ) : t === "business" ? (
+              {t === "free" ? (
+                currentTier === "free" ? (
+                  <div className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-border bg-muted px-4 text-sm font-medium text-muted-foreground">
+                    Current plan
+                  </div>
+                ) : (
+                  <Link
+                    href="/dashboard"
+                    className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    <CheckIcon className="mr-1.5 size-4 text-emerald-600" />
+                    You're on {TIER_LABELS[currentTier]}
+                  </Link>
+                )
+              ) : t === "pro" ? (
+                currentTier === "pro" ? (
+                  <div className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-primary bg-primary/10 px-4 text-sm font-medium text-primary">
+                    <CheckIcon className="mr-1.5 size-4" />
+                    You're on Pro
+                  </div>
+                ) : currentTier === "business" ? (
+                  <Link
+                    href="/dashboard"
+                    className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  >
+                    <CheckIcon className="mr-1.5 size-4 text-emerald-600" />
+                    You're on Business
+                  </Link>
+                ) : (
+                  <Suspense fallback={<div className="h-10" />}>
+                    <StartProForm />
+                  </Suspense>
+                )
+              ) : (
                 <Suspense fallback={<div className="h-10" />}>
                   <BusinessLeadForm />
                 </Suspense>
-              ) : (
-                <a
-                  href="/sell"
-                  className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                >
-                  Start for free
-                </a>
               )}
             </div>
           )

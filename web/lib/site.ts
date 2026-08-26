@@ -2,7 +2,10 @@
 // OG/Twitter defaults) and the sitemap so the deployment URL and copy are
 // defined once.
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL ?? "https://vintech-marketplace.vercel.app"
+  process.env.NEXT_PUBLIC_SITE_URL ??
+  (process.env.NODE_ENV === "production"
+    ? "https://vintech-marketplace.vercel.app"
+    : "http://localhost:3000")
 
 export const SITE_TITLE = "Dagim Gebeya - Buy and sell second-hand goods in Ethiopia"
 export const SITE_DESCRIPTION =

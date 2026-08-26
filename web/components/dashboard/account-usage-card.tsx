@@ -89,15 +89,17 @@ export function AccountUsageCard({ usage }: { usage: AccountUsage }) {
             You&apos;ve reached your free listing limit. Mark an item sold or archive
             an old one to free a slot, or upgrade to Pro.
           </p>
-        ) : (
+        ) : usage.tier === "free" ? (
           <p className="mt-3 text-sm text-muted-foreground">
             Need more headroom? Pro gives you 25 listings and 30 AI credits.
           </p>
-        )}
+        ) : null}
 
-        <Button asChild className="mt-4 w-full sm:mt-3">
-          <Link href="/pricing">Upgrade to Pro</Link>
-        </Button>
+        {usage.tier === "free" ? (
+          <Button asChild className="mt-4 w-full sm:mt-3">
+            <Link href="/pricing">Upgrade to Pro</Link>
+          </Button>
+        ) : null}
       </CardContent>
     </Card>
   )

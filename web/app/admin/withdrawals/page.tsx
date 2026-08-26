@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useActionState } from "react"
 import { CheckCircle2Icon, XCircleIcon, ClockIcon, AlertTriangleIcon } from "lucide-react"
 
@@ -13,10 +13,6 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
 
-interface AdminWithdrawalsPageProps {
-  withdrawals: AdminWithdrawalRow[]
-}
-
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800",
   processing: "bg-blue-100 text-blue-800",
@@ -24,10 +20,38 @@ const STATUS_STYLES: Record<string, string> = {
   failed: "bg-red-100 text-red-800",
 }
 
-export default function AdminWithdrawalsPage({ withdrawals = [] }: AdminWithdrawalsPageProps) {
+export default function AdminWithdrawalsPage() {
+  const [withdrawals, setWithdrawals] = useState<AdminWithdrawalRow[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [filter, setFilter] = useState<string>("pending")
 
+  useEffect(() => {
+    fetch("/api/admin/withdrawals")
+      .then((res) => res.json())
+      .then((data) => {
+        setWithdrawals(data)
+        setLoading(false)
+      })
+      .catch((err) => {
+        setError(err.message)
+        setLoading(false)
+      })
+  }, [])
+
   const filtered = filter === "all" ? withdrawals : withdrawals?.filter((w) => w.status === filter) ?? []
+
+  if (loading) {
+    return <div className="p-8 text-center text-muted-foreground">Loading...</div>
+  }
+
+  if (error) {
+    return (
+      <div className="rounded bg-red-100 p-4 text-red-800">
+        Error: {error}
+      </div>
+    )
+  }
 
   return (
     <div>

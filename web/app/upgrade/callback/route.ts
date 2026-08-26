@@ -1,6 +1,7 @@
 import "server-only"
 
 import { NextResponse } from "next/server"
+import { revalidateTag } from "next/cache"
 
 import { createClient } from "@/lib/supabase/server"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
@@ -31,11 +32,13 @@ export async function GET(request: Request): Promise<Response> {
     return NextResponse.redirect(dest, { status: 303 })
   }
 
-  // Apply the tier mutation. Chapa verify already happened client-side via the
-  // hosted checkout reaching this return URL; the RPC re-checks the row state.
   const result = await callOutcomeRpc(supabase, "apply_upgrade", {
     p_tx_ref: txRef,
   }, "apply_upgrade")
+
+  if (result.ok) {
+    revalidateTag(`user-${intent.user_id}`, { expire: 0 })
+  }
 
   if (!result.ok) {
     console.error("[upgrade] apply_upgrade failed:", result.error)

@@ -2,6 +2,7 @@ import "server-only"
 
 import { headers } from "next/headers"
 
+import { createServiceClient } from "@/lib/supabase/service"
 import { createClient } from "@/lib/supabase/server"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
 import { requireUser } from "@/lib/auth"
@@ -291,30 +292,27 @@ export interface AdminWithdrawalRow {
 }
 
 export async function fetchAdminWithdrawals(status?: string): Promise<AdminWithdrawalRow[]> {
-  const supabase = await createClient()
-  let query = supabase
-    .from("withdrawals")
-    .select(`
-      id, seller_id, amount, fee, net_amount, status, payout_method, payout_details, created_at, processed_at,
-      seller:profiles!withdrawals_seller_id_fkey(full_name)
-    `)
-    .order("created_at", { ascending: false })
+  try {
+    const supabase = createServiceClient()
+    
+    // Simple query first - no joins
+    const { data, error } = await supabase
+      .from("withdrawals")
+      .select("*")
+      .order("created_at", { ascending: false })
 
-  if (status) {
-    query = query.eq("status", status)
+    if (error) {
+      throw new Error(`Supabase error: ${error.message} | Details: ${error.details} | Hint: ${error.hint}`)
+    }
+
+    // Map to AdminWithdrawalRow (without seller join for now)
+    return (data ?? []).map((row: Record<string, unknown>) => ({
+      ...row,
+      seller_name: "Unknown",
+    })) as unknown as AdminWithdrawalRow[]
+  } catch (err) {
+    throw new Error(`fetchAdminWithdrawals: ${err instanceof Error ? err.message : String(err)}`)
   }
-
-  const { data, error } = await query
-
-  if (error) {
-    console.error("fetchAdminWithdrawals:", error.message)
-    return []
-  }
-
-  return (data ?? []).map((row: { seller: Array<{ full_name: string | null }> } & Record<string, unknown>) => ({
-    ...row,
-    seller_name: row.seller?.[0]?.full_name ?? "Unknown",
-  })) as unknown as AdminWithdrawalRow[]
 }
 
 export interface SellerEarnings {

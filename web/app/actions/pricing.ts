@@ -25,9 +25,10 @@ export async function submitUpgradeIntent(
   const user = await requireUser()
   const supabase = await createClient()
 
-  const email = formData.get("email")?.toString()?.trim() || user.email
-  if (!email || !email.includes("@")) {
-    return { ok: false, message: "Payments are not set up for this demo yet." }
+  let email = formData.get("email")?.toString()?.trim() || user.email
+  // Chapa rejects non-standard test emails — use their test address for demo accounts
+  if (!email || !email.includes("@") || email.endsWith("@vintch.local")) {
+    email = "test@chapa.co"
   }
 
   const txRef = chapaTxRef()
@@ -54,20 +55,30 @@ export async function submitUpgradeIntent(
   }
 
   const returnUrl = `${SITE_URL}/upgrade/callback?tx_ref=${encodeURIComponent(txRef)}`
+  console.log("[Chapa init] params:", JSON.stringify({
+    amount: money.amount,
+    currency: money.currency,
+    email,
+    firstName: user.fullName ?? "Customer",
+    txRef,
+    title: "VinTech",
+    description: "Pro tier 199 ETB",
+  }, null, 2))
+
   const init = await initializeChapaTransaction({
     txRef,
     amount: money.amount,
     currency: money.currency,
     email,
-    firstName: user.fullName,
+    firstName: user.fullName ?? "Customer",
     returnUrl,
-    title: "VinTech Pro",
-    description: "Pro tier — 199 ETB/month",
+    title: "VinTech",
+    description: "Pro tier 199 ETB",
   })
 
   if (!init.ok) {
-    console.error("submitUpgradeIntent chapa:", init.error)
-    return { ok: false, message: "Could not start the upgrade — please try again later." }
+    console.error("[Chapa init] error:", JSON.stringify(init.error, null, 2))
+    return { ok: false, message: `Could not start the upgrade: ${init.error}` }
   }
 
   revalidatePath("/pricing")
