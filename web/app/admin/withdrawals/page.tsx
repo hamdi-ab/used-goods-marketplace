@@ -24,10 +24,10 @@ const STATUS_STYLES: Record<string, string> = {
   failed: "bg-red-100 text-red-800",
 }
 
-export default function AdminWithdrawalsPage({ withdrawals }: AdminWithdrawalsPageProps) {
+export default function AdminWithdrawalsPage({ withdrawals = [] }: AdminWithdrawalsPageProps) {
   const [filter, setFilter] = useState<string>("pending")
 
-  const filtered = filter === "all" ? withdrawals : withdrawals.filter((w) => w.status === filter)
+  const filtered = filter === "all" ? withdrawals : withdrawals?.filter((w) => w.status === filter) ?? []
 
   return (
     <div>

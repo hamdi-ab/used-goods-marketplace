@@ -180,6 +180,16 @@ export function ProfileForm({
                 </div>
               ) : null}
 
+              {user.role === "seller" && verifiedTypes.size < 2 ? (
+                <div className="rounded-lg border border-[#2563EB]/30 bg-[#EEF4FF] p-3">
+                  <p className="text-xs font-medium text-[#2563EB]">Become a Verified Seller</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Verify both your phone and Fayda ID to earn the Verified Seller badge.
+                    Buyers trust verified sellers more.
+                  </p>
+                </div>
+              ) : null}
+
               <Link
                 href={`/users/${user.id}`}
                 className="text-sm font-medium text-primary hover:underline"

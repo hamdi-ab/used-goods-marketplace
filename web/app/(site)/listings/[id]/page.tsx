@@ -175,6 +175,27 @@ export default async function ListingPage({
                   instead.
                 </p>
               </div>
+            ) : l.status === "draft" ? (
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-sm font-semibold text-slate-700">
+                  This listing is a draft
+                </p>
+                <p className="mt-1 text-xs text-slate-600">
+                  It&apos;s not visible to other users yet. Publish it to receive offers.
+                </p>
+              </div>
+            ) : isOwner ? (
+              <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+                <p className="text-sm font-semibold text-blue-800">
+                  This is your listing
+                </p>
+                <p className="mt-1 text-xs text-blue-600">
+                  You can&apos;t make offers to or contact yourself.{" "}
+                  <Link href="/dashboard" className="font-medium underline underline-offset-2">
+                    Manage in dashboard
+                  </Link>
+                </p>
+              </div>
             ) : (
               <>
                 <div className="flex flex-col gap-3">

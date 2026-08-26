@@ -18,6 +18,7 @@ import {
 
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+import DagimLogo from "@/components/brand/dagim-logo"
 
 interface NavItem {
   title: string
@@ -31,7 +32,7 @@ interface NavSection {
   items: NavItem[]
 }
 
-const sections: NavSection[] = [
+const buildSections = (reportCount: number): NavSection[] => [
   {
     label: "Overview",
     items: [
@@ -42,7 +43,7 @@ const sections: NavSection[] = [
   {
     label: "Moderation",
     items: [
-      { title: "Reports", href: "/admin/reports", icon: FlagIcon, badge: 3 },
+      { title: "Reports", href: "/admin/reports", icon: FlagIcon, badge: reportCount },
       { title: "Disputes", href: "/admin/disputes", icon: AlertTriangleIcon, badge: 0 },
       { title: "Withdrawals", href: "/admin/withdrawals", icon: BanknoteIcon, badge: 0 },
       { title: "Verifications", href: "/admin/verifications", icon: ShieldCheckIcon, badge: 0 },
@@ -58,8 +59,13 @@ const sections: NavSection[] = [
   },
 ]
 
-export function SidebarVariantB() {
+interface SidebarVariantBProps {
+  reportCount: number
+}
+
+export function SidebarVariantB({ reportCount }: SidebarVariantBProps) {
   const pathname = usePathname()
+  const sections = buildSections(reportCount)
 
   return (
     <div className="flex h-full flex-col">
@@ -68,9 +74,7 @@ export function SidebarVariantB() {
         href="/"
         className="flex shrink-0 items-center gap-2.5 px-5 py-5 font-heading text-lg font-semibold text-foreground"
       >
-        <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
-          V
-        </span>
+        <DagimLogo width={32} height={32} />
         <span className="hidden sm:inline">Dagim Gebeya</span>
       </Link>
 
