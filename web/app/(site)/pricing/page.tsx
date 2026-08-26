@@ -46,7 +46,7 @@ function CurrentPlanLink({ tier }: { tier: Tier }) {
       className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
     >
       <CheckIcon className="mr-1.5 size-4 text-emerald-600" />
-      You're on {TIER_LABELS[tier]}
+      You&apos;re on {TIER_LABELS[tier]}
     </Link>
   )
 }
@@ -145,7 +145,7 @@ export default async function PricingPage({
                 currentTier === "pro" ? (
                   <div className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-primary bg-primary/10 px-4 text-sm font-medium text-primary">
                     <CheckIcon className="mr-1.5 size-4" />
-                    You're on Pro
+                    You&apos;re on Pro
                   </div>
                 ) : currentTier === "business" ? (
                   <CurrentPlanLink tier={currentTier} />

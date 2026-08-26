@@ -38,7 +38,7 @@ export function AdminDisputeCard({ dispute }: AdminDisputeCardProps) {
   const [adminNote, setAdminNote] = useState("")
 
   const createdDate = formatShortDate(dispute.created_at)
-  const daysOpen = Math.floor((Date.now() - new Date(dispute.created_at).getTime()) / (1000 * 60 * 60 * 24))
+  const daysOpen = Math.floor((new Date().getTime() - new Date(dispute.created_at).getTime()) / (1000 * 60 * 60 * 24))
   const isOverdue = daysOpen > 7
 
   return (
