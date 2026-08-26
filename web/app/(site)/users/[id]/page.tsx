@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { MapPinIcon, SendIcon } from "lucide-react"
+import { MapPinIcon, PhoneIcon, SendIcon } from "lucide-react"
 
 import { ROLE_LABELS, type UserRole, getCurrentUser } from "@/lib/auth"
 import { fetchPublicProfile } from "@/lib/profiles"
@@ -151,6 +151,17 @@ export default async function UserProfilePage({
           )}
 
           <div className="flex flex-col gap-3 border-t pt-4 text-sm">
+            {profile.phone && (
+              <div className="flex items-center gap-3">
+                <PhoneIcon className="size-4 shrink-0 text-muted-foreground" />
+                <a
+                  href={`tel:${profile.phone}`}
+                  className="text-primary underline"
+                >
+                  {profile.phone}
+                </a>
+              </div>
+            )}
             <div className="flex items-center gap-3">
               <MapPinIcon className="size-4 shrink-0 text-muted-foreground" />
               <span>

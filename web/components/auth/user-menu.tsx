@@ -114,16 +114,6 @@ export function UserMenu({ tone = "light" }: { tone?: "light" | "blue" }) {
 
         <DropdownMenuSeparator className="my-1" />
 
-        {/* Sell action */}
-        <DropdownMenuItem asChild>
-          <Link href="/sell" className="flex items-center gap-3 rounded-md px-2 py-2 text-sm font-medium text-primary">
-            <PlusIcon className="size-4" />
-            <span className="flex-1">Sell an item</span>
-          </Link>
-        </DropdownMenuItem>
-
-        <DropdownMenuSeparator className="my-1" />
-
         {/* Sign out */}
         <DropdownMenuItem
           onClick={() => void signOut()}
