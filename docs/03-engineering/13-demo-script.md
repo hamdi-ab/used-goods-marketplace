@@ -21,6 +21,7 @@ marketplace. Target length: **3–5 minutes, ≤ 5:00**.
 - [ ] No local stack in the video — record against the production URL.
 - [ ] Recording tool ready (OS-native or OBS); trim to ≤ 5:00.
 - [ ] Browser window clean, e.g. 1440×900, no bookmarks bar clutter.
+- [ ] Mock services verified: `PHONE_MOCK=true`, `FAYDA_MOCK=true`, `CHAPA_DEMO_FALLBACK=false` (test mode).
 
 ## 1. Demo accounts
 
@@ -120,25 +121,26 @@ Demo accounts (from `web/supabase/seed.sql`, all `demo1234`):
 - **Narrator:** "Every card carries the seller's earned badges and a trust
   score — the same on home, search, and the detail page."
 
-### Trust beat T3 — earn a phone badge, best-effort OTP (Shot 3)
+### Trust beat T3 — earn a phone badge (demo: enter 123456)
 - **Account:** Amira Sellers (`/profile`).
 - **Screen:** the Verification card (`components/profile/verification-card.tsx`)
   under the profile form.
 - **What happens on screen:** Phone row shows *Verified* (seed). For a fresh
-  seller: "Request verification" → the #99 decision — the in-profile OTP panel
-  (Supabase test-OTP sandbox) auto-badges on success; on SMS failure it falls
-  back to the admin-reviewed request.
-- **Narrator:** "Phone verification is offered, not forced — and if a code
-  can't be delivered, an admin can confirm it instead. It never blocks listing."
+  seller: "Request verification" → in demo mode, enter any phone → enter code
+  `123456` → auto-badges on success. Production uses real Supabase SMS OTP.
+- **Narrator:** "Phone verification is offered, not forced — it never blocks listing."
 
-### Trust beat T4 — one-click Fayda verification (Shot 3)
+### Trust beat T4 — one-click Fayda verification (demo: mock OIDC)
 - **Account:** Fayad Verified (`/profile`).
 - **Screen:** the same Verification card, Fayda row.
-- **What happens on screen:** one click → the mock Fayda OIDC (T21, live on
-  hosted) → `record_fayda_verification` flips `fayda_verified` and the badge
-  row gains *Fayda Verified*; trust jumps (50 → 70 on a fresh seller).
+- **What happens on screen:** one click → the mock Fayda OIDC provider (runs in
+  dev + deployed) → consent screen (demo identity) → `record_fayda_verification`
+  flips `fayda_verified` and the badge row gains *Fayda Verified*; trust jumps.
 - **Narrator:** "Fayda ID verification is a login, not a document upload —
   seconds, no PII stored. Verified sellers rank higher in search."
+- **Note:** The deployed demo uses an in-app mock OIDC provider (no real eSignet
+  credentials for the competition). The verify-only OIDC surface is identical to
+  production Fayda — swapping to real credentials is config-only.
 
 ### Trust beat T5 — the buyer filters verified sellers (Shot 4)
 - **Account:** Biniam Buyer → `/search`.
@@ -226,17 +228,14 @@ Jiji Boost Packages), and the quota meters sell headroom, not restriction.
 ### Monetization beat M4 — the pricing ladder (Shot 9, before closing)
 - **Account:** any; footer → `/pricing`.
 - **Screen:** Free / Pro / Business three-column table (T27); Pro highlighted
-  at **199 ETB/month** with a "pricing being validated" note; Business "Contact
-  us / coming soon"; "Start Pro" captures email as intent only — mock success,
-  no billing.
+  at **199 ETB/month**. Logged-in Pro users see "You're on Pro" instead of
+  upgrade CTA. Business "Contact us / coming soon".
 - **Narrator:** "Free stays genuinely usable. Pro is capacity for frequent
-  sellers. And when billing opens, the intent we capture today becomes the
-  waitlist."
+  sellers. Upgrade uses Chapa test mode — real sandbox, no live billing."
 
 ### What is NOT in the monetization storyline
 - No real billing/payment anywhere (ADR-021 + §17) — boosts and Pro are demo
-  surfaces; the Chapa bonus beat (2c) is the only "money moves" moment and it
-  is optional.
+  surfaces. The Chapa upgrade flow runs in test mode (sandbox, no live charges).
 - No listing fees, no paywall on core listing/search/contact.
 
 ## 3. Time budget
