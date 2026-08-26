@@ -41,6 +41,13 @@ export function buildLoginUrl(pathname: string): string {
 // (Trips vs Reservations) — each role sees only their mental model, no
 // cross-contamination, no confusing links to the other role's view.
 export function primaryNav(role: UserRole | null): NavItem[] {
+  if (role === "admin") {
+    return [
+      { title: "Home", href: "/", icon: HomeIcon },
+      { title: "Browse", href: "/search", icon: LayoutGridIcon },
+    ]
+  }
+
   const offers: NavItem =
     role === "seller"
       ? { title: "Incoming offers", href: "/offers/seller", icon: HandshakeIcon }
@@ -55,6 +62,13 @@ export function primaryNav(role: UserRole | null): NavItem[] {
 }
 
 export function mobileNav(role: UserRole | null): NavItem[] {
+  if (role === "admin") {
+    return [
+      { title: "Home", href: "/", icon: HomeIcon },
+      { title: "Search", href: "/search", icon: SearchIcon },
+    ]
+  }
+
   const offers: NavItem =
     role === "seller"
       ? { title: "Incoming offers", href: "/offers/seller", icon: HandshakeIcon }

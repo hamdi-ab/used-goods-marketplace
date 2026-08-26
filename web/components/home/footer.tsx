@@ -18,12 +18,12 @@ export function SiteFooter({ flush = false }: { flush?: boolean }) {
       <div className="mx-auto w-full max-w-[1280px] px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr_1fr_1.2fr]">
           <div className="max-w-xs">
-            <p className="flex items-center gap-2 font-heading text-lg font-semibold">
+            <div className="flex items-center gap-2 font-heading text-lg font-semibold">
               <span className="flex size-8 items-center justify-center rounded-lg bg-white p-1">
                 <DagimLogo width={24} height={24} />
               </span>
               {siteName}
-            </p>
+            </div>
             <p className="mt-3 text-sm text-white/90">
               A trusted marketplace for buying and selling second-hand goods across
               Ethiopia — verified sellers, real reviews, safe meetups.

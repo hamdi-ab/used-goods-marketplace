@@ -4,7 +4,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { SendIcon } from "lucide-react"
 
-import { requireUser } from "@/lib/auth"
+import { requireTrader } from "@/lib/auth"
 import { fetchBuyerOffers, fetchOfferEvents } from "@/lib/offers"
 import { verifyOfferPayment } from "@/lib/payments"
 import type { OfferPayment } from "@/lib/payments/constants"
@@ -33,7 +33,7 @@ export default async function OffersPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
-  const user = await requireUser()
+  const user = await requireTrader()
   const params = await searchParams
   const offset = parseOffset(params.offset)
   const supabase = await createClient()

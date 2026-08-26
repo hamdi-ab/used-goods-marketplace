@@ -3,7 +3,7 @@ import type { ReactNode } from "react"
 import Link from "next/link"
 import { InboxIcon } from "lucide-react"
 
-import { requireUser } from "@/lib/auth"
+import { requireTrader } from "@/lib/auth"
 import { fetchSellerOffers, OPEN_OFFER_STATUSES } from "@/lib/offers"
 import { formatPrice } from "@/lib/listings"
 import { nextOffset, parseOffset } from "@/lib/pagination"
@@ -28,7 +28,7 @@ export default async function SellerOffersPage({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const sp = await searchParams
-  const user = await requireUser()
+  const user = await requireTrader()
   const offset = parseOffset(typeof sp.offset === "string" ? sp.offset : undefined)
   const { offers, hasMore, error } = await fetchSellerOffers(user.id, {
     offset,

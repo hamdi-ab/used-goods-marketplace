@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 
-import { requireUser } from "@/lib/auth"
+import { requireTrader } from "@/lib/auth"
 import { fetchCategories } from "@/lib/listings"
 import { fetchAccountUsage } from "@/lib/usage"
 import { CreateListingForm } from "@/components/listings/create-listing-form"
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 }
 
 export default async function SellPage() {
-  const user = await requireUser()
+  const user = await requireTrader()
 
   // Only buyers need onboarding — sellers go straight to listing form
   if (user.role === "buyer") {

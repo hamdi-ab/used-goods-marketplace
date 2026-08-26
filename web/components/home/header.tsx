@@ -119,12 +119,14 @@ export function SiteHeader() {
           {user ? (
             <>
               <NotificationBell tone="blue" href="/notifications" />
-              <Button
-                asChild
-                className="hidden sm:inline-flex bg-white text-[#2563EB] hover:bg-white/90"
-              >
-                <Link href="/sell">Sell</Link>
-              </Button>
+              {role !== "admin" ? (
+                <Button
+                  asChild
+                  className="hidden sm:inline-flex bg-white text-[#2563EB] hover:bg-white/90"
+                >
+                  <Link href="/sell">Sell</Link>
+                </Button>
+              ) : null}
               <UserMenu tone="blue" />
             </>
           ) : (

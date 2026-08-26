@@ -14,10 +14,16 @@ import {
   AlertTriangleIcon,
   BanknoteIcon,
   UserPlusIcon,
+  LogOutIcon,
+  UserIcon,
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
+import { useSignOut } from "@/components/auth/use-sign-out"
+import { useAuth } from "@/components/auth/auth-provider"
+import { initials } from "@/lib/utils"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import DagimLogo from "@/components/brand/dagim-logo"
 
 interface NavItem {
@@ -66,6 +72,12 @@ interface SidebarVariantBProps {
 export function SidebarVariantB({ reportCount }: SidebarVariantBProps) {
   const pathname = usePathname()
   const sections = buildSections(reportCount)
+  const signOut = useSignOut()
+  const { user } = useAuth()
+
+  const email = user?.email ?? ""
+  const fullName = (user?.user_metadata?.full_name as string | undefined) ?? email
+  const name = fullName || email
 
   return (
     <div className="flex h-full flex-col">
@@ -77,20 +89,6 @@ export function SidebarVariantB({ reportCount }: SidebarVariantBProps) {
         <DagimLogo width={32} height={32} />
         <span className="hidden sm:inline">Dagim Gebeya</span>
       </Link>
-
-      {/* View Site link */}
-      <div className="px-3 pb-1">
-        <Link
-          href="/"
-          className={cn(
-            "flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground",
-            pathname === "/" ? "bg-primary/10 text-primary" : "font-semibold text-muted-foreground"
-          )}
-        >
-          <HomeIcon className="size-[18px]" />
-          View Site
-        </Link>
-      </div>
 
       {/* Nav with sections */}
       <div className="flex-1 overflow-y-auto px-3 py-2">
@@ -127,6 +125,35 @@ export function SidebarVariantB({ reportCount }: SidebarVariantBProps) {
             </div>
           ))}
         </nav>
+      </div>
+
+      {/* User section */}
+      <div className="border-t border-border p-3">
+        <Link
+          href="/admin/account"
+          className={cn(
+            "flex items-center gap-3 rounded-lg px-3 py-2 transition-colors hover:bg-muted",
+            pathname === "/admin/account" ? "bg-primary/10" : ""
+          )}
+        >
+          <Avatar className="size-9">
+            <AvatarFallback className="bg-primary/10 text-xs font-medium text-primary">
+              {initials(name)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-medium text-foreground">{name}</p>
+            <p className="truncate text-xs text-muted-foreground">{email}</p>
+          </div>
+        </Link>
+        <button
+          type="button"
+          onClick={() => void signOut()}
+          className="mt-1 flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          <LogOutIcon className="size-[18px]" />
+          Sign out
+        </button>
       </div>
     </div>
   )
