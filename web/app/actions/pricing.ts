@@ -55,15 +55,6 @@ export async function submitUpgradeIntent(
   }
 
   const returnUrl = `${SITE_URL}/upgrade/callback?tx_ref=${encodeURIComponent(txRef)}`
-  console.log("[Chapa init] params:", JSON.stringify({
-    amount: money.amount,
-    currency: money.currency,
-    email,
-    firstName: user.fullName ?? "Customer",
-    txRef,
-    title: "VinTech",
-    description: "Pro tier 199 ETB",
-  }, null, 2))
 
   const init = await initializeChapaTransaction({
     txRef,
@@ -77,8 +68,8 @@ export async function submitUpgradeIntent(
   })
 
   if (!init.ok) {
-    console.error("[Chapa init] error:", JSON.stringify(init.error, null, 2))
-    return { ok: false, message: `Could not start the upgrade: ${init.error}` }
+    console.error("[Chapa init] error:", init.error)
+    return { ok: false, message: "Could not start the upgrade — please try again later." }
   }
 
   revalidatePath("/pricing")

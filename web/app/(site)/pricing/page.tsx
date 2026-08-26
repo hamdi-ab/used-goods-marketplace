@@ -39,6 +39,18 @@ const FEATURE_ROWS: { feature: string; free: string; pro: string; business: stri
   { feature: "Listing boosts", free: "Add-on", pro: "Add-on", business: "Add-on" },
 ]
 
+function CurrentPlanLink({ tier }: { tier: Tier }) {
+  return (
+    <Link
+      href="/dashboard"
+      className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+    >
+      <CheckIcon className="mr-1.5 size-4 text-emerald-600" />
+      You're on {TIER_LABELS[tier]}
+    </Link>
+  )
+}
+
 export default async function PricingPage({
   searchParams,
 }: {
@@ -127,13 +139,7 @@ export default async function PricingPage({
                     Current plan
                   </div>
                 ) : (
-                  <Link
-                    href="/dashboard"
-                    className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  >
-                    <CheckIcon className="mr-1.5 size-4 text-emerald-600" />
-                    You're on {TIER_LABELS[currentTier]}
-                  </Link>
+                  <CurrentPlanLink tier={currentTier} />
                 )
               ) : t === "pro" ? (
                 currentTier === "pro" ? (
@@ -142,13 +148,7 @@ export default async function PricingPage({
                     You're on Pro
                   </div>
                 ) : currentTier === "business" ? (
-                  <Link
-                    href="/dashboard"
-                    className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-border bg-background px-4 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-                  >
-                    <CheckIcon className="mr-1.5 size-4 text-emerald-600" />
-                    You're on Business
-                  </Link>
+                  <CurrentPlanLink tier={currentTier} />
                 ) : (
                   <Suspense fallback={<div className="h-10" />}>
                     <StartProForm />

@@ -294,21 +294,29 @@ export interface AdminWithdrawalRow {
 export async function fetchAdminWithdrawals(status?: string): Promise<AdminWithdrawalRow[]> {
   try {
     const supabase = createServiceClient()
-    
-    // Simple query first - no joins
-    const { data, error } = await supabase
+    let query = supabase
       .from("withdrawals")
-      .select("*")
+      .select(`
+        id, seller_id, amount, fee, net_amount, status, payout_method, payout_details, created_at, processed_at,
+        seller:profiles!withdrawals_seller_id_fkey(full_name)
+      `)
       .order("created_at", { ascending: false })
+
+    if (status) {
+      query = query.eq("status", status)
+    }
+
+    const { data, error } = await query
 
     if (error) {
       throw new Error(`Supabase error: ${error.message} | Details: ${error.details} | Hint: ${error.hint}`)
     }
 
-    // Map to AdminWithdrawalRow (without seller join for now)
-    return (data ?? []).map((row: Record<string, unknown>) => ({
+    return (data ?? []).map((row: { seller: { full_name: string | null } | Array<{ full_name: string | null }> } & Record<string, unknown>) => ({
       ...row,
-      seller_name: "Unknown",
+      seller_name: Array.isArray(row.seller)
+        ? row.seller[0]?.full_name ?? null
+        : row.seller?.full_name ?? null,
     })) as unknown as AdminWithdrawalRow[]
   } catch (err) {
     throw new Error(`fetchAdminWithdrawals: ${err instanceof Error ? err.message : String(err)}`)

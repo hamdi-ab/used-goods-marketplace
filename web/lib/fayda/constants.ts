@@ -32,6 +32,8 @@ export const FAYDA_MOCK_KID = "fayda-mock-key-1"
 // The JWKS is always resolved from the issuer's discovery document, never from
 // a separate env value — FAYDA_JWKS_URL was a dead config and is deliberately
 // absent (a second, unvetted key source would only weaken signature checks).
+// For the deployed demo, leave these unset — lib/site.ts derives them from
+// SITE_URL so the mock provider works without localhost.
 export const FAYDA_ENV = {
   ISSUER_URL: "FAYDA_ISSUER_URL",
   CLIENT_ID: "FAYDA_CLIENT_ID",
