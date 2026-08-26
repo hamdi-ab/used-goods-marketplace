@@ -57,5 +57,5 @@ export async function startSelling(
 
   revalidatePath("/profile")
   revalidatePath("/sell")
-  return { message: "Ready to sell! Create your first listing below." }
+  redirect("/sell")
 }
