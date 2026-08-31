@@ -1,23 +1,19 @@
 "use server"
 
-import { z } from "zod"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 
-import { getCurrentUser } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
 import { completeOwnProfile, updateOwnProfile } from "@/lib/profiles"
 import { uploadObjects } from "@/lib/media"
 import { avatarAdapter } from "@/lib/media/avatar-adapter"
-
-const onboardingSchema = z.object({
-  fullName: z.string().min(2, "Enter your full name"),
-  city: z.string().min(1, "Enter your city"),
-  subCity: z.string().optional(),
-  phone: z.string().optional(),
-  telegramUsername: z.string().optional(),
-  bio: z.string().max(300, "Bio must be 300 characters or fewer").optional(),
-})
+import {
+  onboardingSchema,
+  editProfileSchema,
+  parseOnboardingForm,
+  parseEditProfileForm,
+} from "@/lib/schemas"
 
 export type CompleteProfileState = {
   errors?: Record<string, string[] | undefined>
@@ -28,20 +24,13 @@ export async function completeProfile(
   _prevState: CompleteProfileState,
   formData: FormData
 ): Promise<CompleteProfileState> {
-  const parsed = onboardingSchema.safeParse({
-    fullName: formData.get("fullName"),
-    city: formData.get("city"),
-    subCity: formData.get("subCity"),
-    phone: formData.get("phone"),
-    telegramUsername: formData.get("telegramUsername"),
-    bio: formData.get("bio"),
-  })
+  const parsed = onboardingSchema.safeParse(parseOnboardingForm(formData))
 
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  const user = await getCurrentUser()
+  const user = await getSession()
   if (!user) redirect("/login")
 
   const result = await completeOwnProfile(user.id, {
@@ -62,19 +51,6 @@ export async function completeProfile(
   redirect(formData.get("redirectTo") === "sell" ? "/sell" : "/profile")
 }
 
-const editProfileSchema = z.object({
-  city: z.string().min(1, "Enter your city").max(100),
-  subCity: z.string().max(100).optional(),
-  phone: z.string().max(30, "Phone number is too long").optional(),
-  telegramUsername: z
-    .string()
-    .max(50, "Too long")
-    .transform((v) => (v ? v.replace(/^@/, "") : v))
-    .optional(),
-  bio: z.string().max(300, "Bio must be 300 characters or fewer").optional(),
-  phonePublic: z.boolean().optional(),
-})
-
 export type EditProfileState = {
   errors?: Record<string, string[] | undefined>
   message?: string
@@ -85,20 +61,13 @@ export async function updateProfile(
   _prevState: EditProfileState,
   formData: FormData
 ): Promise<EditProfileState> {
-  const parsed = editProfileSchema.safeParse({
-    city: formData.get("city"),
-    subCity: formData.get("subCity") || undefined,
-    phone: formData.get("phone") || undefined,
-    telegramUsername: formData.get("telegramUsername") || undefined,
-    bio: formData.get("bio") || undefined,
-    phonePublic: formData.get("phonePublic") === "on",
-  })
+  const parsed = editProfileSchema.safeParse(parseEditProfileForm(formData))
 
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  const user = await getCurrentUser()
+  const user = await getSession()
   if (!user) redirect("/login")
 
   const result = await updateOwnProfile(user.id, {
@@ -124,7 +93,7 @@ export async function uploadAvatar(
   _prevState: { url: string | null; error: string | null },
   formData: FormData
 ): Promise<{ url: string | null; error: string | null }> {
-  const user = await getCurrentUser()
+  const user = await getSession()
   if (!user || user.id !== uid) {
     return { url: null, error: "Not authorized" }
   }

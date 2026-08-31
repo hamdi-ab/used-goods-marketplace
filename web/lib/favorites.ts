@@ -4,8 +4,8 @@ import { createClient } from "@/lib/supabase/server"
 import type { Supabase } from "@/lib/supabase/types"
 import { isValidUuid } from "@/lib/uuid"
 import type { BrowseListing } from "@/lib/listings/constants"
-import { mapNestedBrowseListing } from "@/lib/listings/browse-mapper"
-import type { NestedBrowseRow } from "@/lib/listings/browse-mapper"
+import { mapNestedBrowseListing } from "@/lib/mappings/browse"
+import type { NestedBrowseRow } from "@/lib/mappings/browse"
 import { toggleFavoriteState } from "@/lib/favorites/constants"
 import {
   pagedHasMore,

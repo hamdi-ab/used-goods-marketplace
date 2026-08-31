@@ -4,8 +4,8 @@ import { createClient } from "@/lib/supabase/server"
 import type { Supabase } from "@/lib/supabase/types"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
 import { isValidUuid, PAGE_SIZE, type BrowseListing } from "@/lib/listings/constants"
-import { mapNestedBrowseListing } from "@/lib/listings/browse-mapper"
-import type { NestedBrowseRow } from "@/lib/listings/browse-mapper"
+import { mapNestedBrowseListing } from "@/lib/mappings/browse"
+import type { NestedBrowseRow } from "@/lib/mappings/browse"
 import {
   OPEN_OFFER_STATUSES,
   type OfferStatus,

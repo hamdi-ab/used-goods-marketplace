@@ -1,21 +1,18 @@
 "use server"
 
-import { z } from "zod"
 import { revalidatePath } from "next/cache"
 
 import { requireAdmin, requireUser } from "@/lib/auth"
 import {
   createReport as createReportRow,
   resolveReport as resolveReportRow,
-  submitReportSchema,
-  REPORT_NOTE_MAX,
 } from "@/lib/reports"
-import { uuidSchema } from "@/lib/uuid"
-
-function formValue(formData: FormData, key: string): string | undefined {
-  const v = formData.get(key)
-  return typeof v === "string" && v.length > 0 ? v : undefined
-}
+import {
+  submitReportSchema,
+  resolveReportSchema,
+  parseSubmitReportForm,
+  parseResolveReportForm,
+} from "@/lib/schemas"
 
 export type SubmitReportState = {
   errors?: Record<string, string[] | undefined>
@@ -27,12 +24,7 @@ export async function submitReport(
   _prevState: SubmitReportState,
   formData: FormData
 ): Promise<SubmitReportState> {
-  const parsed = submitReportSchema.safeParse({
-    listingId: formValue(formData, "listingId"),
-    sellerId: formValue(formData, "sellerId"),
-    reason: formValue(formData, "reason"),
-    note: formValue(formData, "note"),
-  })
+  const parsed = submitReportSchema.safeParse(parseSubmitReportForm(formData))
 
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors }
@@ -56,15 +48,6 @@ export async function submitReport(
   return { ok: true }
 }
 
-const resolveSchema = z.object({
-  reportId: uuidSchema,
-  action: z.enum(["remove_listing", "block_seller", "reject"]),
-  adminNote: z
-    .string()
-    .max(REPORT_NOTE_MAX, `Keep the note under ${REPORT_NOTE_MAX} characters`)
-    .optional(),
-})
-
 export type ResolveReportState = {
   message?: string
   ok?: boolean
@@ -75,11 +58,7 @@ export async function adminResolveReport(
   _prevState: ResolveReportState,
   formData: FormData
 ): Promise<ResolveReportState> {
-  const parsed = resolveSchema.safeParse({
-    reportId: formValue(formData, "reportId"),
-    action: formValue(formData, "action"),
-    adminNote: formValue(formData, "adminNote"),
-  })
+  const parsed = resolveReportSchema.safeParse(parseResolveReportForm(formData))
 
   if (!parsed.success) {
     return { message: "Invalid report request" }

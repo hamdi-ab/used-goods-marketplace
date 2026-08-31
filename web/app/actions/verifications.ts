@@ -1,6 +1,5 @@
 "use server"
 
-import { z } from "zod"
 import { revalidatePath } from "next/cache"
 
 import { requireAdmin, requireTrader } from "@/lib/auth"
@@ -10,22 +9,11 @@ import {
   requestVerificationRow,
 } from "@/lib/verifications"
 import {
-  SELF_SERVE_TYPES,
-  VERIFICATION_TYPES,
-  VERIFICATION_NOTES_MAX,
-} from "@/lib/verifications/constants"
-import { uuidSchema } from "@/lib/uuid"
-
-function formValue(formData: FormData, key: string): string | undefined {
-  const v = formData.get(key)
-  return typeof v === "string" && v.length > 0 ? v : undefined
-}
-
-// ---- Self-serve (fix #73) ----
-
-const requestSchema = z.object({
-  type: z.enum(SELF_SERVE_TYPES),
-})
+  requestVerificationSchema,
+  recordVerificationSchema,
+  parseRequestVerificationForm,
+  parseRecordVerificationForm,
+} from "@/lib/schemas"
 
 export type RequestVerificationState = {
   errors?: Record<string, string[] | undefined>
@@ -43,7 +31,9 @@ export async function requestVerification(
   _prevState: RequestVerificationState,
   formData: FormData
 ): Promise<RequestVerificationState> {
-  const parsed = requestSchema.safeParse({ type: formValue(formData, "type") })
+  const parsed = requestVerificationSchema.safeParse(
+    parseRequestVerificationForm(formData)
+  )
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors }
   }
@@ -63,21 +53,6 @@ export async function requestVerification(
   return { ok: true }
 }
 
-// ---- Admin review (FS-014 Verification Review) ----
-
-const recordSchema = z.object({
-  userId: uuidSchema,
-  type: z.enum(VERIFICATION_TYPES),
-  status: z.enum(["verified", "rejected"]),
-  notes: z
-    .string()
-    .max(
-      VERIFICATION_NOTES_MAX,
-      `Keep the note under ${VERIFICATION_NOTES_MAX} characters`
-    )
-    .optional(),
-})
-
 export type AdminRecordVerificationState = {
   message?: string
   ok?: boolean
@@ -92,12 +67,9 @@ export async function adminRecordVerification(
   _prevState: AdminRecordVerificationState,
   formData: FormData
 ): Promise<AdminRecordVerificationState> {
-  const parsed = recordSchema.safeParse({
-    userId: formValue(formData, "userId"),
-    type: formValue(formData, "type"),
-    status: formValue(formData, "status"),
-    notes: formValue(formData, "notes"),
-  })
+  const parsed = recordVerificationSchema.safeParse(
+    parseRecordVerificationForm(formData)
+  )
   if (!parsed.success) {
     return { message: "Invalid verification decision" }
   }

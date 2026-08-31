@@ -35,7 +35,7 @@ import {
   mapFlatSearchListing,
   mapNestedBrowseListing,
   pickCoverImage,
-} from "./listings/browse-mapper"
+} from "@/lib/mappings/browse"
 import type {
   FlatSearchRow,
   NestedBrowseRow,

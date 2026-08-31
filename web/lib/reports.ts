@@ -3,7 +3,7 @@ import "server-only"
 import { createClient } from "@/lib/supabase/server"
 import type { Supabase } from "@/lib/supabase/types"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
-import { pickCoverImage } from "@/lib/listings/browse-mapper"
+import { pickCoverImage } from "@/lib/mappings/browse"
 import { OPEN_REPORT_STATUSES } from "./reports/constants"
 import type { ReportReason, ReportStatus } from "./reports/constants"
 

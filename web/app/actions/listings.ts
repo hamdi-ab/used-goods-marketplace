@@ -1,9 +1,7 @@
 "use server"
 
-import { z } from "zod"
 import { revalidatePath } from "next/cache"
 
-import { uuidSchema } from "@/lib/uuid"
 import { requireSeller } from "@/lib/auth"
 import { recordAiUsage } from "@/lib/ai/telemetry"
 import { enforceListingCap } from "@/lib/usage"
@@ -13,48 +11,16 @@ import {
   updateListing as updateListingRow,
   softDeleteListing,
   boostListing as boostListingRow,
-  CONDITIONS,
-  STATUSES,
-  MAX_IMAGES,
 } from "@/lib/listings"
 import type { ListingStatus } from "@/lib/listings/constants"
-
-function formValue(formData: FormData, key: string): string | undefined {
-  const v = formData.get(key)
-  return typeof v === "string" && v.length > 0 ? v : undefined
-}
-
-const createSchema = z.object({
-  title: z.string().min(5, "Title needs at least 5 characters").max(120),
-  description: z.string().max(2000).optional().refine((v) => !v || v.length >= 20, "Description needs at least 20 characters"),
-  price: z.coerce
-    .number({ message: "Enter a price" })
-    .gt(0, "Price must be greater than 0"),
-  condition: z.enum(CONDITIONS),
-  categoryId: uuidSchema.optional(),
-  city: z.string().min(1, "Enter a city").max(100),
-  subCity: z.string().max(100).optional(),
-  address: z.string().max(200).optional(),
-  negotiable: z.boolean().optional(),
-  ai_assisted: z.boolean().optional(),
-  photos: z.array(z.instanceof(File)).min(1, "Add at least one photo").max(MAX_IMAGES, `Up to ${MAX_IMAGES} photos allowed`),
-})
-
-const editSchema = z.object({
-  id: uuidSchema,
-  title: z.string().min(5, "Title needs at least 5 characters").max(120),
-  description: z.string().max(2000).optional().refine((v) => !v || v.length >= 20, "Description needs at least 20 characters"),
-  price: z.coerce
-    .number({ message: "Enter a price" })
-    .gt(0, "Price must be greater than 0"),
-  condition: z.enum(CONDITIONS),
-  categoryId: uuidSchema.optional(),
-  city: z.string().min(1, "Enter a city").max(100),
-  subCity: z.string().max(100).optional(),
-  address: z.string().max(200).optional(),
-  negotiable: z.boolean().optional(),
-  status: z.enum(STATUSES).optional(),
-})
+import { formValue } from "@/lib/form-value"
+import {
+  createListingSchema,
+  editListingSchema,
+  boostSchema,
+  parseCreateListingForm,
+  parseEditListingForm,
+} from "@/lib/schemas"
 
 export type CreateListingState = {
   errors?: Record<string, string[] | undefined>
@@ -78,23 +44,7 @@ export async function createListing(
   _prevState: CreateListingState,
   formData: FormData
 ): Promise<CreateListingState> {
-  const files = (formData.getAll("photos") as File[]).filter(
-    (f) => f && f.size > 0
-  )
-
-  const parsed = createSchema.safeParse({
-    title: formData.get("title"),
-    description: formValue(formData, "description"),
-    price: formData.get("price"),
-    condition: formData.get("condition"),
-    categoryId: formValue(formData, "categoryId"),
-    city: formData.get("city"),
-    subCity: formValue(formData, "subCity"),
-    address: formValue(formData, "address"),
-     negotiable: formData.get("negotiable") === "on",
-     ai_assisted: formData.get("ai_assisted") === "on",
-     photos: files,
-  })
+  const parsed = createListingSchema.safeParse(parseCreateListingForm(formData))
 
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors }
@@ -140,19 +90,7 @@ export async function updateListing(
   _prevState: EditListingState,
   formData: FormData
 ): Promise<EditListingState> {
-  const parsed = editSchema.safeParse({
-    id: formValue(formData, "id"),
-    title: formData.get("title"),
-    description: formValue(formData, "description"),
-    price: formData.get("price"),
-    condition: formData.get("condition"),
-    categoryId: formValue(formData, "categoryId"),
-    city: formData.get("city"),
-    subCity: formValue(formData, "subCity"),
-    address: formValue(formData, "address"),
-    negotiable: formData.get("negotiable") === "on",
-    status: formValue(formData, "status"),
-  })
+  const parsed = editListingSchema.safeParse(parseEditListingForm(formData))
 
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors }
@@ -231,11 +169,6 @@ export async function deleteListing(
      }
    }
  }
-
-const boostSchema = z.object({
-  id: uuidSchema,
-  preset: z.enum(["standard", "premium"]).default("premium"),
-})
 
 interface BoostState {
   ok: boolean
