@@ -1,14 +1,14 @@
 import "server-only"
 
+import type { SupabaseClient } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/server"
-import type { Supabase } from "@/lib/supabase/types"
 import { callRpc } from "@/lib/supabase/rpc"
 
 /** Read the seller's AI-generations used this calendar month (server-side month
  *  boundary, so the cap resets on the 1st with no cron). Injectable client so
  *  fetchAccountUsage and the action share the one RPC seam. */
 export async function countAiGenerationsThisMonth(
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<number> {
   const supabase = client ?? (await createClient())
   const { data } = await callRpc<{ used: number }[]>(

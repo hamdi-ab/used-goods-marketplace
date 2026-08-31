@@ -1,9 +1,9 @@
 import "server-only"
 
 import { cache } from "react"
+import type { SupabaseClient } from "@supabase/supabase-js"
 
 import { createClient } from "@/lib/supabase/server"
-import type { Supabase } from "@/lib/supabase/types"
 
 // ---- Row shapes ----
 
@@ -54,7 +54,7 @@ const PUBLIC_PROFILE_COLUMNS =
 export const fetchOwnProfile = cache(
   async (
     userId: string,
-    client?: Supabase
+    client?: SupabaseClient
   ): Promise<OwnProfileRow | null> => {
     const supabase = client ?? (await createClient())
     const { data: profile, error } = await supabase
@@ -78,7 +78,7 @@ export const fetchOwnProfile = cache(
 export const fetchPublicProfile = cache(
   async (
     userId: string,
-    client?: Supabase
+    client?: SupabaseClient
   ): Promise<PublicProfileRow | null> => {
     const supabase = client ?? (await createClient())
 

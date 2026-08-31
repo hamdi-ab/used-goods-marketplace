@@ -1,7 +1,7 @@
 import "server-only"
 
+import type { SupabaseClient } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/server"
-import type { Supabase } from "@/lib/supabase/types"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
 import { pickCoverImage } from "@/lib/mappings/browse"
 import { OPEN_REPORT_STATUSES } from "./reports/constants"
@@ -95,7 +95,7 @@ const REPORT_JOINS = `${REPORT_COLUMNS},
    */
   export async function fetchMyReports(
     userId: string,
-    client?: Supabase
+    client?: SupabaseClient
   ): Promise<{ reports: MyReportRow[]; error: string | null }> {
     const supabase = client ?? (await createClient())
 
@@ -123,7 +123,7 @@ const REPORT_JOINS = `${REPORT_COLUMNS},
  * context (listing + seller profile, or just the seller profile).
  */
 export async function fetchAdminReports(
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<ReportWithRelations[]> {
   const supabase = client ?? (await createClient())
 

@@ -1,7 +1,7 @@
 import "server-only"
 
+import type { SupabaseClient } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/server"
-import type { Supabase } from "@/lib/supabase/types"
 import { isValidUuid } from "@/lib/uuid"
 import type { BrowseListing } from "@/lib/listings/constants"
 import { mapNestedBrowseListing } from "@/lib/mappings/browse"
@@ -19,7 +19,7 @@ export * from "@/lib/favorites/constants"
 
 export async function fetchFavoriteIds(
   userId: string,
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<string[]> {
   const supabase = client ?? (await createClient())
   const { data, error } = await supabase
@@ -30,7 +30,7 @@ export async function fetchFavoriteIds(
     console.error("fetchFavoriteIds:", error.message)
     return []
   }
-  return (data ?? []).map((row) => row.listing_id)
+  return (data ?? []).map((row: { listing_id: string }) => row.listing_id)
 }
 
 // The favorites feed: rows are joined against listings, so RLS already drops
@@ -48,7 +48,7 @@ export interface FavoritesPage {
 export async function fetchFavoriteListings(
   userId: string,
   args: PagingArgs = {},
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<FavoritesPage> {
   const supabase = client ?? (await createClient())
   const { limit, offset } = resolveWindow(args)

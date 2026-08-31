@@ -1,7 +1,7 @@
 import "server-only"
 
+import type { SupabaseClient } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/server"
-import type { Supabase } from "@/lib/supabase/types"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
 import { isValidUuid } from "@/lib/uuid"
 import {
@@ -60,7 +60,7 @@ export interface ReviewsPage {
 export async function fetchSellerReviews(
   sellerId: string,
   args: PagingArgs = {},
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<ReviewsPage> {
   if (!isValidUuid(sellerId)) {
     return { reviews: [], count: 0, hasMore: false, error: null }
@@ -100,7 +100,7 @@ export async function fetchSellerReviews(
 // full joined list (P1.14, #81).
 export async function fetchSellerRatingSummary(
   sellerId: string,
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<SellerRatingSummary> {
   if (!isValidUuid(sellerId)) return { average: null, count: 0 }
   const supabase = client ?? (await createClient())

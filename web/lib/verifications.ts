@@ -1,8 +1,8 @@
 import "server-only"
 
+import type { SupabaseClient } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/server"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
-import type { Supabase } from "@/lib/supabase/types"
 import type {
   VerificationStatus,
   VerificationType,
@@ -93,7 +93,7 @@ const MY_VERIFICATION_COLUMNS = "id, type, status, updated_at"
  * the current status of each type. */
 export async function fetchMyVerifications(
   userId: string,
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<MyVerificationRow[]> {
   const supabase = client ?? (await createClient())
 
@@ -118,7 +118,7 @@ const ADMIN_VERIFICATION_JOINS = `id, user_id, type, status, notes, created_at,
  * applicant's profile context (name, city, role, current badges). The admin RLS
  * policy exposes all non-deleted rows. */
 export async function fetchAdminVerifications(
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<AdminVerificationRow[]> {
   const supabase = client ?? (await createClient())
 

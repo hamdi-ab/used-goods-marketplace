@@ -6,21 +6,18 @@ import { toast } from "sonner"
 
 import { useAuth } from "@/components/auth/auth-provider"
 import { createClient } from "@/lib/supabase/client"
-import {
-  NOTIFICATION_POLL_MS,
-  type NotificationType,
-} from "@/lib/notifications/constants"
+import { NOTIFICATION_POLL_MS } from "@/lib/notifications/constants"
+
+const LATEST_COLUMNS = "id, type, title, body, is_read, metadata, created_at"
 
 interface LatestNotification {
   id: string
-  type: NotificationType
+  type: string
   title: string
   body: string | null
   is_read: boolean
   created_at: string
 }
-
-const LATEST_COLUMNS = "id, type, title, body, is_read, created_at"
 
 /**
  * Client-side notification state (fix #72): exact unread count for the header
@@ -38,9 +35,6 @@ export function useNotifications(): { unreadCount: number } {
 
   useEffect(() => {
     if (!user) {
-      // The bell unmounts when there is no session (NotificationBell returns
-      // null), so the count resets on remount; only the poll baseline refs
-      // need clearing here.
       lastSeenId.current = null
       bootstrapped.current = false
       return
