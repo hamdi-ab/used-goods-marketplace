@@ -19,6 +19,9 @@ export const NOTIFICATION_TYPES = [
   "business_lead",
   "dispute_opened",
   "dispute_resolved",
+  "dispute_appealed",
+  "withdrawal_approved",
+  "withdrawal_rejected",
 ] as const
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number]
 
@@ -34,6 +37,9 @@ export const NOTIFICATION_TYPE_LABELS: Record<NotificationType, string> = {
   business_lead: "Business lead",
   dispute_opened: "Dispute opened",
   dispute_resolved: "Dispute resolved",
+  dispute_appealed: "Dispute appealed",
+  withdrawal_approved: "Withdrawal approved",
+  withdrawal_rejected: "Withdrawal rejected",
 }
 
 // The inbox page cap and the client poll interval (config.toml realtime is
@@ -72,6 +78,11 @@ export function notificationHref(
       return "/admin/disputes"
     case "dispute_resolved":
       return "/offers"
+    case "dispute_appealed":
+      return "/admin/disputes"
+    case "withdrawal_approved":
+    case "withdrawal_rejected":
+      return "/withdrawals"
     default:
       return null
   }

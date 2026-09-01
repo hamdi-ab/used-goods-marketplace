@@ -62,6 +62,9 @@ describe("notifications constants (#72)", () => {
       "business_lead",
       "dispute_opened",
       "dispute_resolved",
+      "dispute_appealed",
+      "withdrawal_approved",
+      "withdrawal_rejected",
     ])
     expect(NOTIFICATION_TYPE_LABELS.offer_received).toBe("New offer")
     expect(NOTIFICATION_TYPE_LABELS.offer_accepted).toBe("Offer accepted")

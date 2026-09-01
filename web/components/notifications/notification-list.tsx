@@ -48,7 +48,7 @@ function matchesFilter(type: NotificationType, filter: FilterKey): boolean {
     return type === "offer_received" || type === "offer_accepted"
   if (filter === "reviews") return type === "review_received"
   if (filter === "disputes")
-    return type === "dispute_opened" || type === "dispute_resolved"
+    return type === "dispute_opened" || type === "dispute_resolved" || type === "dispute_appealed"
   return type === "report_resolved"
 }
 
@@ -96,6 +96,18 @@ const TYPE_STYLE: Record<NotificationType, { icon: ReactNode; chip: string }> = 
   dispute_resolved: {
     icon: <ShieldCheckIcon className="size-5" />,
     chip: "bg-emerald-100 text-emerald-700",
+  },
+  dispute_appealed: {
+    icon: <BellIcon className="size-5" />,
+    chip: "bg-purple-100 text-purple-700",
+  },
+  withdrawal_approved: {
+    icon: <CheckCircle2Icon className="size-5" />,
+    chip: "bg-emerald-100 text-emerald-700",
+  },
+  withdrawal_rejected: {
+    icon: <BellIcon className="size-5" />,
+    chip: "bg-red-100 text-red-700",
   },
 }
 

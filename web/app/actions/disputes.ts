@@ -2,7 +2,7 @@
 
 import { z } from "zod"
 import { revalidatePath } from "next/cache"
-import { decideDispute, openDispute } from "@/lib/disputes"
+import { appealDispute, decideDispute, openDispute } from "@/lib/disputes"
 import { createNotification } from "@/lib/notifications"
 import { createClient } from "@/lib/supabase/server"
 import { uuidSchema } from "@/lib/uuid"
@@ -43,21 +43,32 @@ export async function decideDisputeAction(
     return { message: result.error ?? "Could not decide dispute" }
   }
 
-  // Notify the buyer about the dispute resolution
+  // Notify both buyer and seller about the dispute resolution
   const resolutionLabel = parsed.data.resolution === "refund_buyer" ? "Refund approved" : "Payment released to seller"
   const supabase = await createClient()
   const { data: dispute } = await supabase
     .from("disputes")
-    .select("payment:payments!disputes_payment_id_fkey(buyer_id)")
+    .select("payment:payments!disputes_payment_id_fkey(buyer_id, seller_id)")
     .eq("id", parsed.data.disputeId)
     .maybeSingle()
-  const buyerId = (dispute as unknown as { payment: { buyer_id: string }[] })?.payment?.[0]?.buyer_id
-  if (buyerId) {
+  const payment = (dispute as unknown as { payment: { buyer_id: string; seller_id: string }[] })?.payment?.[0]
+  const note = parsed.data.adminNote ?? "Your dispute has been reviewed and resolved."
+
+  if (payment?.buyer_id) {
     await createNotification({
-      userId: buyerId,
+      userId: payment.buyer_id,
       type: "dispute_resolved",
       title: `Dispute resolved: ${resolutionLabel}`,
-      body: parsed.data.adminNote ?? "Your dispute has been reviewed and resolved.",
+      body: note,
+      metadata: { dispute_id: parsed.data.disputeId },
+    })
+  }
+  if (payment?.seller_id) {
+    await createNotification({
+      userId: payment.seller_id,
+      type: "dispute_resolved",
+      title: `Dispute resolved: ${resolutionLabel}`,
+      body: note,
       metadata: { dispute_id: parsed.data.disputeId },
     })
   }
@@ -118,6 +129,64 @@ export async function openDisputeAction(
         title: "New dispute opened",
         body: `Reason: ${parsed.data.reason.replace(/_/g, " ")}`,
         metadata: { payment_id: parsed.data.paymentId },
+      })
+    }
+  }
+
+  revalidatePath("/offers")
+  revalidatePath("/admin/disputes")
+  return { ok: true }
+}
+
+const appealSchema = z.object({
+  disputeId: uuidSchema,
+  appealNote: z.string().min(1, "Please explain your appeal"),
+  appealEvidenceUrls: z.array(z.string()).default([]),
+})
+
+export type AppealDisputeState = {
+  message?: string
+  ok?: boolean
+}
+
+export async function appealDisputeAction(
+  _prevState: AppealDisputeState,
+  formData: FormData
+): Promise<AppealDisputeState> {
+  const parsed = appealSchema.safeParse({
+    disputeId: formValue(formData, "disputeId"),
+    appealNote: formValue(formData, "appealNote"),
+    appealEvidenceUrls: [],
+  })
+
+  if (!parsed.success) {
+    return { message: "Invalid request" }
+  }
+
+  const result = await appealDispute({
+    disputeId: parsed.data.disputeId,
+    appealNote: parsed.data.appealNote,
+    appealEvidenceUrls: parsed.data.appealEvidenceUrls,
+  })
+
+  if (!result.ok) {
+    return { message: result.error ?? "Could not submit appeal" }
+  }
+
+  // Notify admins about the appeal
+  const supabase = await createClient()
+  const { data: admins } = await supabase
+    .from("profiles")
+    .select("id")
+    .eq("role", "admin")
+  if (admins) {
+    for (const admin of admins) {
+      await createNotification({
+        userId: admin.id,
+        type: "dispute_appealed",
+        title: "Dispute appealed",
+        body: parsed.data.appealNote.slice(0, 100),
+        metadata: { dispute_id: parsed.data.disputeId },
       })
     }
   }

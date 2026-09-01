@@ -17,6 +17,8 @@ interface DisputeFormProps {
 const REASON_LABELS: Record<DisputeReason, string> = {
   not_received: "Item not received",
   not_as_description: "Not as described",
+  damaged: "Item damaged",
+  other: "Other issue",
 }
 
 export function DisputeForm({ paymentId }: DisputeFormProps) {
