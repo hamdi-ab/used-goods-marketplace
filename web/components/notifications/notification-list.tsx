@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition, type ReactNode } from "react"
+import { useState, useTransition, useEffect, type ReactNode } from "react"
 import Link from "next/link"
 import {
   BadgeDollarSignIcon,
@@ -132,11 +132,9 @@ export function NotificationList({
   const [filter, setFilter] = useState<FilterKey>("all")
   const [, startTransition] = useTransition()
 
-  const [prevRows, setPrevRows] = useState(notifications)
-  if (prevRows !== notifications) {
-    setPrevRows(notifications)
+  useEffect(() => {
     setRows(notifications)
-  }
+  }, [notifications])
 
   const unreadCount = rows.filter((n) => !n.is_read).length
 
@@ -289,7 +287,7 @@ export function NotificationList({
                           {!n.is_read ? (
                             <span
                               aria-hidden="true"
-                              className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full border-2 border-background bg-[#2563EB] animate-pulse-dot"
+                              className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full border-2 border-background bg-[#2563EB]"
                             />
                           ) : null}
                           {style.icon}

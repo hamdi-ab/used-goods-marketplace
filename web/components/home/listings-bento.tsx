@@ -62,6 +62,18 @@ export function ListingsBento({ listings, favoriteIds }: ListingsBentoProps) {
     </Link>
   )
 
+  // With fewer than 3 listings, fall back to a simple uniform grid — the
+  // asymmetric bento layout needs at least a spine + feature tile to look right.
+  if (tiles.length < 3) {
+    return (
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {tiles.map((l) =>
+          tile(l, "aspect-[4/3]", "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw")
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="grid grid-cols-2 gap-3 auto-rows-[210px] lg:grid-cols-4">
       {spine

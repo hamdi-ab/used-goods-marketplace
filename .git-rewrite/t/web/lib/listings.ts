@@ -1,0 +1,564 @@
+import "server-only"
+
+import { createClient } from "@/lib/supabase/server"
+import type { Supabase } from "@/lib/supabase/types"
+import { callRpc, callOutcomeRpc } from "@/lib/supabase/rpc"
+import { uploadObjects } from "@/lib/media"
+import { listingImageAdapter } from "@/lib/media/listing-adapter"
+
+import {
+  BROWSE_LIMIT_MAX,
+  LISTING_COLUMNS,
+  MAX_IMAGES,
+  PAGE_SIZE,
+  isValidUuid,
+} from "./listings/constants"
+import type {
+  BrowseListing,
+  Category,
+  Condition,
+  Listing,
+  ListingEditPayload,
+  ListingImage,
+  ListingPayload,
+  ListingStatus,
+  ListingWithRelations,
+} from "./listings/constants"
+import type { SearchSort } from "@/lib/search"
+import {
+  MAX_PAGING_OFFSET,
+  pagedHasMore,
+  resolveWindow,
+  type PagingArgs,
+} from "@/lib/pagination"
+import {
+  mapFlatSearchListing,
+  mapNestedBrowseListing,
+  pickCoverImage,
+} from "./listings/browse-mapper"
+import type {
+  FlatSearchRow,
+  NestedBrowseRow,
+} from "./listings/browse-mapper"
+
+// Re-export the pure value objects so imports from "@/lib/listings" keep
+// resolving. Definitions live in ./listings/constants (server-free).
+export * from "./listings/constants"
+
+// ---- Reads ----
+
+export async function fetchCategories(
+  client?: Supabase
+): Promise<Category[]> {
+  const supabase = client ?? (await createClient())
+  const { data, error } = await supabase
+    .from("categories")
+    .select("id, name, slug, parent_id")
+    .order("name")
+  if (error) {
+    console.error("fetchCategories:", error.message)
+    return []
+  }
+  return data as Category[]
+}
+
+export interface FetchListingOptions {
+  /** Include the joined seller profile. The detail view renders the seller card,
+   * but the edit flow only authorizes via the page and never reads the profile
+   * row — so it can opt out of the extra profiles join. (RLS "readable by the
+   * owner" already lets an owner see their unpubished/draft rows.) */
+  includeSeller?: boolean
+}
+
+export async function fetchListing(
+  id: string,
+  opts: FetchListingOptions = {},
+  client?: Supabase
+): Promise<ListingWithRelations | null> {
+  if (!isValidUuid(id)) return null
+  const supabase = client ?? (await createClient())
+
+  const { data: listing } = await supabase
+    .from("listings")
+    .select(LISTING_COLUMNS)
+    .eq("id", id)
+    .is("deleted_at", null)
+    .maybeSingle()
+  if (!listing) return null
+
+  const { data: images } = await supabase
+    .from("listing_images")
+    .select("id, listing_id, image_url, display_order, alt_text")
+    .eq("listing_id", id)
+    .order("display_order", { ascending: true })
+
+  let category: Category | null = null
+  if (listing.category_id) {
+    const { data: cat } = await supabase
+      .from("categories")
+      .select("id, name, slug, parent_id")
+      .eq("id", listing.category_id)
+      .maybeSingle()
+    category = (cat as Category | null) ?? null
+  }
+
+  // The seller join is opt-out: one seam serves both read intents (detail wants
+  // seller, edit does not), instead of two near-copied functions.
+  let seller: ListingWithRelations["seller"] = null
+  if (opts.includeSeller !== false) {
+    const { data: s } = await supabase
+      .from("profiles")
+      .select("id, full_name, avatar_url, role, trust_score, phone_verified, fayda_verified")
+      .eq("id", listing.seller_id)
+      .maybeSingle()
+    seller = s as ListingWithRelations["seller"]
+  }
+
+  return {
+    listing: listing as Listing,
+    images: (images ?? []) as ListingImage[],
+    category: category as Category | null,
+    seller,
+  }
+}
+
+// A seller's own listing as shown on the dashboard manager: the full Listing
+// plus the cover image for the thumbnail. Soft-deleted rows are filtered out so
+// an archived listing disappears from the seller's manager once deleted.
+export interface SellerListingRow extends Listing {
+  cover_image_url: string | null
+}
+
+// PostgREST returns numeric as string; the row type is derived from Listing so
+// the mapper cannot drift from the contract (price is the only shape change).
+type RawSellerListingRow = Omit<Listing, "price"> & {
+  price: number | string
+  images: { image_url: string; display_order: number }[] | null
+}
+
+export interface SellerListingsPage {
+  listings: SellerListingRow[]
+  count: number | null
+  hasMore: boolean
+  error: string | null
+}
+
+export async function fetchSellerListings(
+  sellerId: string,
+  args: PagingArgs = {},
+  client?: Supabase
+): Promise<SellerListingsPage> {
+  const supabase = client ?? (await createClient())
+  const { limit, offset } = resolveWindow(args)
+  const { data, error, count } = await supabase
+    .from("listings")
+    .select(
+      `${LISTING_COLUMNS},
+       images:listing_images(image_url, display_order)`,
+      { count: "exact" }
+    )
+    .eq("seller_id", sellerId)
+    .is("deleted_at", null)
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  if (error) {
+    console.error("fetchSellerListings:", error.message)
+    return { listings: [], count, hasMore: false, error: error.message }
+  }
+
+  const rows = data as unknown as RawSellerListingRow[] | null ?? []
+
+  // Best-effort boost state (T29): read `boosted_until` in a separate query so
+  // the dashboard still renders when the boost migration hasn't been applied —
+  // the boost UI degrades to "not boosted" instead of crashing the page. The
+  // base LISTING_COLUMNS select deliberately omits the column for the same
+  // reason (buyer browse never depends on it).
+  const boosts: Record<string, string | null> = {}
+  try {
+    const ids = rows.map((r) => r.id)
+    if (ids.length > 0) {
+      const { data: b } = await supabase
+        .from("listings")
+        .select("id, boosted_until")
+        .in("id", ids)
+      for (const row of b ?? []) boosts[row.id] = row.boosted_until
+    }
+  } catch (e) {
+    console.error(
+      "fetchSellerListings: boost read failed (boost migration pending?)",
+      e
+    )
+  }
+
+  const listings = rows.map((row) => {
+    const { images, ...rest } = row
+    return {
+      ...rest,
+      price: Number(rest.price),
+      cover_image_url: pickCoverImage(images),
+      boosted_until: boosts[row.id] ?? null,
+    }
+  })
+  return {
+    listings,
+    count,
+    hasMore: pagedHasMore(offset, listings.length, count),
+    error: null,
+  }
+}
+
+// Public, paginated browse of published listings (anon-readable via RLS).
+export async function fetchListings(
+  opts: {
+    limit?: number
+    offset?: number
+    categorySlug?: string
+  } = {},
+  client?: Supabase
+): Promise<{
+  listings: BrowseListing[]
+  count: number | null
+  hasMore: boolean
+  error: string | null
+}> {
+  const supabase = client ?? (await createClient())
+  const limit = Math.min(opts.limit ?? PAGE_SIZE, BROWSE_LIMIT_MAX)
+  // offset is an untrusted cursor from the URL; parseBrowseParams
+  // (lib/browse) is the single source of truth that validates + clamps it
+  // to the 1000-row paging window so "Load more" always terminates.
+  const offset = opts.offset ?? 0
+
+  let categoryId: string | null = null
+  if (opts.categorySlug) {
+    const { data: cat } = await supabase
+      .from("categories")
+      .select("id")
+      .eq("slug", opts.categorySlug)
+      .maybeSingle()
+    categoryId = cat?.id ?? null
+    if (!categoryId) return { listings: [], count: 0, hasMore: false, error: null }
+  }
+
+  let query = supabase
+    .from("listings")
+    .select(
+      `id, title, price, condition, city, status, published_at,
+        seller:profiles!listings_seller_id_fkey(id, full_name, avatar_url, role, trust_score, phone_verified, fayda_verified),
+        images:listing_images(id, image_url, display_order)`,
+      { count: "exact" }
+    )
+    .in("status", ["published", "sold"])
+  if (categoryId) query = query.eq("category_id", categoryId)
+
+  const { data, error, count } = await query
+    .order("published_at", { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  if (error) {
+    console.error("fetchListings:", error.message)
+    return { listings: [], count, hasMore: false, error: error.message }
+  }
+
+  const listings: BrowseListing[] = (data as NestedBrowseRow[] | null ?? []).map(
+    mapNestedBrowseListing
+  )
+
+  const hasMore =
+    typeof count === "number"
+      ? offset + listings.length < count && offset + listings.length < BROWSE_LIMIT_MAX
+      : false
+  return { listings, count, hasMore, error: null }
+}
+
+// Public "listings by a seller" feed for the seller-profile page (anon-readable
+// via the same published-listings RLS as fetchListings). Shows only live
+// published rows, newest first, capped to a small showcase grid. Reuses the
+// nested browse shape + mapper so the seller/image contract stays single-sourced.
+export async function fetchSellerPublicListings(
+  sellerId: string,
+  limit: number = 6,
+  client?: Supabase
+): Promise<BrowseListing[]> {
+  const supabase = client ?? (await createClient())
+  const safeLimit = Math.min(Math.max(limit, 1), BROWSE_LIMIT_MAX)
+
+  const { data, error } = await supabase
+    .from("listings")
+    .select(
+      `id, title, price, condition, city, status, published_at,
+        seller:profiles!listings_seller_id_fkey(id, full_name, avatar_url, role, trust_score, phone_verified, fayda_verified),
+        images:listing_images(id, image_url, display_order)`
+    )
+    .eq("seller_id", sellerId)
+    .eq("status", "published")
+    .order("published_at", { ascending: false })
+    .limit(safeLimit)
+
+  if (error) {
+    console.error("fetchSellerPublicListings:", error.message)
+    return []
+  }
+
+  return (data as NestedBrowseRow[] | null ?? []).map(mapNestedBrowseListing)
+}
+
+export interface SearchOptions {
+  q?: string
+  categorySlug?: string
+  minPrice?: number
+  maxPrice?: number
+  condition?: Condition
+  city?: string
+  sellerVerified?: boolean
+  sort?: SearchSort
+  offset?: number
+}
+
+export interface SearchResult {
+  listings: BrowseListing[]
+  count: number
+  hasMore: boolean
+  error: string | null
+}
+
+/** Row shape returned by the `search_listings` RPC (see migrations). It is the
+ * same flat browse row the mapper consumes (so the seller/image contract lives
+ * once), plus the exact-count column the RPC adds alongside the slice. */
+type SearchListingRow = FlatSearchRow & { total_count: number }
+
+// Keyword + filters + sort + count in one round trip via the search_listings
+// RPC (T06, Search Service). Paging mirrors fetchListings: one PAGE_SIZE window
+// that never crosses the 1000-row ceiling, with `hasMore` derived from the
+// exact count the RPC returns alongside the slice.
+export async function searchListings(
+  opts: SearchOptions = {},
+  client?: Supabase
+): Promise<SearchResult> {
+  const supabase = client ?? (await createClient())
+  const offset = Math.min(Math.max(opts.offset ?? 0, 0), MAX_PAGING_OFFSET)
+
+  const { data, error } = await callRpc<SearchListingRow[]>(
+    supabase,
+    "search_listings",
+    {
+      p_query: opts.q || null,
+      p_category_slug: opts.categorySlug || null,
+      p_min_price: opts.minPrice ?? null,
+      p_max_price: opts.maxPrice ?? null,
+       p_condition: opts.condition ?? null,
+       p_city: opts.city || null,
+       p_verified_seller: opts.sellerVerified ?? null,
+       p_sort: opts.sort ?? "newest",
+       p_limit: PAGE_SIZE,
+       p_offset: offset,
+     }
+  )
+
+  if (error) {
+    console.error("searchListings:", error)
+    return { listings: [], count: 0, hasMore: false, error }
+  }
+
+  const rows = (data ?? []) as SearchListingRow[]
+  const listings: BrowseListing[] = rows.map(mapFlatSearchListing)
+
+  const count = rows.length > 0 ? rows[0].total_count : 0
+  return {
+    listings,
+    count,
+    hasMore:
+      offset + listings.length < count && offset + listings.length < BROWSE_LIMIT_MAX,
+    error: null,
+  }
+}
+
+// ---- Similar listings (#78, P1.10) ----
+//
+// `listings_similar` returns published listings in the same category as the
+// source, within +/-50% price band (PRD US-010 AC: same category + similar
+// price range), newest first. Reuses the flat browse shape + mapper so the
+// seller/image contract stays single-sourced, and the same SECURITY DEFINER
+// posture as search_listings.
+
+export interface SimilarResult {
+  listings: BrowseListing[]
+  count: number
+  error: string | null
+}
+
+const SIMILAR_LIMIT_DEFAULT = 6
+const SIMILAR_LIMIT_MAX = 12
+
+export async function fetchSimilarListings(
+  listingId: string,
+  limit: number = SIMILAR_LIMIT_DEFAULT,
+  client?: Supabase
+): Promise<SimilarResult> {
+  const supabase = client ?? (await createClient())
+  const safeLimit = Math.min(Math.max(limit, 1), SIMILAR_LIMIT_MAX)
+
+  const { data, error } = await callRpc<FlatSearchRow & { total_count: number }[]>(
+    supabase,
+    "listings_similar",
+    {
+      p_listing_id: listingId,
+      p_limit: safeLimit,
+      p_offset: 0,
+    }
+  )
+
+  if (error) {
+    console.error("fetchSimilarListings:", error)
+    return { listings: [], count: 0, error }
+  }
+
+  const rows = (data ?? []) as (FlatSearchRow & { total_count: number })[]
+  const listings = rows.map(mapFlatSearchListing)
+  return { listings, count: rows.length, error: null }
+}
+
+// ---- Writes (called by server actions; DB access centralized here, §17) ----
+
+export async function createListing(
+  values: ListingPayload,
+  sellerId: string
+): Promise<{ id: string } | { error: string }> {
+  const supabase = await createClient()
+
+  if (values.categoryId) {
+    const { count } = await supabase
+      .from("categories")
+      .select("id", { count: "exact", head: true })
+      .eq("id", values.categoryId)
+    if (!count) return { error: "Invalid category" }
+  }
+
+  const { data: listing, error } = await supabase
+    .from("listings")
+    .insert({
+      seller_id: sellerId,
+      category_id: values.categoryId ?? null,
+      title: values.title,
+      description: values.description ?? null,
+      price: values.price,
+      condition: values.condition,
+      city: values.city,
+      sub_city: values.subCity ?? null,
+      address: values.address ?? null,
+      negotiable: values.negotiable ?? false,
+      ai_assisted: values.ai_assisted ?? false,
+      status: "published" as ListingStatus,
+    })
+    .select("id")
+    .single()
+
+  if (error || !listing) {
+    return { error: error?.message ?? "Could not create listing" }
+  }
+
+  // Photos are required by the schema; upload them. If upload fails, compensate
+  // by deleting the half-created listing so we never persist a gallery-less row.
+  const uploadError = await uploadListingPhotos(
+    supabase,
+    listing.id,
+    values.photos ?? []
+  )
+  if (uploadError) {
+    await supabase.from("listings").delete().eq("id", listing.id)
+    return { error: uploadError }
+  }
+
+  return { id: listing.id }
+}
+
+export async function updateListing(
+  values: ListingEditPayload,
+  sellerId: string
+): Promise<{ ok: boolean; error: string | null }> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from("listings")
+    .update({
+      category_id: values.categoryId ?? null,
+      title: values.title,
+      description: values.description ?? null,
+      price: values.price,
+      condition: values.condition,
+      city: values.city,
+      sub_city: values.subCity ?? null,
+      address: values.address ?? null,
+      negotiable: values.negotiable ?? false,
+      ...(values.status ? { status: values.status } : {}),
+    })
+    .eq("id", values.id)
+    .eq("seller_id", sellerId)
+    .select("id")
+
+  if (error) return { ok: false, error: error.message }
+  if (!data || data.length === 0) return { ok: false, error: "Listing not found" }
+  return { ok: true, error: null }
+}
+
+export async function softDeleteListing(
+  id: string,
+  sellerId: string
+): Promise<{ ok: boolean; error: string | null }> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from("listings")
+    .update({ deleted_at: new Date().toISOString() })
+    .eq("id", id)
+    .eq("seller_id", sellerId)
+    .select("id")
+
+  if (error) return { ok: false, error: error.message }
+  if (!data || data.length === 0) return { ok: false, error: "Listing not found" }
+  return { ok: true, error: null }
+}
+
+/** T29: boost a seller's own published listing (payment handled off-platform,
+ * see ADR-021). Ownership + published guards live in the SECURITY DEFINER
+ * `boost_listing` RPC so they cannot be bypassed client-side. The DB owns the
+ * authoritative boost window — the client must not compute its own expiry —
+ * so the seam returns ok/error only; the refreshed `boosted_until` arrives on
+ * the next listing read. */
+export async function boostListing(
+  listingId: string,
+  preset: "standard" | "premium"
+): Promise<{ ok: boolean; error: string | null }> {
+  const supabase = await createClient()
+  const result = await callOutcomeRpc(supabase, "boost_listing", {
+    p_listing_id: listingId,
+    p_preset: preset,
+  }, "boost_listing")
+  const msg = result.error ?? null
+  if (msg) {
+    return { ok: false, error: msg }
+  }
+  return { ok: true, error: null }
+}
+
+/** Upload listing photos for a given listing (T29 image seam). Delegates to the
+ * shared Media upload seam so the listing domain never touches storage. */
+export async function uploadListingPhotos(
+  supabase: Supabase,
+  listingId: string,
+  files: File[]
+): Promise<string | null> {
+  if (files.length > MAX_IMAGES) {
+    return `Up to ${MAX_IMAGES} photos allowed`
+  }
+
+  // The listing-image adapter (see lib/media/listing-adapter): one of the two
+  // adapters behind the shared Media upload seam. Bucket + path + validation +
+  // reconcile all live in the media layer, so the listing domain never knows
+  // storage details.
+  const result = await uploadObjects(
+    files.map((file, i) => ({ file, index: i })),
+    listingImageAdapter({ listingId, supabase }),
+    supabase
+  )
+
+  return result.ok ? null : result.error
+}

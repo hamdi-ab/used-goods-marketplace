@@ -190,10 +190,6 @@ export function EditListingForm({
               variant="destructive"
               disabled={deletePending}
               className="h-11"
-              onClick={() => {
-                if (!confirm("Archive this listing? It will no longer be visible."))
-                  return false
-              }}
             >
               <XIcon className="mr-2 size-4" />
               {deletePending ? "Archiving…" : "Archive listing"}
@@ -240,7 +236,7 @@ export function EditListingForm({
                 {title || "Listing title"}
               </p>
               <p className="mt-1 text-lg font-extrabold text-[#2563EB]">
-                {formatPrice(Number(price) || 0, { maxFractionDigits: 2 })}
+                {formatPrice(Number.isFinite(Number(price)) ? Number(price) : 0, { maxFractionDigits: 2 })}
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {condition ? (

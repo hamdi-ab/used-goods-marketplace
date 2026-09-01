@@ -1,0 +1,75 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="800" viewBox="0 0 1600 800" font-family="Inter, Geist, 'Segoe UI', system-ui, sans-serif">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#EFF6FF"/><stop offset="1" stop-color="#DBEAFE"/>
+  </linearGradient>
+  <linearGradient id="skyDeep" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#DBEAFE"/><stop offset="1" stop-color="#BFDBFE"/>
+  </linearGradient>
+  <linearGradient id="primary" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#60A5FA"/><stop offset="1" stop-color="#2563EB"/>
+  </linearGradient>
+  <linearGradient id="primaryDeep" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#2563EB"/><stop offset="1" stop-color="#1D4ED8"/>
+  </linearGradient>
+  <linearGradient id="navy" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#1E40AF"/><stop offset="1" stop-color="#172554"/>
+  </linearGradient>
+  <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EFF6FF"/>
+  </linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#FBBF24"/><stop offset="1" stop-color="#F59E0B"/>
+  </linearGradient>
+  <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FDE68A"/><stop offset="1" stop-color="#F59E0B"/>
+  </linearGradient>
+  <linearGradient id="warm" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FFFBEB"/><stop offset="1" stop-color="#FEF3C7"/>
+  </linearGradient>
+  <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#93C5FD" stop-opacity="0.55"/><stop offset="1" stop-color="#93C5FD" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="glowWarm" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#FDE68A" stop-opacity="0.5"/><stop offset="1" stop-color="#FDE68A" stop-opacity="0"/>
+  </radialGradient>
+  <filter id="s1" x="-40%" y="-40%" width="180%" height="180%">
+    <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#1E40AF" flood-opacity="0.10"/>
+  </filter>
+  <filter id="s2" x="-40%" y="-40%" width="180%" height="180%">
+    <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#1E40AF" flood-opacity="0.14"/>
+  </filter>
+  <filter id="s3" x="-60%" y="-60%" width="220%" height="220%">
+    <feDropShadow dx="0" dy="14" stdDeviation="20" flood-color="#1E3A8A" flood-opacity="0.18"/>
+  </filter>
+</defs><rect width="1600" height="800" fill="url(#sky)"/><ellipse cx="800" cy="336" rx="544" ry="240" fill="url(#glow)"/><path d="M 300 198 C 309.24 207.24 322 220 C 309.24 232.76 300 242 C 287.24 232.76 278 220 C 287.24 207.24 300 198 Z" fill="#93C5FD"/><path d="M 1340 198 C 1349.24 207.24 1362 220 C 1349.24 232.76 1340 242 C 1327.24 232.76 1318 220 C 1327.24 207.24 1340 198 Z" fill="#F59E0B"/><path d="M 620 542 C 627.56 549.56 638 560 C 627.56 570.44 620 578 C 609.56 570.44 602 560 C 609.56 549.56 620 542 Z" fill="#60A5FA"/><path d="M 1010 602 C 1017.56 609.56 1028 620 C 1017.56 630.44 1010 638 C 999.56 630.44 992 620 C 999.56 609.56 1010 602 Z" fill="#93C5FD"/><rect x="60" y="180" width="600" height="380" rx="20" fill="#FFFFFF" filter="url(#s2)"/><g transform="translate(80 200)">
+      <rect x="0" y="0" width="560" height="300" rx="12" fill="#F3F4F6"/>
+      <rect x="30" y="30" width="380" height="220" rx="10" fill="#D1D5DB"/>
+      <g transform="translate(260 170) scale(0.85)">
+    <ellipse cx="0" cy="46" rx="44" ry="10" fill="#172554" opacity="0.16"/>
+    <path d="M -34 30 A 34 34 0 0 1 34 30 L 26 46 L -26 46 Z" fill="#6B7280"/>
+    <path d="M -34 30 A 34 34 0 0 1 34 30" fill="none" stroke="#9CA3AF" stroke-width="5"/>
+    <rect x="-18" y="-14" width="36" height="18" rx="7" fill="#9CA3AF"/>
+    <path d="M 34 20 Q 58 20 52 40 Q 46 52 30 46" fill="none" stroke="#6B7280" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="-2" cy="38" r="5" fill="#9CA3AF"/>
+  </g>
+      <rect x="430" y="30" width="100" height="90" rx="8" fill="#E5E7EB"/>
+      <rect x="430" y="130" width="100" height="90" rx="8" fill="#D1D5DB"/>
+      <path d="M 30 270 L 590 270" stroke="#9CA3AF" stroke-width="3" stroke-dasharray="10 10"/>
+      <rect x="30" y="282" width="26" height="26" rx="4" fill="#9CA3AF"/>
+      <path d="M 30 295 L 30 310 M 43 295 L 43 310 M 56 295 L 56 310 M 30 302 L 56 302 M 30 306 L 56 306" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
+    </g><g><rect x="90" y="130" width="110" height="36" rx="18" fill="#6B7280" filter="url(#s1)"/><text x="145" y="148" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="600" fill="#FFFFFF">BEFORE · RAW</text></g><g><rect x="560" y="170" width="74" height="34" rx="17" fill="#9CA3AF" filter="url(#s1)"/><text x="597" y="187" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="600" fill="#FFFFFF">Photo</text></g><g transform="translate(770 360)"><path d="M -90 0 H 110 M 82 -24 L 118 0 L 82 24" fill="none" stroke="#2563EB" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/></g><circle cx="770" cy="250" r="48" fill="#1D4ED8"/><circle cx="770" cy="250" r="36" fill="#2563EB"/><text x="770" y="254" text-anchor="middle" dominant-baseline="central" font-size="34" font-weight="800" fill="#FFFFFF">AI</text><path d="M 640 280 C 648.4 288.4 660 300 C 648.4 311.6 640 320 C 628.4 311.6 620 300 C 628.4 288.4 640 280 Z" fill="#F59E0B"/><g filter="url(#s2)"><g transform="translate(1190 380) rotate(-2) translate(-310 -200)"><rect width="620" height="400" rx="16" fill="#FFFFFF"/><rect width="620" height="400" rx="16" fill="#BFDBFE" opacity="0.55"/><g>
+      <rect x="20" y="20" width="580" height="280" rx="14" fill="#DBEAFE"/>
+      <g transform="translate(250 110) scale(1.05)">
+    <ellipse cx="0" cy="46" rx="44" ry="10" fill="#172554" opacity="0.16"/>
+    <path d="M -34 30 A 34 34 0 0 1 34 30 L 26 46 L -26 46 Z" fill="#60A5FA"/>
+    <path d="M -34 30 A 34 34 0 0 1 34 30" fill="none" stroke="#1E40AF" stroke-width="5"/>
+    <rect x="-18" y="-14" width="36" height="18" rx="7" fill="#1E40AF"/>
+    <path d="M 34 20 Q 58 20 52 40 Q 46 52 30 46" fill="none" stroke="#60A5FA" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="-2" cy="38" r="5" fill="#1E40AF"/>
+  </g>
+      <rect x="20" y="320" width="230" height="18" rx="9" fill="#1D4ED8"/>
+      <rect x="20" y="350" width="170" height="14" rx="7" fill="#93C5FD"/>
+      <g><rect x="400" y="320" width="150" height="42" rx="21" fill="#1E40AF" filter="url(#s1)"/><text x="475" y="341" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="600" fill="#FFFFFF">ETB 1,850</text></g>
+      <g><rect x="480" y="372" width="110" height="36" rx="18" fill="#22C55E" filter="url(#s1)"/><text x="535" y="390" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="600" fill="#FFFFFF">Listed</text></g>
+    </g></g></g><g><circle cx="1440" cy="150" r="30" fill="#22C55E" stroke="#FFFFFF" stroke-width="4"/><path d="M 1433.7 150 L 1438.8 155.1 L 1446.9 144.9" fill="none" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></g><g><rect x="900" y="150" width="110" height="34" rx="17" fill="#22C55E" filter="url(#s1)"/><text x="955" y="167" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="600" fill="#FFFFFF">AFTER · LIVE</text></g><path d="M 930 102 C 937.56 109.56 948 120 C 937.56 130.44 930 138 C 919.56 130.44 912 120 C 919.56 109.56 930 102 Z" fill="#93C5FD"/></svg>

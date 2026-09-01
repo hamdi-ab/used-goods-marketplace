@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" font-family="Inter, Geist, 'Segoe UI', system-ui, sans-serif">
+<defs>
+  <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#EFF6FF"/><stop offset="1" stop-color="#DBEAFE"/>
+  </linearGradient>
+  <linearGradient id="skyDeep" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#DBEAFE"/><stop offset="1" stop-color="#BFDBFE"/>
+  </linearGradient>
+  <linearGradient id="primary" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#60A5FA"/><stop offset="1" stop-color="#2563EB"/>
+  </linearGradient>
+  <linearGradient id="primaryDeep" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#2563EB"/><stop offset="1" stop-color="#1D4ED8"/>
+  </linearGradient>
+  <linearGradient id="navy" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#1E40AF"/><stop offset="1" stop-color="#172554"/>
+  </linearGradient>
+  <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EFF6FF"/>
+  </linearGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#FBBF24"/><stop offset="1" stop-color="#F59E0B"/>
+  </linearGradient>
+  <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FDE68A"/><stop offset="1" stop-color="#F59E0B"/>
+  </linearGradient>
+  <linearGradient id="warm" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#FFFBEB"/><stop offset="1" stop-color="#FEF3C7"/>
+  </linearGradient>
+  <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#93C5FD" stop-opacity="0.55"/><stop offset="1" stop-color="#93C5FD" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="glowWarm" cx="0.5" cy="0.5" r="0.5">
+    <stop offset="0" stop-color="#FDE68A" stop-opacity="0.5"/><stop offset="1" stop-color="#FDE68A" stop-opacity="0"/>
+  </radialGradient>
+  <filter id="s1" x="-40%" y="-40%" width="180%" height="180%">
+    <feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#1E40AF" flood-opacity="0.10"/>
+  </filter>
+  <filter id="s2" x="-40%" y="-40%" width="180%" height="180%">
+    <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="#1E40AF" flood-opacity="0.14"/>
+  </filter>
+  <filter id="s3" x="-60%" y="-60%" width="220%" height="220%">
+    <feDropShadow dx="0" dy="14" stdDeviation="20" flood-color="#1E3A8A" flood-opacity="0.18"/>
+  </filter>
+</defs><rect width="1024" height="1024" fill="url(#sky)"/><ellipse cx="512" cy="430.08" rx="348.16" ry="307.2" fill="url(#glow)"/><path d="M 200 238 C 209.24 247.24 222 260 C 209.24 272.76 200 282 C 187.24 272.76 178 260 C 187.24 247.24 200 238 Z" fill="#F59E0B"/><path d="M 850 240 C 858.4 248.4 870 260 C 858.4 271.6 850 280 C 838.4 271.6 830 260 C 838.4 248.4 850 240 Z" fill="#93C5FD"/><path d="M 200 762 C 207.56 769.56 218 780 C 207.56 790.44 200 798 C 189.56 790.44 182 780 C 189.56 769.56 200 762 Z" fill="#60A5FA"/><ellipse cx="512" cy="930" rx="320" ry="54" fill="#DBEAFE" opacity="0.7"/><g filter="url(#s2)"><g transform="translate(512 500) rotate(-1) translate(-250 -250)"><rect width="500" height="500" rx="16" fill="#FFFFFF"/><rect width="500" height="500" rx="16" fill="#DBEAFE" opacity="0.55"/><g>
+      <g transform="translate(250 230)">
+        <path d="M 0 74 C -96 24 -128 -52 -64 -100 C -28 -126 0 -104 0 -86 C 0 -104 28 -126 64 -100 C 128 -52 96 24 0 74 Z" fill="#93C5FD"/>
+        <path d="M 0 54 C -72 16 -98 -40 -50 -78 C -24 -95 0 -80 0 -66 C 0 -80 24 -95 50 -78 C 98 -40 72 16 0 54 Z" fill="#FFFFFF"/>
+        <path d="M 0 40 C -10 32 -18 20 -18 8 C -18 -4 -8 -10 0 -6 C 8 -10 18 -4 18 8 C 18 20 10 32 0 40 Z" fill="#EF4444"/>
+        <path d="M -18 -120 L -30 -138 M 18 -120 L 30 -138 M -46 -96 L -66 -106 M 46 -96 L 66 -106" stroke="#BFDBFE" stroke-width="6" stroke-linecap="round"/>
+        <path d="M 70 -148 C 77.56 -140.44 88 -130 C 77.56 -119.56 70 -112 C 59.56 -119.56 52 -130 C 59.56 -140.44 70 -148 Z" fill="#F59E0B"/>
+        <path d="M -70 -154 C -64.12 -148.12 -56 -140 C -64.12 -131.88 -70 -126 C -78.12 -131.88 -84 -140 C -78.12 -148.12 -70 -154 Z" fill="#2563EB"/>
+      </g>
+      <g><rect x="150" y="396" width="200" height="48" rx="24" fill="#1E40AF" filter="url(#s1)"/><text x="250" y="420" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="600" fill="#FFFFFF">No favorites yet</text></g>
+      <g><rect x="120" y="456" width="260" height="44" rx="22" fill="#2563EB" filter="url(#s1)"/><text x="250" y="478" text-anchor="middle" dominant-baseline="central" font-size="15" font-weight="600" fill="#FFFFFF">Tap the heart to save items</text></g>
+    </g></g></g><path d="M 300 280 C 308.4 288.4 320 300 C 308.4 311.6 300 320 C 288.4 311.6 280 300 C 288.4 288.4 300 280 Z" fill="#93C5FD"/><path d="M 740 278 C 749.24 287.24 762 300 C 749.24 312.76 740 322 C 727.24 312.76 718 300 C 727.24 287.24 740 278 Z" fill="#F59E0B"/><path d="M 700 740 C 708.4 748.4 720 760 C 708.4 771.6 700 780 C 688.4 771.6 680 760 C 688.4 748.4 700 740 Z" fill="#2563EB"/></svg>

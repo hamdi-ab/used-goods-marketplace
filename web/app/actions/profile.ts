@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache"
 
 import { getSession } from "@/lib/auth"
 import { createClient } from "@/lib/supabase/server"
-import { completeOwnProfile, updateOwnProfile } from "@/lib/profiles"
+import { completeOwnProfile, updateOwnProfile, promoteToSellerRow } from "@/lib/profiles"
 import { uploadObjects } from "@/lib/media"
 import { avatarAdapter } from "@/lib/media/avatar-adapter"
 import {
@@ -120,9 +120,18 @@ export async function uploadAvatar(
   return { url: result.publicUrls[0], error: null }
 }
 
-// T21/FS-014: one-click buyer→seller promotion (fix #71). Stub no-ops so the
-// dashboard compiles; wire to the idempotent role-flip RPC once the
-// verification / trust-score gate is implemented.
+// T21/FS-014: one-click buyer→seller promotion (fix #71). Idempotent —
+// delegates to the promote_to_seller RPC which derives identity from auth.uid().
 export async function promoteToSeller(_formData: FormData): Promise<void> {
-  return
+  const user = await getSession()
+  if (!user) redirect("/login")
+
+  const result = await promoteToSellerRow()
+  if (!result.ok) {
+    redirect("/dashboard?error=" + encodeURIComponent(result.error ?? "Could not start selling"))
+    return
+  }
+
+  revalidatePath("/dashboard")
+  redirect("/sell")
 }

@@ -13,12 +13,15 @@ export async function markPhoneVerified() {
   // then insert a verified audit row. This keeps the verifications table in
   // sync with the profiles.phone_verified flag so the profile page and public
   // profile agree on status.
-  await supabase
+  const { error: updateErr } = await supabase
     .from("verifications")
     .update({ deleted_at: new Date().toISOString() })
     .eq("user_id", user.id)
     .eq("type", "phone")
     .is("deleted_at", null)
+  if (updateErr) {
+    return { error: "Failed to update verification record." }
+  }
 
   const { error: insertErr } = await supabase
     .from("verifications")

@@ -24,11 +24,9 @@ export function FavoritesGrid({
   const [, startTransition] = useTransition()
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const [prevListings, setPrevListings] = useState(listings)
-  if (prevListings !== listings) {
-    setPrevListings(listings)
+  useEffect(() => {
     setItems(listings)
-  }
+  }, [listings])
 
   useEffect(() => {
     return () => {

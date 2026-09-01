@@ -60,6 +60,11 @@ export function useNotifications(): { unreadCount: number } {
       ])
       if (cancelled) return
 
+      if (latestRes.error || countRes.error) {
+        console.error("Notification poll failed", latestRes.error ?? countRes.error)
+        return
+      }
+
       if (countRes.count !== null) setUnreadCount(countRes.count)
 
       const rows = (latestRes.data ?? []) as unknown as LatestNotification[]
