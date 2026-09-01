@@ -9,7 +9,7 @@ import { uuidSchema } from "@/lib/uuid"
 import { formValue } from "@/lib/form-value"
 import { disputeEvidenceAdapter } from "@/lib/media/dispute-evidence-adapter"
 import { uploadObjects } from "@/lib/media"
-import { requireUser } from "@/lib/auth"
+import { requireAdmin, requireUser } from "@/lib/auth"
 
 const decideSchema = z.object({
   disputeId: uuidSchema,
@@ -34,6 +34,13 @@ export async function decideDisputeAction(
 
   if (!parsed.success) {
     return { message: "Invalid request" }
+  }
+
+  // Security: only admins can decide disputes
+  try {
+    await requireAdmin()
+  } catch {
+    return { message: "Unauthorized" }
   }
 
   const result = await decideDispute({

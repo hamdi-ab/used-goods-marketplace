@@ -9,9 +9,14 @@ vi.mock("@/lib/notifications", () => ({
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }))
+vi.mock("@/lib/auth", () => ({
+  requireAdmin: vi.fn(),
+  requireUser: vi.fn(),
+}))
 
 import { createClient } from "@/lib/supabase/server"
 import { createNotification } from "@/lib/notifications"
+import { requireAdmin } from "@/lib/auth"
 import {
   appealDisputeAction,
   decideDisputeAction,
@@ -20,6 +25,7 @@ import {
 
 const mockCreateClient = vi.mocked(createClient)
 const mockCreateNotification = vi.mocked(createNotification)
+const mockRequireAdmin = vi.mocked(requireAdmin)
 
 function mockRpcResult(result: unknown) {
   mockCreateClient.mockResolvedValue({
@@ -60,6 +66,7 @@ describe("openDisputeAction", () => {
 describe("decideDisputeAction", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockRequireAdmin.mockResolvedValue({ id: "admin-1", role: "admin" } as never)
   })
 
   it("notifies both buyer and seller on resolution", async () => {
