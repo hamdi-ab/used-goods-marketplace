@@ -5,6 +5,7 @@ import { Toaster } from "sonner";
 import "./globals.css";
 
 import { AuthProvider } from "@/components/auth/auth-provider";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 import { siteName } from "@/lib/nav";
 import { SITE_URL, SITE_TITLE, SITE_DESCRIPTION } from "@/lib/site";
 
@@ -55,8 +56,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-background font-sans text-foreground">
-        <AuthProvider>{children}</AuthProvider>
-        <Toaster richColors position="top-right" />
+        <ThemeProvider>
+          <AuthProvider>{children}</AuthProvider>
+          <Toaster richColors position="top-right" />
+        </ThemeProvider>
       </body>
     </html>
   );

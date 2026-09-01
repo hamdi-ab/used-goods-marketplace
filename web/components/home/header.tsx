@@ -11,6 +11,7 @@ import { cn } from "@/lib/utils"
 import { primaryNav, siteName } from "@/lib/nav"
 import { useAuth } from "@/components/auth/auth-provider"
 import { NotificationBell } from "@/components/notifications/notification-bell"
+import { ThemeToggle } from "@/components/theme/theme-toggle"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { MobileNav } from "@/components/mobile-nav"
@@ -116,6 +117,7 @@ export function SiteHeader() {
             <SearchIcon className="size-5" />
           </button>
 
+          <ThemeToggle />
           {user ? (
             <>
               <NotificationBell tone="blue" href="/notifications" />
