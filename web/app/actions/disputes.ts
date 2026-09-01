@@ -7,6 +7,9 @@ import { createNotification } from "@/lib/notifications"
 import { createClient } from "@/lib/supabase/server"
 import { uuidSchema } from "@/lib/uuid"
 import { formValue } from "@/lib/form-value"
+import { disputeEvidenceAdapter } from "@/lib/media/dispute-evidence-adapter"
+import { uploadObjects } from "@/lib/media"
+import { requireUser } from "@/lib/auth"
 
 const decideSchema = z.object({
   disputeId: uuidSchema,
@@ -136,6 +139,47 @@ export async function openDisputeAction(
   revalidatePath("/offers")
   revalidatePath("/admin/disputes")
   return { ok: true }
+}
+
+const evidenceSchema = z.object({
+  paymentId: uuidSchema,
+  files: z.array(z.instanceof(File)).min(1),
+})
+
+export type UploadEvidenceState = {
+  urls?: string[]
+  message?: string
+  ok?: boolean
+}
+
+export async function uploadEvidence(
+  paymentId: string,
+  files: File[]
+): Promise<{ ok: boolean; urls: string[]; error?: string }> {
+  const parsed = evidenceSchema.safeParse({ paymentId, files })
+  if (!parsed.success) {
+    return { ok: false, urls: [], error: "Invalid request" }
+  }
+
+  const user = await requireUser()
+  const supabase = await createClient()
+  const adapter = disputeEvidenceAdapter({
+    uid: user.id,
+    disputeId: parsed.data.paymentId,
+    supabase,
+  })
+
+  const result = await uploadObjects(
+    parsed.data.files.map((file, index) => ({ file, index })),
+    adapter,
+    supabase
+  )
+
+  if (!result.ok) {
+    return { ok: false, urls: [], error: result.error }
+  }
+
+  return { ok: true, urls: result.publicUrls }
 }
 
 const appealSchema = z.object({
