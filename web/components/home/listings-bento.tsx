@@ -19,6 +19,15 @@ interface ListingsBentoProps {
 // No full-width base tile — it was too squashed to read. Throwaway 
 export function ListingsBento({ listings, favoriteIds }: ListingsBentoProps) {
   const tiles = listings.slice(0, 9)
+
+  if (tiles.length === 0) {
+    return (
+      <div className="flex flex-col items-center rounded-2xl border border-border bg-muted/30 px-4 py-16 text-center">
+        <p className="text-sm text-muted-foreground">No listings yet</p>
+      </div>
+    )
+  }
+
   const [spine, feature, ...rest] = tiles
   const rightSmalls = rest.slice(0, 2)
   const bottomSmalls = rest.slice(2, 6)
