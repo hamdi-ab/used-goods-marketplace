@@ -3,6 +3,7 @@
 import { useActionState } from "react"
 import Link from "next/link"
 import { ExternalLinkIcon, TrashIcon } from "lucide-react"
+import { toast } from "sonner"
 
 import { adminRemoveListing } from "@/app/actions/admin"
 import type { AdminListingRow } from "@/lib/admin"
@@ -16,6 +17,10 @@ export function AdminListingRow({
   listing: AdminListingRow
 }) {
   const [state, action, pending] = useActionState(adminRemoveListing, {})
+
+  if (state?.ok) {
+    toast.success("Listing removed")
+  }
 
   const sold = listing.sold_to_buyer_id !== null
 

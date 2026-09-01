@@ -7,6 +7,7 @@ import {
   CheckCircle2Icon,
   ClockIcon,
 } from "lucide-react"
+import { toast } from "sonner"
 
 import type { DisputeWithRelations, DisputeResolution } from "@/lib/disputes"
 import { decideDisputeAction } from "@/app/actions/disputes"
@@ -36,6 +37,10 @@ export function AdminDisputeCard({ dispute }: AdminDisputeCardProps) {
   const [state, formAction, pending] = useActionState(decideDisputeAction, {})
   const [selectedResolution, setSelectedResolution] = useState<DisputeResolution | null>(null)
   const [adminNote, setAdminNote] = useState("")
+
+  if (state?.ok) {
+    toast.success("Dispute decided")
+  }
 
   const createdDate = formatShortDate(dispute.created_at)
   const daysOpen = Math.floor((new Date().getTime() - new Date(dispute.created_at).getTime()) / (1000 * 60 * 60 * 24))

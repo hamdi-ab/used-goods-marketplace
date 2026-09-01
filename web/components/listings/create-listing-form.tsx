@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState, useTransition, type ChangeEvent } from "react"
 import { useRouter } from "next/navigation"
-import { XIcon, UploadIcon } from "lucide-react"
+import { Loader2Icon, XIcon, UploadIcon } from "lucide-react"
 
 import { createListing } from "@/app/actions/listings"
 import { CONDITIONS, type Condition } from "@/lib/listings/constants"
@@ -310,7 +310,14 @@ export function CreateListingForm({
       {state.message ? <p className="text-sm text-destructive">{state.message}</p> : null}
 
       <Button type="submit" size="lg" className="w-full" disabled={pending}>
-        {pending ? "Publishing…" : "Publish listing"}
+        {pending ? (
+          <>
+            <Loader2Icon className="mr-2 size-4 animate-spin" />
+            Publishing…
+          </>
+        ) : (
+          "Publish listing"
+        )}
       </Button>
     </form>
   )

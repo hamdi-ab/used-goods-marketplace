@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useActionState } from "react"
-import { XIcon, CameraIcon } from "lucide-react"
+import { Loader2Icon, XIcon, CameraIcon } from "lucide-react"
 import Image from "next/image"
 
 import { updateListing, deleteListing } from "@/app/actions/listings"
@@ -182,7 +182,14 @@ export function EditListingForm({
 
           <div className="mt-4 flex gap-3">
             <Button type="submit" form="edit-listing-form" disabled={pending} className="h-11">
-              {pending ? "Saving…" : "Save changes"}
+              {pending ? (
+                <>
+                  <Loader2Icon className="mr-2 size-4 animate-spin" />
+                  Saving…
+                </>
+              ) : (
+                "Save changes"
+              )}
             </Button>
             <Button
               type="submit"
