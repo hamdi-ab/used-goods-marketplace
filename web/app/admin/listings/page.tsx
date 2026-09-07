@@ -3,7 +3,7 @@ import Link from "next/link"
 
 import { fetchAdminListings } from "@/lib/admin"
 import { nextOffset, parseOffset } from "@/lib/pagination"
-import { ListingsTable } from "@/components/admin/listings-table"
+import { AdminListingRow } from "@/components/admin/admin-listing-row"
 
 export const metadata: Metadata = {
   title: "Admin — Listings",
@@ -40,9 +40,22 @@ export default async function AdminListingsPage({
         <div className="rounded-lg border border-border bg-card p-6 text-center">
           <p className="text-sm text-destructive">{error}</p>
         </div>
+      ) : listings.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-border bg-card py-16 text-center">
+          <p className="text-sm text-muted-foreground">No listings found.</p>
+        </div>
       ) : (
         <>
-          <ListingsTable listings={listings} count={count ?? 0} />
+          <p className="mb-3 text-sm text-muted-foreground">
+            {count} listing{count === 1 ? "" : "s"}
+          </p>
+          <ul className="flex flex-col gap-3">
+            {listings.map((listing) => (
+              <li key={listing.id}>
+                <AdminListingRow listing={listing} />
+              </li>
+            ))}
+          </ul>
           {hasMore ? (
             <div className="mt-6 flex justify-center">
               <Link

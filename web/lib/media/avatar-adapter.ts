@@ -1,9 +1,7 @@
-import {
-  ALLOWED_IMAGE_MIME,
-  detectImageMime,
-  MAX_IMAGE_BYTES,
-} from "./primitives"
-import type { Supabase, UploadAdapter } from "@/lib/media"
+import type { SupabaseClient } from "@supabase/supabase-js"
+
+import { validateImageFile } from "./primitives"
+import type { UploadAdapter } from "@/lib/media"
 
 // The profile avatar adapter: second adapter behind the shared Media upload
 // seam. Same magic-byte validation surface as the listing adapter (so both
@@ -11,18 +9,15 @@ import type { Supabase, UploadAdapter } from "@/lib/media"
 // reconcile. Lives in the media layer; profile.ts only supplies the uid.
 export function avatarAdapter(ctx: {
   uid: string
-  supabase: Supabase
+  supabase: SupabaseClient
 }): UploadAdapter {
   return {
     bucket: "profiles",
     upsert: true,
     validate: async (file) => {
-      const mime = await detectImageMime(file)
-      if (!mime || !ALLOWED_IMAGE_MIME.includes(mime)) {
+      const error = await validateImageFile(file)
+      if (error) {
         return "Upload a JPG, PNG or WebP image"
-      }
-      if (file.size > MAX_IMAGE_BYTES) {
-        return "Avatar must be 5 MB or smaller"
       }
       return null
     },

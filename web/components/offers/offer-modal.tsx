@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { useActionState } from "react"
 
 import { submitOffer } from "@/app/actions/offers"
@@ -32,11 +32,15 @@ export function OfferModal({
 }) {
   const [state, formAction, pending] = useActionState(submitOffer, {})
 
+  // Keep onClose in a ref so the effect never captures a stale closure.
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
+
   // Close the dialog once the offer is persisted; revalidation has already
   // refreshed the page underneath.
   useEffect(() => {
-    if (state.ok) onClose()
-  }, [state.ok, onClose])
+    if (state.ok) onCloseRef.current()
+  }, [state.ok])
 
   return (
     <>

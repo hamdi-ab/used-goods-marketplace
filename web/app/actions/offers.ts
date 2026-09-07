@@ -1,8 +1,8 @@
 "use server"
 
-import { z } from "zod"
 import { revalidatePath } from "next/cache"
 
+import { formValue } from "@/lib/form-value"
 import { requireTrader } from "@/lib/auth"
 import {
   acceptOfferRow,
@@ -10,28 +10,15 @@ import {
   declineOfferRow,
   submitOfferRow,
   abandonSaleRow,
-  OFFER_AMOUNT_MAX,
-  OFFER_MESSAGE_MAX,
 } from "@/lib/offers"
-import { uuidSchema } from "@/lib/uuid"
-
-function formValue(formData: FormData, key: string): string | undefined {
-  const v = formData.get(key)
-  return typeof v === "string" && v.length > 0 ? v : undefined
-}
-
-// One amount rule for submitting an offer and countering it, so both paths
-// validate (and reject) identically.
-const amountSchema = z.coerce
-  .number({ message: "Enter an amount" })
-  .gt(0, "Amount must be greater than 0")
-  .max(OFFER_AMOUNT_MAX, "Amount is too large")
-
-const submitOfferSchema = z.object({
-  listingId: uuidSchema,
-  amount: amountSchema,
-  message: z.string().max(OFFER_MESSAGE_MAX, "Keep the message under 500 characters").optional(),
-})
+import {
+  submitOfferSchema,
+  offerActionSchema,
+  abandonSaleSchema,
+  parseSubmitOfferForm,
+  parseOfferActionForm,
+  parseAbandonSaleForm,
+} from "@/lib/schemas"
 
 export type SubmitOfferState = {
   errors?: Record<string, string[] | undefined>
@@ -43,11 +30,7 @@ export async function submitOffer(
   _prevState: SubmitOfferState,
   formData: FormData
 ): Promise<SubmitOfferState> {
-  const parsed = submitOfferSchema.safeParse({
-    listingId: formValue(formData, "listingId"),
-    amount: formData.get("amount"),
-    message: formValue(formData, "message"),
-  })
+  const parsed = submitOfferSchema.safeParse(parseSubmitOfferForm(formData))
 
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors }
@@ -71,13 +54,6 @@ export async function submitOffer(
   return { ok: true }
 }
 
-const offerActionSchema = z.object({
-  action: z.enum(["accept", "decline", "counter"]),
-  offerId: uuidSchema,
-  listingId: uuidSchema,
-  amount: amountSchema.optional(),
-})
-
 export type OfferActionState = {
   message?: string
   ok?: boolean
@@ -90,12 +66,7 @@ export async function offerAction(
   _prevState: OfferActionState,
   formData: FormData
 ): Promise<OfferActionState> {
-  const parsed = offerActionSchema.safeParse({
-    action: formValue(formData, "action"),
-    offerId: formValue(formData, "offerId"),
-    listingId: formValue(formData, "listingId"),
-    amount: formData.get("amount") ?? undefined,
-  })
+  const parsed = offerActionSchema.safeParse(parseOfferActionForm(formData))
 
   if (!parsed.success) {
     const amountErrors = parsed.error.flatten().fieldErrors.amount
@@ -127,11 +98,6 @@ export async function offerAction(
   return { ok: true }
 }
 
-const abandonSaleSchema = z.object({
-  offerId: uuidSchema,
-  listingId: uuidSchema,
-})
-
 export type AbandonSaleState = {
   message?: string
   ok?: boolean
@@ -145,10 +111,7 @@ export async function abandonSaleAction(
   _prevState: AbandonSaleState,
   formData: FormData
 ): Promise<AbandonSaleState> {
-  const parsed = abandonSaleSchema.safeParse({
-    offerId: formValue(formData, "offerId"),
-    listingId: formValue(formData, "listingId"),
-  })
+  const parsed = abandonSaleSchema.safeParse(parseAbandonSaleForm(formData))
   if (!parsed.success) {
     return { message: "Invalid request" }
   }

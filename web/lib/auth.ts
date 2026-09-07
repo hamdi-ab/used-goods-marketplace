@@ -11,6 +11,10 @@ export type { SessionUser, UserRole }
 export { ROLE_LABELS } from "./auth/types"
 
 export const getCurrentUser = async (): Promise<SessionUser | null> => {
+  return getSession()
+}
+
+export const getSession = async (): Promise<SessionUser | null> => {
   const supabase = await createClient()
 
   const {
@@ -27,9 +31,10 @@ export const getCurrentUser = async (): Promise<SessionUser | null> => {
         .eq("id", authUser.id)
         .maybeSingle()
 
-      const role: UserRole = profile?.role === "admin" || profile?.role === "seller"
-        ? profile.role
-        : "buyer"
+      const role: UserRole =
+        profile?.role === "admin" || profile?.role === "seller"
+          ? profile.role
+          : "buyer"
 
       return {
         id: authUser.id,
@@ -45,35 +50,31 @@ export const getCurrentUser = async (): Promise<SessionUser | null> => {
   )()
 }
 
-export async function requireUser(): Promise<SessionUser> {
-  const user = await getCurrentUser()
+async function checkSession(): Promise<SessionUser> {
+  const user = await getSession()
   if (!user) redirect("/login")
   return user
 }
 
+export async function requireUser(): Promise<SessionUser> {
+  return checkSession()
+}
+
 export async function requireSeller(): Promise<SessionUser> {
-  const user = await requireUser()
-  if (user.role === "admin") {
-    redirect("/admin")
-  }
-  if (user.role !== "seller") {
-    redirect("/profile")
-  }
+  const user = await checkSession()
+  if (user.role === "admin") redirect("/admin")
+  if (user.role !== "seller") redirect("/profile")
   return user
 }
 
 export async function requireAdmin(): Promise<SessionUser> {
-  const user = await requireUser()
-  if (user.role !== "admin") {
-    redirect("/dashboard")
-  }
+  const user = await checkSession()
+  if (user.role !== "admin") redirect("/dashboard")
   return user
 }
 
 export async function requireTrader(): Promise<SessionUser> {
-  const user = await requireUser()
-  if (user.role === "admin") {
-    redirect("/admin")
-  }
+  const user = await checkSession()
+  if (user.role === "admin") redirect("/admin")
   return user
 }

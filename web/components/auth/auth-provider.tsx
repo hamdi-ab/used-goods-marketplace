@@ -49,8 +49,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return
       }
 
-      setRole(await fetchClientRole(supabase, nextUser.id))
-      setLoading(false)
+      try {
+        setRole(await fetchClientRole(supabase, nextUser.id))
+      } catch (e) {
+        console.error("Failed to fetch role", e)
+        setRole(null)
+      } finally {
+        setLoading(false)
+      }
     })()
 
     const {

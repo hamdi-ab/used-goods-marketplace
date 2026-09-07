@@ -1,7 +1,7 @@
 import "server-only"
 
+import type { SupabaseClient } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/server"
-import type { Supabase } from "@/lib/supabase/types"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
 import type { SellerContactInfo, ContactMethod } from "./contact/constants"
 
@@ -25,7 +25,7 @@ export interface ContactAttemptResult {
  */
 export async function fetchSellerContactInfo(
   sellerId: string,
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<SellerContactInfo | null> {
   const supabase = client ?? (await createClient())
 

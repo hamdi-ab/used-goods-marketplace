@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useActionState } from "react"
-import { XIcon, CameraIcon } from "lucide-react"
+import { Loader2Icon, XIcon, CameraIcon } from "lucide-react"
 import Image from "next/image"
 
 import { updateListing, deleteListing } from "@/app/actions/listings"
@@ -182,7 +182,14 @@ export function EditListingForm({
 
           <div className="mt-4 flex gap-3">
             <Button type="submit" form="edit-listing-form" disabled={pending} className="h-11">
-              {pending ? "Saving…" : "Save changes"}
+              {pending ? (
+                <>
+                  <Loader2Icon className="mr-2 size-4 animate-spin" />
+                  Saving…
+                </>
+              ) : (
+                "Save changes"
+              )}
             </Button>
             <Button
               type="submit"
@@ -190,10 +197,6 @@ export function EditListingForm({
               variant="destructive"
               disabled={deletePending}
               className="h-11"
-              onClick={() => {
-                if (!confirm("Archive this listing? It will no longer be visible."))
-                  return false
-              }}
             >
               <XIcon className="mr-2 size-4" />
               {deletePending ? "Archiving…" : "Archive listing"}
@@ -240,7 +243,7 @@ export function EditListingForm({
                 {title || "Listing title"}
               </p>
               <p className="mt-1 text-lg font-extrabold text-[#2563EB]">
-                {formatPrice(Number(price) || 0, { maxFractionDigits: 2 })}
+                {formatPrice(Number.isFinite(Number(price)) ? Number(price) : 0, { maxFractionDigits: 2 })}
               </p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {condition ? (

@@ -1,17 +1,12 @@
 "use server"
 
-import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 
-import { getCurrentUser } from "@/lib/auth"
+import { getSession } from "@/lib/auth"
 import { completeOwnProfile } from "@/lib/profiles"
 import { promoteToSellerRow } from "@/lib/profiles"
-
-const startSellingSchema = z.object({
-  fullName: z.string().min(2, "Enter your full name"),
-  city: z.string().min(1, "Enter your city"),
-})
+import { startSellingSchema, parseStartSellingForm } from "@/lib/schemas"
 
 export type StartSellingState = {
   errors?: Record<string, string[] | undefined>
@@ -27,16 +22,13 @@ export async function startSelling(
   _prevState: StartSellingState,
   formData: FormData
 ): Promise<StartSellingState> {
-  const parsed = startSellingSchema.safeParse({
-    fullName: formData.get("fullName"),
-    city: formData.get("city"),
-  })
+  const parsed = startSellingSchema.safeParse(parseStartSellingForm(formData))
 
   if (!parsed.success) {
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  const user = await getCurrentUser()
+  const user = await getSession()
   if (!user) redirect("/login")
 
   // Promote buyer → seller (idempotent — safe if already seller)

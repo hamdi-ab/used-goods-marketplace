@@ -3,7 +3,7 @@ import Link from "next/link"
 
 import { fetchAdminUsers } from "@/lib/admin"
 import { nextOffset, parseOffset } from "@/lib/pagination"
-import { UsersTable } from "@/components/admin/users-table"
+import { AdminUserRow } from "@/components/admin/admin-user-row"
 
 export const metadata: Metadata = {
   title: "Admin — Users",
@@ -40,9 +40,22 @@ export default async function AdminUsersPage({
         <div className="rounded-lg border border-border bg-card p-6 text-center">
           <p className="text-sm text-destructive">{error}</p>
         </div>
+      ) : users.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-border bg-card py-16 text-center">
+          <p className="text-sm text-muted-foreground">No users found.</p>
+        </div>
       ) : (
         <>
-          <UsersTable users={users} count={count ?? 0} />
+          <p className="mb-3 text-sm text-muted-foreground">
+            {count} user{count === 1 ? "" : "s"}
+          </p>
+          <ul className="flex flex-col gap-3">
+            {users.map((user) => (
+              <li key={user.id}>
+                <AdminUserRow user={user} />
+              </li>
+            ))}
+          </ul>
           {hasMore ? (
             <div className="mt-6 flex justify-center">
               <Link

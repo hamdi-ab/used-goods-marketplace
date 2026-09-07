@@ -1,0 +1,1 @@
+-- Placeholder: reverted in favor of lenient uuidSchema

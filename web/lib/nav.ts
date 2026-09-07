@@ -1,4 +1,5 @@
 import {
+  BanknoteIcon,
   HomeIcon,
   SearchIcon,
   PlusIcon,
@@ -53,10 +54,16 @@ export function primaryNav(role: UserRole | null): NavItem[] {
       ? { title: "Incoming offers", href: "/offers/seller", icon: HandshakeIcon }
       : { title: "My offers", href: "/offers", icon: HandshakeIcon }
 
+  const sellerExtras: NavItem[] =
+    role === "seller"
+      ? [{ title: "Withdrawals", href: "/withdrawals", icon: BanknoteIcon }]
+      : []
+
   return [
     { title: "Home", href: "/", icon: HomeIcon },
     { title: "Browse", href: "/search", icon: LayoutGridIcon },
     offers,
+    ...sellerExtras,
     { title: "Favorites", href: "/favorites", icon: HeartIcon },
   ]
 }

@@ -1,0 +1,153 @@
+import "server-only"
+
+import { createClient } from "@/lib/supabase/server"
+import type { Supabase } from "@/lib/supabase/types"
+import { isValidUuid } from "@/lib/uuid"
+import type { BrowseListing } from "@/lib/listings/constants"
+import { mapNestedBrowseListing } from "@/lib/listings/browse-mapper"
+import type { NestedBrowseRow } from "@/lib/listings/browse-mapper"
+import { toggleFavoriteState } from "@/lib/favorites/constants"
+import {
+  pagedHasMore,
+  resolveWindow,
+  type PagingArgs,
+} from "@/lib/pagination"
+
+export * from "@/lib/favorites/constants"
+
+// ---- Reads ----
+
+export async function fetchFavoriteIds(
+  userId: string,
+  client?: Supabase
+): Promise<string[]> {
+  const supabase = client ?? (await createClient())
+  const { data, error } = await supabase
+    .from("favorites")
+    .select("listing_id")
+    .eq("user_id", userId)
+  if (error) {
+    console.error("fetchFavoriteIds:", error.message)
+    return []
+  }
+  return (data ?? []).map((row) => row.listing_id)
+}
+
+// The favorites feed: rows are joined against listings, so RLS already drops
+// listings that are no longer readable (unpublished, deleted, sold). Only
+// still-available favorites are returned, most recently favorited first, one
+// PAGE_SIZE window at a time (P1.14, #81). `hasMore` is derived from the
+// server count so the UI can stop rendering "Load more" without guessing.
+export interface FavoritesPage {
+  listings: BrowseListing[]
+  count: number | null
+  hasMore: boolean
+  error: string | null
+}
+
+export async function fetchFavoriteListings(
+  userId: string,
+  args: PagingArgs = {},
+  client?: Supabase
+): Promise<FavoritesPage> {
+  const supabase = client ?? (await createClient())
+  const { limit, offset } = resolveWindow(args)
+  const { data, error, count } = await supabase
+    .from("favorites")
+    .select(
+      `created_at,
+        listing:listings(id, title, price, condition, city, published_at,
+          seller:profiles!listings_seller_id_fkey(id, full_name, avatar_url, role, trust_score, phone_verified, fayda_verified),
+          images:listing_images(id, image_url, display_order))`,
+      { count: "exact" }
+    )
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .range(offset, offset + limit - 1)
+
+  if (error) {
+    console.error("fetchFavoriteListings:", error.message)
+    return { listings: [], count, hasMore: false, error: error.message }
+  }
+
+  // supabase-js without generated types types embedded resources as arrays,
+  // but listing_id -> listings is a to-one join: PostgREST returns a single
+  // row (or null when the listing is no longer readable under RLS).
+  const rows = (data ?? []) as unknown as {
+    listing: NestedBrowseRow | null
+  }[]
+
+  const listings = rows
+    .map((row) => row.listing)
+    .filter((listing): listing is NestedBrowseRow => listing !== null)
+    .map(mapNestedBrowseListing)
+
+  return {
+    listings,
+    count,
+    hasMore: pagedHasMore(offset, listings.length, count),
+    error: null,
+  }
+}
+
+// ---- Writes (called by the toggle server action) ----
+
+export interface ToggleFavoriteResult {
+  ok: boolean
+  error: string | null
+}
+
+// Persists the toggle: reads the current row state, applies the shared
+// toggleFavoriteState reducer, then inserts or deletes to reach the target.
+// The reducer is the same one the client's useOptimistic applies, so the
+// optimistic frame and the final server state always agree.
+export async function toggleFavoriteRow(
+  userId: string,
+  listingId: string
+): Promise<ToggleFavoriteResult> {
+  if (!isValidUuid(listingId)) {
+    return { ok: false, error: "invalid listing id" }
+  }
+  const supabase = await createClient()
+
+  const { data: existing } = await supabase
+    .from("favorites")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("listing_id", listingId)
+    .maybeSingle()
+  const shouldFavor = toggleFavoriteState(Boolean(existing))
+
+  if (shouldFavor) {
+    // A new favorite requires a published, non-deleted listing (RLS would also
+    // return null for anything else, but the explicit check keeps the write
+    // from inserting a row for an unreadable listing).
+    const { data: listing } = await supabase
+      .from("listings")
+      .select("id")
+      .eq("id", listingId)
+      .eq("status", "published")
+      .maybeSingle()
+    if (!listing) return { ok: false, error: "listing not found" }
+  }
+
+  // Deleting is always allowed: a favorite can outlive its listing's
+  // publish status (a listing sold or unpublished while saved), and the
+  // owner must still be able to clear that stale row.
+  const result = shouldFavor
+    ? await supabase.from("favorites").insert({
+        user_id: userId,
+        listing_id: listingId,
+      })
+    : await supabase
+        .from("favorites")
+        .delete()
+        .eq("user_id", userId)
+        .eq("listing_id", listingId)
+
+  if (result.error) {
+    console.error("toggleFavoriteRow:", result.error.message)
+    return { ok: false, error: result.error.message }
+  }
+  return { ok: true, error: null }
+}

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { Loader2Icon } from "lucide-react"
 
 import { createClient } from "@/lib/supabase/client"
 import { isInternalPath } from "@/lib/utils"
@@ -76,7 +77,14 @@ export function LoginForm({ next }: { next?: string }) {
         {error ? <p className="text-sm text-destructive shake">{error}</p> : null}
 
         <Button type="submit" disabled={isSubmitting} className="mt-2 h-11 press-feedback">
-          {isSubmitting ? "Logging in…" : "Log in"}
+          {isSubmitting ? (
+            <>
+              <Loader2Icon className="mr-2 size-4 animate-spin" />
+              Logging in…
+            </>
+          ) : (
+            "Log in"
+          )}
         </Button>
 
         <AuthDivider />

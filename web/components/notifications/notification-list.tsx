@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useTransition, type ReactNode } from "react"
+import { useState, useTransition, useEffect, type ReactNode } from "react"
 import Link from "next/link"
 import {
   BadgeDollarSignIcon,
@@ -48,7 +48,7 @@ function matchesFilter(type: NotificationType, filter: FilterKey): boolean {
     return type === "offer_received" || type === "offer_accepted"
   if (filter === "reviews") return type === "review_received"
   if (filter === "disputes")
-    return type === "dispute_opened" || type === "dispute_resolved"
+    return type === "dispute_opened" || type === "dispute_resolved" || type === "dispute_appealed"
   return type === "report_resolved"
 }
 
@@ -97,6 +97,18 @@ const TYPE_STYLE: Record<NotificationType, { icon: ReactNode; chip: string }> = 
     icon: <ShieldCheckIcon className="size-5" />,
     chip: "bg-emerald-100 text-emerald-700",
   },
+  dispute_appealed: {
+    icon: <BellIcon className="size-5" />,
+    chip: "bg-purple-100 text-purple-700",
+  },
+  withdrawal_approved: {
+    icon: <CheckCircle2Icon className="size-5" />,
+    chip: "bg-emerald-100 text-emerald-700",
+  },
+  withdrawal_rejected: {
+    icon: <BellIcon className="size-5" />,
+    chip: "bg-red-100 text-red-700",
+  },
 }
 
 const DAY_MS = 24 * 3600 * 1000
@@ -132,11 +144,10 @@ export function NotificationList({
   const [filter, setFilter] = useState<FilterKey>("all")
   const [, startTransition] = useTransition()
 
-  const [prevRows, setPrevRows] = useState(notifications)
-  if (prevRows !== notifications) {
-    setPrevRows(notifications)
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRows(notifications)
-  }
+  }, [notifications])
 
   const unreadCount = rows.filter((n) => !n.is_read).length
 
@@ -289,7 +300,7 @@ export function NotificationList({
                           {!n.is_read ? (
                             <span
                               aria-hidden="true"
-                              className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full border-2 border-background bg-[#2563EB] animate-pulse-dot"
+                              className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full border-2 border-background bg-[#2563EB]"
                             />
                           ) : null}
                           {style.icon}

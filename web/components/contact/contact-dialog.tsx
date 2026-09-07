@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { useActionState } from "react"
 import { SendIcon } from "lucide-react"
 
@@ -77,13 +77,17 @@ export function ContactDialog({
     FormData
   >(recordContact, {})
 
+  // Keep onClose in a ref so the effect never captures a stale closure.
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
+
   // If the server returned a URL, open it (Telegram deep-link or tel:).
   useEffect(() => {
     if (state.url) {
       window.open(state.url, "_blank", "noopener,noreferrer")
-      onClose()
+      onCloseRef.current()
     }
-  }, [state.url, onClose])
+  }, [state.url])
 
   const methods = contactInfo
     ? availableContactMethods(contactInfo)

@@ -3,6 +3,7 @@
 import Image from "next/image"
 import { useActionState } from "react"
 import { ExternalLinkIcon, TrashIcon, XIcon } from "lucide-react"
+import { toast } from "sonner"
 
 import { adminResolveReport } from "@/app/actions/reports"
 import type { ReportWithRelations } from "@/lib/reports"
@@ -93,6 +94,10 @@ export function AdminReportCard({
   report: ReportWithRelations
 }) {
   const [state, action, pending] = useActionState(adminResolveReport, {})
+
+  if (state?.ok) {
+    toast.success("Report resolved")
+  }
 
   const canRemoveListing = report.reported_listing_id !== null
   const canBlockSeller = report.reported_seller_id !== null

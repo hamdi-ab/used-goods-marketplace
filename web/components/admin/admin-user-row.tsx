@@ -2,6 +2,7 @@
 
 import { useActionState } from "react"
 import { RotateCcwIcon, UserRoundXIcon } from "lucide-react"
+import { toast } from "sonner"
 
 import { adminRestoreUser, adminSuspendUser } from "@/app/actions/admin"
 import type { AdminUserRow } from "@/lib/admin"
@@ -28,6 +29,13 @@ export function AdminUserRow({
   const isAdmin = user.role === "admin"
   const isSuspended = user.suspended_at != null
   const message = suspendState?.message ?? restoreState?.message
+
+  if (suspendState?.ok) {
+    toast.success("User suspended")
+  }
+  if (restoreState?.ok) {
+    toast.success("User restored")
+  }
 
   return (
     <li className="flex flex-wrap items-center justify-between gap-3 rounded-lg border bg-card p-4">

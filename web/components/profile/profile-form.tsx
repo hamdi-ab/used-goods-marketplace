@@ -3,7 +3,7 @@
 import { useActionState, useRef, useState, type ChangeEvent } from "react"
 import { toast } from "sonner"
 import Link from "next/link"
-import { UploadIcon, ShieldCheckIcon, PhoneIcon, UserCheckIcon } from "lucide-react"
+import { Loader2Icon, UploadIcon, ShieldCheckIcon, PhoneIcon, UserCheckIcon } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
@@ -313,7 +313,14 @@ export function ProfileForm({
             ) : null}
 
             <Button type="submit" disabled={pending} className="w-fit h-11">
-              {pending ? "Saving…" : "Save changes"}
+              {pending ? (
+                <>
+                  <Loader2Icon className="mr-2 size-4 animate-spin" />
+                  Saving…
+                </>
+              ) : (
+                "Save changes"
+              )}
             </Button>
           </form>
 

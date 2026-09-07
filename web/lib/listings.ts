@@ -1,7 +1,7 @@
 import "server-only"
 
+import type { SupabaseClient } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/server"
-import type { Supabase } from "@/lib/supabase/types"
 import { callRpc, callOutcomeRpc } from "@/lib/supabase/rpc"
 import { uploadObjects } from "@/lib/media"
 import { listingImageAdapter } from "@/lib/media/listing-adapter"
@@ -35,7 +35,7 @@ import {
   mapFlatSearchListing,
   mapNestedBrowseListing,
   pickCoverImage,
-} from "./listings/browse-mapper"
+} from "@/lib/mappings/browse"
 import type {
   FlatSearchRow,
   NestedBrowseRow,
@@ -48,7 +48,7 @@ export * from "./listings/constants"
 // ---- Reads ----
 
 export async function fetchCategories(
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<Category[]> {
   const supabase = client ?? (await createClient())
   const { data, error } = await supabase
@@ -73,7 +73,7 @@ export interface FetchListingOptions {
 export async function fetchListing(
   id: string,
   opts: FetchListingOptions = {},
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<ListingWithRelations | null> {
   if (!isValidUuid(id)) return null
   const supabase = client ?? (await createClient())
@@ -146,7 +146,7 @@ export interface SellerListingsPage {
 export async function fetchSellerListings(
   sellerId: string,
   args: PagingArgs = {},
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<SellerListingsPage> {
   const supabase = client ?? (await createClient())
   const { limit, offset } = resolveWindow(args)
@@ -215,7 +215,7 @@ export async function fetchListings(
     offset?: number
     categorySlug?: string
   } = {},
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<{
   listings: BrowseListing[]
   count: number | null
@@ -278,7 +278,7 @@ export async function fetchListings(
 export async function fetchSellerPublicListings(
   sellerId: string,
   limit: number = 6,
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<BrowseListing[]> {
   const supabase = client ?? (await createClient())
   const safeLimit = Math.min(Math.max(limit, 1), BROWSE_LIMIT_MAX)
@@ -333,7 +333,7 @@ type SearchListingRow = FlatSearchRow & { total_count: number }
 // exact count the RPC returns alongside the slice.
 export async function searchListings(
   opts: SearchOptions = {},
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<SearchResult> {
   const supabase = client ?? (await createClient())
   const offset = Math.min(Math.max(opts.offset ?? 0, 0), MAX_PAGING_OFFSET)
@@ -393,7 +393,7 @@ const SIMILAR_LIMIT_MAX = 12
 export async function fetchSimilarListings(
   listingId: string,
   limit: number = SIMILAR_LIMIT_DEFAULT,
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<SimilarResult> {
   const supabase = client ?? (await createClient())
   const safeLimit = Math.min(Math.max(limit, 1), SIMILAR_LIMIT_MAX)
@@ -542,7 +542,7 @@ export async function boostListing(
 /** Upload listing photos for a given listing (T29 image seam). Delegates to the
  * shared Media upload seam so the listing domain never touches storage. */
 export async function uploadListingPhotos(
-  supabase: Supabase,
+  supabase: SupabaseClient,
   listingId: string,
   files: File[]
 ): Promise<string | null> {

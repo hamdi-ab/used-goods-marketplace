@@ -19,6 +19,15 @@ interface ListingsBentoProps {
 // No full-width base tile — it was too squashed to read. Throwaway 
 export function ListingsBento({ listings, favoriteIds }: ListingsBentoProps) {
   const tiles = listings.slice(0, 9)
+
+  if (tiles.length === 0) {
+    return (
+      <div className="flex flex-col items-center rounded-2xl border border-border bg-muted/30 px-4 py-16 text-center">
+        <p className="text-sm text-muted-foreground">No listings yet</p>
+      </div>
+    )
+  }
+
   const [spine, feature, ...rest] = tiles
   const rightSmalls = rest.slice(0, 2)
   const bottomSmalls = rest.slice(2, 6)
@@ -61,6 +70,18 @@ export function ListingsBento({ listings, favoriteIds }: ListingsBentoProps) {
       </div>
     </Link>
   )
+
+  // With fewer than 3 listings, fall back to a simple uniform grid — the
+  // asymmetric bento layout needs at least a spine + feature tile to look right.
+  if (tiles.length < 3) {
+    return (
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {tiles.map((l) =>
+          tile(l, "aspect-[4/3]", "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw")
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="grid grid-cols-2 gap-3 auto-rows-[210px] lg:grid-cols-4">

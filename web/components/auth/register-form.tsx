@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
+import { Loader2Icon } from "lucide-react"
 
 import { createClient } from "@/lib/supabase/client"
 import { AuthLayout } from "@/components/auth/auth-layout"
@@ -119,7 +120,14 @@ export function RegisterForm() {
         {error ? <p className="text-sm text-destructive shake">{error}</p> : null}
 
         <Button type="submit" disabled={isSubmitting} className="mt-2 h-11 press-feedback">
-          {isSubmitting ? "Creating account…" : "Create account"}
+          {isSubmitting ? (
+            <>
+              <Loader2Icon className="mr-2 size-4 animate-spin" />
+              Creating account…
+            </>
+          ) : (
+            "Create account"
+          )}
         </Button>
 
         <AuthDivider />

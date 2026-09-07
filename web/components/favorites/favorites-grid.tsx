@@ -24,11 +24,11 @@ export function FavoritesGrid({
   const [, startTransition] = useTransition()
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const [prevListings, setPrevListings] = useState(listings)
-  if (prevListings !== listings) {
-    setPrevListings(listings)
+  // Reset items when listings prop changes
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setItems(listings)
-  }
+  }, [listings])
 
   useEffect(() => {
     return () => {

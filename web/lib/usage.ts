@@ -1,7 +1,7 @@
 import "server-only"
 
+import type { SupabaseClient } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/server"
-import type { Supabase } from "@/lib/supabase/types"
 import {
   TIER_LIMITS,
   activeListingLimit,
@@ -19,7 +19,7 @@ import { countAiGenerationsThisMonth } from "@/lib/ai/quota"
  * blocks self-promotion), so this is a trusted read. */
 export async function fetchSellerTier(
   userId: string,
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<Tier> {
   const supabase = client ?? (await createClient())
   const { data } = await supabase
@@ -36,7 +36,7 @@ export async function fetchSellerTier(
  * Drafts/archived/sold do NOT count against the cap. */
 export async function countActiveListings(
   sellerId: string,
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<number> {
   const supabase = client ?? (await createClient())
   const { count } = await supabase
@@ -55,7 +55,7 @@ export async function countActiveListings(
 export async function enforceListingCap(
   sellerId: string,
   role: "buyer" | "seller" | "admin" | null,
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<{ ok: boolean; used: number; limit: number; message?: string }> {
   if (role === "admin") return { ok: true, used: 0, limit: Infinity }
   const supabase = client ?? (await createClient())

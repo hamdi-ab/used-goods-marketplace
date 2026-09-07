@@ -1,11 +1,12 @@
 import { randomUUID } from "node:crypto"
+import type { SupabaseClient } from "@supabase/supabase-js"
 
 import {
   EXT_BY_MIME,
   detectImageMime,
   validateImageFile,
 } from "./primitives"
-import type { Supabase, UploadAdapter } from "@/lib/media"
+import type { UploadAdapter } from "@/lib/media"
 
 // The listing gallery adapter: bucket + path + validate + reconcile for a
 // listing's photos. One of the two adapters behind the shared Media upload
@@ -14,7 +15,7 @@ import type { Supabase, UploadAdapter } from "@/lib/media"
 // or image rules — listings.ts just supplies the listing id.
 export function listingImageAdapter(ctx: {
   listingId: string
-  supabase: Supabase
+  supabase: SupabaseClient
 }): UploadAdapter {
   return {
     bucket: "listing-images",

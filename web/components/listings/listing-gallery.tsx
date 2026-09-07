@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import Image from "next/image"
 import { ChevronLeftIcon, ChevronRightIcon, XIcon, ExpandIcon } from "lucide-react"
 
@@ -104,7 +104,7 @@ export function ListingGallery({
                   onClick={() => setActive(i)}
                   aria-label={`View image ${i + 1} of ${images.length}`}
                   aria-current={i === active ? "true" : undefined}
-                  className={`relative aspect-[4/3] w-20 shrink-0 cursor-pointer overflow-hidden rounded-lg border-2 bg-muted ring-offset-2 transition-all duration-200 ease-out ${
+                  className={`relative aspect-[4/3] w-20 shrink-0 cursor-pointer overflow-hidden rounded-lg border-2 bg-muted ring-offset-2 transition-all duration-200 ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2563EB] ${
                     i === active
                       ? "border-[#2563EB] opacity-100 scale-105"
                       : "border-transparent opacity-60 hover:opacity-100 hover:-translate-y-0.5 hover:shadow-md"
@@ -124,69 +124,78 @@ export function ListingGallery({
         ) : null}
       </div>
 
-      {lightbox ? (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90"
-          onClick={() => setLightbox(false)}
-        >
-          <button
-            type="button"
-            onClick={() => setLightbox(false)}
-            className="absolute top-4 right-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20"
-            aria-label="Close"
-          >
-            <XIcon className="size-6" />
-          </button>
+       {lightbox ? (
+         <div
+           role="dialog"
+           aria-modal="true"
+           aria-label={`Image viewer: ${title}`}
+           className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90"
+           onClick={() => setLightbox(false)}
+           ref={(el) => {
+             // Trap focus inside the lightbox and move focus to it on open.
+             if (el) el.focus()
+           }}
+           tabIndex={-1}
+         >
+           <button
+             type="button"
+             onClick={() => setLightbox(false)}
+             className="absolute top-4 right-4 rounded-full bg-white/10 p-2 text-white hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+             aria-label="Close"
+           >
+             <XIcon className="size-6" />
+           </button>
 
-          <div
-            className="relative h-[85vh] w-[90vw] max-w-5xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Image
-              src={current.image_url}
-              alt={current.alt_text ?? title}
-              fill
-              sizes="90vw"
-              className="object-contain"
-            />
-          </div>
+           <div
+             className="relative h-[85vh] w-[90vw] max-w-5xl"
+             onClick={(e) => e.stopPropagation()}
+           >
+             <Image
+               src={current.image_url}
+               alt={current.alt_text ?? title}
+               fill
+               sizes="90vw"
+               className="object-contain"
+             />
+           </div>
 
-          {images.length > 1 ? (
-            <>
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); goPrev() }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white hover:bg-white/20"
-                aria-label="Previous image"
-              >
-                <ChevronLeftIcon className="size-6" />
-              </button>
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); goNext() }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white hover:bg-white/20"
-                aria-label="Next image"
-              >
-                <ChevronRightIcon className="size-6" />
-              </button>
+           {images.length > 1 ? (
+             <>
+               <button
+                 type="button"
+                 onClick={(e) => { e.stopPropagation(); goPrev() }}
+                 className="absolute left-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                 aria-label="Previous image"
+               >
+                 <ChevronLeftIcon className="size-6" />
+               </button>
+               <button
+                 type="button"
+                 onClick={(e) => { e.stopPropagation(); goNext() }}
+                 className="absolute right-4 top-1/2 -translate-y-1/2 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+                 aria-label="Next image"
+               >
+                 <ChevronRightIcon className="size-6" />
+               </button>
 
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
-                {images.map((_, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); setActive(i) }}
-                    aria-label={`Go to image ${i + 1}`}
-                    className={`size-2 rounded-full transition ${
-                      i === active ? "bg-white" : "bg-white/40 hover:bg-white/60"
-                    }`}
-                  />
-                ))}
-              </div>
-            </>
-          ) : null}
-        </div>
-      ) : null}
+               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+                 {images.map((_, i) => (
+                   <button
+                     key={i}
+                     type="button"
+                     onClick={(e) => { e.stopPropagation(); setActive(i) }}
+                     aria-label={`Go to image ${i + 1}`}
+                     aria-current={i === active ? "true" : undefined}
+                     className={`size-2.5 rounded-full transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
+                       i === active ? "bg-white" : "bg-white/40 hover:bg-white/60"
+                     }`}
+                   />
+                 ))}
+               </div>
+             </>
+           ) : null}
+         </div>
+       ) : null}
     </>
   )
 }

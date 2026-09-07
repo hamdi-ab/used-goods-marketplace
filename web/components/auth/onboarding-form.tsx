@@ -2,6 +2,7 @@
 
 import { useActionState } from "react"
 import Link from "next/link"
+import { Loader2Icon } from "lucide-react"
 
 import { completeProfile, type CompleteProfileState } from "@/app/actions/profile"
 import { Button } from "@/components/ui/button"
@@ -103,7 +104,14 @@ export function OnboardingForm({ fullName }: { fullName: string }) {
             {state.message ? <p className="text-sm text-destructive">{state.message}</p> : null}
 
             <Button type="submit" disabled={pending} className="mt-2">
-              {pending ? "Saving…" : "Save profile"}
+              {pending ? (
+                <>
+                  <Loader2Icon className="mr-2 size-4 animate-spin" />
+                  Saving…
+                </>
+              ) : (
+                "Save profile"
+              )}
             </Button>
           </form>
         </CardContent>

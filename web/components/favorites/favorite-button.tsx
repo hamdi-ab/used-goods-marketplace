@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useOptimistic } from "react"
 import { usePathname } from "next/navigation"
 import { Heart } from "lucide-react"
+import { toast } from "sonner"
 
 import { cn } from "@/lib/utils"
 import {
@@ -67,7 +68,10 @@ export function FavoriteButton({
     const next = !favorite
     setFavorite(toggleFavoriteState)
     onChange?.(next, listingId)
-    await toggleFavorite(formData)
+    const result = await toggleFavorite(formData)
+    if (!result.ok && result.message) {
+      toast.error(result.message)
+    }
   }
 
   return (

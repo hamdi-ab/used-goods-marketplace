@@ -1,11 +1,11 @@
 import "server-only"
 
+import type { SupabaseClient } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/server"
-import type { Supabase } from "@/lib/supabase/types"
 import { callOutcomeRpc } from "@/lib/supabase/rpc"
 import { isValidUuid, PAGE_SIZE, type BrowseListing } from "@/lib/listings/constants"
-import { mapNestedBrowseListing } from "@/lib/listings/browse-mapper"
-import type { NestedBrowseRow } from "@/lib/listings/browse-mapper"
+import { mapNestedBrowseListing } from "@/lib/mappings/browse"
+import type { NestedBrowseRow } from "@/lib/mappings/browse"
 import {
   OPEN_OFFER_STATUSES,
   type OfferStatus,
@@ -129,7 +129,7 @@ function resolveWindow(args: OffersPageArgs): { limit: number; offset: number } 
 export async function fetchBuyerOffers(
   userId: string,
   args: OffersPageArgs = {},
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<OffersPage<BuyerOfferRow>> {
   const supabase = client ?? (await createClient())
   const { limit, offset } = resolveWindow(args)
@@ -177,7 +177,7 @@ review:reviews(id, rating),
 export async function fetchSellerOffers(
   userId: string,
   args: OffersPageArgs = {},
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<OffersPage<SellerOfferRow>> {
   const supabase = client ?? (await createClient())
   const { limit, offset } = resolveWindow(args)
@@ -224,7 +224,7 @@ buyer:profiles(id, full_name, avatar_url),
 // seller filter is the same PostgREST hint used by fetchSellerOffers.
 export async function countIncomingOffers(
   userId: string,
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<number> {
   const supabase = client ?? (await createClient())
   const { count, error } = await supabase
@@ -349,7 +349,7 @@ export interface OfferEventRow {
 // Fetch the full negotiation history for an offer, oldest first.
 export async function fetchOfferEvents(
   offerId: string,
-  client?: Supabase
+  client?: SupabaseClient
 ): Promise<OfferEventRow[]> {
   const supabase = client ?? (await createClient())
   const { data, error } = await supabase

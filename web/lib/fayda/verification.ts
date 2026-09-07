@@ -1,6 +1,6 @@
 import "server-only"
 
-import type { Supabase } from "@/lib/supabase/types"
+import type { SupabaseClient } from "@supabase/supabase-js"
 import {
   FAYDA_ENV,
   derivePkceChallenge,
@@ -44,7 +44,7 @@ export interface RecordFaydaVerificationResult {
 // dropped RPC fails to compile instead of surfacing as a runtime magic-string
 // typo (the same seam `record_verification` reaches via callOutcomeRpc).
 export async function recordFaydaVerification(
-  supabase: Supabase,
+  supabase: SupabaseClient,
   params: { userId: string; sub: string }
 ): Promise<RecordFaydaVerificationResult> {
   return callOutcomeRpc(
@@ -110,7 +110,7 @@ export interface VerifyFaydaOptions {
 }
 
 export async function verifyAndRecord(
-  supabase: Supabase,
+  supabase: SupabaseClient,
   userId: string,
   opts: VerifyFaydaOptions
 ): Promise<RecordFaydaVerificationResult> {
@@ -232,7 +232,7 @@ export interface CompleteFaydaResult {
 // the self-issued verification. Every failure resolves to a safe envelope; a
 // failure before the exchange never reaches the DB.
 export async function completeFaydaAuthorization(
-  supabase: Supabase,
+  supabase: SupabaseClient,
   userId: string,
   params: CompleteFaydaParams
 ): Promise<CompleteFaydaResult> {

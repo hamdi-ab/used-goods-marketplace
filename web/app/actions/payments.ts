@@ -1,25 +1,18 @@
 "use server"
 
-import { z } from "zod"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { abandonStalePayment, approveWithdrawal, confirmOfferReceipt, payOffer, rejectWithdrawal, requestWithdrawal } from "@/lib/payments"
-import { uuidSchema } from "@/lib/uuid"
+import { createNotification } from "@/lib/notifications"
 import { formValue } from "@/lib/form-value"
-
-const offerIdSchema = z.object({
-  offerId: uuidSchema,
-})
-
-const amountSchema = z.object({
-  amount: z.coerce.number().positive("Amount must be greater than 0"),
-  payoutMethod: z.enum(["bank_transfer", "mobile_money"]).default("bank_transfer"),
-  accountNumber: z.string().optional(),
-})
-
-const txRefSchema = z.object({
-  txRef: z.string().min(1, "Transaction reference is required"),
-})
+import {
+  offerIdSchema,
+  withdrawalSchema,
+  txRefSchema,
+  parseOfferIdForm,
+  parseWithdrawalForm,
+  parseTxRefForm,
+} from "@/lib/schemas"
 
 export type PayOfferState = {
   message?: string
@@ -31,9 +24,7 @@ export async function payOfferAction(
   _prevState: PayOfferState,
   formData: FormData
 ): Promise<PayOfferState> {
-  const parsed = offerIdSchema.safeParse({
-    offerId: formValue(formData, "offerId"),
-  })
+  const parsed = offerIdSchema.safeParse(parseOfferIdForm(formData))
   if (!parsed.success) {
     return { message: "Invalid request" }
   }
@@ -57,9 +48,7 @@ export async function confirmReceiptAction(
   _prevState: ConfirmReceiptState,
   formData: FormData
 ): Promise<ConfirmReceiptState> {
-  const parsed = offerIdSchema.safeParse({
-    offerId: formValue(formData, "offerId"),
-  })
+  const parsed = offerIdSchema.safeParse(parseOfferIdForm(formData))
   if (!parsed.success) {
     return { message: "Invalid request" }
   }
@@ -87,14 +76,12 @@ export async function requestWithdrawalAction(
   _prevState: WithdrawalState,
   formData: FormData
 ): Promise<WithdrawalState> {
-  const parsed = amountSchema.safeParse({
-    amount: formValue(formData, "amount"),
-  })
+  const parsed = withdrawalSchema.safeParse(parseWithdrawalForm(formData))
   if (!parsed.success) {
     return { message: parsed.error.flatten().fieldErrors.amount?.[0] ?? "Invalid amount" }
   }
 
-  const accountNumber = formValue(formData, "accountNumber")
+  const accountNumber = parsed.data.accountNumber
   if (!accountNumber || !accountNumber.trim()) {
     return { message: "Please enter your account number" }
   }
@@ -119,9 +106,7 @@ export async function abandonStalePaymentAction(
   _prevState: AbandonStaleState,
   formData: FormData
 ): Promise<AbandonStaleState> {
-  const parsed = txRefSchema.safeParse({
-    txRef: formValue(formData, "txRef"),
-  })
+  const parsed = txRefSchema.safeParse(parseTxRefForm(formData))
   if (!parsed.success) {
     return { message: "Invalid request" }
   }
@@ -155,7 +140,19 @@ export async function approveWithdrawalAction(
     return { message: result.error ?? "Could not approve withdrawal" }
   }
 
+  // Notify seller
+  if (result.sellerId) {
+    await createNotification({
+      userId: result.sellerId,
+      type: "withdrawal_approved",
+      title: "Withdrawal approved",
+      body: "Your withdrawal request has been approved and is being processed.",
+      metadata: { withdrawal_id: withdrawalId },
+    })
+  }
+
   revalidatePath("/admin/withdrawals")
+  revalidatePath("/withdrawals")
   return { ok: true }
 }
 
@@ -174,6 +171,20 @@ export async function rejectWithdrawalAction(
     return { message: result.error ?? "Could not reject withdrawal" }
   }
 
+  // Notify seller
+  if (result.sellerId) {
+    await createNotification({
+      userId: result.sellerId,
+      type: "withdrawal_rejected",
+      title: "Withdrawal rejected",
+      body: reason
+        ? `Your withdrawal request was rejected. Reason: ${reason}`
+        : "Your withdrawal request was rejected. Please contact support for details.",
+      metadata: { withdrawal_id: withdrawalId },
+    })
+  }
+
   revalidatePath("/admin/withdrawals")
+  revalidatePath("/withdrawals")
   return { ok: true }
 }

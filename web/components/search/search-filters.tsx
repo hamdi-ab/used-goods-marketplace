@@ -5,6 +5,7 @@ import {
   useTransition,
   useEffect,
   useMemo,
+  useRef,
   type FormEvent,
 } from "react"
 import { useRouter } from "next/navigation"
@@ -89,12 +90,24 @@ export function SearchFilters({
   // Fire when the debounced value has settled on something new.
   useEffect(() => {
     if (debouncedQuery === activeQuery) return
+    lastPushed.current = debouncedQuery
     startTransition(() => {
       router.push(debouncedQuery)
     })
   }, [debouncedQuery, activeQuery, router])
 
-  const isPending = isNavigating || debouncedQuery !== activeQuery
+  // Track the last-pushed URL locally so the spinner reflects what *we* fired,
+  // not the server-prop lag. Clears when the server catches up.
+  const lastPushed = useRef<string | null>(null)
+
+  const isPending = lastPushed.current !== null || isNavigating
+
+  useEffect(() => {
+    if (lastPushed.current && lastPushed.current === activeQuery) {
+      // eslint-disable-next-line react-hooks/immutability
+      lastPushed.current = null
+    }
+  }, [activeQuery])
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -187,7 +200,18 @@ export function SearchFilters({
               type="number"
               min="0"
               value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
+              onChange={(e) => {
+                const next = e.target.value
+                // If both fields are filled and min > max, swap them so the
+                // range is always valid — the user never gets a silent empty
+                // result from an inverted range.
+                if (next && minPrice && Number(next) < Number(minPrice)) {
+                  setMinPrice(next)
+                  setMaxPrice(minPrice)
+                } else {
+                  setMaxPrice(next)
+                }
+              }}
               placeholder="No maximum"
             />
           </div>

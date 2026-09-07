@@ -1,4 +1,4 @@
-import type { Supabase } from "@/lib/supabase/types"
+import type { SupabaseClient } from "@supabase/supabase-js"
 
 /** Every SECURITY DEFINER function the app calls, in one place, so a renamed
  * or dropped RPC fails to compile instead of failing at runtime with a
@@ -59,7 +59,7 @@ export interface RpcOutcome {
  * client is injected so the seam stays testable without the server graph (and
  * so callers can pass a fake in unit tests). */
 export async function callRpc<T>(
-  supabase: Supabase,
+  supabase: SupabaseClient,
   name: RpcName,
   args: RpcArgs
 ): Promise<RpcResult<T>> {
@@ -73,7 +73,7 @@ export async function callRpc<T>(
  * so every write-RPC caller lands on this one interface. On a transport error
  * the extra fields are absent; callers default them with `??`. */
 export async function callOutcomeRpc<T extends RpcOutcome = RpcOutcome>(
-  supabase: Supabase,
+  supabase: SupabaseClient,
   name: RpcName,
   args: RpcArgs,
   logLabel: string

@@ -1,8 +1,8 @@
 import "server-only"
 
-import type { Supabase } from "@/lib/supabase/types"
+import type { SupabaseClient } from "@supabase/supabase-js"
 
-export type { Supabase } from "@/lib/supabase/types"
+export type { SupabaseClient } from "@supabase/supabase-js"
 export {
   ALLOWED_IMAGE_MIME,
   detectImageMime,
@@ -45,7 +45,7 @@ export type UploadResult =
 export async function uploadObjects(
   files: MediaFile[],
   adapter: UploadAdapter,
-  supabase: Supabase
+  supabase: SupabaseClient
 ): Promise<UploadResult> {
   // Validate every file before uploading any, so a bad batch never starts.
   for (const { file } of files) {
