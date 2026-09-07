@@ -26,7 +26,7 @@ const MAX_EVIDENCE_FILES = 5
 const MAX_FILE_BYTES = 5 * 1024 * 1024
 
 export function DisputeForm({ paymentId }: DisputeFormProps) {
-  const [state, formAction, pending] = useActionState(openDisputeAction, {})
+  const [state, , pending] = useActionState(openDisputeAction, {})
   const [reason, setReason] = useState<DisputeReason | null>(null)
   const [description, setDescription] = useState("")
   const [evidenceFiles, setEvidenceFiles] = useState<File[]>([])

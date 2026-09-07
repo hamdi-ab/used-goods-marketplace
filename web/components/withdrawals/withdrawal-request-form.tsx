@@ -1,6 +1,7 @@
 "use client"
 
-import { useActionState, useEffect, useState } from "react"
+import { useActionState } from "react"
+import { useFormStatus } from "react-dom"
 import { BanknoteIcon, SmartphoneIcon, WalletIcon } from "lucide-react"
 import { toast } from "sonner"
 
@@ -10,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { formatPrice } from "@/lib/listings"
+import { useState } from "react"
 
 const WITHDRAWAL_MINIMUM = 50
 
@@ -18,30 +20,44 @@ interface WithdrawalRequestFormProps {
   pendingAmount: number
 }
 
+function SubmitButton({ disabled }: { disabled: boolean }) {
+  const { pending } = useFormStatus()
+  return (
+    <Button type="submit" disabled={disabled || pending} className="w-full">
+      {pending ? "Requesting..." : "Request withdrawal"}
+    </Button>
+  )
+}
+
 export function WithdrawalRequestForm({
   availableBalance,
   pendingAmount,
 }: WithdrawalRequestFormProps) {
-  const [state, formAction, pending] = useActionState(requestWithdrawalAction, {})
+  const [state, formAction] = useActionState(requestWithdrawalAction, {})
   const [amount, setAmount] = useState("")
   const [accountNumber, setAccountNumber] = useState("")
   const [payoutMethod, setPayoutMethod] = useState<"bank_transfer" | "mobile_money">("bank_transfer")
+  const [lastShownState, setLastShownState] = useState<typeof state | null>(null)
 
-  useEffect(() => {
+  // Only fire toast on state change
+  if (state !== lastShownState) {
     if (state.ok) {
       toast.success(
         `Withdrawal requested! Fee: ${state.fee ? formatPrice(state.fee, { maxFractionDigits: 2 }) : "0 ETB"}, Net: ${state.netAmount ? formatPrice(state.netAmount, { maxFractionDigits: 2 }) : "0 ETB"}`
       )
-      setAmount("")
-      setAccountNumber("")
-    } else if (state.message) {
+      if (lastShownState !== null) {
+        setAmount("")
+        setAccountNumber("")
+      }
+    } else if (state.message && lastShownState !== null) {
       toast.error(state.message)
     }
-  }, [state])
+    setLastShownState(state)
+  }
 
   const amountNum = parseFloat(amount) || 0
   const isValidAmount = amountNum >= WITHDRAWAL_MINIMUM && amountNum <= availableBalance
-  const canSubmit = isValidAmount && accountNumber.trim().length > 0 && !pending
+  const canSubmit = isValidAmount && accountNumber.trim().length > 0
 
   return (
     <Card>
@@ -116,9 +132,7 @@ export function WithdrawalRequestForm({
             />
           </div>
 
-          <Button type="submit" disabled={!canSubmit} className="w-full">
-            {pending ? "Requesting..." : "Request withdrawal"}
-          </Button>
+          <SubmitButton disabled={!canSubmit} />
 
           <p className="text-xs text-muted-foreground">
             First 2 withdrawals each month are free. After that, a 5 ETB fee applies.
