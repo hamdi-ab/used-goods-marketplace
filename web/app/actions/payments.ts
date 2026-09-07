@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { abandonStalePayment, approveWithdrawal, confirmOfferReceipt, payOffer, rejectWithdrawal, requestWithdrawal } from "@/lib/payments"
+import { createNotification } from "@/lib/notifications"
 import { formValue } from "@/lib/form-value"
 import {
   offerIdSchema,
@@ -139,7 +140,19 @@ export async function approveWithdrawalAction(
     return { message: result.error ?? "Could not approve withdrawal" }
   }
 
+  // Notify seller
+  if (result.sellerId) {
+    await createNotification({
+      userId: result.sellerId,
+      type: "withdrawal_approved",
+      title: "Withdrawal approved",
+      body: "Your withdrawal request has been approved and is being processed.",
+      metadata: { withdrawal_id: withdrawalId },
+    })
+  }
+
   revalidatePath("/admin/withdrawals")
+  revalidatePath("/withdrawals")
   return { ok: true }
 }
 
@@ -158,6 +171,20 @@ export async function rejectWithdrawalAction(
     return { message: result.error ?? "Could not reject withdrawal" }
   }
 
+  // Notify seller
+  if (result.sellerId) {
+    await createNotification({
+      userId: result.sellerId,
+      type: "withdrawal_rejected",
+      title: "Withdrawal rejected",
+      body: reason
+        ? `Your withdrawal request was rejected. Reason: ${reason}`
+        : "Your withdrawal request was rejected. Please contact support for details.",
+      metadata: { withdrawal_id: withdrawalId },
+    })
+  }
+
   revalidatePath("/admin/withdrawals")
+  revalidatePath("/withdrawals")
   return { ok: true }
 }

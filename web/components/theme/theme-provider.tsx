@@ -20,21 +20,25 @@ const ThemeProviderContext = createContext<ThemeProviderContextValue | null>(nul
 
 const STORAGE_KEY = "dagim-theme"
 
+function isValidTheme(value: string | null): value is Theme {
+  return value === "light" || value === "dark" || value === "system"
+}
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>("system")
   const [resolved, setResolved] = useState<"light" | "dark">("light")
   const [mounted, setMounted] = useState(false)
 
-  // Read persisted preference on mount (avoids hydration mismatch).
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null
-    if (stored === "light" || stored === "dark" || stored === "system") {
-      setThemeState(stored)
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem(STORAGE_KEY)
+      if (isValidTheme(stored) && stored !== theme) {
+        setThemeState(stored)
+      }
     }
     setMounted(true)
-  }, [])
+  }, [theme])
 
-  // Resolve "system" to actual preference and apply to <html>.
   useEffect(() => {
     if (!mounted) return
 
@@ -53,13 +57,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const setTheme = (next: Theme) => {
     setThemeState(next)
-    localStorage.setItem(STORAGE_KEY, next)
-  }
-
-  // Prevent FOUC: don't render children until mounted so the server and
-  // client agree on the class list.
-  if (!mounted) {
-    return <div style={{ visibility: "hidden" }}>{children}</div>
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, next)
+    }
   }
 
   return (
@@ -73,4 +73,26 @@ export function useTheme() {
   const ctx = useContext(ThemeProviderContext)
   if (!ctx) throw new Error("useTheme must be used within ThemeProvider")
   return ctx
+}
+
+// Safe variant for components rendered outside the provider (e.g. ThemeToggle
+// during static generation of pages like /sell and /about that don't yet
+// have a client ThemeProvider in scope). Returns safe defaults on the server.
+export function useThemeOrDefault() {
+  const ctx = useContext(ThemeProviderContext)
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (ctx) {
+    return { ...ctx, mounted }
+  }
+
+  return {
+    theme: "system" as Theme,
+    setTheme: () => {},
+    resolved: "light" as const,
+    mounted,
+  }
 }

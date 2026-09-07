@@ -140,6 +140,84 @@ export async function initializeChapaTransaction(
   }
 }
 
+// ---- Payout (withdrawal) seam ----
+//
+// Chapa Transfers API for seller payouts. In demo mode this is a no-op that
+// simulates success; in production it would call the real /transfers endpoint.
+// The withdrawal RPC marks the row completed regardless — this is the
+// execution layer that actually moves funds.
+
+export type ChapaPayoutParams = {
+  withdrawalId: string
+  amount: number
+  currency?: string
+  bankCode?: string
+  accountNumber: string
+  accountName?: string
+}
+
+export type ChapaPayoutResult =
+  | { ok: true; reference: string; demo: boolean }
+  | { ok: false; error: string }
+
+export async function executePayout(
+  params: ChapaPayoutParams
+): Promise<ChapaPayoutResult> {
+  if (chapaDemoMode()) {
+    // Simulate a successful payout without hitting the network
+    return {
+      ok: true,
+      reference: `demo_payout_${crypto.randomUUID().slice(0, 8)}`,
+      demo: true,
+    }
+  }
+
+  const secretKey = process.env.CHAPA_SECRET_KEY
+  if (!secretKey) {
+    return { ok: false, error: "Chapa is not configured" }
+  }
+
+  try {
+    const res = await fetch(`${CHAPA_BASE_URL}/transfers`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${secretKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        account_name: params.accountName ?? "Seller",
+        account_number: params.accountNumber,
+        amount: params.amount,
+        currency: params.currency ?? "ETB",
+        bank_code: params.bankCode,
+        reference: params.withdrawalId,
+      }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(CHAPA_TIMEOUT_MS),
+    })
+
+    const json = (await res.json()) as {
+      status?: string
+      message?: string
+      data?: { reference?: string; id?: string }
+    }
+
+    if (!res.ok || json.status !== "success") {
+      const msg = json.message
+      const errorText = typeof msg === "string" ? msg : JSON.stringify(msg)
+      return { ok: false, error: errorText || `Payout failed (${res.status})` }
+    }
+
+    return {
+      ok: true,
+      reference: json.data?.reference ?? json.data?.id ?? params.withdrawalId,
+      demo: false,
+    }
+  } catch {
+    return { ok: false, error: "Chapa is unreachable right now" }
+  }
+}
+
 /**
  * Verify a transaction after the buyer returns from the hosted checkout (or,
  * in demo fallback mode, immediately). A `demo_` tx_ref is simulated (with the

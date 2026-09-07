@@ -10,6 +10,7 @@ import { SITE_URL } from "@/lib/site"
 import {
   chapaConfigured,
   chapaTxRef,
+  executePayout,
   initializeChapaTransaction,
   verifyChapaTransaction,
 } from "@/lib/chapa"
@@ -248,6 +249,40 @@ export async function approveWithdrawal(
   withdrawalId: string
 ): Promise<{ ok: boolean; error: string | null; sellerId?: string }> {
   const supabase = await createClient()
+
+  // Fetch withdrawal details for payout execution
+  const { data: withdrawal } = await supabase
+    .from("withdrawals")
+    .select("seller_id, net_amount, payout_method, payout_details")
+    .eq("id", withdrawalId)
+    .maybeSingle()
+
+  if (!withdrawal) {
+    return { ok: false, error: "Withdrawal not found" }
+  }
+
+  // Execute the actual payout via Chapa
+  let payoutDetails: { account_number?: string } = {}
+  try {
+    if (withdrawal.payout_details) {
+      payoutDetails = JSON.parse(withdrawal.payout_details)
+    }
+  } catch {
+    // Ignore parse errors
+  }
+
+  const payoutResult = await executePayout({
+    withdrawalId,
+    amount: Number(withdrawal.net_amount),
+    accountNumber: payoutDetails.account_number ?? "",
+    bankCode: withdrawal.payout_method === "bank_transfer" ? "COMMERCIAL_BANK_OF_ETHIOPIA" : undefined,
+  })
+
+  if (!payoutResult.ok) {
+    return { ok: false, error: payoutResult.error, sellerId: withdrawal.seller_id }
+  }
+
+  // Mark withdrawal as completed
   const result = await callOutcomeRpc<
     { ok: boolean; error: string | null; seller_id?: string }
   >(
