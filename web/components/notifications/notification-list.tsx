@@ -145,6 +145,7 @@ export function NotificationList({
   const [, startTransition] = useTransition()
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRows(notifications)
   }, [notifications])
 

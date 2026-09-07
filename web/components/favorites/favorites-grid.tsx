@@ -24,7 +24,9 @@ export function FavoritesGrid({
   const [, startTransition] = useTransition()
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
+  // Reset items when listings prop changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setItems(listings)
   }, [listings])
 

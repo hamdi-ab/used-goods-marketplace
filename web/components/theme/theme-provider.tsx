@@ -33,6 +33,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(STORAGE_KEY)
       if (isValidTheme(stored) && stored !== theme) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setThemeState(stored)
       }
     }

@@ -104,6 +104,7 @@ export function SearchFilters({
 
   useEffect(() => {
     if (lastPushed.current && lastPushed.current === activeQuery) {
+      // eslint-disable-next-line react-hooks/immutability
       lastPushed.current = null
     }
   }, [activeQuery])
