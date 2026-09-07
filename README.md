@@ -75,7 +75,27 @@ commands, and the design-token overview. For a hosted deployment, see
 
 ## Documentation map
 
+### Core docs
+
 - **PRD:** [`docs/01-prd/00-overview.md`](docs/01-prd/00-overview.md)
 - **Build plan:** [`docs/03-engineering/06-implementation-roadmap.md`](docs/03-engineering/06-implementation-roadmap.md)
 - **Design authority:** [`docs/04-design/00-design-foundations.md`](docs/04-design/00-design-foundations.md)
 - **Architecture decisions:** [`docs/02-architecture/01-architecture-decision-records.md`](docs/02-architecture/01-architecture-decision-records.md)
+- **System architecture:** [`docs/02-architecture/00-system-architecture.md`](docs/02-architecture/00-system-architecture.md)
+
+### Doc families
+
+| Folder | Contents |
+|--------|----------|
+| [`docs/00-strategy/`](docs/00-strategy/) | Winning strategy & product vision |
+| [`docs/01-prd/`](docs/01-prd/) | Product requirements |
+| [`docs/02-architecture/`](docs/02-architecture/) | System architecture, ADRs, domain model, DB/API specs |
+| [`docs/03-engineering/`](docs/03-engineering/) | Performance, testing, CI/CD, coding standard, roadmap |
+| [`docs/04-design/`](docs/04-design/) | Design system, components, UX |
+| [`docs/agents/`](docs/agents/) | Agent working notes (tracker conventions) |
+
+### Web app
+
+- **App README:** [`web/README.md`](web/README.md) — full setup, architecture, demo accounts, deployment
+- **Load test:** [`load-test/`](load-test/) — k6 scenario + runbook
+- **CI workflows:** `.github/workflows/` — PR validation + Vercel deploy
