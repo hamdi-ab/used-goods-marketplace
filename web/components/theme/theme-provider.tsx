@@ -33,7 +33,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(STORAGE_KEY)
       if (isValidTheme(stored) && stored !== theme) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
         setThemeState(stored)
       }
     }
@@ -63,10 +62,6 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  if (!mounted) {
-    return <div style={{ visibility: "hidden" }}>{children}</div>
-  }
-
   return (
     <ThemeProviderContext.Provider value={{ theme, setTheme, resolved }}>
       {children}
@@ -78,4 +73,26 @@ export function useTheme() {
   const ctx = useContext(ThemeProviderContext)
   if (!ctx) throw new Error("useTheme must be used within ThemeProvider")
   return ctx
+}
+
+// Safe variant for components rendered outside the provider (e.g. ThemeToggle
+// during static generation of pages like /sell and /about that don't yet
+// have a client ThemeProvider in scope). Returns safe defaults on the server.
+export function useThemeOrDefault() {
+  const ctx = useContext(ThemeProviderContext)
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (ctx) {
+    return { ...ctx, mounted }
+  }
+
+  return {
+    theme: "system" as Theme,
+    setTheme: () => {},
+    resolved: "light" as const,
+    mounted,
+  }
 }

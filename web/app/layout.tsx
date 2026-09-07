@@ -49,12 +49,30 @@ export const viewport: Viewport = {
   themeColor: "#2563EB",
 };
 
+const themeScript = `
+  (function() {
+    try {
+      var stored = localStorage.getItem("dagim-theme");
+      var systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      var theme = stored || "system";
+      var resolved = theme === "system" ? (systemDark ? "dark" : "light") : theme;
+      if (resolved === "dark") document.documentElement.classList.add("dark");
+    } catch (e) {}
+  })();
+`
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{ __html: themeScript }}
+        />
+      </head>
       <body className="min-h-full bg-background font-sans text-foreground">
         <ThemeProvider>
           <AuthProvider>{children}</AuthProvider>
