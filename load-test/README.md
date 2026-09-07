@@ -81,3 +81,13 @@ Record in the report which one appeared first and at what concurrency.
 ## Validation note
 
 This scenario was executed successfully against a local mock server (all endpoints returning 200, all thresholds green, exit 0) to prove the script compiles and the per-endpoint tags, chained listing id, and thresholds all work. That mock run produced **no** meaningful latency numbers and is **not** the T19 measurement. The real run is pending a hosted endpoint (T01 scaffold / T17 deploy) — see `docs/03-engineering/11-load-verification.md`.
+
+---
+
+## Related
+
+- **Web app:** [`../../web/README.md`](../../web/README.md) — full setup, architecture, demo accounts
+- **Repo root:** [`../../README.md`](../../README.md) — overview, doc map, all doc families
+- **Load verification report:** [`docs/03-engineering/11-load-verification.md`](../docs/03-engineering/11-load-verification.md)
+- **PRD:** [`docs/01-prd/00-overview.md`](../docs/01-prd/00-overview.md)
+- **Architecture:** [`docs/02-architecture/00-system-architecture.md`](../docs/02-architecture/00-system-architecture.md)
