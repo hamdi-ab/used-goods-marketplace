@@ -1,7 +1,7 @@
 import { CheckCircle2Icon, ClockIcon, XCircleIcon } from "lucide-react"
 
 import type { WithdrawalRow } from "@/lib/payments"
-import { formatPrice } from "@/lib/listings"
+import { formatPrice } from "@/lib/listings/constants"
 import { formatShortDate } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"

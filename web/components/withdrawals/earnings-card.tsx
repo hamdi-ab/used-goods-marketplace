@@ -6,7 +6,7 @@ import {
 } from "lucide-react"
 
 import type { SellerEarnings } from "@/lib/payments"
-import { formatPrice } from "@/lib/listings"
+import { formatPrice } from "@/lib/listings/constants"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface EarningsCardProps {
