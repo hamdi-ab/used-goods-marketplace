@@ -49,7 +49,7 @@ create policy "Reviews are publicly readable"
 -- rating on a 0-100 scale (rating 1-5 -> score 20-100), which is what makes
 -- the rating visible as the seller badge's Trust score (AC5, INV-007).
 ------------------------------------------------------------------------------
-create or replace function public.submit_review(p_offer_id uuid, p_rating smallint, p_comment text)
+create or replace function public.submit_review(p_offer_id uuid, p_rating smallint, p_comment text, p_source text default 'organic')
 returns jsonb
 language plpgsql
 security definer
@@ -85,8 +85,8 @@ begin
   end if;
   v_seller_id := v_listing.seller_id;
 
-  insert into public.reviews (offer_id, seller_id, buyer_id, rating, comment)
-  values (p_offer_id, v_seller_id, v_offer.buyer_id, p_rating, nullif(p_comment, ''))
+  insert into public.reviews (offer_id, seller_id, buyer_id, rating, comment, source)
+  values (p_offer_id, v_seller_id, v_offer.buyer_id, p_rating, nullif(p_comment, ''), p_source)
   on conflict (offer_id) do nothing;
   get diagnostics v_rows = row_count;
 
@@ -111,5 +111,5 @@ grant select on public.reviews to authenticated, anon;
 
 -- RPC grant: authenticated only; revoking from public keeps the implicit
 -- EXECUTE grant from exposing it.
-revoke all on function public.submit_review(uuid, smallint, text) from public;
-grant execute on function public.submit_review(uuid, smallint, text) to authenticated;
+revoke all on function public.submit_review(uuid, smallint, text, text) from public;
+grant execute on function public.submit_review(uuid, smallint, text, text) to authenticated;

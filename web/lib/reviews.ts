@@ -71,6 +71,7 @@ export async function fetchSellerReviews(
     .from("reviews")
     .select(REVIEW_COLUMNS, { count: "exact" })
     .eq("seller_id", sellerId)
+    .eq("source", "organic")
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1)
 
@@ -108,6 +109,7 @@ export async function fetchSellerRatingSummary(
     .from("reviews")
     .select("rating")
     .eq("seller_id", sellerId)
+    .eq("source", "organic")
 
   if (error) {
     console.error("fetchSellerRatingSummary:", error.message)
@@ -153,6 +155,7 @@ export async function submitReviewRow(input: {
   offerId: string
   rating: number
   comment: string | null
+  source?: "organic" | "demo"
 }): Promise<ReviewResult> {
   if (!isValidUuid(input.offerId)) {
     return { ok: false, error: "invalid offer id", sellerId: null }
@@ -165,6 +168,7 @@ export async function submitReviewRow(input: {
       p_offer_id: input.offerId,
       p_rating: input.rating,
       p_comment: input.comment?.trim() || null,
+      p_source: input.source ?? "organic",
     },
     "submitReviewRow"
   )
