@@ -10,6 +10,7 @@ import {
   FolderTreeIcon,
   MailWarningIcon,
   MessageSquareIcon,
+  MessageSquareWarningIcon,
   ShieldAlertIcon,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
@@ -37,6 +38,7 @@ const REASON_ICONS: Record<ReportReason, LucideIcon> = {
   duplicate: CopyIcon,
   wrong_category: FolderTreeIcon,
   offensive_content: AlertTriangleIcon,
+  review_violation: MessageSquareWarningIcon,
   other: MessageSquareIcon,
 }
 

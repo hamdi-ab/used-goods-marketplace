@@ -18,6 +18,14 @@ export const REVIEW_COMMENT_MAX = 1000
 // A review is only possible once the offer is accepted (INV-008).
 export const REVIEWABLE_OFFER_STATUS = "accepted" as const
 
+// Source distinguishes organic reviews from demo/test reviews.
+export const REVIEW_SOURCES = ["organic", "demo"] as const
+export type ReviewSource = (typeof REVIEW_SOURCES)[number]
+export const REVIEW_SOURCE_LABELS: Record<ReviewSource, string> = {
+  organic: "Organic",
+  demo: "Demo",
+}
+
 // Trust Score reflects the seller's average rating on a 0-100 scale
 // (rating 1-5 -> score 20-100). Kept here so the SQL formula and any client
 // preview of it cannot drift.
