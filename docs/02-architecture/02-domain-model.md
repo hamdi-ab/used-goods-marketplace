@@ -666,7 +666,23 @@ To keep the system modular, the domain is divided into contexts.
 | Monetization | Account Tier |
 | AI | AI Listing Service |
 
-# 14. Summary
+# 14. Domain Groups (ADR-014)
+
+The codebase is organized into 7 domain groups for ownership and navigation:
+
+| Group | Scope | Key Files |
+|-------|-------|-----------|
+| **Marketplace Core** | Listings, search, browse, categories, images | `lib/listings/`, `app/(site)/search/`, `app/(site)/listings/` |
+| **Transaction Lifecycle** | Offers, payments, checkout, abandoned sales | `lib/offers.ts`, `lib/payments/`, `app/actions/offers.ts`, `app/payments/` |
+| **Reputation & Trust** | Reviews, ratings, verification badges, trust scores | `lib/reviews/`, `components/reviews/`, `app/actions/reviews.ts` |
+| **User Identity** | Auth, profiles, account, settings, navigation | `components/auth/`, `lib/auth.ts`, `app/(site)/settings/`, `lib/nav.ts` |
+| **Notifications** | In-app notifications, email digests, real-time | `lib/notifications/`, `components/notifications/` |
+| **AI & Monetization** | AI listing assist, boosted listings, premium tiers | `lib/ai/`, `lib/boost/`, `app/actions/boost.ts` |
+| **Admin** | Dashboard, reports, moderation, user management | `app/(admin)/`, `app/actions/reports.ts` |
+
+Each group owns its mutations, queries, and components. Cross-group calls flow through server actions or RPCs — never direct DB access.
+
+# 15. Summary
 
 The Domain Model represents the business language of the marketplace.
 
