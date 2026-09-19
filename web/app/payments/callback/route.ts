@@ -57,16 +57,18 @@ export async function GET(request: Request): Promise<Response> {
   } else if (payment.status === "paid" || payment.status === "failed") {
     // Already processed, nothing to do
   } else {
-    // Update directly using service role (bypasses caller gate in RPC).
-    // If offerId is available, verify it matches; otherwise trust tx_ref (it's unique).
+    // Use the complete_payment RPC (idempotent, handles all business logic)
+    // instead of a direct UPDATE which bypasses the payment lifecycle.
     if (offerId && payment.offer_id !== offerId) {
       console.error("[payments/callback] payment offer mismatch")
     } else {
-      const { error: updateError } = await supabase
-        .from("payments")
-        .update({ status: "paid", paid_at: new Date().toISOString() })
-        .eq("id", payment.id)
-      console.log("[payments/callback] update result:", JSON.stringify(updateError))
+      const { error: rpcError } = await supabase.rpc("complete_payment", {
+        p_tx_ref: txRef,
+        p_mode: "demo",
+        p_amount: payment.amount,
+        p_currency: payment.currency,
+      })
+      console.log("[payments/callback] complete_payment rpc:", JSON.stringify(rpcError))
     }
   }
 
