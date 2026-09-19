@@ -8,6 +8,7 @@ import {
   LISTING_STATUS_LABELS,
 } from "@/lib/listings/constants"
 import { isBoostActive } from "@/lib/boost"
+import { ratingAverageToTrustScore } from "@/lib/reviews/constants"
 import { ConditionChip } from "@/components/listings/condition-chip"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -107,6 +108,12 @@ export function ListingCard({
             <span className="truncate text-sm font-medium text-foreground">
               {seller.full_name ?? "Seller"}
             </span>
+            {seller.trust_score && seller.trust_score > 50 ? (
+              <span className="inline-flex items-center gap-0.5 text-xs text-muted-foreground">
+                <span className="text-amber-500">★</span>
+                {Math.round(seller.trust_score / 20)}
+              </span>
+            ) : null}
             {trustBadges[0] ? (
               <span
                 className="inline-flex items-center gap-1 text-xs font-semibold text-green-600"
