@@ -2,12 +2,10 @@
 
 import Link from "next/link"
 import {
-  HeartIcon,
   LayoutDashboardIcon,
   LogOutIcon,
-  PlusIcon,
   UserRoundIcon,
-  FlagIcon,
+  SettingsIcon,
   ChevronRightIcon,
 } from "lucide-react"
 
@@ -101,31 +99,16 @@ export function UserMenu({ tone = "light" }: { tone?: "light" | "blue" }) {
                   <ChevronRightIcon className="size-4 text-muted-foreground/50" />
                 </Link>
               </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/settings" className="flex items-center gap-3 rounded-md px-2 py-2 text-sm">
+                  <SettingsIcon className="size-4 text-muted-foreground" />
+                  <span className="flex-1">Settings</span>
+                  <ChevronRightIcon className="size-4 text-muted-foreground/50" />
+                </Link>
+              </DropdownMenuItem>
             </>
           )}
         </div>
-
-        <DropdownMenuSeparator className="my-1" />
-
-        {/* Activity section */}
-        {!isAdmin ? (
-          <div>
-            <DropdownMenuItem asChild>
-              <Link href="/favorites" className="flex items-center gap-3 rounded-md px-2 py-2 text-sm">
-                <HeartIcon className="size-4 text-muted-foreground" />
-                <span className="flex-1">Favorites</span>
-                <ChevronRightIcon className="size-4 text-muted-foreground/50" />
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/reports" className="flex items-center gap-3 rounded-md px-2 py-2 text-sm">
-                <FlagIcon className="size-4 text-muted-foreground" />
-                <span className="flex-1">My reports</span>
-                <ChevronRightIcon className="size-4 text-muted-foreground/50" />
-              </Link>
-            </DropdownMenuItem>
-          </div>
-        ) : null}
 
         <DropdownMenuSeparator className="my-1" />
 

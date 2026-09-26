@@ -111,5 +111,5 @@ grant select on public.reviews to authenticated, anon;
 
 -- RPC grant: authenticated only; revoking from public keeps the implicit
 -- EXECUTE grant from exposing it.
-revoke all on function public.submit_review(uuid, smallint, text) from public;
-grant execute on function public.submit_review(uuid, smallint, text) to authenticated;
+revoke all on function public.submit_review(uuid, smallint, text, text) from public;
+grant execute on function public.submit_review(uuid, smallint, text, text) to authenticated;

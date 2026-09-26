@@ -16,6 +16,7 @@ export const REPORT_REASONS = [
   "duplicate",
   "wrong_category",
   "offensive_content",
+  "review_violation",
   "other",
 ] as const
 
@@ -27,6 +28,7 @@ export const REPORT_REASON_LABELS: Record<ReportReason, string> = {
   duplicate: "Duplicate",
   wrong_category: "Wrong Category",
   offensive_content: "Offensive Content",
+  review_violation: "Review Violation",
   other: "Other",
 }
 

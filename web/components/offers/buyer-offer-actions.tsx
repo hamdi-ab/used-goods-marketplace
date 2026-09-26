@@ -4,7 +4,7 @@ import { useState } from "react"
 import { useActionState } from "react"
 
 import { offerAction } from "@/app/actions/offers"
-import { declineCounterAction } from "@/app/actions/offer-actions"
+import { declineCounterAction } from "@/app/actions/offers"
 import type { BuyerOfferRow } from "@/lib/offers"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"

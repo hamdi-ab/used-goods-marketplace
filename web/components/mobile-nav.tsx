@@ -68,16 +68,7 @@ export function MobileNav() {
             Sign up
           </Link>
         </div>
-      ) : (
-        <div className="mt-4 border-t pt-4">
-          <Link
-            href="/sell"
-            className="flex items-center gap-3 rounded-md bg-primary px-3 py-2.5 text-sm font-medium text-primary-foreground"
-          >
-            Start selling
-          </Link>
-        </div>
-      )}
+      ) : null}
     </nav>
   )
 }

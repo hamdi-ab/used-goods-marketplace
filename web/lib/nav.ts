@@ -13,6 +13,7 @@ import {
   ShieldCheckIcon,
   UserCogIcon,
   LayoutGridIcon,
+  ListIcon,
   type LucideIcon,
 } from "lucide-react"
 import type { UserRole } from "@/lib/auth/types"
@@ -34,58 +35,38 @@ export function buildLoginUrl(pathname: string): string {
   return `/login?next=${encodeURIComponent(pathname)}`
 }
 
-// Component standards §12 caps primary destinations at 5. Dashboard and
-// Profile live in the account menu (components/auth/user-menu.tsx) instead.
+// Primary nav is capped at 3 items (Browse, Activity, Sell). The Account
+// menu lives in the user-menu dropdown. Admin sees only Browse.
 //
-// Nav is role-scoped: buyers see "My offers" (offers they made), sellers see
-// "Incoming offers" (offers they received). This follows the Airbnb pattern
-// (Trips vs Reservations) — each role sees only their mental model, no
-// cross-contamination, no confusing links to the other role's view.
+// Activity is a unified hub for all user actions — outgoing offers, incoming
+// offers, favorites, dashboard. The entry currently points to /offers as a
+// placeholder; when the ActivitySection component lands it will render a
+// tabbed view at the same route.
 export function primaryNav(role: UserRole | null): NavItem[] {
   if (role === "admin") {
     return [
-      { title: "Home", href: "/", icon: HomeIcon },
       { title: "Browse", href: "/search", icon: LayoutGridIcon },
     ]
   }
 
-  const offers: NavItem =
-    role === "seller"
-      ? { title: "Incoming offers", href: "/offers/seller", icon: HandshakeIcon }
-      : { title: "My offers", href: "/offers", icon: HandshakeIcon }
-
-  const sellerExtras: NavItem[] =
-    role === "seller"
-      ? [{ title: "Withdrawals", href: "/withdrawals", icon: BanknoteIcon }]
-      : []
-
   return [
-    { title: "Home", href: "/", icon: HomeIcon },
     { title: "Browse", href: "/search", icon: LayoutGridIcon },
-    offers,
-    ...sellerExtras,
-    { title: "Favorites", href: "/favorites", icon: HeartIcon },
+    { title: "Activity", href: "/activity", icon: ListIcon },
+    { title: "Sell", href: "/sell", icon: PlusIcon },
   ]
 }
 
 export function mobileNav(role: UserRole | null): NavItem[] {
   if (role === "admin") {
     return [
-      { title: "Home", href: "/", icon: HomeIcon },
-      { title: "Search", href: "/search", icon: SearchIcon },
+      { title: "Browse", href: "/search", icon: SearchIcon },
     ]
   }
 
-  const offers: NavItem =
-    role === "seller"
-      ? { title: "Incoming offers", href: "/offers/seller", icon: HandshakeIcon }
-      : { title: "My offers", href: "/offers", icon: HandshakeIcon }
-
   return [
-    { title: "Home", href: "/", icon: HomeIcon },
-    { title: "Search", href: "/search", icon: SearchIcon },
-    offers,
-    { title: "Favorites", href: "/favorites", icon: HeartIcon },
+    { title: "Browse", href: "/search", icon: SearchIcon },
+    { title: "Activity", href: "/activity", icon: ListIcon },
+    { title: "Sell", href: "/sell", icon: PlusIcon },
   ]
 }
 

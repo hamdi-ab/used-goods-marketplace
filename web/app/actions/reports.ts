@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache"
 
 import { requireAdmin, requireUser } from "@/lib/auth"
+import { consumeRateBudget } from "@/lib/rate-limit"
 import {
   createReport as createReportRow,
   resolveReport as resolveReportRow,
@@ -34,6 +35,11 @@ export async function submitReport(
   // resolves the reporter from auth.uid() and enforces rate limiting.
   await requireUser()
 
+  const budget = await consumeRateBudget()
+  if (!budget.ok) {
+    return { message: budget.message }
+  }
+
   const result = await createReportRow({
     listingId: parsed.data.listingId ?? null,
     sellerId: parsed.data.sellerId ?? null,
@@ -45,6 +51,9 @@ export async function submitReport(
     return { message: result.error ?? "Could not submit your report" }
   }
 
+  if (parsed.data.listingId) {
+    revalidatePath(`/listings/${parsed.data.listingId}`)
+  }
   return { ok: true }
 }
 

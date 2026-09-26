@@ -15,13 +15,14 @@ import {
 } from "@/lib/reports/constants"
 
 describe("reports reasons", () => {
-  it("declares the six AC reasons", () => {
+  it("declares the seven AC reasons", () => {
     expect(REPORT_REASONS).toEqual([
       "spam",
       "fraud",
       "duplicate",
       "wrong_category",
       "offensive_content",
+      "review_violation",
       "other",
     ])
   })
