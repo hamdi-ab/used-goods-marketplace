@@ -49,10 +49,12 @@ function FieldError({ message }: { message: string | undefined }) {
 export function ReportDialog({
   listingId,
   sellerId,
+  reviewId,
   onClose,
 }: {
   listingId: string | null
   sellerId: string | null
+  reviewId?: string | null
   onClose: () => void
 }) {
   const [state, formAction, pending] = useActionState<
@@ -92,7 +94,7 @@ export function ReportDialog({
   }
 
   const reasons = REPORT_REASONS
-  const targetLabel = sellerId ? "seller" : "item"
+  const targetLabel = reviewId ? "review" : sellerId ? "seller" : "item"
 
   return (
     <>
@@ -110,6 +112,7 @@ export function ReportDialog({
       <form action={formAction}>
         <input type="hidden" name="listingId" value={listingId ?? ""} />
         <input type="hidden" name="sellerId" value={sellerId ?? ""} />
+        <input type="hidden" name="reviewId" value={reviewId ?? ""} />
 
         <div className="mt-4 flex flex-col gap-3">
           <fieldset className="flex flex-col gap-1.5">

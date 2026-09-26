@@ -7,7 +7,7 @@ export { submitReportSchema }
 
 export const resolveReportSchema = z.object({
   reportId: uuidSchema,
-  action: z.enum(["remove_listing", "block_seller", "reject"]),
+  action: z.enum(["remove_listing", "block_seller", "remove_review", "reject"]),
   adminNote: z
     .string()
     .max(REPORT_NOTE_MAX, `Keep the note under ${REPORT_NOTE_MAX} characters`)
@@ -25,6 +25,7 @@ export function parseSubmitReportForm(formData: FormData): Record<string, unknow
   return {
     listingId: formValue(formData, "listingId"),
     sellerId: formValue(formData, "sellerId"),
+    reviewId: formValue(formData, "reviewId"),
     reason: formValue(formData, "reason"),
     note: formValue(formData, "note"),
   }

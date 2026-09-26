@@ -17,6 +17,7 @@ const ReportDialog = lazyDialog(() =>
 type Target =
   | { type: "listing"; listingId: string }
   | { type: "seller"; sellerId: string }
+  | { type: "review"; reviewId: string; sellerId?: string }
 
 export function ReportButton({
   target,
@@ -39,11 +40,21 @@ export function ReportButton({
     if (nextOpen) setOpenKey((k) => k + 1)
   }
 
-  const label = target.type === "listing" ? "Report listing" : "Report seller"
+  const label =
+    target.type === "listing"
+      ? "Report listing"
+      : target.type === "seller"
+      ? "Report seller"
+      : "Report review"
+
   const href =
     target.type === "listing"
       ? `/listings/${target.listingId}`
-      : `/users/${target.sellerId}`
+      : target.type === "seller"
+      ? `/users/${target.sellerId}`
+      : target.sellerId
+      ? `/users/${target.sellerId}`
+      : "/activity"
 
   // T15: hide reporting/report-self actions from the owner.
   if (isOwner) return null
@@ -71,6 +82,7 @@ export function ReportButton({
           key={openKey}
           listingId={target.type === "listing" ? target.listingId : null}
           sellerId={target.type === "seller" ? target.sellerId : null}
+          reviewId={target.type === "review" ? target.reviewId : null}
           onClose={() => setOpen(false)}
         />
       </DialogContent>

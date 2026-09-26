@@ -214,31 +214,39 @@ export default async function UserProfilePage({
               </div>
               <ul className="flex flex-col gap-4">
                 {reviews.reviews.map((review) => (
-                  <li key={review.id} className="flex items-start gap-3 text-sm">
-                    <Avatar className="size-8">
-                      {review.buyer?.avatar_url ? (
-                        <AvatarImage
-                          src={review.buyer.avatar_url}
-                          alt={review.buyer.full_name ?? "Reviewer"}
-                        />
-                      ) : null}
-                      <AvatarFallback className="text-xs">
-                        {initials(review.buyer?.full_name ?? "")}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <ReviewStars rating={review.rating} size="xs" />
-                        <span className="text-xs text-muted-foreground">
-                          {formatShortDate(review.created_at)}
-                        </span>
+                  <li key={review.id} className="flex items-start justify-between gap-3 text-sm">
+                    <div className="flex items-start gap-3 min-w-0 flex-1">
+                      <Avatar className="size-8">
+                        {review.buyer?.avatar_url ? (
+                          <AvatarImage
+                            src={review.buyer.avatar_url}
+                            alt={review.buyer.full_name ?? "Reviewer"}
+                          />
+                        ) : null}
+                        <AvatarFallback className="text-xs">
+                          {initials(review.buyer?.full_name ?? "")}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <ReviewStars rating={review.rating} size="xs" />
+                          <span className="text-xs text-muted-foreground">
+                            {formatShortDate(review.created_at)}
+                          </span>
+                        </div>
+                        {review.comment ? (
+                          <p className="mt-1 text-sm text-foreground/80">
+                            {review.comment}
+                          </p>
+                        ) : null}
                       </div>
-                      {review.comment ? (
-                        <p className="mt-1 text-sm text-foreground/80">
-                          {review.comment}
-                        </p>
-                      ) : null}
                     </div>
+                    {user?.id !== review.buyer?.id ? (
+                      <ReportButton
+                        target={{ type: "review", reviewId: review.id, sellerId: id }}
+                        signedIn={Boolean(user)}
+                      />
+                    ) : null}
                   </li>
                 ))}
               </ul>

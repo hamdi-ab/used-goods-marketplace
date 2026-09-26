@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { useActionState } from "react"
+import { useActionState, useEffect } from "react"
 import { ExternalLinkIcon, TrashIcon, XIcon } from "lucide-react"
 import { toast } from "sonner"
 
@@ -9,6 +9,8 @@ import { adminResolveReport } from "@/app/actions/reports"
 import type { ReportWithRelations } from "@/lib/reports"
 import { REPORT_REASON_LABELS } from "@/lib/reports/constants"
 import { ReportStatusBadge } from "@/components/reports/report-status-badge"
+import { ReviewStars } from "@/components/reviews/review-stars"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -21,6 +23,7 @@ import {
 function ReportTarget({ report }: { report: ReportWithRelations }) {
   const listing = report.listing
   const seller = report.seller
+  const review = report.review
 
   if (listing) {
     return (
@@ -81,6 +84,52 @@ function ReportTarget({ report }: { report: ReportWithRelations }) {
     )
   }
 
+  if (review) {
+    return (
+      <div className="flex flex-col gap-2 rounded-lg border bg-muted/40 p-3">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Avatar className="size-6">
+              {review.buyer?.avatar_url ? (
+                <AvatarImage
+                  src={review.buyer.avatar_url}
+                  alt={review.buyer.full_name ?? "Buyer"}
+                />
+              ) : null}
+              <AvatarFallback className="text-[10px]">
+                {review.buyer?.full_name?.[0]?.toUpperCase() ?? "B"}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-sm font-medium">
+              {review.buyer?.full_name ?? "Buyer"}
+            </span>
+          </div>
+          <ReviewStars rating={review.rating} size="xs" />
+        </div>
+        {review.comment ? (
+          <p className="text-sm italic text-foreground/90">
+            &ldquo;{review.comment}&rdquo;
+          </p>
+        ) : (
+          <p className="text-xs italic text-muted-foreground">
+            No written comment
+          </p>
+        )}
+        {review.listing ? (
+          <p className="text-xs text-muted-foreground">
+            On listing:{" "}
+            <a
+              href={`/listings/${review.listing.id}`}
+              className="font-medium text-foreground hover:underline"
+            >
+              {review.listing.title}
+            </a>
+          </p>
+        ) : null}
+      </div>
+    )
+  }
+
   return (
     <p className="text-sm text-muted-foreground">
       Target no longer available
@@ -95,12 +144,15 @@ export function AdminReportCard({
 }) {
   const [state, action, pending] = useActionState(adminResolveReport, {})
 
-  if (state?.ok) {
-    toast.success("Report resolved")
-  }
+  useEffect(() => {
+    if (state?.ok) {
+      toast.success("Report resolved")
+    }
+  }, [state?.ok])
 
   const canRemoveListing = report.reported_listing_id !== null
   const canBlockSeller = report.reported_seller_id !== null
+  const canRemoveReview = report.review_id !== null
 
   return (
     <Card>
@@ -180,6 +232,23 @@ export function AdminReportCard({
               >
                 <TrashIcon className="mr-1.5 size-3.5" />
                 Remove listing
+              </Button>
+            </form>
+          ) : null}
+
+          {canRemoveReview ? (
+            <form action={action}>
+              <input type="hidden" name="reportId" value={report.id} readOnly />
+              <input type="hidden" name="action" value="remove_review" readOnly />
+              <Button
+                type="submit"
+                variant="outline"
+                size="sm"
+                disabled={pending}
+                className="border-red-200 text-red-800 hover:bg-red-50"
+              >
+                <TrashIcon className="mr-1.5 size-3.5" />
+                Remove review
               </Button>
             </form>
           ) : null}

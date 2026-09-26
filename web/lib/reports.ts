@@ -35,14 +35,31 @@ export interface ReportSellerContext {
   trust_score: number | null
 }
 
+// Context for a review-targeted report: the reported review + buyer + listing.
+export interface ReportReviewContext {
+  id: string
+  rating: number
+  comment: string | null
+  buyer: {
+    id: string
+    full_name: string | null
+    avatar_url: string | null
+  } | null
+  listing: {
+    id: string
+    title: string
+  } | null
+}
+
 // A report enriched with the context needed by the admin queue and the
-// reporter's acknowledgement view. The listing/seller joins are nullable
+// reporter's acknowledgement view. The listing/seller/review joins are nullable
 // (a report targets exactly one), mirroring the DB constraint.
 export interface ReportWithRelations {
   id: string
   reporter_id: string
   reported_listing_id: string | null
   reported_seller_id: string | null
+  review_id: string | null
   reason: ReportReason
   note: string | null
   status: ReportStatus
@@ -50,6 +67,7 @@ export interface ReportWithRelations {
   updated_at: string
   listing: ReportListingContext | null
   seller: ReportSellerContext | null
+  review: ReportReviewContext | null
   reporter: {
     id: string
     full_name: string | null
@@ -64,7 +82,7 @@ export interface MyReportRow {
   reason: ReportReason
   note: string | null
   status: ReportStatus
-  target_type: "listing" | "seller"
+  target_type: "listing" | "seller" | "review"
   target_id: string
   target_title: string | null
   created_at: string
@@ -74,7 +92,7 @@ export interface MyReportRow {
 
 /** Columns selected for every report query (keeps the two read paths in sync). */
 const REPORT_COLUMNS =
-  "id, reporter_id, reported_listing_id, reported_seller_id, reason, note, status, created_at, updated_at"
+  "id, reporter_id, reported_listing_id, reported_seller_id, review_id, reason, note, status, created_at, updated_at"
 
 // Join spec for the reported item context. Reports has two FKs to profiles
 // (reporter_id and reported_seller_id), so the seller join needs an explicit
@@ -84,6 +102,11 @@ const REPORT_JOINS = `${REPORT_COLUMNS},
    seller:profiles!listings_seller_id_fkey(id, full_name, avatar_url),
    images:listing_images(image_url, display_order)),
  seller:profiles!reports_reported_seller_id_fkey(id, full_name, avatar_url, role, trust_score),
+ review:reviews!reports_review_id_fkey(id, rating, comment,
+   buyer:profiles!reviews_buyer_id_fkey(id, full_name, avatar_url),
+   offer:offers!reviews_offer_id_fkey(
+     listing:listings(id, title)
+   )),
  reporter:profiles!reports_reporter_id_fkey(id, full_name, avatar_url)`
 
    /**
@@ -159,6 +182,7 @@ export interface ReportResult {
 export async function createReport(params: {
   listingId?: string | null
   sellerId?: string | null
+  reviewId?: string | null
   reason: ReportReason
   note?: string | null
 }): Promise<ReportResult> {
@@ -170,6 +194,7 @@ export async function createReport(params: {
     {
       p_listing_id: params.listingId ?? null,
       p_seller_id: params.sellerId ?? null,
+      p_review_id: params.reviewId ?? null,
       p_reason: params.reason,
       p_note: params.note?.trim() || null,
     },
@@ -186,7 +211,7 @@ export async function createReport(params: {
  */
 export async function resolveReport(
   reportId: string,
-  action: "remove_listing" | "block_seller" | "reject",
+  action: "remove_listing" | "block_seller" | "remove_review" | "reject",
   adminNote?: string | null
 ): Promise<ReportResult> {
   const supabase = await createClient()
@@ -212,6 +237,7 @@ interface RawReportRow {
   reporter_id: string
   reported_listing_id: string | null
   reported_seller_id: string | null
+  review_id: string | null
   reason: string
   note: string | null
   status: string
@@ -231,6 +257,17 @@ interface RawReportRow {
     role: string | null
     trust_score: number | null
   } | null
+  review: {
+    id: string
+    rating: number | string
+    comment: string | null
+    buyer?: { id: string; full_name: string | null; avatar_url: string | null } | { id: string; full_name: string | null; avatar_url: string | null }[] | null
+    offer?: {
+      listing?: { id: string; title: string } | { id: string; title: string }[] | null
+    } | {
+      listing?: { id: string; title: string } | { id: string; title: string }[] | null
+    }[] | null
+  } | null
   reporter: { id: string; full_name: string | null; avatar_url: string | null } | null
 }
 
@@ -238,12 +275,27 @@ function normalizeAdminReport(row: RawReportRow): ReportWithRelations {
   const listing = row.listing
   const seller = row.seller
   const reporter = row.reporter
+  const review = row.review
+
+  let reviewBuyer = null
+  if (review?.buyer) {
+    reviewBuyer = Array.isArray(review.buyer) ? review.buyer[0] : review.buyer
+  }
+
+  let reviewListing = null
+  if (review?.offer) {
+    const offerObj = Array.isArray(review.offer) ? review.offer[0] : review.offer
+    if (offerObj?.listing) {
+      reviewListing = Array.isArray(offerObj.listing) ? offerObj.listing[0] : offerObj.listing
+    }
+  }
 
   return {
     id: row.id,
     reporter_id: row.reporter_id,
     reported_listing_id: row.reported_listing_id,
     reported_seller_id: row.reported_seller_id,
+    review_id: row.review_id ?? null,
     reason: (row.reason ?? "other") as ReportReason,
     note: row.note,
     status: (row.status ?? "open") as ReportStatus,
@@ -273,6 +325,26 @@ function normalizeAdminReport(row: RawReportRow): ReportWithRelations {
           trust_score: seller.trust_score,
         }
       : null,
+    review: review
+      ? {
+          id: review.id,
+          rating: Number(review.rating),
+          comment: review.comment,
+          buyer: reviewBuyer
+            ? {
+                id: reviewBuyer.id,
+                full_name: reviewBuyer.full_name,
+                avatar_url: reviewBuyer.avatar_url,
+              }
+            : null,
+          listing: reviewListing
+            ? {
+                id: reviewListing.id,
+                title: reviewListing.title,
+              }
+            : null,
+        }
+      : null,
     reporter: reporter
       ? {
           id: reporter.id,
@@ -283,21 +355,49 @@ function normalizeAdminReport(row: RawReportRow): ReportWithRelations {
   }
 }
 
-function normalizeMyReport(row: RawReportRow): MyReportRow {
+export function normalizeMyReport(row: RawReportRow): MyReportRow {
   const listing = row.listing
   const seller = row.seller
+  const review = row.review
 
   const isListing = row.reported_listing_id !== null
+  const isSeller = row.reported_seller_id !== null
+  const target_type: "listing" | "seller" | "review" = isListing
+    ? "listing"
+    : isSeller
+    ? "seller"
+    : "review"
+
+  const target_id = isListing
+    ? row.reported_listing_id!
+    : isSeller
+    ? row.reported_seller_id!
+    : row.review_id!
+
+  let target_title: string | null = null
+  if (isListing) {
+    target_title = listing?.title ?? null
+  } else if (isSeller) {
+    target_title = seller?.full_name ?? null
+  } else if (review) {
+    if (review.comment) {
+      target_title =
+        review.comment.length > 30
+          ? `Review: "${review.comment.slice(0, 30)}..."`
+          : `Review: "${review.comment}"`
+    } else {
+      target_title = "Review"
+    }
+  }
+
   return {
     id: row.id,
     reason: (row.reason ?? "other") as ReportReason,
     note: row.note,
     status: (row.status ?? "open") as ReportStatus,
-    target_type: isListing ? "listing" : "seller",
-    target_id: isListing
-      ? row.reported_listing_id!
-      : row.reported_seller_id!,
-    target_title: isListing ? listing?.title ?? null : seller?.full_name ?? null,
+    target_type,
+    target_id,
+    target_title,
     created_at: row.created_at,
   }
 }

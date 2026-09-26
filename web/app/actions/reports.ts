@@ -43,6 +43,7 @@ export async function submitReport(
   const result = await createReportRow({
     listingId: parsed.data.listingId ?? null,
     sellerId: parsed.data.sellerId ?? null,
+    reviewId: parsed.data.reviewId ?? null,
     reason: parsed.data.reason,
     note: parsed.data.note ?? null,
   })
@@ -53,6 +54,9 @@ export async function submitReport(
 
   if (parsed.data.listingId) {
     revalidatePath(`/listings/${parsed.data.listingId}`)
+  }
+  if (parsed.data.sellerId) {
+    revalidatePath(`/users/${parsed.data.sellerId}`)
   }
   return { ok: true }
 }
