@@ -29,7 +29,7 @@ export interface BuyerOfferRow {
   expires_at: string | null
   listing: BrowseListing | null
   // The review on this offer, if the buyer has already rated the seller (T10).
-  review: { id: string; rating: number } | null
+  review: { id: string; rating: number; comment?: string | null; response?: string | null } | null
   // The payment on this offer (#97); null until a payment is begun.
   payment: OfferPayment | null
 }
@@ -84,7 +84,7 @@ function mapRawOfferRow(
   row: RawOfferRow & {
     listing: RawOfferListingRow | null
     buyer?: { id: string; full_name: string | null; avatar_url: string | null } | null
-    review?: { id: string; rating: number } | null
+    review?: { id: string; rating: number; comment?: string | null; response?: string | null } | null
     payment?: OfferPayment[] | null
   },
   withBuyer: boolean
@@ -139,7 +139,7 @@ export async function fetchBuyerOffers(
       `${OFFER_COLUMNS},
        listing:listings(id, title, price, condition, city, published_at,
          images:listing_images(id, image_url, display_order)),
-review:reviews(id, rating),
+       review:reviews(id, rating, comment, response),
        payment:payments(id, tx_ref, amount, currency, status, mode, buyer_confirmed, paid_at, confirmed_at)`,
       { count: "exact" }
     )
@@ -161,7 +161,7 @@ review:reviews(id, rating),
     created_at: string
     expires_at: string | null
     listing: RawOfferListingRow | null
-    review: { id: string; rating: number } | null
+    review: { id: string; rating: number; comment?: string | null; response?: string | null } | null
     payment: OfferPayment[] | null
   }[]
 
@@ -188,7 +188,8 @@ export async function fetchSellerOffers(
        listing:listings(id, title, price, condition, city, published_at,
          seller:profiles!listings_seller_id_fkey(id, full_name, avatar_url, role, trust_score),
          images:listing_images(id, image_url, display_order)),
-buyer:profiles(id, full_name, avatar_url),
+       buyer:profiles(id, full_name, avatar_url),
+       review:reviews(id, rating, comment, response),
        payment:payments(id, amount, currency, status, mode, buyer_confirmed, paid_at, confirmed_at)`,
       { count: "exact" }
     )
@@ -211,6 +212,7 @@ buyer:profiles(id, full_name, avatar_url),
     expires_at: string | null
     listing: RawOfferListingRow | null
     buyer: { id: string; full_name: string | null; avatar_url: string | null } | null
+    review: { id: string; rating: number; comment?: string | null; response?: string | null } | null
     payment: OfferPayment[] | null
   }[]
 

@@ -16,7 +16,7 @@ export async function SellerOffersList({ userId }: { userId: string }) {
   if (offers.length === 0) {
     return (
       <div className="text-center py-12">
-        <div className="size-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4 text-2xl">dY"<</div>
+        <div className="size-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4 text-2xl">📥</div>
         <h3 className="font-semibold mb-1">No incoming offers</h3>
         <p className="text-sm text-muted-foreground mb-4">Offers on your listings will appear here.</p>
         <Button asChild><Link href="/sell">Create a listing</Link></Button>

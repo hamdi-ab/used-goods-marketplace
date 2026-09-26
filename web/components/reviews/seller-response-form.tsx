@@ -12,20 +12,23 @@ export function SellerResponseForm({
   existingResponse,
 }: {
   reviewId: string
-  existingResponse?: { comment: string; created_at: string } | null
+  existingResponse?: { comment: string; created_at?: string } | string | null
 }) {
   const [state, formAction, pending] = useActionState(submitReviewResponse, initialState)
 
   if (existingResponse) {
+    const text = typeof existingResponse === "string" ? existingResponse : existingResponse.comment
+    const dateStr = typeof existingResponse === "string" || !existingResponse.created_at
+      ? null
+      : new Date(existingResponse.created_at).toLocaleDateString()
+
     return (
       <div className="mt-3 rounded-lg bg-muted/50 p-3 text-sm">
         <div className="flex items-center gap-2 mb-1">
           <span className="font-semibold text-xs text-muted-foreground">Your response</span>
-          <span className="text-xs text-muted-foreground">
-            {new Date(existingResponse.created_at).toLocaleDateString()}
-          </span>
+          {dateStr && <span className="text-xs text-muted-foreground">{dateStr}</span>}
         </div>
-        <p className="text-foreground whitespace-pre-wrap">{existingResponse.comment}</p>
+        <p className="text-foreground whitespace-pre-wrap">{text}</p>
       </div>
     )
   }
