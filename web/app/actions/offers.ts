@@ -107,7 +107,7 @@ export async function offerAction(
 
   // Gate on a signed-in trader session before reaching the RPC; the RPC itself
   // re-checks that the caller owns the offer's listing.
-  await requireTrader()
+  const user = await requireTrader()
 
   const budget = await consumeRateBudget()
   if (!budget.ok) {
@@ -125,28 +125,33 @@ export async function offerAction(
     return { message: result.error ?? "Could not update the offer" }
   }
 
-  // Notify buyer of offer status change (best-effort, non-blocking)
+  // Notify recipient of offer status change (best-effort, non-blocking)
   const supabase = await createClient()
   const { data: offer } = await supabase
     .from("offers")
-    .select("buyer_id")
+    .select("buyer_id, listing:listings(seller_id)")
     .eq("id", parsed.data.offerId)
     .single()
-  if (offer?.buyer_id) {
-    const notificationType =
-      parsed.data.action === "accept" ? "offer_accepted" :
-      parsed.data.action === "decline" ? "offer_declined" :
-      "offer_countered"
-    const notificationTitle =
-      parsed.data.action === "accept" ? "Offer accepted" :
-      parsed.data.action === "decline" ? "Offer declined" :
-      "Counter-offer received"
-    createNotification({
-      userId: offer.buyer_id,
-      type: notificationType,
-      title: notificationTitle,
-      metadata: { offer_id: parsed.data.offerId, listing_id: parsed.data.listingId },
-    }).catch(() => {})
+  if (offer) {
+    const rawListing = offer.listing as unknown as { seller_id?: string } | null
+    const sellerId = rawListing?.seller_id
+    const targetUserId = user.id === offer.buyer_id ? sellerId : offer.buyer_id
+    if (targetUserId) {
+      const notificationType =
+        parsed.data.action === "accept" ? "offer_accepted" :
+        parsed.data.action === "decline" ? "offer_declined" :
+        "offer_countered"
+      const notificationTitle =
+        parsed.data.action === "accept" ? "Offer accepted" :
+        parsed.data.action === "decline" ? "Offer declined" :
+        "Counter-offer received"
+      createNotification({
+        userId: targetUserId,
+        type: notificationType,
+        title: notificationTitle,
+        metadata: { offer_id: parsed.data.offerId, listing_id: parsed.data.listingId },
+      }).catch(() => {})
+    }
   }
 
   revalidatePath(`/listings/${parsed.data.listingId}`)
@@ -210,6 +215,12 @@ export async function declineCounterAction(
   }
 
   await requireTrader()
+
+  const budget = await consumeRateBudget()
+  if (!budget.ok) {
+    return { message: budget.message }
+  }
+
   const result = await declineCounterRow(parsed.data)
 
   if (!result.ok) {

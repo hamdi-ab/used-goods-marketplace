@@ -680,7 +680,7 @@ The codebase is organized into 7 domain groups for ownership and navigation:
 | **AI & Monetization** | AI listing assist, boosted listings, premium tiers | `lib/ai/`, `lib/boost/`, `app/actions/boost.ts` |
 | **Admin** | Dashboard, reports, moderation, user management | `app/(admin)/`, `app/actions/reports.ts` |
 
-Each group owns its mutations, queries, and components. Cross-group calls flow through server actions or RPCs — never direct DB access.
+Each group owns its mutations, queries, and components. Intended policy: cross-group calls should use server actions or RPCs — never direct DB access.
 
 # 15. Summary
 

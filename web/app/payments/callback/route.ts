@@ -62,13 +62,17 @@ export async function GET(request: Request): Promise<Response> {
     if (offerId && payment.offer_id !== offerId) {
       console.error("[payments/callback] payment offer mismatch")
     } else {
-      const { error: rpcError } = await supabase.rpc("complete_payment", {
+      const { data: rpcData, error: rpcError } = await supabase.rpc("complete_payment", {
         p_tx_ref: txRef,
-        p_mode: "demo",
+        p_mode: payment.mode ?? "demo",
         p_amount: payment.amount,
         p_currency: payment.currency,
       })
-      console.log("[payments/callback] complete_payment rpc:", JSON.stringify(rpcError))
+      const result = rpcData as unknown as { ok?: boolean; error?: string } | null
+      console.log("[payments/callback] complete_payment rpc:", JSON.stringify({ rpcError, result }))
+      if (rpcError || (result && !result.ok)) {
+        console.error("[payments/callback] complete_payment failed:", rpcError?.message ?? result?.error)
+      }
     }
   }
 
