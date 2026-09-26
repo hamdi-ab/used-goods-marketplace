@@ -110,7 +110,67 @@ describe("submitReportSchema target validation", () => {
     expect(r2.success).toBe(false)
   })
 
-  it("rejects no target", () => {
+    it("rejects no target", () => {
     expect(submitReportSchema.safeParse(VALID).success).toBe(false)
+  })
+})
+
+describe("normalizeMyReport target_title formatting", () => {
+  const baseReport = {
+    id: "report-1",
+    reporter_id: "reporter-1",
+    reason: "review_violation" as const,
+    note: null,
+    status: "open" as const,
+    reported_listing_id: null,
+    reported_seller_id: null,
+    review_id: "review-1",
+    created_at: "2026-09-26T12:00:00Z",
+    updated_at: "2026-09-26T12:00:00Z",
+    listing: null,
+    seller: null,
+    reporter: null,
+  }
+
+  it("formats short review comments without ellipsis", async () => {
+    const { normalizeMyReport } = await import("@/lib/reports")
+    const res = normalizeMyReport({
+      ...baseReport,
+      review: {
+        id: "review-1",
+        rating: 1,
+        comment: "Short comment",
+      },
+    })
+    expect(res.target_title).toBe('Review: "Short comment"')
+    expect(res.target_type).toBe("review")
+  })
+
+  it("truncates long review comments with ellipsis beyond 30 characters", async () => {
+    const { normalizeMyReport } = await import("@/lib/reports")
+    const res = normalizeMyReport({
+      ...baseReport,
+      id: "report-2",
+      review: {
+        id: "review-2",
+        rating: 1,
+        comment: "This is a very long comment that definitely exceeds thirty characters in total length",
+      },
+    })
+    expect(res.target_title).toBe('Review: "This is a very long comment th..."')
+  })
+
+  it("falls back to 'Review' when review comment is null or empty", async () => {
+    const { normalizeMyReport } = await import("@/lib/reports")
+    const res = normalizeMyReport({
+      ...baseReport,
+      id: "report-3",
+      review: {
+        id: "review-3",
+        rating: 5,
+        comment: null,
+      },
+    })
+    expect(res.target_title).toBe("Review")
   })
 })

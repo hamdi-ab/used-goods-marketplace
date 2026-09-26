@@ -12,6 +12,27 @@ alter table public.reviews
 
 create index if not exists reviews_deleted_at_idx on public.reviews (deleted_at);
 
+-- Update RLS policies on public.reviews to hide soft-deleted reviews from public
+drop policy if exists "Reviews are publicly readable" on public.reviews;
+drop policy if exists "Active reviews are publicly readable" on public.reviews;
+drop policy if exists "Authors can read their own soft-deleted reviews" on public.reviews;
+drop policy if exists "Admins can read all reviews" on public.reviews;
+
+create policy "Active reviews are publicly readable"
+  on public.reviews for select
+  to authenticated, anon
+  using (deleted_at is null);
+
+create policy "Authors can read their own soft-deleted reviews"
+  on public.reviews for select
+  to authenticated
+  using (buyer_id = (select auth.uid()));
+
+create policy "Admins can read all reviews"
+  on public.reviews for select
+  to authenticated
+  using (public.is_admin());
+
 -- 2. Review appeals table
 do $$
 begin
@@ -404,15 +425,152 @@ begin
 end;
 $$;
 
+-- 9. Update submit_review and recompute_trust_score to exclude soft-deleted reviews
+create or replace function public.recompute_trust_score(p_user_id uuid)
+returns smallint
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_rating numeric;
+  v_completion smallint;
+  v_phone_verified boolean;
+  v_fayda_verified boolean;
+  v_sold_count integer;
+  v_resolved_reports integer;
+  v_trust numeric;
+begin
+  if p_user_id is null then
+    return null;
+  end if;
+
+  -- Ratings component: organic, non-deleted reviews only
+  select coalesce(round(avg(rating) * 20), 0) into v_rating
+  from public.reviews
+  where seller_id = p_user_id
+    and source = 'organic'
+    and deleted_at is null;
+
+  -- Completion + verification components read the profile itself.
+  select profile_completion, phone_verified, fayda_verified
+    into v_completion, v_phone_verified, v_fayda_verified
+  from public.profiles
+  where id = p_user_id;
+  if not found then
+    return null;
+  end if;
+
+  -- Successful-listings component: sold listings only, capped at ten.
+  select count(*) into v_sold_count
+  from public.listings
+  where seller_id = p_user_id
+    and status = 'sold'
+    and deleted_at is null;
+
+  -- Reports component
+  select count(*) into v_resolved_reports
+  from public.reports r
+  where r.status = 'resolved'
+    and (
+      r.reported_seller_id = p_user_id
+      or exists (
+        select 1 from public.listings l
+        where l.id = r.reported_listing_id and l.seller_id = p_user_id
+      )
+    );
+
+  v_trust := round(
+      0.35 * v_rating
+    + 0.25 * v_completion
+    + 0.20 * least(10, v_sold_count) * 10
+    + 0.10 * (case when v_phone_verified then 50 else 0 end
+              + case when v_fayda_verified then 50 else 0 end)
+    + 0.10 * greatest(0, 100 - v_resolved_reports * 25)
+  );
+
+  update public.profiles
+    set trust_score = least(100, greatest(0, v_trust))::smallint
+    where id = p_user_id;
+
+  return least(100, greatest(0, v_trust))::smallint;
+end;
+$$;
+
+create or replace function public.submit_review(
+  p_offer_id uuid,
+  p_rating smallint,
+  p_comment text,
+  p_source text default 'organic'
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_offer public.offers;
+  v_listing public.listings;
+  v_seller_id uuid;
+  v_rows integer;
+begin
+  if p_rating is null or p_rating < 1 or p_rating > 5 then
+    return jsonb_build_object('ok', false, 'error', 'rating must be between 1 and 5');
+  end if;
+  if p_comment is not null and char_length(p_comment) > 1000 then
+    return jsonb_build_object('ok', false, 'error', 'comment is too long');
+  end if;
+
+  select * into v_offer from public.offers where id = p_offer_id;
+  if not found then
+    return jsonb_build_object('ok', false, 'error', 'offer not found');
+  end if;
+
+  if v_offer.status <> 'accepted' or v_offer.buyer_id <> (select auth.uid()) then
+    return jsonb_build_object('ok', false, 'error', 'not allowed');
+  end if;
+
+  select * into v_listing from public.listings where id = v_offer.listing_id;
+  if not found then
+    return jsonb_build_object('ok', false, 'error', 'listing not found');
+  end if;
+  v_seller_id := v_listing.seller_id;
+
+  insert into public.reviews (offer_id, seller_id, buyer_id, rating, comment, source)
+  values (p_offer_id, v_seller_id, v_offer.buyer_id, p_rating, nullif(p_comment, ''), coalesce(p_source, 'organic'))
+  on conflict (offer_id) do nothing;
+  get diagnostics v_rows = row_count;
+
+  if v_rows = 0 then
+    return jsonb_build_object('ok', false, 'error', 'offer already reviewed');
+  end if;
+
+  update public.profiles
+    set trust_score = (
+      select round(avg(rating) * 20)::smallint
+      from public.reviews
+      where seller_id = v_seller_id
+        and source = 'organic'
+        and deleted_at is null
+    )
+    where id = v_seller_id;
+
+  return jsonb_build_object('ok', true, 'error', null, 'seller_id', v_seller_id);
+end;
+$$;
+
 -- Permissions and grants
 revoke all on function public.submit_report(public.report_reason, uuid, uuid, text, uuid) from public;
 revoke all on function public.resolve_report(uuid, text, text) from public;
 revoke all on function public.remove_review(uuid, text) from public;
 revoke all on function public.appeal_review_removal(uuid, text) from public;
 revoke all on function public.resolve_review_appeal(uuid, text, text) from public;
+revoke all on function public.recompute_trust_score(uuid) from public;
+revoke all on function public.submit_review(uuid, smallint, text, text) from public;
 
 grant execute on function public.submit_report(public.report_reason, uuid, uuid, text, uuid) to authenticated;
 grant execute on function public.resolve_report(uuid, text, text) to authenticated;
 grant execute on function public.remove_review(uuid, text) to authenticated;
 grant execute on function public.appeal_review_removal(uuid, text) to authenticated;
 grant execute on function public.resolve_review_appeal(uuid, text, text) to authenticated;
+grant execute on function public.submit_review(uuid, smallint, text, text) to authenticated;

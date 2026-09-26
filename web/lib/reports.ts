@@ -355,7 +355,7 @@ function normalizeAdminReport(row: RawReportRow): ReportWithRelations {
   }
 }
 
-function normalizeMyReport(row: RawReportRow): MyReportRow {
+export function normalizeMyReport(row: RawReportRow): MyReportRow {
   const listing = row.listing
   const seller = row.seller
   const review = row.review
@@ -380,7 +380,14 @@ function normalizeMyReport(row: RawReportRow): MyReportRow {
   } else if (isSeller) {
     target_title = seller?.full_name ?? null
   } else if (review) {
-    target_title = review.comment ? `Review: "${review.comment.slice(0, 30)}..."` : "Review"
+    if (review.comment) {
+      target_title =
+        review.comment.length > 30
+          ? `Review: "${review.comment.slice(0, 30)}..."`
+          : `Review: "${review.comment}"`
+    } else {
+      target_title = "Review"
+    }
   }
 
   return {
