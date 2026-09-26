@@ -72,6 +72,7 @@ export async function fetchSellerReviews(
     .select(REVIEW_COLUMNS, { count: "exact" })
     .eq("seller_id", sellerId)
     .eq("source", "organic")
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .range(offset, offset + limit - 1)
 
@@ -110,6 +111,7 @@ export async function fetchSellerRatingSummary(
     .select("rating")
     .eq("seller_id", sellerId)
     .eq("source", "organic")
+    .is("deleted_at", null)
 
   if (error) {
     console.error("fetchSellerRatingSummary:", error.message)

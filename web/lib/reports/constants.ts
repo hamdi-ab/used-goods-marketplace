@@ -68,6 +68,7 @@ export const submitReportSchema = z
   .object({
     listingId: z.string().uuid().optional(),
     sellerId: z.string().uuid().optional(),
+    reviewId: z.string().uuid().optional(),
     reason: z.enum(REPORT_REASONS),
     note: z
       .string()
@@ -79,14 +80,10 @@ export const submitReportSchema = z
   })
   .refine(
     (data) => {
-      const hasListing = Boolean(data.listingId)
-      const hasSeller = Boolean(data.sellerId)
-      // Exactly one target — the DB reports_target_one constraint requires XOR,
-      // so a dual (or empty) target is rejected here with a field-level error
-      // instead of a generic SQL violation (audit P1.17, #84).
-      return hasListing !== hasSeller
+      const targets = [data.listingId, data.sellerId, data.reviewId].filter(Boolean)
+      return targets.length === 1
     },
-    { message: "A report must target a listing or a seller, but not both" }
+    { message: "A report must target a listing, seller, or review, but only one" }
   )
 
 // The login redirect target for the Report button, shared across signed-out

@@ -70,18 +70,44 @@ describe("reports bounds", () => {
   })
 })
 
-describe("submitReportSchema target xor", () => {
+describe("submitReportSchema target validation", () => {
   const VALID = { reason: "spam" as const }
 
-  it("accepts exactly one target", () => {
-    expect(submitReportSchema.safeParse({ ...VALID, listingId: "00000000-0000-0000-0000-000000000000" }).success).toBe(true)
-    expect(submitReportSchema.safeParse({ ...VALID, sellerId: "00000000-0000-0000-0000-000000000000" }).success).toBe(true)
+  it("accepts exactly one target: listing, seller, or review", () => {
+    expect(
+      submitReportSchema.safeParse({
+        ...VALID,
+        listingId: "00000000-0000-0000-0000-000000000000",
+      }).success
+    ).toBe(true)
+    expect(
+      submitReportSchema.safeParse({
+        ...VALID,
+        sellerId: "00000000-0000-0000-0000-000000000000",
+      }).success
+    ).toBe(true)
+    expect(
+      submitReportSchema.safeParse({
+        ...VALID,
+        reviewId: "00000000-0000-0000-0000-000000000000",
+      }).success
+    ).toBe(true)
   })
 
-  it("rejects both targets", () => {
-    const r = submitReportSchema.safeParse({ ...VALID, listingId: "00000000-0000-0000-0000-000000000000", sellerId: "11111111-1111-1111-1111-111111111111" })
-    expect(r.success).toBe(false)
-    expect(r.error!.issues.some((i) => i.message.includes("but not both"))).toBe(true)
+  it("rejects multiple targets", () => {
+    const r1 = submitReportSchema.safeParse({
+      ...VALID,
+      listingId: "00000000-0000-0000-0000-000000000000",
+      sellerId: "11111111-1111-1111-1111-111111111111",
+    })
+    expect(r1.success).toBe(false)
+
+    const r2 = submitReportSchema.safeParse({
+      ...VALID,
+      listingId: "00000000-0000-0000-0000-000000000000",
+      reviewId: "22222222-2222-2222-2222-222222222222",
+    })
+    expect(r2.success).toBe(false)
   })
 
   it("rejects no target", () => {

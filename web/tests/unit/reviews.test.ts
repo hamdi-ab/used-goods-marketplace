@@ -64,6 +64,7 @@ describe("reviews.fetchSellerReviews (P1.14 #81)", () => {
     const b: Record<string, unknown> = {
       select: () => b,
       eq: () => b,
+      is: () => b,
       order: () => b,
       range: () => b,
       then: (resolve: (value: unknown) => unknown) =>
@@ -128,6 +129,7 @@ describe("reviews.fetchSellerRatingSummary (P1.14 #81)", () => {
     const b: Record<string, unknown> = {
       select: () => b,
       eq: () => b,
+      is: () => b,
       then: (resolve: (value: unknown) => unknown) =>
         Promise.resolve(result).then(resolve),
     }
