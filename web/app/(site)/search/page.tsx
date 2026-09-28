@@ -49,19 +49,20 @@ export default async function SearchPage({
   const sp = await searchParams
   const filters = parseSearchParams(sp)
 
-  const categoriesPromise = fetchCategories()
-  const { listings, count, hasMore, error } = await searchListings({
-    q: filters.q || undefined,
-    categorySlug: filters.categorySlug,
-    minPrice: filters.minPrice,
-    maxPrice: filters.maxPrice,
-    condition: filters.condition,
-    city: filters.city || undefined,
-    sellerVerified: filters.sellerVerified,
-    sort: filters.sort,
-    offset: filters.offset,
-  })
-  const categories = await categoriesPromise
+  const [categories, { listings, count, hasMore, error }] = await Promise.all([
+    fetchCategories(),
+    searchListings({
+      q: filters.q || undefined,
+      categorySlug: filters.categorySlug,
+      minPrice: filters.minPrice,
+      maxPrice: filters.maxPrice,
+      condition: filters.condition,
+      city: filters.city || undefined,
+      sellerVerified: filters.sellerVerified,
+      sort: filters.sort,
+      offset: filters.offset,
+    }),
+  ])
 
   return (
     <main className="mx-auto w-full max-w-[1280px] px-4 py-10 sm:px-6 lg:py-12">

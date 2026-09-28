@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { AlertCircleIcon, InboxIcon } from "lucide-react"
 
 import { fetchSellerOffers } from "@/lib/offers"
@@ -65,11 +66,13 @@ export async function SellerOffersList({
           <CardContent className="p-4">
             <div className="flex gap-4">
               {offer.listing?.image_url && (
-                <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-muted">
-                  <img
+                <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-muted relative">
+                  <Image
                     src={offer.listing.image_url}
                     alt=""
-                    className="h-full w-full object-cover"
+                    fill
+                    sizes="64px"
+                    className="object-cover"
                   />
                 </div>
               )}

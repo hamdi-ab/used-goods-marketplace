@@ -20,17 +20,21 @@ export default async function Home({
   const sp = await searchParams
   const { categorySlug, offset } = parseBrowseParams(sp)
 
-  const userPromise = getCurrentUser()
-  const categoriesPromise = fetchCategories()
-  const browsePromise = fetchListings({
-    limit: PAGE_SIZE,
-    offset,
-    categorySlug,
+  const userFavoritesPromise = getCurrentUser().then(async (user) => {
+    if (!user) return null
+    const ids = await fetchFavoriteIds(user.id)
+    return new Set(ids)
   })
-  const user = await userPromise
-  const favoriteIds = user ? new Set(await fetchFavoriteIds(user.id)) : null
-  const { listings } = await browsePromise
-  const categories = await categoriesPromise
+
+  const [favoriteIds, categories, { listings }] = await Promise.all([
+    userFavoritesPromise,
+    fetchCategories(),
+    fetchListings({
+      limit: PAGE_SIZE,
+      offset,
+      categorySlug,
+    }),
+  ])
 
   return (
     <HomePage
