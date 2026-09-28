@@ -77,7 +77,7 @@ export async function SellerOffersList({
                 <div className="flex items-start justify-between gap-2">
                   <Link
                     href={`/listings/${offer.listing_id}`}
-                    className="truncate text-sm font-medium hover:underline"
+                    className="truncate text-sm font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
                   >
                     {offer.listing?.title ?? "Listing"}
                   </Link>
@@ -87,7 +87,7 @@ export async function SellerOffersList({
                   {formatPrice(offer.amount)}
                 </div>
                 {offer.message && (
-                  <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                  <p className="mt-1 line-clamp-2 text-xs text-muted-foreground break-words">
                     {offer.message}
                   </p>
                 )}
@@ -110,7 +110,7 @@ export async function SellerOffersList({
                       </span>
                     </div>
                     {offer.review.comment && (
-                      <p className="whitespace-pre-wrap text-sm text-foreground">
+                      <p className="whitespace-pre-wrap text-sm text-foreground break-words">
                         {offer.review.comment}
                       </p>
                     )}
@@ -128,7 +128,11 @@ export async function SellerOffersList({
 
       {hasMore && (
         <div className="pt-2 text-center">
-          <Button variant="outline" asChild>
+          <Button
+            variant="outline"
+            asChild
+            className="min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >
             <Link href={`/activity?tab=offers&offset=${offset + 20}`}>
               Load older offers
             </Link>

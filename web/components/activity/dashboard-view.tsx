@@ -43,11 +43,14 @@ export async function DashboardView({ userId }: { userId: string }) {
       </div>
 
       <div className="rounded-xl border bg-card p-6 text-center">
-        <h3 className="font-semibold mb-1">Full Dashboard Access</h3>
-        <p className="text-sm text-muted-foreground mb-4">
+        <h3 className="mb-1 font-semibold">Full Dashboard Access</h3>
+        <p className="mb-4 text-sm text-muted-foreground">
           Visit your seller dashboard for detailed management, payout requests, and analytics.
         </p>
-        <Button asChild>
+        <Button
+          asChild
+          className="min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+        >
           <Link href="/dashboard">Go to Dashboard</Link>
         </Button>
       </div>
