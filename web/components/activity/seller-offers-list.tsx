@@ -1,14 +1,17 @@
+import Link from "next/link"
+import { AlertCircleIcon, InboxIcon } from "lucide-react"
+
 import { fetchSellerOffers } from "@/lib/offers"
 import { createClient } from "@/lib/supabase/server"
 import { OfferStatusBadge } from "@/components/offers/offer-status-badge"
 import { HandoffBanner } from "@/components/activity/handoff-banner"
 import { SellerResponseForm } from "@/components/reviews/seller-response-form"
 import { ReviewStars } from "@/components/reviews/review-stars"
+import { EmptyState } from "@/components/ui/empty-state"
 import { formatPrice } from "@/lib/listings"
 import { formatShortDate } from "@/lib/utils"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
 
 export async function SellerOffersList({
   userId,
@@ -26,26 +29,32 @@ export async function SellerOffersList({
 
   if (error) {
     return (
-      <div className="py-12 text-center">
-        <p className="text-sm text-destructive">Could not load incoming offers. Please try again.</p>
-      </div>
+      <EmptyState
+        icon={AlertCircleIcon}
+        title="Unable to load incoming offers"
+        description="There was a problem loading your incoming offers. Please try again."
+        iconClassName="bg-destructive/10 text-destructive"
+        action={
+          <Button variant="outline" asChild>
+            <Link href="/activity?tab=offers">Try again</Link>
+          </Button>
+        }
+      />
     )
   }
 
   if (offers.length === 0) {
     return (
-      <div className="py-12 text-center">
-        <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-muted text-2xl">
-          📥
-        </div>
-        <h3 className="mb-1 font-semibold">No incoming offers</h3>
-        <p className="mb-4 text-sm text-muted-foreground">
-          Offers on your listings will appear here.
-        </p>
-        <Button asChild>
-          <Link href="/sell">Create a listing</Link>
-        </Button>
-      </div>
+      <EmptyState
+        icon={InboxIcon}
+        title="No incoming offers"
+        description="Offers made by buyers on your listings will appear here."
+        action={
+          <Button asChild>
+            <Link href="/sell">Create a listing</Link>
+          </Button>
+        }
+      />
     )
   }
 

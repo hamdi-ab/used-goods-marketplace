@@ -1,5 +1,8 @@
 import Link from "next/link"
+import { AlertCircleIcon, PackageIcon } from "lucide-react"
+
 import { fetchSellerListings } from "@/lib/listings"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { formatPrice } from "@/lib/listings"
@@ -10,26 +13,32 @@ export async function ListingsList({ userId }: { userId: string }) {
 
   if (error) {
     return (
-      <div className="py-12 text-center">
-        <p className="text-sm text-destructive">Could not load your listings.</p>
-      </div>
+      <EmptyState
+        icon={AlertCircleIcon}
+        title="Unable to load listings"
+        description="There was a problem loading your listings. Please try again."
+        iconClassName="bg-destructive/10 text-destructive"
+        action={
+          <Button variant="outline" asChild>
+            <Link href="/activity?tab=listings">Try again</Link>
+          </Button>
+        }
+      />
     )
   }
 
   if (listings.length === 0) {
     return (
-      <div className="py-12 text-center">
-        <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-muted text-2xl">
-          📦
-        </div>
-        <h3 className="mb-1 font-semibold">My listings</h3>
-        <p className="mb-4 text-sm text-muted-foreground">
-          Manage the items you are selling.
-        </p>
-        <Button asChild>
-          <Link href="/sell">Create a listing</Link>
-        </Button>
-      </div>
+      <EmptyState
+        icon={PackageIcon}
+        title="No listings yet"
+        description="You haven't created any listings. Start selling today!"
+        action={
+          <Button asChild>
+            <Link href="/sell">Create a listing</Link>
+          </Button>
+        }
+      />
     )
   }
 

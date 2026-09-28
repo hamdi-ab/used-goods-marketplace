@@ -1,14 +1,17 @@
+import Link from "next/link"
+import { AlertCircleIcon, InboxIcon } from "lucide-react"
+
 import { fetchBuyerOffers } from "@/lib/offers"
 import { createClient } from "@/lib/supabase/server"
 import { OfferStatusBadge } from "@/components/offers/offer-status-badge"
 import { HandoffBanner } from "@/components/activity/handoff-banner"
 import { ReviewForm } from "@/components/reviews/review-form"
 import { ReviewStars } from "@/components/reviews/review-stars"
+import { EmptyState } from "@/components/ui/empty-state"
 import { formatPrice } from "@/lib/listings"
 import { formatShortDate } from "@/lib/utils"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
 
 export async function OffersList({
   userId,
@@ -26,26 +29,32 @@ export async function OffersList({
 
   if (error) {
     return (
-      <div className="py-12 text-center">
-        <p className="text-sm text-destructive">Could not load offers. Please try again.</p>
-      </div>
+      <EmptyState
+        icon={AlertCircleIcon}
+        title="Unable to load offers"
+        description="There was a problem loading your offers. Please try again."
+        iconClassName="bg-destructive/10 text-destructive"
+        action={
+          <Button variant="outline" asChild>
+            <Link href="/activity?tab=offers">Try again</Link>
+          </Button>
+        }
+      />
     )
   }
 
   if (offers.length === 0) {
     return (
-      <div className="py-12 text-center">
-        <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-muted text-2xl">
-          📋
-        </div>
-        <h3 className="mb-1 font-semibold">No offers yet</h3>
-        <p className="mb-4 text-sm text-muted-foreground">
-          When you make an offer, it will appear here.
-        </p>
-        <Button asChild>
-          <Link href="/search">Browse listings</Link>
-        </Button>
-      </div>
+      <EmptyState
+        icon={InboxIcon}
+        title="No offers yet"
+        description="When you make an offer on a listing, it will appear here."
+        action={
+          <Button asChild>
+            <Link href="/search">Browse listings</Link>
+          </Button>
+        }
+      />
     )
   }
 

@@ -1,7 +1,7 @@
 "use client"
 
 import { useActionState, useState } from "react"
-import { StarIcon } from "lucide-react"
+import { Loader2Icon, StarIcon } from "lucide-react"
 
 import { submitReview, type ReviewState } from "@/app/actions/reviews"
 import { RATING_MAX, REVIEW_COMMENT_MAX } from "@/lib/reviews/constants"
@@ -34,56 +34,61 @@ export function ReviewForm({
   }
 
   return (
-    <form action={formAction} className="flex flex-col gap-4">
+    <form action={formAction} aria-busy={pending} className="flex flex-col gap-4">
       <input type="hidden" name="offerId" value={offerId} />
 
-      <div className="space-y-2">
-        <label className="block text-sm font-medium">Your rating</label>
-        <div className="flex items-center gap-1">
-          {Array.from({ length: RATING_MAX }, (_, i) => {
-            const value = i + 1
-            return (
-              <label key={value} htmlFor={`review-rating-${offerId}-${value}`}>
-                <input
-                  type="radio"
-                  name="rating"
-                  id={`review-rating-${offerId}-${value}`}
-                  value={value}
-                  checked={rating === value}
-                  onChange={() => setRating(value)}
-                  required
-                  className="sr-only"
-                  aria-label={`${value} star${value === 1 ? "" : "s"}`}
-                />
-                <StarIcon
-                  className={cn(
-                    "size-6 shrink-0 cursor-pointer transition-colors",
-                    value <= rating
-                      ? "fill-amber-400 text-amber-400"
-                      : "text-muted-foreground/40 hover:text-muted-foreground/70"
-                  )}
-                />
-              </label>
-            )
-          })}
+      <fieldset disabled={pending} className="space-y-4">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Your rating</label>
+          <div className="flex items-center gap-1">
+            {Array.from({ length: RATING_MAX }, (_, i) => {
+              const value = i + 1
+              return (
+                <label key={value} htmlFor={`review-rating-${offerId}-${value}`}>
+                  <input
+                    type="radio"
+                    name="rating"
+                    id={`review-rating-${offerId}-${value}`}
+                    value={value}
+                    checked={rating === value}
+                    onChange={() => setRating(value)}
+                    required
+                    disabled={pending}
+                    className="sr-only"
+                    aria-label={`${value} star${value === 1 ? "" : "s"}`}
+                  />
+                  <StarIcon
+                    className={cn(
+                      "size-6 shrink-0 transition-colors",
+                      pending ? "cursor-not-allowed opacity-60" : "cursor-pointer",
+                      value <= rating
+                        ? "fill-amber-400 text-amber-400"
+                        : "text-muted-foreground/40 hover:text-muted-foreground/70"
+                    )}
+                  />
+                </label>
+              )
+            })}
+          </div>
+          <FieldError message={state.errors?.rating?.[0]} />
         </div>
-        <FieldError message={state.errors?.rating?.[0]} />
-      </div>
 
-      <div className="space-y-2">
-        <label htmlFor={`review-comment-${offerId}`} className="block text-sm font-medium">
-          Comment (optional)
-        </label>
-        <textarea
-          id={`review-comment-${offerId}`}
-          name="comment"
-          rows={4}
-          maxLength={REVIEW_COMMENT_MAX}
-          placeholder="What was the transaction like?"
-          className={TEXTAREA_CLASS}
-        />
-        <FieldError message={state.errors?.comment?.[0]} />
-      </div>
+        <div className="space-y-2">
+          <label htmlFor={`review-comment-${offerId}`} className="block text-sm font-medium">
+            Comment (optional)
+          </label>
+          <textarea
+            id={`review-comment-${offerId}`}
+            name="comment"
+            rows={4}
+            maxLength={REVIEW_COMMENT_MAX}
+            placeholder="What was the transaction like?"
+            disabled={pending}
+            className={TEXTAREA_CLASS}
+          />
+          <FieldError message={state.errors?.comment?.[0]} />
+        </div>
+      </fieldset>
 
       {state.message ? (
         <p role="alert" className="text-sm text-destructive">
@@ -92,7 +97,14 @@ export function ReviewForm({
       ) : null}
 
       <Button type="submit" disabled={pending || rating === 0}>
-        {pending ? "Sending…" : "Submit review"}
+        {pending ? (
+          <>
+            <Loader2Icon className="mr-2 size-4 animate-spin" />
+            Submitting review…
+          </>
+        ) : (
+          "Submit review"
+        )}
       </Button>
     </form>
   )

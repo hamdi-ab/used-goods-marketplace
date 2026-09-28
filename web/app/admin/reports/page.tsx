@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import Link from "next/link"
-import { ShieldIcon, MessageSquareWarningIcon } from "lucide-react"
+import { ShieldCheckIcon, MessageSquareWarningIcon } from "lucide-react"
 
 import { fetchAdminReports } from "@/lib/reports"
 import { fetchAdminReviewAppeals } from "@/lib/appeals"
@@ -8,6 +8,7 @@ import { AdminReportCard } from "@/components/reports/admin-report-card"
 import { AdminAppealCard } from "@/components/admin/admin-appeal-card"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { EmptyState } from "@/components/ui/empty-state"
 
 export const dynamic = "force-dynamic"
 
@@ -80,14 +81,12 @@ export default async function AdminReportsPage({
       {tab === "appeals" ? (
         appeals.length === 0 ? (
           <Card>
-            <CardContent className="flex flex-col items-center gap-3 py-12">
-              <MessageSquareWarningIcon className="size-8 text-muted-foreground" />
-              <h2 className="font-heading text-lg font-semibold">
-                No pending appeals
-              </h2>
-              <p className="max-w-sm text-center text-sm text-muted-foreground">
-                Appeals submitted by reviewers for removed reviews will appear here.
-              </p>
+            <CardContent className="p-6">
+              <EmptyState
+                icon={MessageSquareWarningIcon}
+                title="No pending appeals"
+                description="Appeals submitted by reviewers for removed reviews will appear here."
+              />
             </CardContent>
           </Card>
         ) : (
@@ -101,14 +100,12 @@ export default async function AdminReportsPage({
         )
       ) : reports.length === 0 ? (
         <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12">
-            <ShieldIcon className="size-8 text-muted-foreground" />
-            <h2 className="font-heading text-lg font-semibold">
-              All caught up
-            </h2>
-            <p className="max-w-sm text-center text-sm text-muted-foreground">
-              There are no open reports to review right now.
-            </p>
+          <CardContent className="p-6">
+            <EmptyState
+              icon={ShieldCheckIcon}
+              title="All caught up"
+              description="There are no open reports to review right now."
+            />
           </CardContent>
         </Card>
       ) : (
