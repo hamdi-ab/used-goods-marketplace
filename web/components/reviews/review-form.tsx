@@ -44,7 +44,11 @@ export function ReviewForm({
             {Array.from({ length: RATING_MAX }, (_, i) => {
               const value = i + 1
               return (
-                <label key={value} htmlFor={`review-rating-${offerId}-${value}`}>
+                <label
+                  key={value}
+                  htmlFor={`review-rating-${offerId}-${value}`}
+                  className="inline-flex size-11 min-h-[44px] min-w-[44px] cursor-pointer items-center justify-center rounded-lg transition-colors hover:bg-muted/60 focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-2"
+                >
                   <input
                     type="radio"
                     name="rating"
@@ -59,8 +63,8 @@ export function ReviewForm({
                   />
                   <StarIcon
                     className={cn(
-                      "size-6 shrink-0 transition-colors",
-                      pending ? "cursor-not-allowed opacity-60" : "cursor-pointer",
+                      "size-7 shrink-0 transition-colors",
+                      pending ? "cursor-not-allowed opacity-60" : "",
                       value <= rating
                         ? "fill-amber-400 text-amber-400"
                         : "text-muted-foreground/40 hover:text-muted-foreground/70"
@@ -84,7 +88,10 @@ export function ReviewForm({
             maxLength={REVIEW_COMMENT_MAX}
             placeholder="What was the transaction like?"
             disabled={pending}
-            className={TEXTAREA_CLASS}
+            className={cn(
+              TEXTAREA_CLASS,
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            )}
           />
           <FieldError message={state.errors?.comment?.[0]} />
         </div>
@@ -96,7 +103,11 @@ export function ReviewForm({
         </p>
       ) : null}
 
-      <Button type="submit" disabled={pending || rating === 0}>
+      <Button
+        type="submit"
+        disabled={pending || rating === 0}
+        className="min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+      >
         {pending ? (
           <>
             <Loader2Icon className="mr-2 size-4 animate-spin" />

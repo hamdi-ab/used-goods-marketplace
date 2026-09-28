@@ -37,19 +37,29 @@ export function SellerResponseForm({
   return (
     <form action={formAction} aria-busy={pending} className="mt-3 space-y-2">
       <input type="hidden" name="reviewId" value={reviewId} />
+      <label htmlFor={`response-comment-${reviewId}`} className="sr-only">
+        Your response to this review
+      </label>
       <Textarea
+        id={`response-comment-${reviewId}`}
         name="comment"
         placeholder="Respond to this review..."
         maxLength={1000}
         rows={3}
         disabled={pending}
+        className="focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
       />
       {state.message && <p className="text-sm text-destructive">{state.message}</p>}
       {state.ok && <p className="text-sm text-green-600">Response sent</p>}
-      <Button type="submit" size="sm" disabled={pending}>
+      <Button
+        type="submit"
+        size="sm"
+        disabled={pending}
+        className="min-h-[40px] px-4 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+      >
         {pending ? (
           <>
-            <Loader2Icon className="mr-2 size-3 animate-spin" />
+            <Loader2Icon className="mr-2 size-3.5 animate-spin" />
             Sending...
           </>
         ) : (

@@ -19,7 +19,11 @@ export async function ListingsList({ userId }: { userId: string }) {
         description="There was a problem loading your listings. Please try again."
         iconClassName="bg-destructive/10 text-destructive"
         action={
-          <Button variant="outline" asChild>
+          <Button
+            variant="outline"
+            asChild
+            className="min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >
             <Link href="/activity?tab=listings">Try again</Link>
           </Button>
         }
@@ -34,7 +38,10 @@ export async function ListingsList({ userId }: { userId: string }) {
         title="No listings yet"
         description="You haven't created any listings. Start selling today!"
         action={
-          <Button asChild>
+          <Button
+            asChild
+            className="min-h-[44px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >
             <Link href="/sell">Create a listing</Link>
           </Button>
         }
@@ -53,7 +60,7 @@ export async function ListingsList({ userId }: { userId: string }) {
             <div className="flex items-center gap-2">
               <Link
                 href={`/listings/${item.id}`}
-                className="truncate font-semibold hover:underline"
+                className="truncate font-semibold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 rounded-sm"
               >
                 {item.title}
               </Link>
@@ -69,10 +76,20 @@ export async function ListingsList({ userId }: { userId: string }) {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            >
               <Link href={`/listings/${item.id}/edit`}>Edit</Link>
             </Button>
-            <Button variant="ghost" size="sm" asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="min-h-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            >
               <Link href={`/listings/${item.id}`}>View</Link>
             </Button>
           </div>
