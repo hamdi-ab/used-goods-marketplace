@@ -18,6 +18,21 @@ load-test/                k6 load-test scenario + runbook (T19, NFR-SCALE-001 co
 
 **Application run command:** `cd web && npm run dev` (see `web/README.md` for setup, Supabase local stack, and scripts). CI workflows live in `.github/workflows/`.
 
+## Domain groups (ADR-014)
+
+The codebase is organized into 7 domain groups for ownership and navigation:
+| Group | Scope | Key Paths |
+|---|---|---|
+| **Marketplace Core** | Listings, search, browse, categories, media | `lib/listings*`, `app/(site)/search/`, `app/(site)/listings/` |
+| **Transaction Lifecycle** | Offers, payments, checkout, escrow, payouts | `lib/offers.ts`, `lib/payments*`, `app/actions/offers.ts`, `app/payments/` |
+| **Reputation & Trust** | Reviews, ratings, verifications, trust scores, appeals | `lib/reviews*`, `lib/appeals.ts`, `components/reviews/`, `app/actions/reviews.ts` |
+| **User Identity** | Auth, profiles, account, settings, navigation | `components/auth/`, `lib/auth.ts`, `lib/profiles.ts`, `app/(site)/settings/`, `lib/nav.ts` |
+| **Notifications** | In-app notifications, email digests, live updates | `lib/notifications*`, `components/notifications/` |
+| **AI & Monetization** | AI assistant/quality score, boosts, tier upgrades | `lib/ai*`, `lib/boost.ts`, `lib/pricing.ts`, `app/actions/boost.ts` |
+| **Admin & Moderation** | Admin dashboard, reports, appeal moderation, user management | `app/admin/`, `lib/reports.ts`, `app/actions/reports.ts` |
+
+**Policy:** Each group owns its queries, mutations, and UI components. Cross-group interaction should use server actions or RPCs — direct cross-group DB access is prohibited.
+
 **Numbering contract.** Every folder's files are numbered from `00` upward. The folder name's leading number is the doc family; the file's leading number is its position within the family. Never introduce a gap or a duplicate when adding a doc. Design-series family prefixes (`vds`/`vcl`/`vux`) were retired; do not reintroduce them.
 
 ## Document conventions

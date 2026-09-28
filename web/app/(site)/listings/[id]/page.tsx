@@ -7,7 +7,7 @@ import { getCurrentUser } from "@/lib/auth"
 import { fetchListing, formatPrice } from "@/lib/listings"
 import type { ListingWithRelations } from "@/lib/listings/constants"
 import { fetchFavoriteIds } from "@/lib/favorites"
-import { fetchSellerContactInfo, type SellerContactInfo } from "@/lib/contact"
+import { fetchSellerContactInfo } from "@/lib/contact"
 import { FavoriteButton } from "@/components/favorites/favorite-button"
 import { ListingViewTracker } from "@/components/listings/listing-view-tracker"
 import { SimilarListings } from "@/components/listings/similar-listings"
@@ -48,17 +48,20 @@ export default async function ListingPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const data = await fetchListing(id)
+  const [data, user] = await Promise.all([
+    fetchListing(id),
+    getCurrentUser(),
+  ])
   if (!data) notFound()
 
-  const user = await getCurrentUser()
-  const favorited = user
-    ? (await fetchFavoriteIds(user.id)).includes(id)
-    : null
+  const [favoriteIds, contactInfo] = user
+    ? await Promise.all([
+        fetchFavoriteIds(user.id),
+        fetchSellerContactInfo(data.listing.seller_id),
+      ])
+    : [[], null]
 
-  const contactInfo: SellerContactInfo | null = user
-    ? await fetchSellerContactInfo(data.listing.seller_id)
-    : null
+  const favorited = user ? favoriteIds.includes(id) : null
 
   const { listing: l, images, category, seller } = data
   const isOwner = Boolean(user && user.id === l.seller_id)

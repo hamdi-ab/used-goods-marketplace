@@ -1,4 +1,4 @@
-﻿import Image from "next/image"
+import Image from "next/image"
 import Link from "next/link"
 import { ArrowRight, BadgeCheck, Quote, ShieldCheck, Sparkles, Star, TrendingUp, Zap } from "lucide-react"
 
@@ -32,6 +32,7 @@ export function HomePage({ categories, listings, favoriteIds }: HomePageProps) {
             src="/images/photos/photo-hero-section.png"
             alt=""
             fill
+            priority
             sizes="100vw"
             className="object-cover opacity-25"
           />
