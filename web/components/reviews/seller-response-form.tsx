@@ -1,6 +1,7 @@
 "use client"
 
 import { useActionState } from "react"
+import { Loader2Icon } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import { submitReviewResponse, type SubmitReviewResponseState } from "@/app/actions/reviews"
@@ -24,17 +25,17 @@ export function SellerResponseForm({
 
     return (
       <div className="mt-3 rounded-lg bg-muted/50 p-3 text-sm">
-        <div className="flex items-center gap-2 mb-1">
-          <span className="font-semibold text-xs text-muted-foreground">Your response</span>
+        <div className="mb-1 flex items-center gap-2">
+          <span className="text-xs font-semibold text-muted-foreground">Your response</span>
           {dateStr && <span className="text-xs text-muted-foreground">{dateStr}</span>}
         </div>
-        <p className="text-foreground whitespace-pre-wrap">{text}</p>
+        <p className="whitespace-pre-wrap text-foreground">{text}</p>
       </div>
     )
   }
 
   return (
-    <form action={formAction} className="mt-3 space-y-2">
+    <form action={formAction} aria-busy={pending} className="mt-3 space-y-2">
       <input type="hidden" name="reviewId" value={reviewId} />
       <Textarea
         name="comment"
@@ -46,7 +47,14 @@ export function SellerResponseForm({
       {state.message && <p className="text-sm text-destructive">{state.message}</p>}
       {state.ok && <p className="text-sm text-green-600">Response sent</p>}
       <Button type="submit" size="sm" disabled={pending}>
-        {pending ? "Sending..." : "Respond"}
+        {pending ? (
+          <>
+            <Loader2Icon className="mr-2 size-3 animate-spin" />
+            Sending...
+          </>
+        ) : (
+          "Respond"
+        )}
       </Button>
     </form>
   )

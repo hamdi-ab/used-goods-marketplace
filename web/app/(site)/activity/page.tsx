@@ -3,7 +3,12 @@ import { Suspense } from "react"
 
 import { requireTrader } from "@/lib/auth"
 import { ActivityTabs } from "@/components/activity/activity-tabs"
+import {
+  ActivityTabsSkeleton,
+  ActivityListSkeleton,
+} from "@/components/activity/activity-skeleton"
 import { OffersList } from "@/components/activity/offers-list"
+import { SellerOffersList } from "@/components/activity/seller-offers-list"
 import { FavoritesList } from "@/components/activity/favorites-list"
 import { DashboardView } from "@/components/activity/dashboard-view"
 import { ListingsList } from "@/components/activity/listings-list"
@@ -30,12 +35,18 @@ export default async function ActivityPage({
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-      <h1 className="text-2xl font-bold mb-6">Activity</h1>
-      <Suspense fallback={<div className="h-10 animate-pulse bg-muted rounded" />}>
+      <h1 className="mb-6 text-2xl font-bold">Activity</h1>
+      <Suspense fallback={<ActivityTabsSkeleton />}>
         <ActivityTabs />
       </Suspense>
-      <Suspense fallback={<div className="space-y-4">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-24 animate-pulse bg-muted rounded" />)}</div>}>
-        {activeTab === "offers" && <OffersList userId={user.id} />}
+      <Suspense fallback={<ActivityListSkeleton />}>
+        {activeTab === "offers" && (
+          user.role === "seller" ? (
+            <SellerOffersList userId={user.id} />
+          ) : (
+            <OffersList userId={user.id} />
+          )
+        )}
         {activeTab === "favorites" && <FavoritesList userId={user.id} />}
         {activeTab === "dashboard" && <DashboardView userId={user.id} />}
         {activeTab === "listings" && <ListingsList userId={user.id} />}

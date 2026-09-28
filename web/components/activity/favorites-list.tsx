@@ -1,6 +1,9 @@
 import Link from "next/link"
+import { AlertCircleIcon, HeartIcon } from "lucide-react"
+
 import { fetchFavoriteListings } from "@/lib/favorites"
 import { ListingCard } from "@/components/listings/listing-card"
+import { EmptyState } from "@/components/ui/empty-state"
 import { Button } from "@/components/ui/button"
 
 export async function FavoritesList({ userId }: { userId: string }) {
@@ -8,26 +11,32 @@ export async function FavoritesList({ userId }: { userId: string }) {
 
   if (error) {
     return (
-      <div className="py-12 text-center">
-        <p className="text-sm text-destructive">Could not load favorite listings.</p>
-      </div>
+      <EmptyState
+        icon={AlertCircleIcon}
+        title="Unable to load favorites"
+        description="There was a problem loading your favorite listings. Please try again."
+        iconClassName="bg-destructive/10 text-destructive"
+        action={
+          <Button variant="outline" asChild>
+            <Link href="/activity?tab=favorites">Try again</Link>
+          </Button>
+        }
+      />
     )
   }
 
   if (listings.length === 0) {
     return (
-      <div className="py-12 text-center">
-        <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-muted text-2xl">
-          ❤️
-        </div>
-        <h3 className="mb-1 font-semibold">Favorites</h3>
-        <p className="mb-4 text-sm text-muted-foreground">
-          Save listings you love and find them here later.
-        </p>
-        <Button asChild>
-          <Link href="/search">Browse listings</Link>
-        </Button>
-      </div>
+      <EmptyState
+        icon={HeartIcon}
+        title="No favorites yet"
+        description="Save listings you love to easily find and compare them here later."
+        action={
+          <Button asChild>
+            <Link href="/search">Browse listings</Link>
+          </Button>
+        }
+      />
     )
   }
 
