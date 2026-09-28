@@ -20,8 +20,14 @@ export default async function Home({
   const sp = await searchParams
   const { categorySlug, offset } = parseBrowseParams(sp)
 
-  const [user, categories, { listings }] = await Promise.all([
-    getCurrentUser(),
+  const userFavoritesPromise = getCurrentUser().then(async (user) => {
+    if (!user) return null
+    const ids = await fetchFavoriteIds(user.id)
+    return new Set(ids)
+  })
+
+  const [favoriteIds, categories, { listings }] = await Promise.all([
+    userFavoritesPromise,
     fetchCategories(),
     fetchListings({
       limit: PAGE_SIZE,
@@ -29,7 +35,6 @@ export default async function Home({
       categorySlug,
     }),
   ])
-  const favoriteIds = user ? new Set(await fetchFavoriteIds(user.id)) : null
 
   return (
     <HomePage

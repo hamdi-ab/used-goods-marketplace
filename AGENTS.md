@@ -21,6 +21,7 @@ load-test/                k6 load-test scenario + runbook (T19, NFR-SCALE-001 co
 ## Domain groups (ADR-014)
 
 The codebase is organized into 7 domain groups for ownership and navigation:
+
 | Group | Scope | Key Paths |
 |---|---|---|
 | **Marketplace Core** | Listings, search, browse, categories, media | `lib/listings*`, `app/(site)/search/`, `app/(site)/listings/` |
