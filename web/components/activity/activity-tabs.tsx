@@ -31,15 +31,13 @@ export function ActivityTabs() {
 
   return (
     <div className="mb-6 border-b border-border overflow-x-auto no-scrollbar">
-      <nav className="flex min-w-full gap-1 -mb-px" aria-label="Activity tabs" role="tablist">
+      <nav className="flex min-w-full gap-1 -mb-px" aria-label="Activity tabs">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id
           return (
             <Link
               key={tab.id}
               href={tab.href}
-              role="tab"
-              aria-selected={isActive}
               aria-current={isActive ? "page" : undefined}
               className={cn(
                 "inline-flex shrink-0 items-center justify-center whitespace-nowrap rounded-t-lg px-4 py-3 text-sm font-medium border-b-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 min-h-[44px]",

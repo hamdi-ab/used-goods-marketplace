@@ -39,11 +39,9 @@ export default async function AdminReportsPage({
         </p>
       </div>
 
-      <div className="mb-6 flex items-center gap-2 border-b pb-3" role="tablist">
+      <nav className="mb-6 flex items-center gap-2 border-b pb-3" aria-label="Moderation queue sections">
         <Link
           href="/admin/reports?tab=reports"
-          role="tab"
-          aria-selected={tab === "reports"}
           aria-current={tab === "reports" ? "page" : undefined}
           className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 min-h-[36px] ${
             tab === "reports"
@@ -63,8 +61,6 @@ export default async function AdminReportsPage({
         </Link>
         <Link
           href="/admin/reports?tab=appeals"
-          role="tab"
-          aria-selected={tab === "appeals"}
           aria-current={tab === "appeals" ? "page" : undefined}
           className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 min-h-[36px] ${
             tab === "appeals"
@@ -82,7 +78,7 @@ export default async function AdminReportsPage({
             </Badge>
           ) : null}
         </Link>
-      </div>
+      </nav>
 
       {tab === "appeals" ? (
         appeals.length === 0 ? (
